@@ -10,27 +10,20 @@ library(reshape2)
 
 ## Wide data has a column for each variable. For example, this is wide-format data:
   
-#>   ozone   wind  temp
-#> 1 23.62 11.623 65.55
-#> 2 29.44 10.267 79.10
-#> 3 59.12  8.942 83.90
-#> 4 59.96  8.794 83.97
+wideDF <- data.frame(
+  ozone = c(23.62, 29.44, 59.12, 59.96),
+  wind = c(11.623, 10.267, 8.942, 8.794),
+  temp = c(65.55, 79.10, 83.90, 83.97)
+  )
+wideDF
 
 ## And this is long-format data:
-  
-#>    variable  value
-#> 1     ozone 23.615
-#> 2     ozone 29.444
-#> 3     ozone 59.115
-#> 4     ozone 59.962
-#> 5      wind 11.623
-#> 6      wind 10.267
-#> 7      wind  8.942
-#> 8      wind  8.794
-#> 9      temp 65.548
-#> 10     temp 79.100
-#> 11     temp 83.903
-#> 12     temp 83.968
+
+longDF <- data.frame(
+  variable = c("ozone", "ozone", "ozone", "ozone", "wind", "wind", "wind", "wind", "temp", "temp", "temp", "temp"),
+  value = c(23.615, 29.444, 59.115, 59.962, 11.623, 10.267,  8.942, 8.794, 65.548, 79.100, 83.903, 83.968)
+)
+longDF
 
 ## Long-format data has a column for possible variable types and a column for the values of those variables. Long-format data isn’t necessarily only two columns. For example, we might have ozone measurements for each day of the year. In that case, we could have another column for day. In other words, there are different levels of “longness”. The ultimate shape you want to get your data into will depend on what you are doing with it.
 
