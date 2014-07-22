@@ -22,7 +22,7 @@ wideDF
 longDF <- data.frame(
   variable = c("ozone", "ozone", "ozone", "ozone", "wind", "wind", "wind", "wind", "temp", "temp", "temp", "temp"),
   value = c(23.615, 29.444, 59.115, 59.962, 11.623, 10.267,  8.942, 8.794, 65.548, 79.100, 83.903, 83.968)
-)
+  )
 longDF
 
 ## Long-format data has a column for possible variable types and a column for the values of those variables. Long-format data isn’t necessarily only two columns. For example, we might have ozone measurements for each day of the year. In that case, we could have another column for day. In other words, there are different levels of “longness”. The ultimate shape you want to get your data into will depend on what you are doing with it.
