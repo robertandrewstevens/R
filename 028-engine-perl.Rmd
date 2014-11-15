@@ -1,0 +1,23 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+https://github.com/yihui/knitr-examples/blob/master/028-engine-perl.Rmd
+
+Run perl scripts
+
+```{r, comment=NA}
+# https://support.rstudio.com/hc/communities/public/questions/202705076-R-Markdown-File-Not-Knitting-Since-Recent-RStudio-Update
+library(knitr) # added to see if it helps - and it did!
+# should exist
+Sys.which('perl')
+```
+
+Does `perl` work?
+
+```{r test-perl, engine='perl', comment=NA}
+$test = "jello world";
+$test =~ s/j/h/;
+print $test
+```
