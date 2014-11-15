@@ -1,0 +1,94 @@
+---
+title: "11 Mistakes"
+author: "Robert A. Stevens"
+date: "August 7, 2014"
+output: pdf_document
+---
+
+http://www.huffingtonpost.com/2014/06/19/work-mistakes-youre-making_n_5501209.html
+
+#11 Mistakes You Make At Work Every. Single. Day.
+
+## The Huffington Post
+## By Rebecca Hiscott
+
+*Posted: 06/19/2014 7:28 am EDT Updated: 06/19/2014 7:59 am EDT*
+
+
+You might think the “perfect employee” works around the clock, constantly checks email and never takes a break or goes on vacation. But it turns out this perception is all wrong. In fact, the most successful people tend to know when to switch off, kick back, and refocus their energy.
+
+So whether you’re angling for a raise, a promotion or just a few kind words from your boss, here are a few common workplace mistakes you should quickly correct. Your employer will appreciate your newfound productivity, and so will you.
+
+**1. You’re Getting In Late**
+
+Even if your boss lets you set your own schedule, you should still aim to get to work early. A recent study found that bosses tend to exhibit a “morning bias,” rating employees who get in to work early as more productive and conscientious than employees who get in later -- even if they put in the same number of hours throughout the day.
+
+**2. You’re Checking Your Email First Thing In The Morning**
+
+It seems counterintuitive, but checking your email first thing in the morning can put a damper on your productivity for the entire day, according to time management expert Julie Morgenstern. Starting your day by responding to 46,966 emails puts you in immediate stress mode, and that will make it harder to focus later on.
+
+“Those requests and those interruptions and those unexpected surprises and those reminders and problems are endless,” Morgenstern told The Huffington Post.
+
+Instead, Morgenstern recommends starting your day with an important task that requires focus and then moving on to more trivial matters like replying to emails. "There is very little that cannot wait a minimum of 59 minutes,” she said.
+
+**3. Your Emails Are Too Long**
+
+Super-successful people generally avoid sending long emails, and so should you. Think of how many emails you receive in a day. Now think of how many TL;DR emails you’ve skipped over. Why expect more of others than you do of yourself?
+
+Our advice: Limit your emails to five sentences or fewer. Just make sure to keep it cheerful, so that you don’t come across as rude.
+
+**4. You’re Sitting At Your Desk**
+
+Sitting down, rather than standing, isn’t just bad for your health; it could be making you less engaged and creative at work. A new study from the Olin Business School at Washington University shows that standing up while engaging in a group project makes workers more creative, more enthusiastic, less defensive of their ideas and more willing to collaborate than when they’re sitting down.
+
+Andrew Knight, a co-author of the study and an assistant professor at Washington University, told HuffPost that “if you work in a place where you’re standing up, you’re going to move more, and because of that you’re going to become more physiologically activated. Your body is going to be 'on.'"
+
+**5. You’re Trying To Multitask**
+
+Chances are, as you’re reading this, you have six other browser windows open, and you're convinced all of them are equally important. And you're making a phone call. And you're eating your lunch.
+
+But studies show that you need to focus on one challenging task at a time in order to really nail it. Our brains can juggle menial tasks easily enough, but tasks that require real brainpower need your full concentration. Your short-term memory can’t process two separate streams of information at once, and the result is you’ll be doing a sloppy job at one or both of those tasks.
+
+When you read something while you’re simultaneously trying to respond to emails, for instance, you’re not going to remember anything that you’ve read. And if you don’t remember it, you can’t brilliantly quote it later.
+
+**6. You’re Not Taking Stock Of Your Day**
+
+Diaries aren’t just for tweens obsessed with selfies and Justin Bieber; they're for you, too. Taking as little as five minutes each day to jot down what you’ve learned, what went well and what went not-so-well during the workday can help you de-stress, identify solutions to problems and even come up with brilliant ideas that will boost your profile in the workplace.
+
+It’ll also remind you to take stock of your successes, rather than just your failures, according to Theresa Amabile, co-author of "The Progress Principle: Using Small Wins to Ignite Joy, Engagement, and Creativity at Work."
+
+"One of the big reasons to keep a diary is to record small wins that otherwise might slip through your memory," Amabile told Forbes. "You can leverage the progress principle and allow yourself to get that boost from realizing you are making progress. And it's also helpful to record major setbacks -- or minor ones that recur -- so you can think about how to get rid of inhibitors blocking your progress."
+
+**7. You’re Not Going To Happy Hour**
+
+Everyone needs a stress release. For some, that’s an hour-long run at the gym; for others, a pint of cookie-dough ice cream. But for many at the typical workplace, it's a chilled glass of beer at a local watering hole.
+
+Whether or not you’re a drinker, you should considering heading to a bar after work every now and then. It’s a prime networking opportunity and a chance to make new friends with your co-workers. Constantly avoiding outside activities with your co-workers could make your seem like someone who doesn’t play well with others. And that's not the kind of impression you want to leave in the workplace.
+
+**8. You Don’t Have A Hobby**
+
+Nurturing your own creative interests actually makes you a better worker, according to a recent study from San Francisco State University. Spending mental energy on something that has nothing to do with work -- playing an instrument, knitting, learning to make the perfect burrito or simply unwinding with a book -- can make you more productive when you get back to the office.
+
+In a press release, the study’s lead researcher said that creative hobbies made workers feel more refreshed and productive the next day. Study participants with hobbies were also found to be more creative and more likely to help out their coworkers in the office -- two metrics that translate to a significantly better performance review.
+
+**9. You're Not Taking Vacation**
+
+You may think you’re being conscientious and hardworking when you avoid taking vacation days, but you’re only hurting yourself. Nearly half of Americans reported using less than 25 percent of their allotted vacation time over the past year, according to a recent Glassdoor survey.
+
+That's unfortunate, because taking a few days off to recharge your batteries is as good for your productivity and creativity as it is for your health.
+
+"Vacations can spark creativity, offer a fresh perspective for problem solving, improve relationships and increase productivity," Dr. Glenn D. Braunstein, vice president of clinical innovation at Cedars-Sinai, wrote for HuffPost. "It may even save your life."
+
+**10. You Don’t Even Take A Break**
+
+In 2012, only 1 in 5 American workers ate lunch away from their desks, a trend that doesn’t seem to be reversing itself. But taking frequent breaks actually makes workers more productive and increases focus.
+
+Even taking a short walk during the workday can improve memory and attention by as much as 20 percent, according to a University of Michigan study. Or if that's not for you, looking at pictures of nature scenes can recharge a fatigued brain better than downing another cup of coffee.
+
+**11. You’re Sacrificing Your Health And Your Sleep**
+
+After a long day at work, you might not have the energy to head to the gym. You just want to curl up on the couch with some cheese puffs and forget about the day with a Netflix binge. Or maybe you take your work home with you and stay up late, trying to get a head start on the next day. Either way, you’re doing yourself a huge disservice.
+
+Eating right, exercising and getting enough sleep have all been linked to better productivity among workers. Exercise has been shown to boost creativity and reduce feelings of stress, which can lead to poor health and decreased productivity. And if you’re chowing down on the wrong foods, whether at home or at lunch, you’ll feel lethargic and unproductive afterwards, otherwise known as the dreaded food coma.
+
+The brain’s waste removal system kicks into high gear when you sleep, literally clearing your mind in preparation for the next day. And while you sleep, your brain acts like a miracle drug, strengthening memories, repairing brain cells, regulating your metabolism and learning new motor tasks, all of which will recharge you for the next day’s work -- something both your boss and you can appreciate.
