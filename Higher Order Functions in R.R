@@ -30,18 +30,14 @@
 #
 # Let’s start by assuming that you’ve been writing some horrible piece of code like the following:
 
-my.sum <- function(x)
-{
-  if(length(x) == 1)
-  {
+my.sum <- function(x) {
+  if(length(x) == 1) {
     return(x[1])
   }
-  if (length(x) == 2)
-  {
+  if (length(x) == 2) {
     return(x[1] + x[2])
   }
-  if (length(x) == 3)
-  {
+  if (length(x) == 3) {
     return(x[1] + x[2] + x[3])
   }
 }
@@ -51,15 +47,11 @@ my.sum(c(1:3))
 # This approach is clearly so specific that it’s virtually unusable. The most obvious fault is that our code is unable to
 # deal with arbitrarily long vectors. That can be easily fixed, though, with a simple loop:
   
-my.sum <- function(x)
-{
+my.sum <- function(x) {
   result <- 0
-  
-  for (i in 1:length(x))
-  {
+  for (i in 1:length(x)) {
     result <- result + x[i]
   }
-  
   return(result)
 }
 
