@@ -1,0 +1,129 @@
+---
+title: "R_graph_plot"
+author: "Robert A. Stevens"
+date: "Thursday, December 17, 2015"
+output: html_document
+---
+
+# R graph: plot
+
+http://www.ljzigerell.com/?p=1891
+
+Posted on August 12, 2014 by ljzigerell
+
+This R lesson is for the plot command. See here for other lessons.
+
+The start of this code is a bit complex. It's from R Commander, which is a way to use R through a graphical interface without having to write code.
+
+```{r}
+#library(foreign) # not needed, since can't read the DTA file and used CSV instead
+```
+
+The library function with the foreign package is used to import data from SPSS, Stata, or some other software.
+
+```{r}
+setwd("~/_comm")
+# Source:  http://voteview.com/political_polarization_2014.htm
+#DWHouse <- read.dta("house_polarization46_113.dta", 
+#                    convert.dates = TRUE, 
+#                    convert.factors = TRUE, 
+#                    missing.type = TRUE, 
+#                    convert.underscore = TRUE, 
+#                    warn.missing.labels = TRUE)
+DWHouse <- read.csv("house_polarization46_113.csv", header = FALSE)
+str(DWHouse)
+```
+
+The above command reads data from Stata (.dta extension) and places the data into DWHouse. The house\_polarization46\_113v9.dta dataset is from Voteview polarization data, located here. [The v9 on the end of the dataset indicates that I saved the dataset as Stata version 9.]
+
+Here's the plot command:
+
+```{r}
+#The format of the Polarization Data files is: 
+# 1.  Congress Number
+# 2.  First Year of the Congress
+# 3.  Difference in Party Means - first dimension
+# 4.  Moderates
+# 5.  Percentage of moderate Democrats
+# 6.  Percentage of moderate Republicans
+# 7.  Overlap
+# 8.  Percentage of overlapping Democrats 
+# 9.  Percentage of overlapping Republicans
+#10.  Chamber Mean - first dimension
+#11.  Chamber Mean - second dimension
+#12.  Democratic Party Mean - first dimension
+#13.  Democratic Party Mean - second dimension
+#14.  Republican Party Mean - first dimension
+#15.  Republican Party Mean - second dimension
+#16.  Northern Democrat Mean - first dimension
+#17.  Northern Democrat Mean - second dimension
+#18.  Southern Democrat Mean - first dimension
+#19.  Southern Democrat Mean - second dimension
+
+names(DWHouse)[2] <- "year"
+names(DWHouse)[14] <- "repmean1"
+names(DWHouse)[12] <- "demmean1"
+
+plot(repmean1 ~ year, type = "p", xlim = c(1900, 2012), ylim = c(-1, 1), 
+     xlab = "Year", ylab = "Liberal - Conservative", pch = 19, col = "red", 
+     main = "House", data = DWHouse)
+```
+
+Here are what the arguments mean: the tilde in **repmean1 ~ year** plots **repmean1** as a function of **year**, **type = "p"** indicates to plot points, **xlim = c(1900, 2012)** indicates the limits for the x-axis, **ylim = c(-1, 1)** indicates the limits for the x-axis, **xlab = "Year"** and **ylab = "Liberal - Conservative"** respectively indicate labels for the x-axis and y-axis, **pch = 19** indicates to use the 19 plotting character [see here for a list of pchs], **col = "red"** indicates the color for the pchs [see here for a list of colors], **main = "House"** indicates the main title, and **data= DWHouse** indicates the data to plot.
+
+Here's what the graph looks like so far:
+
+The repmean1 plotted above is the Republican Party mean for the first-dimension DW-Nominate scores among members of the House of Representatives. Let's add the Democrats. Instead of adding a new plot command, we just add points:
+
+```{r}
+plot(repmean1 ~ year, type = "p", xlim = c(1900, 2012), ylim = c(-1, 1), 
+     xlab = "Year", ylab = "Liberal - Conservative", pch = 19, col = "red", 
+     main = "House", data = DWHouse)
+points(demmean1 ~ year, type = "p", pch = 19, col = "blue", data = DWHouse)
+```
+
+Now let's add some labels:
+
+```{r}
+plot(repmean1 ~ year, type = "p", xlim = c(1900, 2012), ylim = c(-1, 1), 
+     xlab = "Year", ylab = "Liberal - Conservative", pch = 19, col = "red", 
+     main = "House", data = DWHouse)
+points(demmean1 ~ year, type = "p", pch = 19, col = "blue", data = DWHouse)
+text(1960,  0.4, labels = "GOP mean", col = "red" )
+text(1960, -0.4, labels = "Dem mean", col = "blue")
+```
+
+The first command adds text at the coordinate x = 1960 and y = 0.4; the text itself is "GOP mean," and the color of the text is red. I picked x = 1960 and y = 0.4 through trial and error to see where the text would look the nicest.
+
+Here's the graph now:
+
+Notice that the x-axis is labeled in increments of 20 years (1900, 1920, 1940, ...). This can be changed as follows. First, add **axes = F** to the plot command to shut off axes; you could also write **axes = FALSE**); then add these axis lines below the plot command:
+
+```{r}
+plot(repmean1 ~ year, type = "p", xlim = c(1900, 2012), ylim = c(-1, 1), 
+     xlab = "Year", ylab = "Liberal - Conservative", pch = 19, col = "red", 
+     main = "House", data = DWHouse)
+points(demmean1 ~ year, type = "p", pch = 19, col = "blue", data = DWHouse)
+text(1960,  0.4, labels = "GOP mean", col = "red" )
+text(1960, -0.4, labels = "Dem mean", col = "blue")
+axis(1, at = seq(1900, 2020, 10))
+axis(2, at = seq(-1, 1, 0.5))
+```
+
+The above lines tell R to plot axes at the indicated intervals. The first line arguments are: 1 tells R to plot an axis below [1 = below, 2 = left, 3 = above, and 4 = right], and the **(1900, 2020, 10)** sequence tells R to plot from 1900 to 2020 and place tick marks every 10 years. Here's the resulting graph:
+
+Notice that the x-axis and y-axis do not touch in the graph above. There's a few extra points plotted that I did not intend to plot: I meant to start the graph at 1900 so that the first point was 1901 (DW-Nominate scores are provided in the dataset every two years starting with 1879). To get the x-axis and y-axis to touch, add **xaxs = "i", yaxs = "i"** to the plot command. Let's also add **box()** to get a box around the graph, like we had in the first two graphs above.
+
+Here is the whole code for the plot above.
+
+```{r}
+plot(repmean1 ~ year, type = "p", xlim = c(1900, 2012), ylim = c(-1, 1), 
+     xlab = "Year", ylab = "Liberal - Conservative", pch = 19, col = "red", 
+     main = "House", data = DWHouse, axes = FALSE, xaxs = "i", yaxs = "i")
+axis(1, at = seq(1900, 2020, 10))
+axis(2, at = seq(-1, 1, 0.5))
+box()
+points(demmean1 ~ year, type = "p", pch = 19, col = "blue", data = DWHouse)
+text(1960,  0.4, labels ="GOP mean", col = "red" )
+text(1960, -0.4, labels ="Dem mean", col = "blue")
+```

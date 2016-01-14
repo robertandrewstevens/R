@@ -1,0 +1,1042 @@
+---
+title: "G4065"
+author: "Robert A. Stevens"
+date: "Friday, October 30, 2015"
+output: html_document
+---
+
+https://courseworks.columbia.edu/access/content/group/QMSSG4065_001_2015_1/RStudio/G4065.html
+
+# RStudio For You
+
+Ben Goodrich and Alex Coppock (please email typos to bg2382)
+
+01/22/2014
+
+1 Introduction  
+1.1 What are R and RStudio?  
+1.2 Can I use something besides R and RStudio?  
+1.3 Homework  
+2 Installation  
+3 Customization  
+4 RStudio Panels  
+4.1 Console  
+4.2 Editor  
+4.3 Accounting  
+4.3.1 Environment  
+4.3.2 History  
+4.3.3 Presentation  
+4.4 Miscellaneous  
+4.4.1 Files  
+4.4.2 Plots  
+4.4.3 Packages  
+4.4.4 Help  
+5 Object Types  
+6 Subsetting R Objects  
+7 R Functions  
+7.1 Argument names vs. symbol names  
+7.2 Functions for reading and writing data  
+7.3 Modeling functions  
+7.4 Four basic functions of probability distributions  
+7.5 Making simple plots  
+7.6 User-defined functions  
+7.7 Matrix stuff  
+8 Bayesian R Packages
+
+# 1 Introduction
+
+This document is intended to get you started with R and RStudio. In fact, this document was written with RStudio. Its goal is to serve as a comprehensive introduction to the essential computational concepts that we will learn in G4065.
+
+A few notes on formatting:
+
+- Italics merely *emphasizes* some point, as in English.
+
+- Boldface **refers** to menu items, tabs, icons, etc. in the RStudio application.
+
+- Highlighted `text` inline pertains to R syntax, and the blue-gray boxes contain entire lines of R code.
+
+- The `##` symbol at the start of a line means that everything that follows on that line is the result the R prints to the screen after evaluating the R code in the blue-gray boxes.
+
+The computational concepts are covered only somewhat chronologically. There is a table of contents at the top with links if you need to jump back and forth.
+
+## 1.1 What are R and RStudio?
+
+- R is both "a freely available language and environment for statistical computing and graphics which provides a wide variety of statistical and graphical techniques" according to CRAN.
+
+- RStudio is an Integrated Development Environment (IDE) for R the computer language that is a much better alternative to R the environment for utilizing such techniques.
+
+As a rough analogy, you might think of the distinction between the HyperText Markup Language (HTML) and a web browser that renders HTML. HTML is a computer language that is fairly readable by humans that specifies how text, images, etc. should appear when the page is loaded by a web browser. The HTML might look something like
+
+    <BIG>This is big</BIG>
+
+and render as **This is big**. These days, well-formatted HTML can be rendered by any web browser. However, the results look somewhat different in different web browsers, some web browsers are easier to use than others, etc.
+
+The R language is like HTML in that it is a computer language that is fairly readable by humans but is oriented toward statistical computing rather than porn. Similarly, you can think of RStudio as being like the best web browser for writing, reading, and executing R code, in addition to displaying the results in various ways.
+
+In addition, R and RStudio are like the Firefox (and, to a lesser extent, Chromium) web browser(s) in the sense that there is a bunch of core functionality that can be enhanced in a myriad of ways by downloadable extensions that anyone can write. In the R case, these extensions are called packages or libraries and there are currently 6201  of them on CRAN https://cran.r-project.org/web/packages/.
+
+The ability to write and distribute R packages is one of the main reasons why R is becoming so popular among quantitative researchers. A large subset of these packages are somewhat topically organized into Task Views https://cran.r-project.org/web/views/. You may be particularly interested in the Bayesian Task View https://cran.r-project.org/web/views/Bayesian.html, although we will only use a few of those packages in G4065, which are discussed in the section on Bayesian R Packages.
+
+## 1.2 Can I use something besides R and RStudio?
+
+At this point, you may have already wondered whether you can use some other statistical computing language and environment for G4065 or whether you can use R "directly" without the RStudio IDE. The short answer is: No, you must use R via RStudio. Although it is possible to use Stan via other interfaces - such as Python, Julia, Matlab, and the command line - the R interface is currently the most advanced. In addition, it is counter-productive for a course to teach more an one interface. Finally, RStudio is the easiest way to work with R markdown files.
+
+## 1.3 Homework
+
+The acceptable form for homework in G4065 is an R markdown (.rmd) file, along with the corresponding .pdf file. This document that you are reading now is the result of compiling a .rmd file into HTML. You can download the .rmd file from which it was created by changing the .html extension to .rmd in the URL of your web browser. As you can see, a .rmd file allows you to mix together English, R code input, and R results output with basic formatting, following Pandoc http://pandoc.org/.
+
+In short, to make a chunk of R input, on a new line enter three "backticks", which is the short northwest to southeast line whose key tends to be at the top left of an American keyboard. Right next to the three backticks, write {r} (with braces). On the following lines, you can write any valid R code. After that, on a new line again place three backticks to indicate that the R chunk is completed.
+
+You can compile the .rmd file into a PDF by clicking the Knit icon below the .rmd file's tab. Doing so will execute the R code in each chunk and output the results. You can read more about creating a .rmd file at its website http://rmarkdown.rstudio.com/ or by creating a .rmd file in RStudio (**File -> New -> R Markdown**), clicking on the question mark right below the file's tab, and selecting "Markdown Quick Reference".
+
+There are many options that can be placed inside the {r}. You can read about all of them on the options page http://yihui.name/knitr/options/. Some of the computations in G4065 take a long time, in which case it is inefficient to execute the same thing over and over again. Thus, one of the most useful options to sepecify is {r, cache = TRUE}. This option ensures that the code will only be rerun if the R code has changed since the last time it was run. However, it might be the case that the R code remains the same but some external code like a .stan file or a .jags file that is called by R has changed. In that case, you can instead specify {r, cache = TRUE, cache.extra = tools::md5sum('myfile')}, which ensures that the code will be executed if myfile has changed since the last time it was executed.
+
+# 2 Installation
+
+R and RStudio are straightforward to install. If you have issues, you can also watch this video.
+
+1.Install R. Using a web browser go to http://cran.rstudio.com/bin/ and click on the directory that corresponds to your operating system. Note that if you have a Mac in 2014, your operating system is macosx rather than macos. Then follow the instructions to download and install R. You should accept without changing whatever the default installation options are.
+
+2.Install RStudio. Using a web broswer go to http://www.rstudio.com/ide/download/desktop and download and install the version of RStudio that corresponds to your operating system. Again you should accept without changing the default installation options. On a Mac, there is an intermediate step where you need to copy the RStudio icon to the Applications folder.
+
+3.Install Tex. For Mac OS X, go to MacTeX. For Windows, go to MikTeX. You do not have to overtly use LaTeX in G4065, but it does need to be installed to make PDFs and if you want, LaTeX can be used within a R markdown file.
+
+4.Start RStudio and click on the **Tools** menu at the top and then click on the **Install packages.** submenu. In the **Packages** box, type the following verbatim and then click on Install.
+
+    knitr, yaml, devtools, MCMCpack, coda, shiny
+    
+# 3 Customization
+
+Start RStudio and click on the **Tools** menu at the top and then click on the **Global Options** submenu. The "Default working directory" is something that will differ depending on what operating system you are using, but you could change it to the directory where you keep everything for G4065. Otherwise, make your options look just like the following and then click OK.
+
+RStudio's Global Options
+
+Now, copy and paste the following into the R Console panel; see the Console subsection just below:
+
+    cat("options(contrasts = c(unordered = 'contr.treatment',
+                               ordered = 'contr.treatment'))",
+        sep = "\n", file = path.expand("~/.Rprofile"), append = TRUE)
+    
+You only have to paste these lines once when you first install R(Studio).
+
+# 4 RStudio Panels
+
+The RStudio IDE consists of four panels. You can resize them by placing the mouse on the edge of one of the panels and dragging to make it smaller or larger. You could also reconfigure their locations and contents, but here we will assume that the four panels have the stock configuration. Each panel also has rectangles in the top right to make the panel minimized or maximized, which may be used to uncover or cover the panel above or below.
+
+There are some nice videos that cover much of what is written below at
+
+- YouTube https://www.youtube.com/playlist?list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP
+
+- O'Reilly http://shop.oreilly.com/product/0636920034834.do?cmp=yt-strata-books-videos-product-promo_introduction_to_data_science_with_r
+
+## 4.1 Console
+
+The bottom-left panel is called the Console and it is where R code is executed. You can type anything at the > prompt, press Enter, and see the result. In this subsection, we will also introduce a little bit of the R language. For example, the Console can be used like a calculator, so try some calculation now, like:
+
+Using the R console as a calculator
+
+The `[1]` merely indicates that you only asked R to show you one thing. In general, R can be used to make several calculations in one step, but we will get to that later. You want to get in the habit of thinking through what each subexpression evaluates to. For example, 2 + 3 evaluates to 5, 5×(6/10)   evaluates to 3, and 3 ??? 1 = 2 . Going through this process every time will make it easier to understand more complicated expressions.
+
+Of course, R is not merely a desk calculator and has essentially every mathematical function you have ever heard of, many that you have never heard of, and the ability for users to write their own functions. Most of the built-in functions are fairly self-explanatory. You have the basic four arithmetic operators, plus `^` for exponentiation and two others:
+
+    ## + - * ^ %% %/% /
+
+The two non-obvious ones - `%%` and `%/%` - are the modulus and integer division operators, which you might know from long division in elementary school but are not used often. For example, seven divided by two is three with a remainder of one or, in decimal notation, 3.5:
+
+```{r, comment=NA}
+7 %/% 2
+7 %% 2
+17 / 2
+```
+
+The `*` operator is for scalar multiplication. For vector or matrix multiplication, use the `%*%` operator, which is explained in more detail in the section on Matrix stuff. Next you have various comparison operators:
+
+    ## == > < != <= >=
+
+Note that in R, like many other computer languages, the "double equals" sign is used to test whether the two sides are equal to each other. As we will learn, the "single equals" sign is used for an entirely different purpose. The `!=` operator asks if the two sides are not equal to each other (and if so returns `TRUE`). For example,
+
+```{r, comment=NA}
+((2 + 3)*6/10 - 1) == 2
+(9 %/% 3) > 2
+(7 %% 2) < 1
+(7/2) != 3
+(7/2) <= 3
+(7/2) >= 3
+```
+
+Finally, the `!` operator indicates logical negation, so
+
+```{r, comment=NA}
+!TRUE
+!FALSE
+```
+
+The two logical operators
+
+    & |
+
+can be translated as "AND" and "OR" respectively. The former returns `TRUE` if and only if both the left and the right sides evaluate to `TRUE` and the latter returns `TRUE` if either the left and the right side evaluates to `TRUE`. Thus, based on the above
+
+```{r, comment=NA}
+(((2 + 3)*6/10 - 1 ) == 2) & ((9 %/% 3) > 2)
+((7 %% 2) < 1) & ((7/2) != 3)
+((7/2) <= 3) | ((7/2) >= 3)
+```
+
+There is a convention in R (and many other programming languages) that for the purpose of "arithmetic" operations, `TRUE` is mapped to 1 and `FALSE` is mapped to 0, so
+
+```{r, comment=NA}
+TRUE + TRUE
+TRUE^3
+TRUE - FALSE
+((7/2) <= 3)*((7/2) >= 3)
+```
+
+R also has many functions. A function "call" consists of four parts
+
+1. The name of the function
+
+2. An opening (round) parenthesis, (
+
+3. The arguments to the function, separated by commas (this is the only situation where commas are used) 
+    + Arguments can be specified by position (which is what we will do in this subsection)
+    + Arguments can be specified by name and an equals sign, =, which is more explicit.
+
+4. A closing (round) parenthesis, )
+
+The all and any functions are generalizations of & and | in that they respectively return TRUE if all the logical expressions in a set are TRUE or return TRUE if any of the logical expressions in a set are TRUE.
+
+```{r, comment=NA}
+all(((2 + 3)*6/10 - 1) == 2, (9 %/% 3) > 2, (7/2) <= 3)
+any((9 %/% 3) > 2, (7/2) <= 3, TRUE < FALSE)
+```
+
+There are also various mathematical functions
+
+    abs acos acosh all any asin asinh atan atanh ceiling cos cosh cospi cummax cummin cumprod cumsum digamma exp expm1 floor gamma lgamma log log10 log1p log2 max min prod range round sign signif sin sinh sinpi sqrt sum tan tanh tanpi trigamma truncWe do not use trigonometry in G4065, but the trig functions are available in R if you ever need them (but remember that they assume radians rather than degrees). We only use the "natural" logarithm function log, so you won't need to use the base-10 or base-2 logarithms. The functions prefixed by cum are useful for finding the cumulative max, min, product, and summation of a set of numbers. Some illustrations
+
+```{r, comment=NA}
+max(sqrt(abs(-4)), exp(log(1)))
+sum(1, 2, 3, 4)
+prod(FALSE, 1, 2, 3, 4)
+```
+
+We will learn more about calling R functions in section on R Functions.
+
+You can go back to previous commands using the up arrow key and then possibly change it before pressing Enter. Also, the Home and End keys are good for jumping to the beginning or end of a line (the same can be accomplished with Apple / Ctrl+left and Apple / Ctrl+right, depending on whether you are using a Mac / Windows). You can also type the first three letters of some R function and then press the Tab key to see possible completions that start with those letters. Try typing the word "data" in the Console and then (without pressing Space or Enter keys press the Tab key).
+
+Finally, if you type a line of R syntax that is incomplete, the R prompt in the Console will change from > to +. This is not an "addition" sign but a suggestion that R needs more input. It looks like
+
+You could complete the line of R syntax by typing some number and pressing Enter. However, often incomplete lines are a sign that you have mismatched parentheses, or quotation marks, or have made some other mistake. If so, you can press the Esc key, and the Console prompt will revert back to > so that you can start again.
+
+## 4.2 Editor
+
+At this point, you have typed a lot of code into the Console and are probably wondering if there is a more permanent way to work with R. The top-left panel is intended for editing R code (inclusive of writing it from scratch) and has a convenient mechanism for piping it to the R Console below. You should type directly into the Console panel only when you are doing something experimental or otherwise will not need the R syntax again in the future. But everything that can be done in the Console panel can (and often should) be done in the Editor panel.
+
+Increase the size of the Editor panel to something reasonable and type some R expression as if you were writing in the R Console, like
+
+Now leave the cursor on that line of R code and click the Run icon in the upper-right of the Editor panel. You should see the Console panel expand and whatever line you typed in the Editor panel has been piped to and evaluated in the Console panel, which in this case is 21 since prod(2, 3, 4) = 24 > sum(1, 2, 3, 4, 5, 6) = 21.
+
+It is even more convenient to use a keyboard shortcut to pipe lines of R code from the Editor panel to the Console panel. On Macs, this keyboard shortcut is executed by holding down the Apple key and pressing Enter. On non-Macs, this keyboard shortcut is executed by holding down the Ctrl key and pressing Enter. There are many other keyboard shortcuts of various degrees of usefulness that can be found by clicking Help on the RStudio menu at the top and then Keyboard Shortcuts from the submenu.
+
+R code written in the Editor panel can be saved for later use. To do so, either click the disk icon, click on the File menu and then Save, or use the keyboard shortcut Apple/Ctrl+S depending on whether you are using a Mac / Windows. Doing so will open up a conventional dialog that will allow you to choose what directory to save this file as and what name to give it. By convention, R syntax files are given a .R extension, so you might save this file as MyFirstRFile.R.
+
+At this point, we have typed many of the same expressions several times in order to illustrate R syntax. However, the general rule is never to type the same thing twice. Instead, it is better to preserve the result of an R expression in R's memory using the "assignment" operator. Many computer languages use the "single equal" sign as their assignment operator, which is technically legal in R but is generally discouraged and considered wrong in G4065. R relies on an atypical assignment operator <-, which is composed of a less-than sign and a minus sign without any space between them. The assignment operator is used to bind the result of an R expression to a symbol that can subsequently be referred to rather than repeating that R expression. For example, we could change our file we are editing to
+
+By selecting all four lines and piping them to the Console (either via the Run icon or the keyboard shortcut), we then see
+
+```{r, comment=NA}
+x <- min(prod(2, 3, 4), sum(1, 2, 3, 4, 5, 6))
+x
+x > 0
+x %/% 3
+```
+
+The symbol x will remain bound to the number 21  until we either reassign it, remove it via the rm function, or close R.
+
+```{r, comment=NA}
+x <- max(prod(2, 3, 4), sum(1, 2, 3, 4, 5, 6))
+x
+rm(x)
+exists("x")
+```
+
+Here are the rules for assigning to symbols
+
+- The symbol name must consist of letters, numbers, underscores, and periods. In particular, it cannot contain spaces. R is case-sensitive.
+
+- The symbol name cannot start with a number but may contain numbers anywhere else.
+
+- You will still see people use periods in symbol names as a substitute for a space (such as my.data), but this is because the underscore was only made legal in 2004 . It is preferable to use the underscore (such as my_data) because the period is also used for something else entirely.
+
+- In general, symbol names should be short and reference what is bound to them. Thus, things like x should only be used when something arbitrary is bound to it, whereas age would be a good symbol for the age(s) of someone and would be a misleading symbol if it were bound to anything else.
+
+Another important aspect of editing R code is to include good code comments. The # character is not a hashtag but rather indicates that everything that follows on that line will not be evaluated by R. Thus, you are free to write an explanation as to why the code is written that way. Note that comments generally should not be used to indicate what the code does; if what the code does is not evident to someone who knows the R syntax, then the code is not written clearly enough in terms of having appropriate symbol names, adequate line breaks, etc. For example,
+
+```{r, comment=NA}
+x <- 9  # assigns 9 to x
+sqrt(x) # takes the square root of x
+```
+
+these code comments add nothing that was not already apparent from the syntax itself. It is preferable to use code comments to explain why you are doing something, such as
+
+```{r, comment=NA}
+y <- x * 0.621371 # convert from kilometers to miles
+y
+```
+
+But it is better still to let the code do the talking and reserve code comments for when you have to explain something non-trivial. Thus, no comment is really needed if you can use symbol names appropriately
+
+```{r, comment=NA}
+length_in_kilometers <- x
+length_in_miles <- length_in_kilometers * 0.621371
+length_in_miles
+```
+
+However, in this document, we will often use code comments to explain what is going on since the audience is presumed to just be starting to learn the R language.
+
+An R expression can span more than one line, although it is not needed in this case
+
+```{r, comment=NA}
+x <- 2 + # this R expression is incomplete until completed on the next line
+  3
+x
+```
+
+If you have multi-line R expressions, RStudio will tend to automatically do something reasonable to format them with indentation, although sometimes it will be necessary for you to manually add more space or more line breaks in order to enhance the clarity of your code (which is particularly important when writing long R expressions). Hadley Wickham's guidelines for the formatting of R code (that RStudio tends to follow) are available here. Another more comprehensive style guide is available that is used by Google employees. Our main disagreement with Google is that we favor the use of underscores in symbol names.
+
+The Source icon can be used to pipe an entire file to the R Console, and thus is basically equivalent to selecting all the lines and Running them. However, using Source is somewhat better for this purpose for a few reasons
+
+- It catches syntax errors more closely to where the problem occurs and tells you the corresponding line number (although the actual problem may be one line up).
+
+- It silently evaluates each R expression, which can be useful to avoid clutter if you are doing something that your reader does not need to know the details of.
+
+- It forces you to verify that your code is complete and self-contained rather than implicitly relying on some objects that you created by typing directly in the R Console and forgot about.
+
+Basically, whenever you "finish" writing a file of R syntax, save your changes to the disk, restart the R session by clicking on the Session menu followed by the Restart R submenu, and finally then click on the Source icon to execute your entire file. If there are any error messages, fix them and go through the process again.
+
+You can have multiple files open simultaneously. These are represented by tabs in the Editor pane, just like in a web browser. One common source of problems is that you might pipe in bits of R code from several files that produce the results you want, but when you restart your R session and click on Source to execute your file one last time, it does not work as intended because the intended results rely on R syntax in another file. You should either make your files self-contained by copying all the necessary code into them, or better yet, put source("MySecondRFile.R") into MyFirstRFile.R, which is logically equivalent to copying all of MySecondRFile.R and pasting it into the corresponding place in MyFirstRFile.R.
+
+## 4.3 Accounting
+
+The top-right panel in RStudio is not essential but is somewhat useful. Nor does it seem to have a well-established name, so we will call it the Accounting panel. It generally has three tabs: Environment, History, and Presentation.
+
+### 4.3.1 Environment
+
+If the Environment tab is selected, it lists the objects that have been assigned (and not removed) in the current R session. At the moment, x is the only symbol we have assigned and it is bound to the number 5  as illustrated below.
+
+This is useful for remembering what objects are assigned and what they are bound to (although no substitute for using symbol names that are more informative than x). If the object is larger than a single number, the Environment tab will display some abbreviated information about it. For example, if we execute
+
+```{r, comment=NA}
+data("USJudgeRatings")
+dim(USJudgeRatings)
+```
+
+then a dataset of ratings that lawyers give to US judges is pulled into the R Console (and bound to the symbol USJudgeRatings). The dim function returns its dimensions, which are 43  rows and 12  columns, which is also given in the Environment tab.
+
+You can click on the spreadsheet-like icon to the right of USJudgeRatings in the environment tab to open a spreadsheet-like representation of the dataset (although it cannot be edited directly). The Clear icon at the top of the Environment tab can be clicked to remove all objects, which can also be accomplished programatically by executing
+
+```{r, comment=NA}
+rm(list = ls())
+```
+
+### 4.3.2 History
+
+The History tab keeps a record of what commands have been executed, either by typing directly in the Console panel or by piping from the Editor panel. You can double-click to resend that command to the Console (although you have to then press Enter to execute it). Or you can click the To Source icon to paste it into your active file in the Editor panel. There are some other icons in the History tab, but they are not too useful.
+
+### 4.3.3 Presentation
+
+The Presentation tab is basically a web browser that is used to show HTML presentations that are made in RStudio. This mechanism is a nice way to make simple presentations that utilize R code and R output, but G4065 will not entail any such presentations.
+
+## 4.4 Miscellaneous
+
+The bottom-right panel contains a grab-bag of stuff, separated into tabs.
+
+### 4.4.1 Files
+
+The Files tab typically shows the contents of the "working directory". The idea of a working directory may be unfamiliar to many of you, although Stata also has this idea. The working directory is a folder on your hard drive where R(Studio) will both look for files and save text files, images, etc. Basically, everything you need for a project should be included in the working directory or in a folder below the working directory.
+
+What if you need to tell R(Studio) to use a different working directory? You can change it with a mouse by clicking on the Session menu, then the Set Working Directory submenu, and finally Choose Directory. Once you complete that, you will see a line like
+
+```{r, comment=NA}
+setwd("~")
+```
+
+that has been piped into the Console panel. You should then copy that line (without the leading >) and paste it at the top of the active tab in the Editor panel. That way, whenever you source that file, it will first change the working directory to the appropriate location. However, this implies that the same .R file may not work on two different computers unless you change the setwd() line appropriately.
+
+### 4.4.2 Plots
+
+The plots tab shows plots that are generated by R code. We will make tons of plots in G4065. For now, in the Console panel simply execute
+
+```{r, comment=NA}
+example(plot) # You have to hit Enter to see the subsequent plots## 
+```
+
+and four plots will appear in the Plots tab. You can click on the arrow icons at the top of the Plots tab to rewind for fast-forward through your accumulated plots. The Zoom icon will open a larger window of your plot. The Export icon can be used to save the plot to your hard disk, although it is better to save the plot programmatically by executing R syntax. We will review how to do so in G4065, but briefly the most relevant functions are savePlot to save an existing plot exactly as is, png to open a Portable Network Graphics (PNG) device to write a plot to, and pdf to open a Portable Document Format (PDF) device to write a plot to. However, for homework, it is not necessary to explicitly save plots to the hard disk because they will already be included when you compile the .rmd file to a .pdf.
+
+### 4.4.3 Packages
+
+The Packages tab shows what R packages have been installed to your hard drive. As was mentioned in the Introduction, R packages contain additional functionality that extends the capability of the somewhat minimal version of R that you first downloaded, the same way extensions enhance the functionality of the Firefox web browser. However, once you have installed a package to your hard drive, you have to load it into your R session in order to expose and then use that functionality. This can be done in the Packages tab by checking the box to the left of the package name, although it is much better to do so programatically by writing something like
+
+```{r, comment=NA}
+suppressMessages(stopifnot(require(MCMCpack)))
+```
+
+near the top of any R file that utilizes the functionality in the specified package (i.e. MCMCpack in this example). The Packages tab also has an Install Packages icon that will open up the dialog discussed in the Installation section of this document. There is also a Check for Updates icon that you should click periodically to make sure you have the most recent versions of the additional R packages, which may fix bugs or add new features.
+
+### 4.4.4 Help
+
+The Help tab displays the documentation for an R function. The paradoxical thing about R is that in order to get help with some R function, you need to know the name of the R function, when often the basic problem is that you do not know or remember the name of the function you are looking for. In G4065, the homework assignments will tell you what functions you need to use, although you may need to read their corresponding help pages. There is a search box in the upper-right corner of the Help tab where you can type the name of the function and RStudio will assist you by trying to guess what you are looking for. For example, type the word "pdf" (without quotes) into the search box and press Enter. The help page for the pdf function should come up, although it may be more convenient to then click the icon to the right of the printer in the Help tab in order to open the help page in a full-sized web browser.
+
+All help pages for R functions follow the same basic format.
+
+1. Description: This is a brief paragraph or two explaining what the purpose of the function is, in this case it says "pdf starts the graphics device driver for producing PDF graphics"
+
+2. Useage: This shows the R syntax for how the function could be called and emphasizes the default values for various arguments to the function
+
+3. Arguments: This is a list of the function's arguments with some additional explanation as to what each argument entails, whether it is required, and if not what its default value is
+
+4. Details: This explains in a more conversational tone how to use the function and expands upon any topics that would not easily fit into the Arguments section.
+
+5. Value: What is returned by the function. In this case, the pdf function does not return any output to the R Console but only creates a PDF file on your hard disk. Thus, the Value section is omitted in this case.
+
+6. See Also: Other functions that provide similar functionality that you may be interested in using
+
+7. Exampes: This is often the most useful section and gives a somewhat minimal example of how to use the function. Or you can use the example() function to just run the example code without reading the entire help page like we did above.
+
+To make a long story short in the case of pdf, you could do something like
+
+```{r, comment=NA}
+dev.off() # to close whatever plotting device might already be open
+pdf(file = "plot_example.pdf", width = 6, height = 9, fonts = "Times")
+example(plot) # or some other plot you want to save
+dev.off()
+```
+
+and R will make a PDF called plot_example.pdf in the current working directory of the four plots you made in the Plots subsection. However, you will not see these plots under the Plots tab. In real projects, this programmatic approach to saving plots is preferable to clicking the Export button under the Plots tab because it automatically saves the new plot whenever you change the R code that generates it.
+
+The help search box is case-sensitive. Thus, if you searched for "PDF", no hits would be returned. The apropos function is somewhat useful if you kind of know what you are looking for but do not know exactly how it is spelled. For example, you could execute in the Console panel
+
+```{r, comment=NA}
+apropos("PDF", mode = "function")
+```
+
+and you will see all functions that have the three letters "PDF" in them, regardless of case.
+
+Finally, R packages often have vignettes that demonstrate basic useage of an R package in a less-structured (and often more useful) format than the help pages. You can download the vignettes from the package's webpage on CRAN or access them from inside RStudio with
+
+    browseVignettes(package = "rstan") # or another R package
+
+# 5 Object Types
+
+The basic types are:
+
+- Numbers such as 3.5 or 10.
+
+- In R, there are no "single precision" floating point numbers and every number is double precision by default, even if it is unnecessary. Thus,integers such as 10  are stored in double precision, unless you explicitly force them to be stored as integers.
+
+- R also supports complex numbers (with real and imaginary parts) but we only use real numbers in G4065.
+
+- The symbol Inf is used to represent infinity and may be prefixed by a minus sign, -.
+
+- Character strings such as "New York"
+
+- Logical values, namely TRUE and FALSE
+
+- Each of the three above types includes a missing value, namely NA_real_, NA_character_, and NA
+
+These basic types can be organized with containers
+
+- a vector in the broad computer science sense rather than the narrow geometric sense. One way to create a vector is with the c() function which is an abbreviation for concatenate.
+
+```{r, comment=NA}
+num <- c(3.5, 10)
+char <- c("hello", "world")
+logic <- c(TRUE, FALSE)
+```
+
+Thus, you can have a vector of numbers, character strings, or logical values, even though linear algebra is not defined for vectors of character strings. The elements of a vector must all be the same type, or else they will be coerced to a common type which is probably not what you want. A quick way to create a vector of consecutive integers is to use the : operator, as is demonstrated below.
+
+- a factor is essentially a special kind of vector that is used to represent categorical data. R is much stricter about categorical data than most other statistical programs, which many people find pedantic but only because they have not thought about such things carefully. A factor defines a correspondence between integer codes and their descriptive labels and is usually created by the factor function, such as
+
+```{r, comment=NA}
+religion <- factor(c(1, 1, 2, 1, 3, 1, 1, 1, 4), levels = 1:4, 
+                   labels = c("Christian", "Jewish", "Muslim", "Other"))
+```
+
+This can be used if you have data on individuals' religions where there are four possible values. We tend to think of religions as being unordered, but some factors have an unambiguous order such as
+
+```{r, comment=NA}
+approval <- factor(c(1, 3, 2, 2, 3, 1), levels = 1:3, 
+                   labels = c("Disapprove", "Neutral", "Approve"), ordered = TRUE)
+```
+
+Be aware that if you do not specify the levels and labels arguments, R will use alpha-numerical ordering of the categories, regardless of whether ordered = TRUE and alpha-numerical categories are often arbitrary.
+
+- a matrix, which is a collection of vectors that have the same length. Again, you can have a matrix whose elements are characters, in which case linear algebra operations will not work. The usual way to create a matrix is with the matrix function, such as
+
+```{r, comment=NA}
+mat <- matrix(1:6, nrow = 3, ncol = 2)
+mat
+```
+
+You can also create a matrix by binding vectors, either column-wise or row-wise using the cbind and rbind functions respectively, as in
+
+```{r, comment=NA}
+mat <- cbind(6:4, 3:1)
+mat
+mat <- rbind(1:2, 3:4, 5:6)
+mat
+```
+
+This last matrix could also be created simply by specifying byrow = TRUE in the call to the matrix() function:
+
+```{r, comment=NA}
+mat <- matrix(1:6, nrow = 3, ncol = 2, byrow = TRUE)
+mat
+```
+
+- an array, which is essentially a multidimensional generalization of vectors and matrices (but without linear algebra operations). Conversely, a vector is a one-dimensional array and a matrix is a two-dimensional array. Arrays are typically created with the array function, as in
+
+```{r, comment=NA}
+arr <- array(1:24, dim = c(4, 2, 3)) # 4 rows, 2 columns, 3 shelves
+arr
+```
+
+- a list, which is a container of containers and its elements need not be of the same type. Thus, this is a list containing a vector, a factor, a matrix, and an array that we created above
+
+```{r, comment=NA}
+lst <- list(logic, approval, mat, arr)
+length(lst)
+```
+
+- a data.frame is a special case of a list where every list element has the same length. Thus, a data.frame resembles a matrix conceptually but unlike a matrix in R, the "columns" of a data.frame need not be the same type. Here is a data.frame of heterogenous vectors
+
+```{r, comment=NA}
+df <- data.frame(num, char, logic)
+dim(df) # 2 rows, 3 columns
+df
+```
+
+Thus, a data.frame can also accomodate a mix of factors and numeric data, which is customary for datasets in social science. When you read data into R, the output of the function will usually be a data.frame (see the section on Functions for reading and writing data).
+
+In addition, some R packages (such as rstan) define new object types that are customized for the input or output for that package. For example, one of the important object types in the coda package is the mcmc.list, which is like a generic list, except all of its elements are of type mcmc, which is like a matrix, except specialized for MCMC output. These customized object types will usually define customized versions of generic functions like summary, so that if you pass an object of type mcmc.list to summary(), it will produce a useful summary of the combined Markov chains.
+
+# 6 Subsetting R Objects
+
+If you have one of the containers discussed in the section on Object Types, then you can subset them using expressions within brackets.
+
+- By position, with an integer (vector)
+
+```{r, comment=NA}
+letters[4]
+letters[c(1, 5, 9, 15, 21)]
+```
+
+- Conversely, you can obtain all elements except those specified with a negative integer (vector)
+
+```{r, comment=NA}
+letters[-4]
+letters[c(-2, -5)]
+```
+
+- With a logical vector of the same length as the object being subsetted
+
+```{r, comment=NA}
+char[logic]
+char[!logic]
+```
+
+- By name, with a character (vector). In the case of a matrix(-like) object, you can subset on either the rownames, the columnnames, or both, as in:
+
+```{r, comment=NA}
+state.x77["New York", ]
+state.x77[ , c("Population", "Murder")]
+state.x77["New York", c("Population", "Murder")]
+```
+
+In the case of a list(-like) object (including a data.frame), there are three ways to subset:
+
+1. With "single brackets", the result is a shorter list
+
+```{r, comment=NA}
+lst[2:3]
+```
+
+2. With "double brackets", the result is the corresponding list element
+
+```{r, comment=NA}
+lst[[1]]
+```
+
+3. With the dollar sign, the result is the list element with that name
+
+```{r, comment=NA}
+USJudgeRatings$PHYS
+```
+
+The dollar sign notation is particularly useful in the R Console because you can type the first few letters of the element name and then press the Tab key to show the possible completions if you do not remember how to spell the element name exactly.
+
+In all of these cases, it is also possible to assign to a subset of a container. For example,
+
+```{r, comment=NA}
+char[2] <- "Newman"
+df$char <- char
+df[ , "char"]
+```
+
+To review,
+
+- Parentheses, (), are used in two very different situations: 
+    + Grouping in mathematical expressions (see Console), such as
+
+```{r, comment=NA}
+(2 + 3)*4
+```
+
+    + Function calls (see R Functions), such as
+
+```{r, comment=NA}
+log(10)
+```
+
+- Braces, {}, are used in two similar situations: 
+
+    + Function definitions (see User-defined functions)
+
+```{r, comment=NA}
+sinc <- function(x) {
+  return(ifelse(x == 0, 1, sin(x)/x))
+}
+```
+
+    + Control flow expressions such as if, else, for, while, etc.
+
+```{r, comment=NA}
+counter <- 1
+while(counter <= 3) {
+  print(paste("counter is", counter))
+  counter <- counter + 1
+}
+```
+
+- Brackets, [], are used for subsetting, as in
+
+```{r, comment=NA}
+x[1]
+mean(x[x > 0])
+```
+
+An example that illustrates most of these constructions simultaneously is
+
+```{r, comment=NA}
+len <- length(x)
+sinc_values <- rep(NA_real_, len)
+for(i in 1:len) {
+  if(x[i] == 0) {
+    sinc_values[i] <- 1
+  }
+  else {
+    sinc_values[i] <- sin(x[i])/x[i]
+  }
+}
+sinc_values
+```
+
+However, the sinc function defined above would be the preferable way in R to numerically evaluate the sinc function if the need were ever to arise.
+
+# 7 R Functions
+
+A function is a basic feature of the R language. R has many functions. For example, there are 2355  functions just in the half-dozen R packages that are loaded on startup. In other words, it does not include the functions in any R packages that you have installed on your hard disk but are not currently loaded. Nor does it include the functions in the some 6201  R packages that are available on CRAN that you have not installed yet. Fortunately, we only use a relatively small number of functions in G4065 that are spread across about a dozen packages, and you can always look them up with the help functionality of R(Studio).
+
+We have already used a few functions, but let's examine more carefully what it means to call a function. A function can be named or anonymous, but we will start with the named functions. A function has input (called arguments in R) and output. The arguments to a function can either be specified by name or by position or both and are separated by commas. If an argument is specified by name, use the "single equals" sign. If an argument is specified by position, do not use any equals signs. In general, specifing arguments by name makes your code easier to read but takes longer to type. Thus, we usually only specify the first argument by position and the remaining arguments by name.
+
+The name of a function will often be related to the output it produces. For example, the round function rounds the inputted number(s) and produces another number or set of numbers
+
+```{r, comment=NA}
+round(7/2)
+```
+
+However, the number to be rounded is not the only (possible) input to the round function. In addition, we might want to customize how many digits to round the inputted number to. Fortunately, the round function has a second argument called digits, which defaults to zero (meaning round to the nearest integer) but if specified as a positive integer will round to that decimal place. Thus,
+
+```{r, comment=NA}
+round(7/2, digits = 1)
+```
+
+rounds to the nearest tenth.
+
+How do you know what arguments a function accepts? The help file for an R function should explain all the arguments in detail in the Arguments section. In general, R functions accept more arguments than any single person could imagine. But if you just want to see the names of all the arguments, you can execute the args function in the Console panel, like
+
+```{r, comment=NA}
+args(round)
+```
+
+The only argument to the args function is the name of the function whose valid arguments are being sought. In this case, the round function only has two arguments, namely x which is the internal name of the number to be rounded and digits which governs which decimal place to round to.
+
+## 7.1 Argument names vs. symbol names
+
+At this point, you might already have an object called x in the global environment of your R session, in which case you are probably confused. Do not worry; this is the part about R that students all find the most confusing. An R function with named arguments just uses those names internally and for documentation. They have essentially nothing to do with what names you have used to bind results to. For example, you might assume that the following would work, since x is the name of the first argument of the round function:
+
+```{r, comment=NA, error=TRUE}
+x <- 5
+round() # yields an error
+```
+
+but in fact, it produces an error message that in essence says that R does not know what you want it to round. In contrast, this does work
+
+```{r, comment=NA}
+x <- 5
+round(x = 7/2) # x is merely the internal symbol that 7/2 is bound to
+x # x is still bound to 5 outside the round() function
+round(x) # specifing by position
+round(x = x) # specifying by name
+```
+
+This is why it is considered unacceptable in G4065 to use the "single equals" sign for assignment, even though it is technically legal in R and obligatory in many other languages like C++. In R, <- should be used to assign a symbol to something and = should be used to specify function arguments by name.
+
+## 7.2 Functions for reading and writing data
+
+R can read data from and write data to a variety of formats. The simplest format is delimited text, whether locally on your hard-disk or from a URL. However, R by default cannot read data from password-protected URLs, such as those that start with http://www.courseworks.columbia.edu or from secure URLs, such as those that start with https so it is necessary in those cases to first download the data to your local hard-disk or do some more complicated stuff with the other R packages, such as devtools which utilizes httr which in turn utilizes RCurl.
+
+RStudio has a dedicated mechanism for reading delimited text that can be accessed by clicking Tools -> Import Dataset. There will be several options in the wizard that look like
+
+The contexts of the name box will be the name of the symbol that the data.frame is bound to. The Heading radio button indicates whether the first row contains the names of the variables. The Separator drop-down menu allows you to choose what character separates the variables from each other, of which the most common choices are the Comma or Whitespace (which includes Tab in addition to spaces). The Decimal drop-down menu allows you to choose the character for the decimal point, which is a Period in American datasets but sometimes is a Comma in European datasets. The Quote drop-down menu allows you to select what character to use for quoted text, implying that inside quoted text R will ignore the Separator character. By default, this is Double quote but sometimes Single quote will be applicable. The na.strings text box allows you to specify a (comma-separated) set of strings that will be used to indicate missing values in the data such as NA or perhaps empty strings "". The Strings as factors checkbox indicates whether non-numeric variables found in the file will be converted to factors or left as character vectors. In general, a factor is preferable but R will use alphabetical order for the levels, which is arbitrary, so often it is better to uncheck this box and convert the resulting character vectors within the data.frame to factors using the factor() function.
+
+When everything is set, click the Import button and the resulting data.frame will be created in R's workspace. RStudio will also call its View() function on that data.frame. At this point, it is very important that you look in the Console panel of RStudio to see the command that has been piped in. Copy and paste this line into your .R file so that when you source it, your file will be imported programatically rather than you having to manually go through the wizard again. This line will involve the read.csv function or the read.table function, which are the underlying functions behind the wizard and offer some additional arguments that are rarely-used but occassionally essential.
+
+Sometimes, you will be faced with a file of data that is not delimited by any particular character but rather comes with an index file that says how many characters each variable contains. This format is called "fixed width" and can be imported into R with the read.fwf function. This function might be called with something like
+
+    dataset <- read.fwf(file = file.path("path", "to", "my", "dataset.txt"),
+                        widths = c(2, 5, 3, 1, 1, 4), header = TRUE)
+                    
+which tells R to look on your disk for a file at C:\path\to\my\datset.txt on Windows or /path/to/my/dataset.txt on anything but Windows with six variables of width 2, 5, 3, 1, 1, and 4 characters respectively that has variable names in the first row. If successful, a data.frame called dataset (which is poorly named) will be created in R's workspace.
+
+The foreign R package has a number of functions for reading data in the binary formats produced by other statistical packages such as Stata, SPSS, etc. These functions follow the read.XXX convention where XXX pertains to the format being read and whose first argument is the path to the file on your hard disk or a URL. To access these functions, you have to first load the foreign package
+
+    stopifnot(require(foreign))
+    ## Loading required package: foreign
+    sewage <- read.dta("http://www.stata-press.com/data/r12/sewage.dta")
+
+The xlsx R package (among others) has functions for reading files produced by Microsoft Excel in either the notorious XML-based format indicated by the .xlsx extension in more recent versions of Excel or the notorious binary format indicated by the .xls extension in older versions of Excel. The read.xlsx function has some additional arguments to deal with spreadsheets that have multiple sheets within them. In general, it is probably easier to save a .xlsx or .xls file as a .csv file within Microsoft Excel and read it into R using the wizard or the read.csv function it calls.
+
+For every read.XXX function, there is typically a write.XXX function that will write a data.frame to your hard disk in the XXX format. In this case, the first argument is the data.frame you want to save and the second argument is an absolute or relative (to the working directory) path to save it to. While the write.XXX functions are sometimes necessary when you need to work with another statistical package, in G4065, you can only do your analysis with R.
+
+More information is available in the manual for R Data Import/Export The read.XXX functions that are available in the foreign, xlsx, and base R packages are
+
+     [1] "read.arff"    "read.dbf"     "read.dta"     "read.epiinfo"
+     [5] "read.mtp"     "read.octave"  "read.S"       "read.spss"   
+     [9] "read.ssd"     "read.systat"  "read.xport"   "read.ftable" 
+    [13] "read.csv"     "read.csv2"    "read.delim"   "read.delim2" 
+    [17] "read.DIF"     "read.fortran" "read.fwf"     "read.socket" 
+    [21] "read.table"   "read.dcf"
+
+Objects in R's workspace can be written to your hard-disk using the save function, whose first few arguments are the names of the objects that you want to save and also takes a required file argument that specifies the absolute or relative (to the working directory) path to save them collectively to. By convention, such files end with an .RData extension.
+
+    save(sewage, x, file = "stuff.RData")
+
+This file can be read into R with load(file = "stuff.RData"), in which case the sewage and x options will exist in R's workspace even if they were created in a different R session (or on a different computer). Clicking Session->Load Workspace allows you to find the .RData file with a GUI and then calls load.
+
+## 7.3 Modeling functions
+
+The syntax for modeling in R is fairly standardized, so that many types of models can be executed using the same core syntax. The basic element of this modeling syntax is the formula, which is characterized by the use of the tilde (~) and looks like
+
+    y ~ x1 + x2
+
+The symbol to the left of the ~ indicates the variable being modeled. The symbols to the right of the ~ indicate the variables beind conditioned on. However, in the context of a formula, the + sign does not mean addition but rather indicates inclusion. Thus y is not being modeled as the sum of x1 and x2 but rather being modeled as a function of both x1 and x2. In English,
+
+    y ~ x1 + x2
+
+could be read as "y is a random variable whose systematic component is a linear function of x1 and x2." A formula can include more than two symbols to the right of the ~, such as
+
+    y ~ x1 + x2 + x3 + x4
+
+If any of the symbols to the right of the ~ are factors (see Object Types), then the formula construct will expand them into a set of indicator variables in the model where the formula is used. An indicator variable is either TRUE or FALSE depending on whether a criterion is satisfied, but is often coded as 1 or 0 (which is implied by the distinction between TRUE and FALSE in R). Thus, something like
+
+    wage ~ race + educ + age + sex
+
+would entail expansion of the race variable into indicator variables for whites, blacks, etc. However, in the example below the only two categories are "W" and "NW" for whites and non-whites respectively. It could also entail entail expansion of the educ variable into indicator variables like "no high school degree", "GED", "graduated high school", "some college", "graduated college", "professional degree", etc. However, in the example below educ is actually measured as the number of years of education and hence is not a factor.
+
+The age variable would only be expanded into indicator variables if it were classified as a factor, such as "18 to 29", "30 to 39", "40 to 49", "50 to 59", "60 to 69", "70+". If age were the number of birthdays the person has celebrated, then it would just be included in the model as an integer, which is the case in the example below.
+
+The sex variable should be expanded into indicator variables but may not be if it is poorly handled by the user. In many datasets, the sex variable will already be coded as an indicator variable, which forces you to go back and look up in the dataset's documentation whether men are coded as 1 and women coded as 0 or vice versa. It is far preferable in R to code sex as a factor with named levels and let R expand it into indicator variables when it is appropriate to do so, which is what is done in the example below and would be essential if the sex variable had more than two categories.
+
+In each case where a factor is expanded into indicator variables in a formula, by default, the first category of that factor is treated as the reference category and has no associated indicator variable. For example with educ, there could be indicator variables for "GED", "graduated high school", "some college", "graduated college", "professional degree" but not for "no high school degree" because "no high school degree" is the reference category. Thus, in order to provide the correct interpretation of the results of the model, it is essential to keep in mind what the reference category of a factor is. Moreover, careless R users will often accept the default alphabetical ordering when they create factors, which is somewhat arbitrary.
+
+These sources of confusion can be mitigated by omitting the constant from a formula using the minus sign, -. Just like + indicates inclusion in a formula, - indicates exclusion, as in
+
+    wage ~ race + educ + age + sex - 1
+    
+Here we explicitly exclude the constant (1 ), which is included by default in most modeling functions. Now R will expand each factor into a full set of indicator variables, in which case the estimated coefficients for such variables can be absolutely associated with the corresponding category, rather than the corresponding category relative to the reference category.
+
+Finally, it is possible to use R functions within formulas, such as
+
+    log(wage) ~ race + educ + age : sex + sex - 1
+
+which indicates the (natural) logarithm of earnings is the variable being modeled, rather than the level of earnings. Thus, it is at best unnecessary for you to precreate a variable for the logarithm of earnings to use in a model, such as
+
+    log_wage <- log(wage)
+    log_wage ~ race + educ + age : sex + sex - 1
+
+There are a few more operators that are described in the Details section of help(formula) but we will not use them in G4065. The lm function and most modeling functions like it have a data argument that can be used to pass a data.frame, in which case R will first look in that data.frame for the symbols designated in the formula. Thus, a typical call to glm might look like
+
+```{r, comment=NA}
+data(Nethvote, package = "MCMCpack")
+logit <- glm(formula = vote == "CDA" ~ relig + class + income  +
+             educ + age + urban, data = Nethvote, family = binomial())
+summary(logit)
+```
+
+Of course, the glm function does frequentist estimation and G4065 focuses on Bayesian estimation. However, many of the functions in the MCMCpack package use the same modeling syntax. Also, it is often useful to use a formula to set up objects to pass to Stan, JAGS, etc. For example,
+
+```{r, comment=NA}
+f <- vote == "CDA" ~ relig + class + income  + educ + age + urban
+X <- model.matrix(f, data = Nethvote)
+dim(X)
+y <- model.response(model.frame(f, data = Nethvote))
+table(y)
+```
+
+creates a matrix of predictors (X), including an intercept and an outcome variable (y) whose length is equal to the number of rows in X. Now, y and X can be passed to another function.
+
+## 7.4 Four basic functions of probability distributions
+
+Some functions are closely related to each other, which is suggested by the fact that their function names differ only by one or two letters (as we just saw with the functions in the dplyr and plyr R packages). The most common example of a group of functions is the four that (typically) are defined for each probability distribution. These four functions prefix a r, a d, a p, or a q onto a common stub to compose the function name. We will use the example of the normal distribution, so stub is "norm" in this case.
+
+- The rstub function generates random variables from the distribution that stub is an abbreviation form. Its first argument is n, which is the number of random draws to generate, and its subsequent arguments (which may or may not have default values) are the parameters for that distribution.
+
+```{r, comment=NA}
+x <- sort(rnorm(999, mean = -2, sd = 3)) # often useful to sort random numbers
+```
+
+- The dstub function evaluates the density (or mass, in the case of a discrete random variable) function. Its first argument is typically named x which is a numeric scalar or vector of points, followed by the parameters for that distribution
+
+```{r, comment=NA}
+d <- dnorm(x, mean = -2, sd = 3)
+plot(x, d, type = "l", xlab = "Random Variable", ylab = "Density", las = 1)
+```
+
+- The pstub function evaluates the cumulative density (or mass, in the case of a discrete random variable). Its first argument is typically named q which is a numeric scalar or vector of points, followed by the parameters for that distibution
+
+```{r, comment=NA}
+p <- pnorm(x, mean = -2, sd = 3)
+plot(x, p, type = "l", xlab = "Random Variable", ylab = "Cumulative Density", las = 1)
+```
+
+- The qstub function evaluates the quantile function. Its first argument is typically named p which is a numeric scalar or vector between 0  and 1 , followed by the parameters for that function
+
+```{r, comment=NA}
+q <- qnorm(p, mean = -2, sd = 3)
+all.equal(q, x)
+plot(p, q, type = "l", xlab = "Proportion", ylab = "Quantile")
+```
+
+The distribution stubs that come with R are as follows
+
+    beta binom cauchy chisq exp f gamma geom hyper lnorm logis nbinom norm pois signrank t unif weibull wilcox
+
+But there are many more distributions in contributed packages that follow the same conventions. See the "Distributions" Task View for more information.
+
+## 7.5 Making simple plots
+
+In the section on the Four basic functions of probability distributions, we illustrated how to plot probability distributions and plots were briefly mentioned in the section on getting the Plots tab of the Miscellaneous panel. In this section, we go into a little more detail about making plots.
+
+First, the plot.default function - which is called by the more commonly-used plot function - is the main function for base graphics (there are a few other graphics schemes, such as [lattice]). Its first argument is x, which is usually a vector of values for the horizontal axis and its second argument is y, which is usually a vector of values for the vertical axis. Alternatively, x can be a named list with elements x and y, in which case the y argument to plot.default can be omitted. The third argument is type, which indicates what type of plot to draw. By default, this argument is p for "points", but can also be l for "lines", b for "both" points and lines, c for empty "circles"" joined by lines, s and S for stair "steps"" (relative to the horizontal and vertical axes respectively), h for "histogramish" vertical lines with points at the top, and the surprisingly-useful n for "not" plotting anything at all (but setting up the axes, etc.). The xlim and ylim arguments are numeric vectors of length two that indicate the lower and upper limits of the horizontal and vertical axes respectively. By default, both xlim and ylim are NULL, in which case R will choose limits that span the range of the input. The xlab and ylab arguments are character strings that label the horizontal and vertical axes respectively. The axes argument is TRUE by default (indicating the axes are drawn), but it is sometimes useful to set it to FALSE and then add axes to the plot with the axis function. The frame.plot argument is also FALSE by default, which if TRUE will draw a box around the plot and thereby aggrevate many people.
+
+There are many "graphical parameters" that are documented in the help page for par, but often can be passed through plot and similar functions. These are col, which indicates the color of the lines or points being plotted. Colors can be specified by integer values from 1  to 8  or by character string or by a variety of other conventions. The eight colors that can be specified by integer are
+
+          [,1]     
+     [1,] "black"  
+     [2,] "red"    
+     [3,] "green3" 
+     [4,] "blue"   
+     [5,] "cyan"   
+     [6,] "magenta"
+     [7,] "yellow" 
+     [8,] "gray"
+
+Other colors that can be specified by name but not by integer can be found by executing
+
+```{r, comment=NA}
+colors()
+```
+
+Also, it is possible to pass a vector of colors to col in order to plot different points in different colors for example.
+
+The pch argument indicates the plotting character. The myriad of options is best visualized by executing
+
+```{r, comment=NA}
+example(points)
+```
+
+The ever-popular cex argument is short for "character expansion" (which defaults to 1) but can be specified to rescale the size of everything in the plot. A more targeted approach is to specify cex.axis, cex.lab, etc. to rescale only the axes, axis labels, etc.
+
+The lty and lwd arguments specify the type of line and its width. The former can also be specified by integer or character string. These options are documented fully under the help page for par but briefly are 1  for a solid line, 2  for a dashed line, 3  for a dotted line, and other numbers for other types of lines that are even harder to distinguish without squinting.
+
+A couple of non-default arguments that we like to set are las = 1, which causes the numbers next to the axis ticks to always be horizontal and mar = c(5,4,1,1) + .1, which indicates the number of lines to reserve for the margins of the plot. For the bottom and the left respectively, 5  and 4  are the minimum number of margins of lines needed to read the axis labels clearly, but the top and right margins are usually blank and thus do not need as much space as R gives them by default.
+
+To add lines or points to an existing plot, we call the lines and / or points functions respectively. These take essentially the same arguments as plot.default but omit the arguments for the limits, axis labels, and other things to the "outsides" of the plot that have already been established by the initial call to plot.default. Sometimes, there are so many points that the plot looks cluttered, in which case it can be useful to utilize the smoothScatter function.
+
+The legend function adds a legend to the plot. Its first argument can be a horizontal coordinate or can be character string like "topleft", "bottom", etc. to specify where to put the legend (in which case the y argument can be omitted). The legend function has a legend argument, which is a vector of character strings or expressions indicating what words or symbols to put next to the points or lines in the legend. Otherwise, the legend function has many of the same arguments as plot.default.
+
+Putting this all together, we can make a somewhat advanced plot by doing
+
+```{r, comment=NA}
+p <- seq(from = 0, to = 1, length.out = 100)
+x1 <- qnorm(p)
+par(mar = c(5, 4, 1, 1) + 0.1)
+plot(x1, dnorm(x1), type = "l", axes = FALSE, xlim = c(-5, 5), 
+     xlab = "Random variable", ylab = "Density")
+axis(1, at = -5:5)
+axis(2, las = 1)
+x2 <- qnorm(p, sd = 2)
+points(x2, dnorm(x2, sd = 2), pch = ".", col = "red")
+legend("topleft", legend = c(expression(sigma == 1), expression(sigma == 2)),
+       lty = c(1, NA), pch = c(NA, "."), col = c("black", "red"), 
+       bg = "lightgray", cex = 0.8, title = expression(N(mu == 0,sigma)))
+```
+
+There are some other occassionally-useful plotting functions with intuitive names such as segments, arrows, rect, polygon, etc. These have similar arguments to those in the functions illustrated above.
+
+## 7.6 User-defined functions
+
+R also allows you to define your own function. Given that there are already more built-in functions that anyone could possibly remember, you may be wondering what utility user-defined functions have. The answer is that they are extremely useful and almost always necessary. You want to write your own functions especially when the result is a composition of various built-in functions.
+
+For example, suppose you want to calculate the ratio of the 90th  percentile of income to the 10th  percentile, and perhaps you want to do so for a variety of countries and / or time periods. The quantile function is appropriate for this purpose and returns the number such that the proportion of data that is less than or equal to that number is given by its probs argument. You can write your own function to calculate the ratio of the 90th  percentile to the 10th  percentile with
+
+```{r, comment=NA}
+ratio90_10 <- function(income) {
+  upper <- quantile(income, probs = 0.9, na.rm = TRUE)
+  lower <- quantile(income, probs = 0.1, na.rm = TRUE)
+  return(upper / lower)
+}
+```
+
+Recall what was said in the subsection on Argument names vs. symbol names. The argument name income is used internally to refer to the set of numbers that are passed to it. There need not be a symbol called income in the global environment, and even if there is, it will not be used unless it is passed by position or by name to the ratio90_10 function.
+
+When writing functions, you should push yourself to make them as general as possible. That way, you may not need to change them when you find the need to use them later. The ratio90_10 function is limited in several ways. First, it does not check whether the input is numeric. Second, it hard-codes the 90th  and 10th  percentiles when it would be just as plausible to use other thresholds. Finally, naming the (first) argument income is a bit misleading because this function could be used for all kinds of variables that are not necessarily "income". Thus, it might be more appropriate to give it a less-specific argument name like x.
+
+```{r, comment=NA}
+q_ratio <- function(x, lower, upper) {
+  stopifnot(is.numeric(x))
+  stopifnot(is.numeric(lower), lower >= 0, lower <  1)
+  stopifnot(is.numeric(upper), upper >  0, upper <= 1, lower < upper)
+  return( quantile(x, probs = upper, na.rm = TRUE) / 
+          quantile(x, probs = lower, na.rm = TRUE) )
+}
+#q_ratio(income, lower = 0.1, upper = 0.9) # now pass income to your function
+```
+
+The q\_ratio function corrects these deficiencies. The stopifnot function is very useful and interrupts the function if any of its arguments evaluates to FALSE. Hence, the q\_ratio function would be interrupted, with the corresponding error message, if any of the input were not numeric, if the lower percentile were less than zero, if the upper percentile were greater than one, if lower were greater than or equal to upper, etc.
+
+It is generally not a good idea to create a user-defined function that has the same name as an preexisting function because in some cases the user-defined function will be called and in other cases the preexisting function will be called. To check if there is already a function with some name, just type the function name in the Console panel and press the Tab key. Similarly, it is not ideal to assign to a symbol name that is the same as a function name, although R can distinguish the two. For example,
+
+```{r, comment=NA}
+mean <- mean(x) # bad
+mean
+rm(mean)
+x_mean <- mean(x) # good
+x_mean
+```
+
+## 7.7 Matrix stuff
+
+R permits vectors and matrices - in the computer science sense of contiguity - of essentially anything, such as vectors of character strings or functions. In this section, we are only concerned with vectors of numbers, which have a specific geometric interpretation and an associated linear algebra.
+
+R also permits "elementwise" operations, which can be convenient but are not a part of linear algebra. For example,
+
+```{r, comment=NA}
+A <- matrix(1:6, nrow = 3, ncol = 2)
+B <- matrix(7:12, nrow = 3, ncol = 2)
+A
+B
+C <- A*B # note elementwise multiplication
+C
+```
+
+Here C is a valid R object, even though A and B are not conformable for matrix multiplication in the linear algebra sense. In addition, R has "recycling" rules that can be convenient but are also dangerous because they allow elements of a vector or matrix to be reused when performing elementwise operations For example,
+
+```{r, comment=NA}
+A
+13:15*A
+```
+
+multiplies each column of A by the corresponding element of the vector c(13, 14, 15) to form a 3-by-2  matrix. Note that by default, vectors in R are considered column vectors, even though the print method for a vector shows them horizontally on the screen, unless they are too long and have to be wrapped onto subsequent lines. Although also not part of linear algebra, the apply() function can be used to apply a function to each row or column of a matrix.
+
+These elementwise operations contrast with genuine linear algebra. In R, the operator for a vector (or matrix) product is %*%, which could be used as
+
+```{r, comment=NA}
+A[ ,1]
+t(13:15) %*% A[ ,1]
+```
+
+Even though 86 is a single number, it is represented as a 1×1  matrix in R, which is usually unproblematic. We also utilized the transposition function t() to convert a column vector to a row vector so that it is conformable for multiplication with the column vector A[ , 1]. However, R is lenient about conformability of vectors for multiplication and assumes that an attempt to multiply two column vectors is actually an attempt to obtain their vector product. Thus,
+
+```{r, comment=NA}
+13:15 %*% A[ , 1]
+```
+
+produces the same answer, even though it would be clearer to explicitly make the vectors conformable for multiplication.
+
+Matrix multiplication works the same way as vector multiplication, as in
+
+```{r, comment=NA}
+A
+B
+A %*% t(B)
+```
+
+In addition, there are functions tcrossprod(A, B) and crossprod(B, A) that yield AB^T and B^TA 
+
+```{r, comment=NA}
+tcrossprod(A, B)
+crossprod(B, A)
+```
+
+If passed only one argument, these two functions post or pre-multiply a matrix by its own transpose, as in
+
+```{r, comment=NA}
+tcrossprod(A)
+C <- crossprod(B)
+C
+```
+
+which can be faster than doing something equivalent like t(B) %*% B because crossprod(B) avoids recalculating duplicative elements of a symmetric matrix.
+
+The det() and solve() functions calculate the determinant and inverse of a square matrix.
+
+```{r, comment=NA}
+det(C)
+C_inv <- solve(C)
+C_inv
+1/det(C)*matrix(c(C[2, 2], -C[1, 2], -C[2, 1], C[1, 1]), 
+                  nrow = 2, ncol = 2, byrow = TRUE)
+C_inv %*% C
+```
+
+As can be seen in the last line, due to rounding errors, the off-diagonal elements may not be exactly zero even though algebraicly any matrix pre-multiplied by its inverse is the identity matrix. Neither det nor solve are the best way to approach a problem numerically but these functions are adequate for G4065. The solve function gets its name because it solves for x  in the linear system of equations Ax = B , but by default B is taken to be the identity matrix that is the same size as A .
+
+Occassionally, you may need to utilize the Kronecker product, which is implemented via the kronecker() function. For example,
+
+```{r, comment=NA}
+A
+B
+kronecker(A, B)
+rbind(cbind(A[1, 1]*B, A[1, 2]*B),
+      cbind(A[2, 1]*B, A[2, 2]*B),
+      cbind(A[3, 1]*B, A[3, 2]*B))
+```
+
+which also illustrates the use of the rbind() and cbind() functions to bind vectors or matrices together, either rowwise or columnwise.
+
+Basic functions for for the multivariate normal (and Student t) distribution are provided in the mvtnorm package
+
+```{r, comment=NA}
+suppressMessages(stopifnot(require(mvtnorm)))
+X <- rmvnorm(10, sigma = C)
+X
+sum(dmvnorm(X, sigma = C, log = TRUE))
+```
+
+# 8 Bayesian R Packages
+
+Coming soon.

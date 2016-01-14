@@ -1,0 +1,73 @@
+---
+title: "graph-based-circle-packing"
+author: "Robert A. Stevens"
+date: "Tuesday, August 04, 2015"
+output: html_document
+---
+
+http://lastresortsoftware.blogspot.com/2015/07/graph-based-circle-packing.html
+
+MONDAY, JULY 27, 2015
+
+# Graph-based circle packing
+
+The previous two posts showed examples of a simple circle packing algorithm using the packcircles package (available from CRAN and GitHub). The algorithm involved iterative pair-repulsion to jiggle the circles until (hopefully) a non-overlapping arrangement emerged. In this post we'll look an alternative approach.
+
+An algorithm to find an arrangement of circles satisfying a prior specification of circle sizes and tangencies was described by Collins and Stephenson in their 2003 paper in Computation Geometry Theory and Applications. A version of their algorithm was implemented in Python by David Eppstein as part of his PADS library (see CirclePack.py). I've now ported David's version to R/Rcpp and included it in the packcircles package.
+
+In the figure below, the graph on the left represents the desired pattern of circle tangencies: e.g. circle 7 should touch all of, and only, circles 1, 2, 6 and 8. Circles 5, 7, 8 and 9 are internal, while the remaining circles are external. The plot on the right shows an arrangement of circles which conforms to the input graph.
+
+The packcircles package provides an experimental version of the algorithm via the function circleGraphLayout (see also the underlying C++ sources on GitHub). To use it, first encode the graph of tangencies as a list of vectors:
+
+```{r}
+library(packcircles)
+library(ggplot2)
+
+# List of tangencies. Vector elements are circle IDs.
+# The first element in each vector is an internal circle
+# and the subsequent elements are its neighbours.
+internal <- list(
+  c(9, 4, 5, 6, 10, 11),
+  c(5, 4, 8, 6, 9),
+  c(8, 3, 2, 7, 6, 5, 4),
+  c(7, 8, 2, 1, 6)
+)
+```
+
+Next, specify the sizes of all external circles:
+
+```{r}
+# External circle radii (constant for this example)
+external <- data.frame(id = c(1, 2, 3, 4, 6, 10, 11), radius = 10.0)
+```
+
+Note that the sizes of the internal circles will be derived by the algorithm.
+
+Now, pass these two objects to the circleGraphLayout function which will attempt to find a corresponding arrangement of circles which can then be plotted:
+
+```{r}
+# Search for a layout. The returned value is a four-column 
+# data.frame: id, x, y, radius.
+layout <- circleGraphLayout(internal, external)
+
+# Generate circle vertices from the layout for plotting
+plotdat <- circlePlotData(layout, xyr.cols = 2:4, id.col = 1)
+
+# Draw the circles annotated with their IDs.
+ggplot() +
+  geom_polygon(data = plotdat, aes(x, y, group = id), fill = NA, colour = "brown") +
+  geom_text(data = layout, aes(x, y, label = id)) +
+  coord_equal() +
+  theme_bw()
+```
+
+The resulting plot should look similar to the arrangement in the figure above.
+
+Beware: the present implementation is a bit brittle. In particular, you have to specify all circle tangencies in a consistent order, either clockwise or anti-clockwise, otherwise the returned layout will either be incomplete, or contain overlapping circles.
+
+The functions in the packcircles package are very basic but should suffice for simple applications. For some much more impressive circle work, both aesthetically and mathematically, visit Ken Stephenson's page, and take a look at this blog post by Danny Calegari.
+
+```{r}
+summary(cars)
+```
+

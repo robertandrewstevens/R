@@ -1,0 +1,253 @@
+---
+title: "linear-regression-alternatives"
+author: "Robert A. Stevens"
+date: "Tuesday, August 04, 2015"
+output: html_document
+---
+
+TODO:  figure out how to get Stan to work -- try on Mac?
+
+http://www.sumsar.net/blog/2015/03/a-speed-comparison-between-flexible-linear-regression-alternatives-in-r/
+
+MAR 25TH, 2015
+
+# A Speed Comparison Between Flexible Linear Regression Alternatives in R
+
+Everybody loves speed comparisons! Is R faster than Python? Is dplyr faster than data.table? Is STAN faster than JAGS? It has been said that speed comparisons are utterly meaningless, and in general I agree, especially when you are comparing apples and oranges which is what I'm going to do here. I'm going to compare a couple of alternatives to lm(), that can be used to run linear regressions in R, but that are more general than lm(). One reason for doing this was to see how much performance you'd loose if you would use one of these tools to run a linear regression (even if you could have used lm()). But as speed comparisons are utterly meaningless, my main reason for blogging about this is just to highlight a couple of tools you can use when you grown out of lm(). The speed comparison was just to lure you in. Let's run!
+
+## The Contenders
+
+Below are the seven different methods that I'm going to compare by using each method to run the same linear regression. If you are just interested in the speed comparisons, just scroll to the bottom of the post. And if you are actually interested in running standard linear regressions as fast as possible in R, then Dirk Eddelbuettel has a nice post that covers just that.
+
+### lm()
+
+This is the baseline, the "default" method for running linear regressions in R. If we have a data.frame d with the following layout:
+
+```{r}
+n <- 30
+n_pred <- 2
+beta <- rnorm(n_pred, 0, 10)
+x <- matrix(rnorm(n * n_pred),nrow = n, ncol = n_pred)
+y <- x %*% beta + rnorm(n, 0, 1)
+data_mat <- cbind(y, x)
+colnames(data_mat) <- c("y", paste0("x", seq_len(n_pred)))
+d <- as.data.frame(data_mat)
+head(d)
+```
+
+Then this would run a linear regression with y as the outcome variable and x1 and x2 as the predictors:
+
+```{r}
+lm(y ~ 1 + x1 + x2, data = d)
+```
+
+### glm()
+
+This is a generalization of lm() that allows you to assume a number of different distributions for the outcome variable, not just the normal distribution as you are stuck with when using lm(). However, if you don't specify any distribution glm() will default to using a normal distribution and will produce output identical to lm():
+
+```{r}
+glm(y ~ 1 + x1 + x2, data = d)
+```
+
+### bayesglm()
+
+Found in the arm package, this is a modification of glm that allows you to assume custom prior distributions over the coefficients (instead of the implicit flat priors of glm()). This can be super useful, for example, when you have to deal with perfect separation in logistic regression or when you want to include prior information in the analysis. While there is bayes in the function name, note that bayesglm() does not give you the whole posterior distribution, only point estimates. This is how to run a linear regression with flat priors, which should give similar results as when using lm():
+
+```{r}
+library(arm)
+bayesglm(y ~ 1 + x1 + x2, data = d, prior.scale = Inf, prior.df = Inf)
+```
+
+### nls()
+
+While lm() can only fit linear models, nls() can also be used to fit non-linear models by least squares. For example, you could fit a sine curve to a data set with the following call: nls(y ~ par1 + par2 * sin(par3 + par4 * x )). Notice here that the syntax is a little bit different from lm() as you have to write out both the variables and the parameters. Here is how to run the linear regression:
+
+```{r}
+nls(y ~ intercept + x1*beta1 + x2*beta2, data = d)
+```
+
+### mle2()
+
+In the bblme package we find mle2(), a function for general maximum likelihood estimation. While mle2() can be used to maximize a handcrafted likelihood function, it also has a formula interface which is simple to use, but powerful, and that plays nice with R's built in distributions. Here is how to roll a linear regression:
+
+```{r}
+library(bbmle)
+inits <- list(log_sigma = rnorm(1), intercept = rnorm(1),
+              beta1 = rnorm(1), beta2 = rnorm(1))
+mle2(y ~ dnorm(mean = intercept + x1*beta1 + x2*beta2, sd = exp(log_sigma)),
+     start = inits, data = d)
+```
+
+Note, that we need to explicitly initialize the parameters before the maximization and that we now also need a parameter for the standard deviation. For an even more versatile use of the formula interface for building statistical models, check out the very cool rethinking package by Richard McElreath.
+
+### optim()
+
+Of course, if we want to be really versatile, we can craft our own log-likelihood function to maximized using optim(), also part of base R. This gives us all the options, but there are also more things that can go wrong: We might make mistakes in the model specification and if the search for the optimal parameters is not initialized well the model might not converge at all! A linear regression log-likelihood could look like this:
+
+```{r}
+log_like_fn <- function(par, d) {
+  sigma <- exp(par[1])
+  intercept <- par[2]
+  beta1 <- par[3]
+  beta2 <- par[4]
+  mu <- intercept + d$x1*beta1 + d$x2*beta2
+  sum(dnorm(d$y, mu, sigma, log = TRUE))
+}
+
+inits <- rnorm(4)
+optim(par = inits, fn = log_like_fn, control = list(fnscale = -1), d = d)
+```
+
+As the convergence returned 0 it hopefully worked fine (a 1 indicates non-convergence). The control = list(fnscale = -1) argument is just there to make optim() do maximum likelihood estimation rather than minimum likelihood estimation (which must surely be the worst estimation method ever).
+
+### Stan's optimizing()
+
+Stan is a stand alone program that plays well with R, and that allows you to specify a model in Stan's language which will compile down to very efficient C++ code. Stan was originally built for doing Hamiltonian Monte Carlo, but now also includes an optimizing() function that, like R's optim(), allows you to do maximum likelihood estimation (or maximum a posteriori estimation, if you explicitly included priors in the model definition). Here we need to do a fair bit of work before we can fit a linear regression but what we gain is extreme flexibility in extending this model, would we need to. We have come a long way from lm.
+
+```{r}
+library(rstan)
+
+model_string <- "
+  data {
+   int n;
+   vector[n] y;
+    vector[n] x1;
+    vector[n] x2;
+  }
+
+  parameters {
+    real intercept;
+    real beta1;
+    real beta2;
+    real<lower=0> sigma;
+  }
+
+  model {
+    vector[n] mu;
+    mu <- intercept + x1 * beta1 + x2 * beta2;
+    y ~ normal(mu, sigma);
+  }
+"
+
+data_list <- list(n = nrow(d), y = d$y, x1 = d$x1, x2 = d$x2)
+model <- stan_model(model_code = model_string)
+fit <- optimizing(model, data_list)
+fit
+```
+
+## An Utterly Meaningless Speed Comparison
+
+So, just for fun, here is the speed comparison, first for running a linear regression with 1000 data points and 5 predictors:
+
+This should be taken with a huge heap of salt (which is not too good for your health!). While all these methods produce a result equivalent to a linear regression they do it in different ways, and not necessary in equally good ways, for example, my homemade optim routine is not converging correctly when trying to fit a model with too many predictors. As I have used the standard settings there is surely a multitude of ways in which any of these methods can be made faster. Anyway, here is what happens if we vary the number of predictors and the number of data points:
+
+To make these speed comparisons I used the microbenchmark package, the full script replicating the plots above can be found here. This speed comparison was made on my laptop running R version 3.1.2, on 32 bit Ubuntu 12.04, with an average amount of RAM and a processor that is starting to get a bit tired.
+
+
+```{r}
+library(microbenchmark)
+#library(arm)
+#library(rstan)
+#library(bbmle)
+
+log_post <- function(par, y, x) {
+  sigma <- exp(par[1])
+  intercept <- par[2]
+  beta <- as.matrix(par[-c(1, 2)])
+  mu <- intercept + x %*% beta
+  sum(dnorm(y, mu, sigma, log = TRUE))
+}
+
+model_string <- "
+  data {
+   int n;
+   int n_pred;
+    vector[n] y;
+    matrix[n, n_pred] x;
+  }
+
+  parameters {
+    real intercept;
+    vector[n_pred] beta;
+    real<lower=0> sigma;
+  }
+
+  model {
+   vector[n] mu;
+    mu <- intercept + x * beta;
+   y ~ normal(mu, sigma);
+  }
+"
+
+model <- stan_model(model_code = model_string)
+
+lin_reg_timing <- ddply(expand.grid(n = c(100, 1000, 10000), n_pred = c(1, 5, 10, 50)), 
+                        c("n", "n_pred"),
+                        function(data_params) {
+                          n <- data_params$n
+                          n_pred <- data_params$n_pred
+  
+                          beta <- rnorm(n_pred, 0, 10)
+                          x <- matrix(rnorm(n * n_pred),nrow = n, ncol = n_pred)
+                          y <- x %*% beta + rnorm(n, 0, 1)
+                          data_mat <- cbind(y, x)
+                          colnames(data_mat) <- c("y", paste0("x", seq_len(n_pred)))
+                          data_df <- as.data.frame(data_mat)
+                          y_depends_on_xs <- as.formula(paste0("y ~ 1 +",  
+                                                               paste0("x", seq_len(n_pred), 
+                                                                      collapse = " + ")))
+                          y_depends_on_xs_with_betas <- as.formula(paste0("y ~ intercept +",  
+                                                                          paste0("x", seq_len(n_pred), 
+                                                                                 "* beta", 
+                                                                                 seq_len(n_pred),
+                                                                                 collapse = " + ")))
+                          y_depends_on_xs_with_dist <- as.formula(paste0("y ~ dnorm(mean = intercept +",
+                                                                         paste0("x", 
+                                                                                seq_len(n_pred), 
+                                                                                "* beta", 
+                                                                                seq_len(n_pred),
+                                                                                collapse = " + "), 
+                                                                                ", sd = exp(log_sigma))" ))
+                          inits <- rnorm(2 + n_pred)
+                          named_inits <- as.list(inits)
+                          names(named_inits) <- c("log_sigma", "intercept", paste0("beta", seq_len(n_pred)))
+                          data_list <- list(n = length(y), n_pred = n_pred, y = as.vector(y), x = x)
+  
+                          mb_result <- microbenchmark(unit = "ms", times = 20,
+                                                      lm.fit(cbind(1, x), y),
+                                                      lm(y_depends_on_xs, data = data_df),
+                                                      glm(y_depends_on_xs, data = data_df),
+                                                      nls(y_depends_on_xs_with_betas, data = data_df),
+                                                      optimizing(model, data_list),
+                                                      bayesglm(y_depends_on_xs, data = data_df, 
+                                                               prior.scale=Inf, prior.df=Inf),
+                                                      optim(par = inits, fn = log_post, 
+                                                            control = list(fnscale = -1), y = y, x = x),
+                                                      mle2(y_depends_on_xs_with_dist, 
+                                                           tart = named_inits, data = data_df))
+                          data.frame(method = c("lm.fit", "lm", "glm", "nls", "stan", "bayesglm", 
+                                                "optim", "mle2"), 
+                                     ms = summary(mb_result)$median)
+                        })
+
+lin_reg_timing$method <- factor(lin_reg_timing$method, 
+                                levels = c("lm.fit", "lm", "nls","glm","bayesglm", "stan","optim", "mle2") ,
+                                ordered = TRUE)
+
+facet_labeler <- function(variable, value) {
+  if(variable == "n_pred") {
+    paste(value, "predictors")
+  } else {
+    paste(value, "data points") 
+  }
+}
+
+qplot(method, ms, main = "Time to run a linear regression (1000 data points, 5 predictors)",
+      data = lin_reg_timing[lin_reg_timing$n == 1000 & lin_reg_timing$n_pred == 5, ], log = "y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+qplot(method, ms,data=lin_reg_timing, log = "y", main = "Time to run a linear regression") + 
+  facet_grid(n ~ n_pred, scales = "free", labeller = facet_labeler) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+

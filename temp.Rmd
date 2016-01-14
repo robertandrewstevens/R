@@ -1,0 +1,5 @@
+1. Bits are any kinds of two-valued things, usually described as **0**s and **1**s. Inside the computer,they take forms like a high or low electrical charge, a strong or weak signal, a shiny or dull spot on the surface of a CD.
+2. If you were expecting something like **10010000** here - good call, but read on. R's numbers are not stored as integers.
+3. Actually, 53, because of a trick that can be used to get one bit for free. Lookup the 'IEEE754' format if you are curious about the details.
+4. When you type string values at the console, you'll notice that they will come back with the quotes and backslashes the way you typed them. To get special characters to show properly, you can do **print("a\nb")** - why this works, we will see in a moment.
+5. The bit bucket is supposedly the place where old bits are kept. On some systems, the programmer has to manually empty it now and then. Fortunately, R comes with a fully-automatic bit-recycling system.

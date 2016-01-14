@@ -1,0 +1,138 @@
+---
+title: "R_graph_confidence_intervals"
+author: "Robert A. Stevens"
+date: "Thursday, December 17, 2015"
+output: html_document
+---
+
+# R graph: confidence intervals
+
+http://www.ljzigerell.com/?p=1916
+
+Posted on August 15, 2014 by ljzigerell 
+
+This R lesson is for confidence intervals on point estimates. See here for other lessons.
+Here's the first three lines of code:
+
+```{r}
+pe <- c(2.48, 1.56, 2.96)
+y.axis <- c(1:3)
+plot(pe, y.axis, type = "p", axes = TRUE, pch = 19, xlim = c(1, 4), ylim = c(1, 3))
+```
+
+The first line places 2.48, 1.56, and 2.96 into a vector called "pe" for point estimates; you can call the vector anything that you want, as long as R recognizes the vector name.
+
+The second line sends the integers from 1 to 3 into the vector "y.axis"; instead of **y.axis <- c(1:3)**, you could have written **y.axis <- c(1, 2, 3)** to do the same thing.
+
+The third line plots a graph with **pe** on the x-axis and **y.axis** on the y-axis; **type = "p"** tells R to plot points, **axes = TRUE** tells R to draw axes, **pch = 19** indicates what type of points to draw, **xlim=c(1, 4)** indicates that the x-axis extends from 1 to 4, and **ylim=c(1, 3)** indicates that the y-axis extends from 1 to 3.
+
+Here's the graph so far:
+
+Let's make the points a bit larger by adding **cex = 1.2** to the end of the plot command.
+
+Let's also add a title, using a new line of code: **title(main = "Negative Stereotype Disagreement > 3")**.
+
+```{r}
+plot(pe, y.axis, type = "p", axes = TRUE, pch = 19, xlim = c(1, 4), ylim = c(1, 3), cex = 1.2)
+title(main = "Negative Stereotype Disagreement > 3")
+```
+
+Let's add the 95% confidence interval lines.
+
+```{r}
+plot(pe, y.axis, type = "p", axes = TRUE, pch = 19, xlim = c(1, 4), ylim = c(1, 3), cex = 1.2)
+title(main = "Negative Stereotype Disagreement > 3")
+lower <- c(2.26, 1.17, 2.64)
+upper <- c(2.70, 1.94, 3.28) 
+segments(lower, y.axis, upper, y.axis, lwd = 1.3)
+```
+
+The first line indicates the lower ends of the confidence intervals; the second line indicates the upper ends of the confidence intervals; and the **segments** command draws line segments from the coordinate (lower, y.axis) to the coordinate (upper, y.axis), with **lwd = 1.3** indicating that the line should be slightly thicker than the default.
+
+Here's what we have so far:
+
+Let's replace the x-axis and y-axis. First, change **axes = TRUE** to **axes = FALSE** in the plot command; then add the code **axis(1, at = seq(1, 4, by = 1))** to tell R to draw an axis at the bottom from 1 to 4 with tick marks every 1 unit. Here's what we get:
+
+```{r}
+plot(pe, y.axis, type = "p", axes = FALSE, pch = 19, xlim = c(1, 4), ylim = c(1, 3), cex = 1.2)
+title(main = "Negative Stereotype Disagreement > 3")
+lower <- c(2.26, 1.17, 2.64)
+upper <- c(2.70, 1.94, 3.28) 
+segments(lower, y.axis, upper, y.axis, lwd = 1.3)
+axis(1, at = seq(1, 4, by = 1))
+```
+
+Let's get rid of the "pe" and "y.axis" labels. Add to the plot command: **xlab = ""**, **ylab = ""**. Here's the graph now:
+
+```{r}
+plot(pe, y.axis, type = "p", axes = FALSE, pch = 19, xlim = c(1, 4), ylim = c(1, 3), 
+     cex = 1.2, xlab = "", ylab = "")
+title(main = "Negative Stereotype Disagreement > 3")
+lower <- c(2.26, 1.17, 2.64)
+upper <- c(2.70, 1.94, 3.28) 
+segments(lower, y.axis, upper, y.axis, lwd = 1.3)
+axis(1, at = seq(1, 4, by = 1))
+```
+
+Let's work on the y-axis now:
+
+
+```{r}
+plot(pe, y.axis, type = "p", axes = FALSE, pch = 19, xlim = c(1, 4), ylim = c(1, 3), 
+     cex = 1.2, xlab = "", ylab = "")
+title(main = "Negative Stereotype Disagreement > 3")
+lower <- c(2.26, 1.17, 2.64)
+upper <- c(2.70, 1.94, 3.28) 
+segments(lower, y.axis, upper, y.axis, lwd = 1.3)
+axis(1, at = seq(1, 4, by = 1))
+names <- c("Baseline", "Black\nFamily", "Affirmative\nAction")
+axis(2, at = y.axis, label = names)
+```
+
+The first line sends three phrases to the vector "names"; the \n in the phrases tells R to place "Family" and "Action" on a new line. Here's the result:
+ 
+Let's make the y-axis labels perpendicular to the y-axis by adding **las = 2** to the **axis(2** line. [**las = 0** would keep the labels parallel.]
+
+```{r}
+plot(pe, y.axis, type = "p", axes = FALSE, pch = 19, xlim = c(1, 4), ylim = c(1, 3), 
+     cex = 1.2, xlab = "", ylab = "")
+title(main = "Negative Stereotype Disagreement > 3")
+lower <- c(2.26, 1.17, 2.64)
+upper <- c(2.70, 1.94, 3.28) 
+segments(lower, y.axis, upper, y.axis, lwd = 1.3)
+axis(1, at = seq(1, 4, by = 1))
+names <- c("Baseline", "Black\nFamily", "Affirmative\nAction")
+axis(2, at = y.axis, label = names, las = 2)
+```
+
+Now we need to add a little more space to the left of the graph to see the y-axis labels. Add **par(mar=c(4, 6, 2, 0))** above the plot command to tell R to make the margins 4, 6, 2, and 0 for the bottom, left, top, and right margins.
+
+```{r}
+par(mar = c(4, 6, 2, 0))
+plot(pe, y.axis, type = "p", axes = FALSE, pch = 19, xlim = c(1, 4), ylim = c(1, 3), 
+     cex = 1.2, xlab = "", ylab = "")
+title(main = "Negative Stereotype Disagreement > 3")
+lower <- c(2.26, 1.17, 2.64)
+upper <- c(2.70, 1.94, 3.28) 
+segments(lower, y.axis, upper, y.axis, lwd = 1.3)
+axis(1, at = seq(1, 4, by = 1))
+names <- c("Baseline", "Black\nFamily", "Affirmative\nAction")
+axis(2, at = y.axis, label = names, las = 2)
+```
+
+Let's say that I decided that I prefer to have the baseline on top of the graph and Affirmative Action at the bottom of the graph. I could use the **rev()** function to reverse the order of the points in the **plot**, **segments**, and **axis** functions to get:
+
+```{r}
+par(mar = c(4, 6, 2, 0))
+plot(rev(pe), y.axis, type = "p", axes = FALSE, pch = 19, xlim = c(1, 4), ylim = c(1, 3),
+     cex = 1.2, xlab = "", ylab = "")
+title(main = "Negative Stereotype Disagreement > 3")
+lower <- c(2.26, 1.17, 2.64)
+upper <- c(2.70, 1.94, 3.28) 
+segments(rev(lower), y.axis, rev(upper), y.axis, lwd = 1.3)
+axis(1, at = seq(1, 4, by = 1))
+names <- c("Baseline", "Black\nFamily", "Affirmative\nAction")
+axis(2, at = y.axis, label = rev(names), las = 2)
+```
+
+Here is the whole code for the above graph. By the way, the graph above can be found in my article on social desirability in the list experiment, "You Wouldn't Like Me When I'm Angry."
