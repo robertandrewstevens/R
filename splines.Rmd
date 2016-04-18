@@ -1,0 +1,155 @@
+---
+title: "splines"
+author: "Robert A. Stevens"
+date: "April 12, 2016"
+output: html_document
+---
+
+http://freakonometrics.hypotheses.org/47681
+
+# REGRESSION WITH SPLINES: SHOULD WE CARE ABOUT NON-SIGNIFICANT COMPONENTS?
+
+04/01/2016 ARTHUR CHARPENTIER  12 COMMENTS
+
+Following the course of this morning, I got a very interesting question from a student of mine. The question was about having non-significant components in a splineregression.  Should we consider a model with a small number of knots and all components significant, or one with a (much) larger number of knots, and a lot of knots non-significant?
+
+My initial intuition was to prefer the second alternative, like in autoregressive models in R. When we fit an AR(6) model, it’s not really a big deal if most coefficients are not significant (but the last one). It’s won’t affect much the forecast. So here, it might be the same. With a larger number of knots, we should be able to capture small bumps that we’ll never capture with a smaller number.
+
+Here is what a have with a small number of knots, and cubic splines
+
+and with a larger number of knots
+
+In order to understand what’s going on, consider a simple model, with the two splines above, in red
+
+```{r, comment=NA}
+set.seed(1)
+library(splines)
+x <- seq(0, 1, by = 0.01)
+v <- bs(x, 10)
+x2 <- v[ , 2]
+x10 <- v[ , 10]
+set.seed(1)
+y <- 1 + 3*x2 + 5*x10 + rnorm(length(x))/4
+y_test <- 1 + 3*x2 + 5*x10 + rnorm(length(x))/4
+```
+
+Note that here I have generated two sets of data, one to train a model, and one to test it.  Here, the data looks like that
+
+```{r, comment=NA}
+plot(x, y)
+```
+
+It is based on two splines,
+
+```{r, comment=NA}
+plot(x, y)
+lines(x, 1 + 3*x2 + 5*x10)
+```
+
+If we use a spline model with 10 degrees of freedom, we get
+
+```{r, comment=NA}
+df <- data.frame(x, y)
+reg <- lm(y ~ bs(x, 10), data = df)
+summary(reg)
+```
+
+which makes sense, from what we have generated. Indeed, most of the components are not significant, but the second and the tenth. We can actually test that all those components are null (at the same time)
+
+```{r, comment=NA}
+A <- matrix(0, 8, 11)
+colnames(A) <- names(coefficients(reg))
+A[1, 2] <- A[2, 4] <- A[3, 5] <- A[4, 6] <- A[5, 7] <- A[6, 8] <- A[7, 9] <- A[8, 10] <- 1
+b <- rep(0, 8)
+library(car)
+linearHypothesis(reg, A, b)
+```
+
+and yes, those coefficients are not significant.
+
+```{r, comment=NA}
+yp10 <- predict(reg)
+plot(x, y)
+lines(x, 1 + 3*x2 + 5*x10)
+lines(df$x, yp10, col = "red")
+```
+
+The red curve is not far away from the black one (the simulated model, when the noise is removed).
+
+Now, if we compare with a spline regression with three degrees of freedom
+
+```{r, comment=NA}
+reg <- lm(y ~ bs(x), data = df)
+yp3 <- predict(reg)
+plot(x, y)
+lines(x, 1 + 3*x2 + 5*x10)
+lines(df$x, yp10, col = "red")
+lines(df$x, yp3, col = "blue", lwd = 3)
+summary(reg)
+```
+
+This time, all components are significant, but the quality of fit is rather poor, isn’t it?
+
+What is the best thing we can do? Let us fit different models. Say consider 8 degrees of freedom, but keep only 1, or 2, or 3, etc components. Then get a prediction on the test-dataset we have, and see which model has the smallest variance,
+
+```{r, comment=NA}
+library(leaps)
+me <- 1e9
+ERR <- matrix(NA, 15, 15)
+for(k in 4:15) {
+  bsX <- bs(df$x, k)
+  dfX <- data.frame(y = df$y, bsX)
+  reg <- lm(y ~ ., data = dfX)
+  W <- leaps(bsX, df$y, method = "Cp", nbest = 1)$which
+  for(i in 1:k) {
+    dfXi <- data.frame(y = df$y, bsX[ ,W[i, ]])
+    reg <- lm(y ~ ., data = dfXi)
+    dfXi_s <- data.frame(y = y_test, bsX[ , W[i, ]])
+    names(dfXi_s) <- c("y", names(coefficients(reg))[-1])
+    erreur <- dfXi_s$y - predict(reg, newdata = dfXi_s)
+    ERR[k, i] <- sum(erreur^2)
+    if(ERR[k, i] <= me) {
+      LOC <- c(k, i)
+      me <- ERR[k, i]
+    }
+  }
+}
+```
+
+The best model is when we keep the ten best components, out of 11 degrees of freedom
+
+```{r, comment=NA}
+LOC
+```
+
+More specifically,
+
+```{r, comment=NA}
+bsX <- bs(df$x, LOC[1])
+W <- leaps(bsX, df$y, method = "Cp", nbest = 1)$which
+dfXi <- data.frame(y = df$y, bsX[ , W[LOC[2], ]])
+reg <- lm(y ~ ., data = dfXi)
+ypopt <- predict(reg)
+plot(x, y)
+lines(x, 1 + 3*x2 + 5*x10)
+lines(df$x, yp10, col = "red")
+lines(df$x, yp3, col = "blue", lwd = 3)
+lines(df$x, ypopt, col = "purple")
+```
+
+The best model here is one with more degrees of freedom than the one we used to generate the data,
+
+Actually, if we use 10 degrees of freedom, but keep only the best two components, we get something rather close
+
+```{r, comment=NA}
+bsX <- bs(df$x, 10)
+W <- leaps(bsX, df$y, method = "Cp", nbest = 1)$which
+dfXi <- data.frame(y = df$y, bsX[ , W[2, ]])
+reg <- lm(y ~ ., data = dfXi)
+ypopt <- predict(reg)
+plot(x, y)
+lines(x, 1 + 3*x2 + 5*x10)
+lines(df$x, ypopt, col = "red", lwd = 3)
+```
+
+So, it looks like having a lot of non significant components in a spline regression is not a major issue. And reducing the degrees of freedom is clearly a bad option.
