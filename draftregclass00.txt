@@ -1,0 +1,339 @@
+From Linear Models to Machine Learning: Regression and Classification, with R Examples
+
+Norman Matloff University of California, Davis
+
+Contents
+
+Preface
+
+1 Setting the Stage 1
+1.1 Example: Predicting Bike-Sharing Activity 
+1.2 Example: Body fat Prediction 
+1.3 Optimal Prediction
+1.4 A Note About E(), Samples and Populations 
+1.5 Example: Do Baseball Players Gain Weight As They Age? 
+1.5.1 Prediction vs. Description
+1.5.2 A First Estimator, Using a Nonparametric Approach 
+1.5.3 A Possibly Better Estimator, Using a Linear Model 
+1.6 Parametric vs. NonparametricModels 
+1.7 Several Predictor Variables 
+1.7.1 Multi-predictor Linear Models 
+1.7.1.1 Estimation of Coefficients 
+1.7.1.2 The Description Goal 
+1.7.2 Nonparametric Regression Estimation: k-NN 
+1.7.3 Measures of Nearness 
+1.7.4 TheCode
+1.8 After Fitting a Model, How Do We Use It for Prediction? 
+1.8.1 Parametric Settings 
+1.8.2 Nonparametric Settings  
+1.9 Overfitting, Bias and Variance 
+1.9.1 Intuition
+1.9.2 Rough Rule of Thumb
+1.9.3 Cross-Validation 
+1.9.4 Linear Model Case
+1.9.4.1 The Code
+1.9.4.2 Matrix Partitioning  
+1.9.4.3 Applying the Code
+1.9.5 k-NN Case 
+1.9.6 Choosing the Partition Sizes 
+1.10 Example: Bike-Sharing Data  
+1.10.1 Linear Modeling of μ(t)  
+1.10.2 Nonparametric Analysis
+1.11 Interaction Terms
+1.11.1 Example: Salaries of Female Programmers and Engineers
+1.12 Classification Techniques 
+1.12.1 It’s a Regression Problem!
+1.12.2 Example: Bike-SharingData 
+1.13 Mathematical Complements 
+1.13.1 μ(t) Minimizes Mean Squared Prediction Error 
+1.13.2 μ(t) Minimizes the Misclassification Rate 
+1.14 CodeComplements 
+1.14.1 The Functions tapply() and Its Cousins 
+1.15 FunctionDispatch 
+
+2 Linear Regression Models 
+2.1 Notation
+2.2 Random- vs. Fixed-X Cases
+2.3 Least-Squares Estimation 
+2.3.1 Motivation 
+2.3.2 Matrix Formulations
+2.3.3 (2.12) in Matrix Terms
+2.3.4 Using Matrix Operations to Minimize (2.12) 
+2.4 A Closer Look at lm() Output  
+2.4.1 StatisticalInference  
+2.4.2 Assumptions 
+2.5 Unbiasedness and Consistency
+2.5.1 β IsUnbiased 
+2.5.2 Bias As an Issue/Nonissue 
+2.5.3 β IsConsistent 
+2.6 Inference under Homoscedasticity
+2.6.1 Review: Classical Inference on a Single Mean 
+2.6.2 Extension to the Regression Case
+2.6.3 Example: Bike-Sharing Data 
+2.7 Collective Predictive Strength of the X(j) 
+2.7.1 Basic Properties 
+2.7.2 Definition of R2 
+2.7.3 Bias Issues 
+2.7.4 Adjusted-R2 
+2.7.5 The “Leaving-One-Out Method” 
+2.7.5.1 TheCode
+2.7.5.2 Example: Bike-Sharing Data 
+2.7.5.3 Another Use of loom(): the Jackknife 
+2.7.6 Other Measures
+2.7.7 The Verdict
+2.8 Significance Testing vs. Confidence Intervals 
+2.9 Bibliographic Notes
+2.10 Mathematical Complements
+2.10.1 The Geometry of Linear Models 
+2.10.2 Unbiasedness of the Least-Squares Estimator 
+2.10.3 Consistency of the Least-Squares Estimator  
+2.10.4 Biased Nature of S 
+2.10.5 μ(X) and ε Are Uncorrelated 
+2.10.6 Asymptotic (p + 1)-Variate Normality of β 
+2.10.7 Derivation of (3.14)  
+2.10.8 Distortion Due to Transformation 
+
+3 The Assumptions in Practice 
+3.1 Normality Assumption
+3.2 Independence Assumption — Don’t Overlook It 
+3.2.1 Estimation of a Single Mean 
+3.2.2 Estimation of Linear Regression Coefficients 
+3.2.3 What Can Be Done?
+3.2.4 Example: Movie Lens Data 
+3.3 Dropping the Homoscedasticity Assumption  
+3.3.1 Robustness of the Homoscedasticity Assumption 
+3.3.2 Weighted Least Squares 
+3.3.3 A Procedure for Valid Inference
+3.3.4 The Methodology
+3.3.5 Simulation Test
+3.3.6 Example: Bike-Sharing Data 
+3.3.7 Variance-Stabilizing Transformations 
+3.3.8 TheVerdict
+3.4 Bibliographic Notes
+
+4 Nonlinear Models 
+4.1 Example: Enzyme Kinetics Model 
+4.2 Least-Squares Computation 
+4.2.1 The Gauss-Newton Method
+4.2.2 Eickert-White Asymptotic Standard Errors 
+4.2.3 Example: Bike Sharing Data 
+4.2.4 The “Elephant in the Room”: Convergence Issues 
+4.2.5 Example: Eckerle4 NIST Data 
+4.2.6 The Verdict
+4.3 The Generalized Linear Model 
+4.3.1 Definition 
+4.3.2 Example: Poisson Regression  
+4.3.3 GLM Computation 
+4.3.4 R’s glm() Function 
+4.4 GLM: the Logistic Model  
+4.4.1 Motivation 
+4.4.2 Example: Pima Diabetes Data  
+4.4.3 Interpretation of Coefficients 
+4.4.4 The predict() Function
+4.4.5 Linear Boundary  
+4.5 GLM: the PoissonModel 
+
+5 Multiclass Classification Problems 
+5.1 The Key Equations
+5.2 How Do We Use Models for Prediction? 
+5.3 Misclassification Costs 
+5.4 One vs. All or All vs. All?
+5.4.1 R Code  
+5.4.2 Which Is Better? 
+5.4.3 Example: Vertebrae Data  
+5.4.4 Intuition 
+5.4.5 Example: Letter Recognition Data 
+5.4.6 The Verdict
+5.5 The Classical Approach: Fisher Linear Discriminant Analysis 
+5.5.1 Background
+5.5.2 Derivation
+5.5.3 Example: Vertebrae Data 
+5.5.3.1 LDA Code and Results 
+5.5.3.2 Comparison to kNN
+5.5.4 Multinomial Logistic Model
+5.5.5 The Verdict
+5.6 Classification Via Density Estimation 
+5.6.1 Methods for Density Estimation 
+5.6.2 Procedure
+5.7 The Issue of “Unbalanced (and Balanced) Data” 
+5.7.1 Why the Concern Regarding Balance? 
+5.7.2 A Crucial Sampling Issue  
+5.7.2.1 It All Depends on How We Sample 
+5.7.2.2 Remedies
+5.8 Example: Letter Recognition 
+5.9 Mathematical Complements 
+5.9.1 Nonparametric Density Estimation 
+5.10 Bibliographic Notes 
+5.11 Further Exploration: Data, Code and Math Problems 
+
+6 Model Fit: Assessment and Improvement
+6.1 Aims of This Chapter 
+6.2 Methods
+6.3 Notation
+6.4 Goals of Model Fit-Checking 
+6.4.1 Prediction Context 
+6.4.2 DescriptionContext  
+6.4.3 Center vs. Fringes of the Data Set 
+6.5 Example: Currency Data 
+6.6 Overall Measures of Model Fit 
+6.6.1 R-Squared, Revisited
+6.6.2 Plotting Parametric Fit Against Nonparametric One
+6.6.3 Residuals vs. Smoothing
+6.7 Diagnostics Related to Individual Predictors 
+6.7.1 PartialResidualPlots 
+6.7.2 Plotting Nonparametric Fit Against Each Predictor 
+6.7.3 Freqparcoord 
+6.8 Effects of Unusual Observations on Model Fit 
+6.8.1 The influence()Function 
+6.8.1.1 Example: Currency Data 
+6.9 Automated Outlier Resistance
+6.9.1 Median Regression 
+6.9.2 Example: CurrencyData  
+6.10 Example: Vocabulary Acquisition
+6.11 Improving Fit
+6.11.1 Deleting Terms from the Model 
+6.11.2 Adding Polynomial Terms 
+6.11.2.1 Example: Currency Data 
+6.11.2.2 Example: Programmer/Engineer Census Data
+6.12 Classification Settings 
+6.12.1 Example: Pima Diabetes Study
+6.13 Special Note on the Description Goal
+6.14 Mathematical Complements 
+6.14.1 The Hat Matrix  
+6.14.2 Matrix Inverse Update  
+6.14.3 The Median Minimizes Mean Absolute Deviation 
+6.15 Further Exploration: Data, Code and Math Problems 
+
+7 Measuring Factor Effects 
+7.1 Example: Baseball Player Data
+7.2 Simpson’s Paradox  
+7.2.1 Example: UCB Admissions Data (Logit) 
+7.2.2 A Geometric Look  
+7.2.3 The Verdict
+7.3 Comparing Groups in the Presence of Covariates 
+7.3.1 ANCOVA
+7.3.2 Example: Programmer/Engineer 2000 Census Data
+7.3.3 Answering Other Subgroup Questions 
+7.4 Unobserved Predictor Variables 
+7.4.1 Instrumental Variables (IV) 
+7.4.1.1 The IV Method  
+7.4.1.2 2 Stage Least Squares:
+7.4.1.3 Example: Price Elasticity of Demand 
+7.4.1.4 Multiple Predictors  
+7.4.1.5 The Verdict
+7.4.2 Random Effects Models 
+7.4.2.1 Example: Movie Ratings Data 
+
+8 Shrinkage Estimators 
+
+9 Dimension Reduction 
+
+10 Smoothing-Based Nonparametric Estimation 
+10.1 Kernel Estimation of Regression Functions 
+10.1.1 What the Theory Says 
+10.2 Choosing the Degree of Smoothing 
+10.3 Bias Issues  
+10.4 Convex Regression  
+10.4.1 Empirical Methods
+
+11 Boundary-Based Classification Methods 
+
+12 Regression and Classification in Big Data 
+
+13 Miscellaneous Topics 
+
+Preface
+
+Regression analysis is both one of the oldest branches of statistics, with least-squares analysis having been first proposed way back in 1805, and also one of the newest areas, in the form of the machine learning techniques being vigorously researched today. Not surprisingly, then, there is a vast literature on the subject.
+
+Well, then, why write yet another regression book? Many books are out there already, with titles using words like regression, classification, predictive analytics, machine learning and so on. They are written by authors whom I greatly admire, and whose work I myself have found useful. Yet, I did not feel that any existing books covered the material in a manner that sufficiently provided insight for the practicing data analyst.
+
+Merely including examples with real data is not enough to truly tell the story in a way that will be useful in practice. Few if any books go much beyond presenting the formulas and techniques, and thus the hapless practitioner is largely left to his/her own devices. Too little is said in terms of what the concepts really mean in a practical sense, what can be done with regard to the inevitable imperfections of our models, which techniques are too much the subject of “hype,” and so on.
+
+This book aims to remedy this gaping deficit. It develops the material in a manner that is precisely-stated yet always maintains as its top priority — borrowing from a book title of the late Leo Breiman — “a view toward applications.”
+
+Examples of what is different here:
+
+One of the many ways in which this book is different from all other regression books is its recurring interplay between parametric and nonparametric methods. On the one hand, the book explains why parametric methods can be much more powerful than their nonparametric cousins if a reasonable model can be developed, but on the other hand it shows how to use nonparametric methods effectively in the absence of a good parametric model. The book also shows how nonparametric analysis can help in parametric model assessment. In the chapter on selection of predictor variables (Chapter 9, Dimension Reduction), the relation of number of predictors to sample size is discussed in both parametric and nonparametric realms.
+
+Another example of how this book takes different paths than do others is its treatment of the well-known point that in addition to the vital Prediction goal of regression analysis, there is an equally-important Description goal. The book devotes an entire chapter to the latter (Chapter 7, Measuring Factor Effects). After an in-depth discussion of the interpretation of coefficients in parametric regression models, and a detailed analysis (and even a resolution) of Simpson’s Paradox, the chapter then turns to the problem of comparing groups in the presence of covariates — updating the old analysis of covariance. Again, both parametric and nonparametric regression approaches are presented.
+
+A number of sections in the book are titled, “The Verdict,” suggesting to the practitioner which among various competing methods might be the most useful. Consider for instance the issue of heteroscedasticity, in which the variance of the response variable is non-constant across covariate values. After showing that the effects on statistical inference are perhaps more severe than many realize, the book presents various solutions: Weighted least squares (including nonparametric estimation of weights); the Eickert-White method; and variance-stabilizing transformations. The section titled “The Verdict” then argues for opting for the Eickert-White model if the goal is Description (and ignoring the problem if the goal is Prediction).
+
+Note too that the book aims to take a unified approach to the various aspects — regression and classification, parametric and nonparametric approaches, methodology developed in both the statistics and machine learning communities, and so on. The aforementioned use of nonparametrics to help assess fit in parametric models exemplifies this.
+
+Big Data:
+
+These days there is much talk about Big Data. Though it is far from the case that most data these days is Big Data, on the other hand it is true that things today are indeed quite different from the days of “your father’s regression book.”
+
+Perhaps the most dramatic of these changes is the emergence of data sets with very large numbers of predictor variables p, as a fraction of n, the number of observations. Indeed, for some data sets p >> n, an extremely challenging situation. Chapter 9, Dimension Reduction, covers not only “ordinary” issues of variable selection, but also this important newer type of problem, for which many solutions have been proposed.
+
+A comment on the field of machine learning:
+
+Mention should be made of the fact that this book’s title includes both the word regression and the phrase machine learning.
+
+When China’s Deng Xiaoping was challenged on his then-controversial policy of introducing capitalist ideas to China’s economy, he famously said, “Black cat, white cat, it doesn’t matter as long as it catches mice.” Statisticians and machine learning users should take heed, and this book draws upon both fields, which at core are not really different from each other anyway.
+
+My own view is that machine learning (ML) consists of the development of regression models with the Prediction goal. Typically nonparametric methods are used. Classification models are more common than those for predicting continuous variables, and it is common that more than two classes are involved, sometimes a great many classes. All in all, though, it’s still regression analysis, involving the conditional mean of Y given X (reducing to P(Y = 1|X) in the classification context).
+
+One often-claimed distinction between statistics and ML is that the former is based on the notion of a sample from a population whereas the latter is concerned only with the content of the data itself. But this difference is more perceived than real. The idea of cross-validation is central to ML methods, and since that approach is intended to measure how well one’s model generalizes beyond our own data, it is clear that ML people do think in terms of samples after all.
+
+So, at the end of the day, we all are doing regression analysis, and this book takes this viewpoint.
+
+Intended audience:
+
+This book is aimed at both practicing professionals and use in the classroom. Some minimal background is required (see below), but some readers will have some background in some aspects of the coverage of the book. The book aims to both accessible and valuable to such diversity of readership, following the old advice of Samuel Johnson that an author “should make the new familiar and the familiar new” [1].
+
+Minimal background: The reader must of course be familiar with terms like confidence interval, significance test and normal distribution, and is assumed to have knowledge of basic matrix algebra, along with some experience with R. Most readers will have had at least some prior exposure to regression analysis, but this is not assumed, and the subject is developed from the beginning. Math stat is needed only for readers who wish to pursue the Mathematical Complements sections at the end of most chapters. Appendices provide brief introductions to R, matrices, math stat and statistical miscellany (e.g. the notion of a standard error).
+
+The book can be used as a text at either the undergraduate or graduate level. For the latter, the Mathematical Complements sections would likely be included, whereas for undergraduates they may be either covered lightly or skipped, depending on whether the students have some math stat background.
+
+Chapter outline:
+
+Chapter 1: Setting the Stage: Regression as the conditional mean; parametric and nonparametric prediction models; Prediction and Description goals; classification as a special case of regression; parametric/nonparametric tradeoff; the need for cross-validation analysis.
+
+Chapter 2, The Linear Regression Model: Least-squares estimation; statistical properties; inference methods, including for linear combinations of β; meaning and reliability of R2; departures from the normality and homoscedasticity assumptions.
+
+Chapter 4, Nonlinear Regression Models: Nonlinear modeling and computation; Generalized Linear Model; iteratively reweighted least squares; logistic model, motivations and interpretations; Poisson regression (including overdispersion and application to log-linear model); others.
+
+Chapter 8: Shrinkage Methods: Multicollinearity in linear and nonlinear models; overview of James-Stein concepts; relation to non-full rank models; ridge regression and Tychonov regularization; LASSO and variants.
+
+Chapter 10, Smoothing-Based Nonparametric Estimation: Estimation via k-nearest neighbor; kernel smoothing; choice of smoothing parameter; bias near support boundaries.
+
+Chapter 6, Model Fit Assessment: Checking propriety of both the regression model and ancillary aspects such as homoscedasticity; residual analysis; nonparametric methods as “helpers”; a parallel-coordinates approach.
+
+Chapter 9, Dimension Reduction: Precise discussion of overfitting; relation of the number of variables p to n, the number of data points; extent to which the Curse of Dimensionality is a practical issue; PCA and newer variants; clustering; classical variable-selection techniques, and new ones such as sparsity-based models; possible approaches with very large p.
+
+Chapter 7, Measuring Factor Effects: Description as a goal of regression separate from Prediction; interpretation of coefficients in a linear model, in the presence (and lack of same) of other predictors; Simpson’s Paradox, and a framework for avoiding falling victim to the problem; measurement of treatment effects, for instance those in a hospital quality-of-care example presented in Chapter 1; brief discussion of instrumental variables.
+
+Chapter 11, Boundary-Based Classification Methods: Major nonparametric classification methodologies that essentially boil down to estimating the geometric boundary in X space between predicting Yes (Y = 1) and No (Y = 0); includes methods developed by statisticians (Fisher linear discriminant analysis, CART, random forests), and some developed in the machine learning community, such as support vector machines and neural networks; and brief discussion of bagging and boosting.
+
+Chapter ??: Outlier-Resistant Methods: Leverage; quantile regression; robust regression.
+
+Chapter 13: Miscellaneous Topics: Missing values; multiple inference; etc.
+
+Appendices: Reviews of/quick intros to R and matrix algebra; odds and ends from probability modeling, e.g. iterated expectation and properties of covariance matrices; modeling of samples from populations, standard errors, delta method, etc.
+
+Those who wish to use the book as a course text should find that all their favorite topics are here, just organized differently and presented in a fresh, modern point of view.
+
+There is little material on Bayesian methods (meaning subjective priors, as opposed to empirical Bayes). This is partly due to author interest, but also because the vast majority of R packages for regression and classification do not take a Bayesian approach. However, armed with the solid general insights into predictive statistics that this book hopes to provide, the reader would find it easy to go Bayesian in this area.
+
+Software:
+
+The book also makes use of some of my research results and associated software. The latter is in my package regtools, available from CRAN, GitHub and http://heather.cs.ucdavis.edu/regress.html. Errata lists, suggested data projects and so on may also be obtained there.
+
+In many cases, code is also displayed within the text, so as to make clear exactly what the algorithms are doing.
+
+Thanks
+
+Conversations with a number of people have directly or indirectly enhanced the quality of this book, among them Stuart Ambler, Doug Bates, Frank Harrell, Benjamin Hofner, Michael Kane, Hyunseung Kang, John Mount, Art Owen, Yingkang Xie and Achim Zeileis.
+
+Thanks go to my editor, John Kimmel, for his encouragement and patience, and to the internal reviewers, David Giles and... Of course, I cannot put into words how much I owe to my wonderful wife Gamis and my daughter Laura, both of whom inspire all that I do, including this book project.
+
+A final comment:
+
+My career has evolved quite a bit over the years. I wrote my dissertation in abstract probability theory, but turned my attention to applied statistics soon afterward. I was one of the founders of the Department of Statistics at UC Davis, but a few years later transferred into the new Computer Science Department. Yet my interest in regression has remained constant throughout those decades.
+
+I published my first research papers on regression methodology way back in the 1980s, and the subject has captivated me ever since. My long-held wish has been to write a regression book, and thus one can say this work is 30 years in the making. I hope you find its goals both worthy and attained. Above all, I simply hope you find it an interesting read.
+
+[1] Cited in N. Schenker, “Why Your Involvement Matters, JASA, April 2015.

@@ -1,0 +1,35 @@
+Chapter 10 Smoothing-Based Nonparametric Estimation
+
+In previous chapters, we often made use of k-Nearest Neighbor (kNN) re- gression analysis. This considered a nonparametric approach, because we do not assume any parametric model for the regression function, μ(t) = E(Y |X = t).
+
+In addition, kNN is known as a smoothing method. In taking the average of Y values near the point X = t, we are “smoothing” those values. A very close analogy is that of photo editing software, such as the open-source GNU Image Manipulation Program (GIMP). An image may have some erroneous pixels here and there, so we replace every pixel by the mean of its neighbors, thus “smoothing out” the image. That way we capture the overall trend of the image in that little section.
+
+We might do something a bit more sophisticated, such as using the median neighbor value, rather than the mean. This would likely eliminate stray pixels altogether, although it would likley give a somewhat rougher image.
+
+And that brings up another question: How much smoothing should we do, i.e. how many nearest neighbors should we use? The more neighbors we use, the smoother our image — but the more we lose some of the fine details of an image. In an image of a face, for instance, if our neighborhood of an eye is so large that it also includes the chin, then we’ve homogenized the entire face, and have a useless image (unless we are trying to hide the person’s identity!). Too little smoothing, on the other hand, will mean that those rogue pixels may still stand out.
+
+So, we wish to find a “happy medium” value for our number of neighbors. This is easier said then done, and we will look into this in some detail in this chapter.
+
+We will also look at variations of kNN, such as kernel methods. These are in a sense the opposite of kNN. The latter looks at a fixed number of neighbors, but the radius of the neighborhood is random, due to our having a random sample from a population. With kernel-based estimation, we fix the radius of the neighborhood, which means the number of neighbors will be random.
+
+In Chapter 11, we will study another kind of nonparametric regression anal- ysis, not smoothing-based. Actually, we will refer to it as quasi-parametric rather than nonparametric, but that can wait. Let’s take a look at smooth- ing methods now.
+
+10.1 Kernel Estimation of Regression Func- tions
+
+WE COVER THIS BECAUSE (A) IT IS ANOTHER WIDELY USED TECH, AND (B) IT IS EASIER TO TREAT MATHEMATICALLY
+
+10.1.1 What the Theory Says
+
+10.2 Choosing the Degree of Smoothing
+
+XVAL, PLUGIN ETC.a
+
+10.3 Bias Issues
+
+LINEAR SMOOTHING, LOESS ETC.
+
+10.4 Convex Regression
+
+MAYBE
+
+10.4.1 Empirical Methods

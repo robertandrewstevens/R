@@ -1,0 +1,755 @@
+Chapter 2
+Linear Regression Models
+In this chapter we go into the details of linear models. Let’s first set some notation, to be used here and in the succeeding chapters.
+2.1 Notation
+Let Y be our response variable, and let X = (X(1), X(2), ..., X(p)))′ de- note the vector of our p predictor variables. Using our weight/height/age baseball player example from Chapter 1 as our running example here, we would have p = 2, and Y , X(1) and X(2) would be weight, height and age, respectively.
+Our sample consists of n data points, X1, X2, ..., Xn, each a p-element pre- dictor vector, and Y1, Y2, ..., Yn, associated scalars. In the baseball example, n was 1015. Also, the third player had height 72, was of age 30.78, and weighed 210. So,
+and
+􏰅 72􏰆 X3 = 30.78
+Y3 = 210 43
+(2.1)
+(2.2)
+￼44 CHAPTER 2. LINEAR REGRESSION MODELS
+Write the Xi in terms of their components:
+Xi =(X(1),...,X(p))′ (2.3)
+X = (X(1), ..., X(p))′ (2.4) So, again using the baseball player example, the height, age and weight of
+the third player would be X(1), X(2) and Y , respectively. 333
+And just one more piece of notation: We sometimes will need to augment a vector with a 1 element at the top, such as we did in (1.9). Our notation for this will consist of a tilde above the symbol,
+For instance,
+So, our linear model is, for a p-element vector t = (t1, ..., tp)′, μ(t)=β0+β1 t1+....+βp tp =􏰯t′ β
+In the baseball example, with both height and weight as predictors:
+μ((height,age) = β0 + β1 height + β2 age  β0 
+= (1, height, age)′ β1 β2
+2.2 Random- vs. Fixed-X Cases
+ii
+1 􏰰
+X3 = 72 30.78
+(2.5)
+(2.6)
+(2.7) (2.8)
+We will usually consider the Xi and Yi to be random samples from some population, so that (X1,Y1),...,(Xn,Yn) are independent and identically distributed (i.i.d.) according to the population. This is a random-X setting, meaning that both the Xi and Yi are random. There are some situations in which the X-values are fixed by design, known as a fixed-X setting. This might be the case in chemistry research, in which we decide in advance to perform experiments at specific levels of concentration of some chemicals.
+
+￼2.3. LEAST-SQUARES ESTIMATION 45
+2.3 Least-Squares Estimation
+Linear regression analysis is sometimes called least-squares estimation. Let’s first look at how this evolved.
+2.3.1 Motivation
+As noted in Section 1.13, μ(X) minimizes the mean squared prediction error,
+E[(Y − f(X))2] (2.9) over all functions f. And since our assumption is that μ(X) = X􏰯 ′β, we
+can also say that setting b = β minimizes
+E[(Y − X􏰯′b))2] (2.10)
+over all vectors b.
+If W1,...,Wn is a sample from a population having mean EW, the sample analog of EW is W = (􏰖ni=1 Wi)/n; one is the average value of W in the population, and the other is the average value of W in the sample. Let’s write this correspondence as
+EW ←→ W (2.11)
+It will be crucial to always keep in mind the distinction between population values and their sample estimates, especially when we discuss overfitting in detail.
+Similarly, for any fixed b, (2.10) is a population quantity, the average squared error using b for prediction in the population (recall Section 1.4). The population/sample correspondence here is
+￼￼′2 1􏰓n ′2 􏰯n􏰰
+E[(Y − X b)) ] ←→ (Yi − Xi b) (2.12) i=1
+￼where the right-hand side is the the average squared error using b for pre- diction in the sample.
+￼46 CHAPTER 2. LINEAR REGRESSION MODELS
+So, since β is the value of b minimizing (2.10), it is intuitive to take our 􏰭
+estimate, β, to be the value of b that minimizes (2.12). Hence the term least squares.
+To find the minimizing b, we could apply calculus, taking the partial deriva- tives of (2.12) with respect to bi, i = 0,1,...,p, set them to 0 and solve. Fortunately, R’s lm() does all that for us, but it’s good to know what is happening inside. Also, this will give the reader more practice with matrix expressions, which will be important in some parts of the book.
+2.3.2 Matrix Formulations
+Use of matrix notation in linear regression analysis greatly compactifies and clarifies the presentation. You may find that this requires a period of adjustment at first, but it will be well worth the effort.
+Let A denote the n × p matrix of X values in our sample, X′
+􏰰
+ X ′ 
+′
+Xp and let D be the n×1 vector of Y values,
+ Y1  D=Y2 
+ ...  Yn
+In the baseball example, row 3 of A is
+(1, 30.78, 72) and the third element of D is 210.
+A=   ... 
+􏰰
+􏰰
+1
+2
+(2.13)
+(2.14)
+(2.15)
+￼2.3. LEAST-SQUARES ESTIMATION 47
+2.3.3 (2.12) in Matrix Terms
+Our first order of business will be to recast (2.12) as a matrix expression.
+′
+To start, look at the quantities Xi b, i = 1, ..., n there in (2.12). Stringing them together in matrix form as we did in (1.19), we get
+􏰰
+X′ 􏰰
+􏰰
+ X ′ 
+′
+1
+2
+(2.16)
+  b = Ab  ... 
+Xn
+Now consider the n summands in (2.12), before squaring. Stringing them
+into a vector, we get
+D − Ab (2.17) We need just one more step: Recall that for a vector a = (a1,...,ak)′,
+k
+􏰓a2k =a′a (2.18) i=1
+In other words, (2.12) (except for the 1/n factor) is actually
+(D − Ab)′(D − Ab) (2.19)
+Now that we have this in matrix form, we can go about finding the optimal b.
+2.3.4 Using Matrix Operations to Minimize (2.12)
+Remember, we will set β􏰭 to whatever value of b minimizes (2.19). Thus we need to take the derivative of that expression with respect to b, and set the result to 0. There is a theory of matrix derivatives, not covered here, but the point is that the derivative of (2.19) with respect to b can be shown to be
+−2A′(D − Ab) (2.20)
+􏰰
+￼48 CHAPTER 2. LINEAR REGRESSION MODELS
+(Intuitively, this is the multivariate analog of
+∂ (d − ab)2 = −2(d − ab)a
+∂b
+for scalar d, a, b.)
+Setting this to 0, we have
+A′D = A′Ab Solving for b we have our answer:
+β􏰭 = (A′A)−1A′D This is what lm() calculates!1
+2.4 A Closer Look at lm() Output
+(2.21)
+(2.22)
+(2.23)
+￼Since the last section was rather abstract, let’s get our bearings by taking a closer look at the output in the baseball example:2
+> lmout <− lm(mlb$Weight  ̃ mlb$Height + mlb$Age) > summary(lmout)
+... Coefficients :
+( Intercept ) mlb$Height mlb$Age
+( Intercept ) mlb$Height ∗∗∗ mlb$Age ∗∗∗
+−−−
+Signif . codes: 0 ∗∗∗
+4.9236 0.9115
+0.001
+0.2344 0.1257
+Estimate Std . Error −187.6382 17.9447
+t
+value −10.46 21.00 7.25
+Pr(>|t |) < 2e−16 < 2e−16
+8.25e−13
+∗∗∗
+∗∗
+0.01
+￼1For the purpose of reducing roundoff error, it uses the QR decomposition in place of the actual matrix inversion. But algoritthmically they are equivalent.
+2Note the use of the ellipsis ..., indicating that portions of the output have been omitted, for clarity.
+￼2.4. A CLOSER LOOK AT LM() OUTPUT
+∗ 0.05 . 0.1
+...
+Multiple R−squared: 0.318, Adjusted R−squared: 0.3166
+...
+49
+There is a lot here! Let’s get an overview, so that the material in the coming sections will be better motivated.
+2.4.1 Statistical Inference
+The lm() output is heavily focused on ststistical inference — forming confi- dence intervals and performing significance tests — and the first thing you may notice is all those asterisks: The estimates of the intercept, the height coefficient and the age coefficient all are marked with three stars, indicating a p-value of less than 0.001. The test of the hypothesis
+H0 :β1 =0 (2.24)
+would be resoundingly rejected, and one could say, “Height has a significant effect on weight.” Not surprising at all, though the finding for age might be more interesting, in that we expect athletes to keep fit, even as they age.
+We could form a confidence interval for β2, for instance, by adding and subtracting 1.96 times the associated standard error,3 which is 0.1257 in this case. Our resulting CI would be about (0.66,1.16), indicating that the average player gains between 0.66 and 1.16 pounts per year; even baseball players gain weight over time.
+2.4.2 Assumptions
+But where did this come from? Surely there must be some assumptions underlying these statistical inference procedures. What are those assump- tions? The classical ones, to which the reader may have some prior expo- sure, are:4
+3The standard error of an estimate θ􏰭 is the estimated standard deviation of that estimator. More on this coming soon.
+4Of course, an assumption not listed here is that the linear model (2.6) is correct, at least to reasonable accuracy.
+1
+￼
+￼50
+CHAPTER 2. LINEAR REGRESSION MODELS
+• Normality: The assumption is that, conditional on the vector of predictor variables X, the response variable Y has a normal distribu- tion.
+In the weight/height/age example, this would mean, for instance, that within the subpopulation of all baseball players of height 72 and age 25, weight is normally distributed.
+• Homoscedasticity: Just as we define the regression function in terms of the conditional mean,
+μ(t)=E(Y |X=t) (2.25) we can define the conditional variance function
+σ2(t)=Var(Y |X=t) (2.26) The homoscedasticity assumption is that σ2(t) does not depend on t.
+In the weight/height/age example, this would say that the variance in weight among, say, 70-inches-tall 22-year-olds is the same as that among the subpopulation of those of height 75 inches and age 32.
+That first assumption is often fairly good, though we’ll see that it doesn’t matter much anyway. But the second assumption is just the opposite — it rarely holds even in an approximate sense, and in fact it turns out that it does matter. More on this in Chapter ??.
+The “R-squared” values will be discussed in Section 2.7.
+2.5 Unbiasedness and Consistency
+We will begin by discussing two properties of the least-squares estimator β. 2.5.1 β􏰭 Is Unbiased
+One of the central concepts in the early development of statistics was un- biasedness. As you’ll see, to some degree it is only historical baggage, but on the other hand it does become quite relevant in some contexts here.
+To explain the concept, say we are estimating some population value θ, using an estimator θ􏰭 based on our sample. Remember, θ􏰭 is a random
+􏰭
+￼2.5. UNBIASEDNESS AND CONSISTENCY 51 􏰭
+variable — if we take a new sample, we get a new value of θ. So, some samples will yield a θ􏰭 that overestimates θ, while in other samples θ􏰭 will come out too low.
+The pioneers of statistics believed that a nice property for θ􏰭 to have would be that on average, i.e., averaged over all possible samples, θ􏰭 comes out “just right”:
+Eθ􏰭= θ (2.27) This seems like a reasonable criterion for an estimator to have, and sure
+enough, our least-squares estimator has that property:
+Eβ􏰭 = β (2.28) Note that since this is a vector equation, the unbiasedness is meant for the
+individual components. In other words, (2.28) is a compact way of saying
+Eβj = βj, j = 0,1,...,p (2.29) This is derived in the Mathematical Complements portion of this chapter,
+Section 2.10.2.
+2.5.2 Bias As an Issue/Nonissue
+Arguably the pioneers of statistics shouldn’t have placed so much emphasis on unbiasednedness. Most statistiical estitmators have some degree of bias, though it is usually small and goes to 0 as the sample size n grows. Other than least-squares, none of the regression function estimators in common use is unbiased.
+Indeed, there is a common estimator, learned in elementary statistics courses, that is arguably wrongly heralded as unbiased. This is the sample variance based on W1, ..., Wn,
+1 􏰓n
+S2 = n−1 estimating a population variance η2.
+(Wi −W)2 (2.30)
+􏰭
+￼￼i=1
+￼52 CHAPTER 2. LINEAR REGRESSION MODELS
+The “natural,” sample-analog divisor in (2.30) would be n, not n−1. Using our “correspondence” notation,
+1 􏰓n
+η2 ←→ n
+But as the reader may be aware, use of n as the divisor would result in a biased estimate of η2. The n − 1 divisor is then a “fudge factor” that can be shown to produce an unbiased estimator.
+Yet even that is illusory. While it is true that S2 (with the n−1 divisor) is an unbiased estimate of η2, we actually don’t have much use for S2. Instead, we use S, as in the familiar t-statistic, (2.38) for inference on means. And lo and behold, S is a biased estimator of η! It is shown in Section (2.10.4) that
+ES < η (2.32) Thus one should indeed not be obsessive in pursuing unbiasedness.
+However, the issue of bias does play an important role in various aspects of regression analysis. It will arise often in this book, including in the present chapter.
+2.5.3 β􏰭 Is Consistent
+In contrast to unbiasedness, which as argued above may not be a general goodness criterion for an estimator, there is a more basic property that we would insist that almost any estimator to have, consistency: As the sample size n goes to infinity, then the sample estimate θ􏰭 goes to θ. This is not a very strong property, but it is a minimal one. It is shown in Section 2.10.3 that the least-squares estimator β􏰭 is indeed a consistent estimator of β.
+2.6 Inference under Homoscedasticity
+Let’s see what the homoscedasticity assumption gives us.
+(Wi −W)2 (2.31)
+￼￼i=1
+￼2.6. INFERENCE UNDER HOMOSCEDASTICITY 53
+2.6.1 Review: Classical Inference on a Single Mean
+You may have noticed the familiar Student-t distribution mentioned in the output of lm() above. Before proceeding, it will be helpful to review this situation from elementary statistics.
+We have a random sample W1,...,Wn from a population hav- ing mean ν = EW and variance η2. Suppose W is normally distributed in the population. Form
+￼￼and
+1 􏰓n W=n Wi
+i=1
+1 􏰓n
+(2.33)
+(2.34)
+S2 = n−1
+(Wi −W)2
+￼￼i=1
+(It is customary to use the lower-case s instead of S in 2.34, but the capital letter is used here so as to distinguish from the s2 quantity in the linear model, (2.47).)
+Then
+W−ν
+T= √ (2.35)
+This is then used for statistical inference on ν. We can form a 95% confidence interval by adding and subtracting c × S/√n to W , where c is the point of the upper-0.025 area for the Student-t distribution with n − 1 df.
+Under the normality assumption, such inference is exact; a 95% confidence interval, say, has exactly 0.95 probability of contain- ing ν.
+The normal distribution model is just that, a model, not expected to be exact. It rarely happens, if ever at all, that a population distribution is exactly normal. Human weight, for instance, cannot be negative and cannot be a million pounds; it is bounded, unlike normal distributions, whose support is (−∞, ∞). So “exact” inference using the Student-t distribution
+￼￼￼S/ n
+has a Student-t distribution with n−1 degrees of freedom (df).
+￼￼
+￼54 CHAPTER 2. LINEAR REGRESSION MODELS
+as above is not exact after all. (Though the following discussion might have been postponed to Chapter 3, it’s important to get the issue out of the way earlier, right here.)
+If n is large, the assumption of a normal population becomes irrelevant: The Central Limit Theorem (CLT, Appendix ??) tells us that
+W−ν
+√ (2.36)
+η/ n
+has an approximate N(0,1) distribution even though the distribution of W is not normal. We then must show that if we replace η by S in (2.36), the result will still be approximately normal. This follows from Slutsky’s Theorem and the fact that S goes to η as n → ∞.5 Thus we can per- form approximate) statistical inference on ν using (2.35) and N(0,1), again without assuming that W has a normal distribution.
+For instance, since the upper 2.5% tail of the N(0,1) distribution starts at 1.96, an approximate 95% confidence interval for ν would be
+(2.37)
+￼￼￼S
+￼W ±1.96√
+n
+￼￼What if n is small? We could use the Student-t distribution anyway, but we would have no idea how accurate it would be. We could not even use the data to assess the normality assumption on which the t-distribution is based, as we would have too little data to do so.
+The normality assumption for the Wi, then, is of rather little value, and as explained in the next section, is of even less value in the regression context.
+One possible virtue, though, of using Student-t would be that it gives a wider interval than does N(0,1). For example, for n = 28, our confidence interval would be
+s
+￼W ±2.04√
+instead of (2.37). The importance of this is that using S instead of η adds
+further variability to (2.35), which goes away as n → ∞ but makes (2.36)
+5In its simpler form, the theorem says that if Un converges to a normal distribution and Vn → v as n → ∞, then Un/Vn also is asymptotically normal.
+￼￼n
+(2.38)
+￼
+￼2.6. INFERENCE UNDER HOMOSCEDASTICITY 55
+overly narrow. Using a Student-t value might compensate for that, though it may also overcompensate.
+In general:
+If θ􏰭 is an approximately normally-distributed estimator of a population value θ, then an approximate 95% confidence inter- val for θ is
+θ ± 1.96 s.e.(θ) (2.39)
+􏰭􏰭
+where the notation s.e.() denotes “standard error of.” (The standard error usually comes from a theoretical derivation, as we will see.)
+2.6.2 Extension to the Regression Case
+The discussion in the last section concerning inference for a mean. What about inference for regression functions (which are conditional means)?
+The first point to note is this:
+The distribution of the least-squares estimator β􏰭 is approxi-
+mately (p + 1)-variate normal, without assuming normality.6
+This again follows from the CLT. Consider for instance a typical component
+of A′D in (2.23),
+n
+􏰓 X(j)Yi (2.40) i
+i=1
+This is a sum of i.i.d. terms, thus approximately normal. The delta method (Appendix ??) says that smooth (i.e. differentiable) functions of asymp- totically normal random variables are again asymptotically normal. So, β􏰭 has an asymptotic (p + 1)−variate normal distribution. (A more formal derivation is presented in Section 2.10.6.)
+However, to perform statistical inference, we need the approximate covari-
+ance matrix of β, from which we can obtain standard errors of the βj. The standard way to do this is by assuming homoscedasticity.
+6The statement is true even without assuming homoscedasticity, but we won’t drop that assumption until the next chapter.
+􏰭􏰭
+￼
+￼56 CHAPTER 2. LINEAR REGRESSION MODELS
+So, lm() assumes that in (2.26), the function σ2(t) is constant in t. For brevity, then, we will simply refer to it as σ2. Note that this plus our independence assumption implies
+Cov(D|A) = σ2I (2.41) where I is the identity matrix.
+To avoid (much) clutter, let C = (A′A)−1A′. Then by the properties of covariance matrices (Appendix ??),
+Cov(β􏰭 |A) = Cov(CD)
+= C Cov(D|A) C′
+= σ2CC′
+Fortunately, the various properties of matrix transpose (Appendix ??) can
+be used to show that
+Thus
+CC′ = (A′A)−1 (2.45)
+Cov(β) = σ2(A′A)−1 (2.46)
+(Yi −Xi′β)2
+If the normality assumption were to hold, then quantities like
+βi − βi 􏰭 √
+s aii
+s2 =
+which can be shown to be unbiased.
+􏰯 􏰭
+(2.47)
+(2.48)
+􏰭
+That’s a nice (surprisingly) compact expression, but the quantity σ2 is an unknown population value. It thus must be estimated, as we estimated η2 by S2 in Section 2.6.1. And again, an unbiased estimator is available. So, we take as our estimator of σ2
+1 􏰓n
+(2.42) (2.43) (2.44)
+￼n−p−1
+i=1
+￼￼
+￼2.6. INFERENCE UNDER HOMOSCEDASTICITY 57
+would have an exact Student-t distribution with n−p−1 degrees of freedom, where aii is the (i,i) element of (A′A)−1.7
+But as noted, this is usually an unrealistic assumption, and we instead rely on the CLT. Putting the above together, we have:
+The conditional distribution of the least-squares estimator β, given A, is approximately multivariate normal distribution with mean β and approximate covariance matrix
+s2 (A′ A)−1 (2.49) 􏰭
+Thus the standard error of βj is the square root of element j of this matrix (counting the top-left element as being in row 0, column 0).
+Similarly, suppose we are interested in some linear combination λ′β of the elements of β, estimating it by λ′β􏰭. The standard error is the square root of
+s2 λ′ (A′ A)−1 λ (2.50)
+And as before, we might as well calculate s2 with a denominator of n, as
+opposed to the n − p − 1 expression above.
+Recall from Chapter 1, by the way, that R’s vcov() function gives us the matrix (3.3), both for lm() and also for some other regression modeling functions that we will encounter later.
+Before going to some examples, note that the conditional nature of the statements above is not an issue. Say for instance we form a 95% confidence interval for some quantity, conditional on A. Let V be an indicator variable for the event that the interval contains the quantity of interest. Then
+P(V =1)=E[P(V =1|A)]=E(0.95)=0.95 (2.51) Thus the unconditional coverage probability is still 0.95.
+7A common interpretation of the number of degrees of freedom here is, “We have n data points, but must subtract one degree of freedom for each of the p + 1 estimated parameters.”
+􏰭
+￼
+￼58 CHAPTER 2. LINEAR REGRESSION MODELS
+2.6.3 Example: Bike-Sharing Data
+Let’s form some confidence intervals from the bike-sharing data.
+> lmout <− lm( reg  ̃ temp+temp2+workingday+clearday , data=shar)
+> summary(lmout) ....
+Coefficients :
+Estimate ( Intercept ) −1362.56 temp 11059.20 temp2 −7636.40 workingday 685.99 clearday 518.95
+...
+Multiple R−squared :
+We estimate that a working
+An approximate 95% confidence interval for the population value for this effect is
+685.99 ± 1.96 · 71.00 = (546.83, 825.15) (2.52) This is a disappointingly wide interval, but it shouldn’t surprise us. After
+all, it is based on only 365 data points.
+Given the nonlinear effect of temperature in our model, finding a relevant confidence interval here is a little more involved. Let’s compare the mean ridership for our example in the last chapter — 62 degree weather, a Sunday and sunny — with the same setting but with 75 degrees.
+The difference in (population!) mean ridership levels between these two settings is
+(β0 +β10.679+β20.6792 +β30+β11)−(β0 +β10.525+β20.5252 +β30+β11) = β10.154 + β20.186
+Our sample estimate for that difference in mean ridership between the two types of days is then obtained as follows:
+Std .
+Error 232.82 988.08
+t value −5.852 11.193 −7.532
+9.661 7.465
+Pr(>|t |) 1.09e−08 < 2e−16 4.08e−13 < 2e−16 6.34e−13
+1013.90 71.00 69.52
+0.6548 , Adjusted R−squared : 0.651
+day adds about 686 riders to the day’s ridership.
+￼2.7. COLLECTIVE PREDICTIVE STRENGTH OF THE X(J) 59
+> lamb <− c(0 ,0.154 ,0.186 ,0 ,0) > t(lamb) %∗% coef(lmout)
+[ ,1] [1 ,] 282.7453
+or about 283 more riders on the warmer day. For a confidence interval, we need a standard error. So, in (3.4), take λ = (0, 0.154, 0.186, 0, 0)′. Our standard error is then obtained via
+> sqrt(t(lamb) %∗% vcov(lmout) %∗% lamb) [ ,1]
+[1 ,] 47.16063
+Our confidence interval for the difference between 75-degree and 62-degree days is
+282.75 ± 1.96 · 47.16 = (190.32, 375.18) (2.53) Again, a very wide interval, but it does appear that a lot more riders show
+up on the warmer days.
+The value of s is itself probably not of major interest, as its use is usually in- direct, in (3.3). However, we can determine it if need be, as lmout$residuals contains the residuals, i.e. the sample prediction errors
+′
+Yi − Xi β, i = 1, 2, ..., n Using (2.47), we can find s:
+> s <− sqrt(sum(lmout$residualsˆ2) / (365−4−1)) >s
+>s
+[1] 626.303
+(2.54)
+􏰰􏰭
+2.7 Collective Predictive Strength of the X(j) The R2 quantity in the output of lm() is a measure of how well our model
+predicts Y . Yet, just as β, a sample quantity, estimates the population quantity β, one would reason that the R2 value printed out by lm() must estimate a population quantity too. In this section, we’ll make that concept precise, and deal with a troubling bias problem.
+􏰭
+￼60 CHAPTER 2. LINEAR REGRESSION MODELS
+We will also introduce an alternative form of the cross-validation notion discussed in Section 1.9.3.
+2.7.1 Basic Properties
+Note carefully that we are working with population quantities here, gen- erally unknown, but existent nonetheless. Note too that, for now, we are NOT assuming normality or homoscedasticity. In fact, even the assumption of having a linear regression function will be dropped for the moment.
+Suppose we somehow knew the exact population regression function μ(t). Whenever we would encounter a person/item/day/etc. with a known X but unknown Y , we would predict the latter by μ(X). Define ε to be the prediction error
+ε = Y − μ(X) (2.55) It can be shown (Section 2.10.5) that μ(X) and ε are uncorrelated, i.e.,
+have zero covariance. We can thus write
+V ar(Y ) = V ar[μ(X)] + V ar(ε) With this partitioning, it makes sense to say:
+The quantity
+ω = V ar[μ(X)] Var(Y)
+is the proportion of variation of Y explainable by X. Section 2.10.5 goes further:
+(2.56)
+(2.57)
+(2.58)
+￼Define
+√
+ρ= ω
+￼Then ρ is the correlation between our prodicted value μ(X) and the actual Y .
+￼2.7. COLLECTIVE PREDICTIVE STRENGTH OF THE X(J) 61
+Again, the normality and homoscedasticity assumptions are NOT needed for these results. In fact, they hold for any regression function, not just one satisfying the linear model.
+2.7.2 Definition of R2
+The quantity R2 output by lm() is the sample analog of ρ2:
+R2 is the squared sample correlation between the actual re- sponse values Yi and the predicted values X􏰯i′ β􏰭. Also, R2 is a consistent estimator of ρ2.
+Exactly how is R2 defined? From (2.56) and (2.57), we see that ρ2 = 1 − V ar[ε]
+(2.59)
+(2.60)
+￼Since Eε = 0, we have
+Var(Y)
+V ar(ε) = E(ε2)
+The latter is the average squared prediction error in the population, whose sample analog is the average squared error in our sample. In other words, using our “correspondence” notation from before,
+(2.61)
+(2.62)
+(2.63)
+1 􏰓n n􏰯􏰭
+E(ε2) ←→ (Yi − Xi′β)2 i=1
+￼Now considering the denominator in (2.59), the sample analog is
+1 􏰓n
+Var(Y)←→ n
+where of course Y = (􏰖ni=1 Yi)/n. And that is R2:
+1 􏰖 n
+2 ni=1
+(Yi −Y)2
+￼￼i=1
+￼( Y i − X􏰯 i′ β􏰭 ) 2
+￼R=1− 1􏰖n (Yi−Y)2 n i=1
+￼￼￼
+￼62 CHAPTER 2. LINEAR REGRESSION MODELS
+(Yes, the 1/n factors do cancel, but it will be useful to leave them there.)
+As a sample estimate of the population ρ2, the quantity R2 would appear to be a very useful measure of the collective predictive ability of the X(j). However, the story is not so simple, and curiously, the problem is actually bias.
+2.7.3 Bias Issues
+R2 can be shown to be biased upward, not surprising in light of the fact 􏰭
+that we are predicting on the same data that we had used to calculate β. In the extreme, we could fit an n − 1 degree polynomial in a single predictor, with the curve passing through each data point, producing R2 = 1, even though our ability to predict future data would likely be very weak.
+The bias can be severe if p is a substantial portion of n. (In the above polynomial example, we would have p = n − 1, even though we started with p = 1.) This is the overfitting problem mentioned in the last chapter, and to be treated in depth in a later chapter. But for now, let’s see how bad the bias can be, using the following simulation code:
+simr2 <− function(n,p,nreps) { r2s <− vector(length=nreps) for (i in 1:nreps) {
+x <− matrix(rnorm(n∗p),ncol=p)
+y <− x %∗% rep(1,p) + rnorm(n,sd=sqrt(p)) r2s[i] <− getr2(x,y)
+}
+hist(r2s) }
+getr2 <− function(x,y) { smm<−summary(lm(y  ̃ x)) smm$r . squared
+}
+Here we are simulating a population in which
+Y =X(1) +...+X(p) +ε
+(2.64)
+so that β consists of a 0 followed by p 1s. We set the X(j) to have variance 1, and ε has variance √p. This gives ρ2 = 0.50. Hopefully R2 will usually
+￼
+￼2.7. COLLECTIVE PREDICTIVE STRENGTH OF THE X(J) 63
+Figure 2.1: Plotted R2 Values, n = 25
+be near this value. To assess this, I ran simr2(25,8,1000), with the result shown in Figure 2.1.
+These results are not encouraging at all! The R2 values are typically around 0.7, rather than 0.5 as they should be. In other words, R2 is typically giving us much too rosy a picture as to the predictive strength of our X(j).
+Of course, it should be kept in mind that I deliberately chose a setting which produced substantial overfitting — 8 predictors for only 25 data points, which you will see in Chapter 9 is probably too many predictors.
+Running the simulation with n = 250 should show much better behavior. The results are shown in Figure 2.2. This is indeed much better. Note, though, that the upward bias is still evident, with values more typically above 0.5 than below it.
+Note too that R2 seems to have large variance, even in the case of n = 250. Thus in samples in which p/n is large, we should not take our sample’s value of R2 overly seriously.
+￼
+￼64 CHAPTER 2. LINEAR REGRESSION MODELS
+Figure 2.2: Plotted R2 Values, n = 250
+2.7.4 Adjusted-R2
+The adjusted-R2 statistic is aimed at serving as a less biased version of the ordinary R2. Its derivation is actually quite simple, though note that we do need to assume homoscedasticity.
+Under the latter assumption, V ar(ε) = σ2 in (2.59). Then the numerator in (2.63) is biased, which we know from (2.47) can be fixed by using the factor 1/(n−p−1) instead of 1/n. Similarly, we know that the denominator will be unbiased if we divide by 1/(n − 1) instead of 1/n. Those changes do NOT make (2.63) unbiased; the ratio of two unbiased estimators is generally biased. However, the hope is that this new version of R2, called adjusted R2, will have less bias than the original.
+We can explore this using the same simulation code as above. We simply change the line
+smm$r . squared to
+￼
+￼2.7. COLLECTIVE PREDICTIVE STRENGTH OF THE X(J) 65
+Figure 2.3: Plotted Adjusted R2 Values, n = 25
+smm$adj . r . squared
+Rerunning simr2(25,8,1000), we obtain the result shown in Figure 2.3. This is a good sign! The values are more or less centered around 0.5, as they should be (though there is still a considerable amount of variation).
+2.7.5 The “Leaving-One-Out Method”
+Our theme here in Section 2.7 has been assessing the predictive ability of our model, with the approach described so far being the R2 measure. But recall that we have another measure: Section 1.9.3 introduced the concept of cross-validation for assessing predictive ability. We will now look at a variant of that method.
+First, a quick review of cross-validation: Say we have n observations in our data set. With cross-validation, we randomly partition the data into a training set and a validation set, of k and n − k observations, respectively. We fit our model to the training set, and use the result to predict in the validation set, and then see how well those predictions turned out.
+￼
+￼66 CHAPTER 2. LINEAR REGRESSION MODELS
+Clearly there is an issue of the choice of k. If k is large, our validation set will be too small to obtain an accurate estimate of predictive ability. That is not a problem if k is small, but then we have a subtler problem: We are getting an estimate of strength of our model when constructed on k observations, but in the end we wish to use all n observations.
+One solution is the Leaving One Out Method (LOOM). Here we set k = n − 1, but apply the training/validation process to all possible (n − 1, 1) partitions. The name alludes to the fact that LOOM repeatedly omits one observation, predicting it from fitting the model to the remaining obser- vation. This gives us “the best of both worlds”: We have n validation points, the best possible, and the training sets are of size n − 1, i.e., nearly full-sized.
+There is an added benefit that the same code to implement this method can be used to implement the jackknife. The latter is a resampling technique. To see what it does, let’s look at a more general technique called the bootstrap, which is a method to empirically compute standard errors.
+Say we wish to determine the standard error of an estimator θ. We repeat- edly take random samples of size k, with replacement, from our data set, and calculate θ􏰭 on each of them. The resulting values form a sample from the distribution of θ􏰭 (for sample size k). One can compute standard errors from this sample in various ways, e.g. simply by findiing their standard deviation.
+The jackknife does this for k = n − 1 (and sampling without replacement), and thus we can again approximate the sampling distribution of our esti- mator based on n data points.
+2.7.5.1 The Code
+Here is general code for Leaving-One-Out:
+# # #
+# # # #
+Leaving−One−Out Method ;
+use both for cross−validation and jackknife resampling arguments:
+xydata: data, one row per observation, ”Y’ value last regftn: regression function to apply to xydata and
+resamples
+postproc: function to apply to the resampling output
+􏰭
+￼2.7. COLLECTIVE PREDICTIVE STRENGTH OF THE X(J) 67 # nsamp: number of leave−one−out resamples to process
+# fits the specified regression model to each leave−one−out # subsample , feeding the results into postproc ()
+# due to possibly large amount of computation
+loom <− function(xydata , regftn , postproc , nsamp=nrow(xydata) ,...)
+{
+xydata <− as.matrix(xydata) n <− nrow(xydata)
+if (nsamp == n) {
+toleaveout <− 1:n
+} else toleaveout <− sample(1:n,nsamp,replace=FALSE) jkout <− doleave ( toleaveout , xydata , regftn )
+for ( i in toleaveout ) {
+jkout[[i]] <− regftn(xydata[−i,]) }
+postproc ( jkout , xydata , toleaveout )
+}
+doleave <− function(toleaveout ,xyd,regftn) { i f ( i s . n u l l ( x y d ) ) x y d <− x y d a t a
+ntlo <− length( toleaveout )
+tmp<− list(length=ntlo) for (i in 1:ntlo) {
+lo <− toleaveout [ i ]
+tmp[[ i ]] <− regftn(xyd[−lo ,])
+}
+tmp
+}
+lmregftn <− function ( xydata ) { ycol <− ncol(xydata)
+lm(xydata[,ycol]  ̃ xydata[,−ycol]) }
+l1postproc <− function(lmouts,xydata,toleaveout) { l1s <− NULL
+ycol <− ncol(xydata) for ( i in toleaveout ) {
+bhat <− coef(lmouts [[ i ]])
+￼68
+mean( l 1 s ) }
+Let’s look at the main arguments first:
+• xydata: Our data set, in the same format as for instance our xvallm() function in Section 1.9.4: One observation per row, Y in the last col- umn.
+• regftn: The code is versatile, not just limited to the linear model, so the user specifies the regression function. The linear model case is handled by specifying lmregftn.
+• postproc: After the leaving-one-out processing is done, the code has an R list, each element of which is the output of regftn(). The postproc() function, specified by the user, is applied to each of these elements. For instance, setting this to l1postproc() will result in computing the mean absolute prediction error.
+The remaining arguments serve to ameliorate the major drawback of the Leaving-One-Out Method, which is large computation time:
+• nsamp: Instead of leaving out each of observations 1,...,n, we do this only for a random sample of nsamp indices from that set.
+Another possible source of speedup in the linear model case would be to use matrix inverse update methods, which we defer to Chapter 9.
+2.7.5.2 Example: Bike-Sharing Data
+To illustrate, let’s look at the bike-sharing data again. To make it more interesting, let’s load up the model with some more variables:
+> shar$winter <− as.integer(shar$season == 1) > shar$spring <− as.integer(shar$season == 2) > shar$summer <− as.integer(shar$season == 3) > shar$mon <− as . integer ( shar$weekday == 1)
+> shar$tue <− as.integer(shar$weekday == 2)
+CHAPTER 2. LINEAR REGRESSION MODELS
+predval <− bhat %∗% c(1,xydata[i,−ycol]) realval <− xydata [ i , ycol ]
+l1s <− c(l1s ,abs(realval − predval))
+}
+￼2.7. COLLECTIVE PREDICTIVE STRENGTH OF THE X(J) 69
+> shar$wed <− as . integer ( shar$weekday == 3)
+> shar$thu <− as.integer(shar$weekday == 4)
+> shar$fri <− as.integer(shar$weekday == 5)
+> shar$sat <− as.integer(shar$weekday == 6)
+> shr <− as.matrix(shar[,c(10,17,6,18,12,13,14,20:28,15)])
+Now try LOOM cross-validation:
+> loom(shr,lmregftn,l1postproc) [1] 383.3055
+On average, we can predict ridership to about 383, when predicting new data. It’s worthwhile comparing this to the same number obtained by repredicting the original data from itself, meaning
+1 􏰓n n􏰯􏰭
+|Yi −Xi′β| (2.65) i=1
+￼We can easily compute this number from the lm() output, as the latter includes the values of Yi − X􏰯i′β􏰭, known as the residuals:
+> l m o u t <− l m ( s h r [ , 1 7 ]  ̃ s h r [ , − 1 7 ] ) > mean(abs(lmout$residuals ))
+[1] 363.3149
+This is our first concrete example of overfitting. The second number, about 363, is more optimistic than the cross-validdated one. The results would have likely been even worse with more variables. Again, this topic will be covered in depth in Chapter 9.
+2.7.5.3 Another Use of loom(): the Jackknife
+As explained in Section 2.7.5, loom() can also be used for jackknife pur- poses, which we will do here on the adjusted R2 statistic. As we saw in Figure 2.3, this statistic can have considerable variation from one sample to another. But in that figure, we had the luxury of performing a simulation of many artificial samples. What can we do with our single sample of real data, to gauge how variable adjusted R2 is in our setting?
+The jackknife comes to the rescue! By repeatedly leaving one observation out, we can generate many adjusted R2 values, amounting to a simulation from the sampling distribution of adjusted R2. For this purpose, we set the loom() argument postproc() to the following:
+￼70 CHAPTER 2. LINEAR REGRESSION MODELS
+> ar2postproc function(lmouts,xydata,toleaveout) {
+r2s <− NULL
+for (lmout in lmouts) {
+s <− summary(lmout)
+r2s <− c(r2s ,s$adj.r.squared) }
+r2s
+}
+Recall that, within loom() the function regftn() is called on each subsam- ple of size n − 1. The function postproc() is then called on the results of these calls, which in this case are calls to lm(). Here ar2postproc() will then collect all the associated adjusted R2 values.
+Here is what we get for the above lm() analysis of the bike-sharing data: > ar2out <− loom(shr ,lmreg\footnote{,ar2postproc)
+> hist(ar2out)
+The results in Figure 2.4 are not too bad. There is actually rather little variation in the simulated adjusted R2 values. This is not surprising, in that there is not much discrepancy between the ordinary and adjusted versions of R2 in the full sample:
+> summary(lmout) ...
+Multiple R−squared : 0.7971 , Adj . R−squared : 0.7877 ...
+2.7.6 Other Measures
+A number of other measures of predictive ability are in common use, notably Mallows’ Cp and the Akaike Information Criterion. These will be treated in Chapter 9.
+2.7.7 The Verdict
+So, what is the verdict on the use of R2 to assess the collective predictive ability of our predictor variables? There is a general consensus among data analysts that adjusted-R2 is a better measure than R2. And if one
+￼2.7. COLLECTIVE PREDICTIVE STRENGTH OF THE X(J) 71
+Figure 2.4: Plotted loom() ‘R2 Values, Bike-Sharing Data
+observes a wide discrepancy between the two on a particular data set, this is a suggestion that we are overfitting.
+On the other hand, one must keep in mind that R2, like any other statistic, is a sample quantity subject to sampling variation. If close attention is to be paid to it, a standard error would be helpful, and would be obtainable via use of loom() as a jackknife (or by the bootstrap).8
+R2 is an appealing measure of predictive ability, as it is dimensionless, and comparable across diverse settings. But finer measures of predictive ability is obtainable via loom(), such as the mean absolute prediction error as shown here. R2 involves squared prediction error, which accentuates the larger errors while giving smaller weight to the moderate ones, which we might consider a distortion.
+￼￼8 If we have m jackknifed versions of an estimator θ􏰭 on a sample of size m, a standard error for full-sample version of θ􏰭 is obtained as follows. Find the standard deviation of
+√ the m jackknifed values, and them multiply by (m − 1)/ m.
+￼
+￼72 CHAPTER 2. LINEAR REGRESSION MODELS
+2.8 Significance Testing vs. Confidence In- tervals
+“Sir Ronald [Fisher] has befuddled us, mesmerized us, and led us down the primrose path” — Paul Meehl, professor of psychology and the philosophy of science
+When the concept of significance testing, especially the 5% value for α, was developed in the 1920s by Sir Ronald Fisher, many prominent statisticians opposed the idea — for good reason, as we’ll see below. But Fisher was so influential that he prevailed, and thus significance testing became the core operation of statistics.
+So, today significance testing is entrenched in the field, in spite of being widely recognized as faulty. Most modern statisticians understand this,9 even if many continue to engage in the practice.10
+The basic problem is that a significance test is answering the wrong ques- tion. Say in a regression analysis we are interested in the relation between X(1) and Y . Our test might have as null hypothesis
+H0 :β1 =0 (2.66)
+But we probably know a priori that there is at least some relation between the two variables; β1 cannot be 0.000000000... to infinitely many decimal places. So we already know that H0 is false.11 The better approach is to form a confidence interval for β1, so that we can gauge the size of β1, i.e., the strength of the relation.
+9This was eloquently stated in a guide to statistics prepared for the U.S. Supreme Court by two very prominent scholars (Reference Guide on Statistics, David Kaye and David Freedman, http://www.fjc.gov/public/pdf.nsf/lookup/sciman02.pdf/$file/ sciman02.pdf: “Statistical significance depends on the p-value, and p-values depend on sample size. Therefore, a ‘significant’ effect could be small. Conversely, an effect that is ‘not significant’ could be large. By inquiring into the magnitude of an effect, courts can avoid being misled by p-values. To focus attention where it belongs — on the actual size of an effect and the reliability of the statistical analysis — interval estimates may be valuable. Seeing a plausible range of values for the quantity of interest helps describe the statistical uncertainty in the estimate.”
+10Many are forced to do so, e.g. to comply with government standards in pharmaceu- tical testing. My own approach in such situations is to quote the test results but then point out the problems, and present confidence intervals as well.
+11A similar point holds for the F-test in lm() output, which tests that all the βi are 0,i.e.,H0 :β1 =β2 =...βp =0.
+￼
+￼2.8. SIGNIFICANCE TESTING VS. CONFIDENCE INTERVALS 73
+For instance, consider another UCI data set, Forest Cover, which involves a remote sensing project. The goal was to predict which one of seven types of ground cover exists in a certain inaccessible location, using variables that can be measured by satellite. One of the variables is Hillside Shade at Noon (HS12).
+For this example, I restricted the data to Cover Types 1 and 2, and took a random subset of 1000 observations to keep the example manageable. The logistic model here is
+P (Cover Type 2) = 1 (2.67) 1 + e−(β0+β1 HS12)
+Here is the glm() output, with column 8 being HS12 and column 56 being a dummy variable indicating Cover Type 2:
+> glmout <−
+glm(f2512[,56]  ̃ f2512[,8],family=binomial)
+> summary(glmout) ...
+Coefficients :
+Estimate Std. Error z value Pr(>|z|)
+( Intercept ) −2.147856 0.634077 −3.387 0.000706 ∗∗∗ f2512 [ , 8] 0.014102 0.002817 5.007 5.53e−07 ∗∗∗
+...
+The triple-star result for β1 would indicate that HS12 is a “very highly
+significant” predictor of cover type. Yet we see that β1, 0.014102, is tiny. HS12 is in the 200+ range, with sample means 227.1 and 223.4 for the two cover types, differing only by 3.7. Multiplying the latter by 0.014102 gives a
+value of about 0.052, which is swamped in (2.67) by the β0 term, -2.147856. In plain English: HS12 has almost no predictive power for Cover Type, yet the test declares it “very highly significant.”
+The confidence interval for β1 here is
+0.014102 ± 1.96 · 0.002817 = (0.00858, 0.01962) (2.68)
+The fact that the interval excludes 0 is irrelevant. The real value of the interval here is that it shows that β1 is quite small; even the right-hand end point is tiny.
+This book’s preferred statistical inference method is confidence intervals, not significance tests.
+￼􏰮
+􏰮
+￼74 CHAPTER 2. LINEAR REGRESSION MODELS
+2.9 Bibliographic Notes
+For more on the Eickert-White approach to correct inference under het- eroscedasticity, see (Zeileis, 2006).
+2.10 Mathematical Complements 2.10.1 The Geometry of Linear Models
+We’ll use the notation of Section 2.3.2 here.
+Since Since β􏰭 is the least-squares estimate, i.e. it minimizes ||D − Ab|| over all b, then Aβ􏰭 is the closest vector in the column space of A to D. Thus the mapping
+D → Aβ􏰭
+is a projection.
+Since a projection forms a “right triangle,” we have that
+2.10.2 Unbiasedness of the Least-Squares Estimator
+We will show that β􏰭 is conditionally unbiased,
+E(β􏰭 | X1, ..., Xn) = β (2.71)
+This approach has the advantage of including the fixed-X case, and it also implies the unconditional case for random-X, since
+Eβ􏰭 = E[E(β􏰭 | X1, ..., Xn)] = Eβ = β (2.72) So let’s derive (2.71). First note that, by definition of regression and the
+(Aβ, D − Aβ) = 0
+(2.69)
+(2.70)
+􏰭􏰭
+￼2.10. MATHEMATICAL COMPLEMENTS 75
+linear model,
+E(Y |X)=μ(X)=X􏰯 ′β (2.73) Once again using the matrix partitioning technique as in (1.19), Equation
+(2.73) tells us that
+E(D | A) = Aβ where A and D are as in Section 2.3.2.
+(2.74)
+(2.75) (2.76) (2.77) (2.78)
+Now using (2.23) we have
+E(β􏰭|X1,...,Xn) = = = =
+E[β􏰭|A]
+(A′ A)−1 A′ E (D (A′A)−1A′Aβ) β
+|A)
+thus showing that β􏰭 is unbiased.
+2.10.3 Consistency of the Least-Squares Estimator
+For technical reasons, it’s easier to treat the random-X case. We’ll make use of a famous theorem:
+Strong Law of Large Numbers (SLLN): Say W1 , W2 , ... are i.i.d. with common mean EW. Then
+1 􏰓n
+lim
+Wi = EW, with probability 1 (2.79)
+￼n→∞ n
+i=1
+Armed with that fundamental theorem in probability theory, rewrite (2.23) as
+􏰅1 ′ 􏰆−1 1 ′
+β􏰭 = nA A (nA D) (2.80)
+￼￼
+￼76 CHAPTER 2. LINEAR REGRESSION MODELS
+To avoid clutter, we will not use the X􏰯 notation here for augmenting with a 1 element at the top of a vector. Assume instead that the 1 is X(1).
+By the SLLN, the (i,j) element of 1 A′A converges as n → ∞: n
+11n
+(A′A)ij = 􏰓 X(i)X(j) → E[X(i)X(j)] = [E(XX′)]ij
+i.e.,
+1 A′A → E(XX′) n
+The vector A′D is a linear combination of the columns of A, with the coefficients of that linear combination being the elements of the vector D. Since the columns of A′ are Xk, k = 1, ..., n, we then have
+￼￼￼nnkk k=1
+(2.81)
+(2.82)
+￼n
+A′D = 􏰓YkXk
+k=1
+1 A′D → E(Y X) n
+E [E(Y X | X)] =
+= E [X(X′β)]
+= E [X(X′Iβ)]
+= E [(XX′)Iβ)]
+= E(XX′) β
+So, we see that β􏰭 converges to
+[E(XX′)]−1E(XY ) = [E(XX′)]−1E(XX′β) = [E(XX′)]−1E(XX′)β = β (2.91)
+and thus
+The latter quantity is
+(2.83)
+(2.84)
+(2.85) (2.86) (2.87) (2.88) (2.89) (2.90)
+￼E[XE(Y|X)]
+￼2.10. MATHEMATICAL COMPLEMENTS 77
+2.10.4 Biased Nature of S
+It was stated in Section 2.6.1 that S, even with the n−1 divisor, is a biased estimator of η, the population standrd deviation. We’ll derive that here.
+0 < V ar(S)
+= E(S2) − (ES)2 = η2−(ES)2
+since S2 is an unbiased estimator of η2. So, ES < η
+2.10.5 μ(X) and ε Are Uncorrelated
+(2.92) (2.93) (2.94)
+(2.95)
+In Section (2.7.1), it was stated that μ(X) and ε are uncorrelated. This is easily shown. Since Eε = 0 and E(ε|X) = 0, we have
+since
+2.10.6
+E(Y
+= 0
+− μ(X)|X) = μ(X) − μ(X) = 0
+E [(μ(X) − Eμ(X)) · (ε − Eε)]
+= E [(μ(X) − Eμ(X) · E(Y − μ(X)|X)]
+(2.96) (2.97) (2.98) (2.99)
+(2.100)
+Cov[μ(X), ε) =
+= E [(μ(X) − Eμ(X)) · (Y − μ(X))]
+Asymptotic (p + 1)-Variate Normality of β􏰭
+Here we show tht asymptotically β􏰭 has a (p+1)-vartiate normal distribution. We again assume the random-X setting, and as in Section 2.10.3, avoid clutter by incorporating the 1 element of X􏰯 into X.
+￼78 CHAPTER 2. LINEAR REGRESSION MODELS
+First, define the actual prediction errors we would have if we knew the true population value of β and were to predict the Yi from the Xi,
+εi = Yi − Xi′β Let G denote the vector of the εi:
+G = (ε1, ..., εn)′
+Then
+D = Aβ + G
+We will show that the distribution of √n(β􏰭−β) converges to (p+1)-variate
+normal with mean 0.
+Multiplying both sides of (2.103) by (A′A)−1A′, we have
+β􏰭 = β + (A′A)−1A′G (2.104)
+Thus
+√n(β􏰭 − β) = (A′A)−1√n A′G (2.105) Using Slutsky’s Theorem and (2.82), the right-hand side has the same
+(2.101)
+(2.102)
+(2.103)
+￼￼￼asymptotic distribution as
+[E(XX′)]−1√n ( 1 A′G)
+n
+In the same reasoning that led to (2.84), we have that
+n
+A′G = 􏰓 εiXi
+i=1
+(2.106)
+(2.107)
+￼￼This is a sum of i.i.d. terms with mean 0, so the CLT says that √n ·(A′G/n) is asymptotically normal with mean 0 and covariance matrix equal to that of εX, where ε is a generic random variable having the distribution of the εi.
+￼
+￼2.10. MATHEMATICAL COMPLEMENTS 79
+Putting this information together with (2.105), we have:
+β􏰭 is asymptotically (p + 1)-variate normal with mean β and covariance matrix
+1 [E(XX′)]−1Cov(εX)[E(XX′)]−1 (2.108) n
+2.10.7 Derivation of (3.14)
+It is again convenient to treat the random-X case, building on the material in Section 2.10.6. Since (2.108) is so complex, let’s simplify things by focusing on the Cov(εX) factor in that equation. Since E(ε|X) = 0, we have
+￼Cov(εX) = E[(εX) (εX)′] = E(ε2XX′)
+By the SLLN, this could be estimated by
+(2.109) (2.110)
+(2.111)
+1 􏰓n
+n
+1 􏰓n
+ε2i XiXi′ = n (Yi − Xi′β)2XiXi′
+￼￼i=1
+This is getting pretty close to what we need for (3.14), but the latter involves
+the 􏰭εi instead of the εi:
+1 􏰓n 1 􏰓n
+i=1
+(Yi − Xi′β)2XiXi′ (2.112) nn􏰭
+􏰭ε2i XiXi′ =
+i=1 i=1
+￼￼But this can be resolved by various methods of advanced probability the- ory. For example, because β􏰭 → β, the Uniform Strong Law of Large Num- bers says that under reasonable conditions, (2.112) has the same limit as (2.111).12
+12See for instance Asymptotic Theory of Statistics and Probability, Anirban DasGupta, Springer, 2008. Roughly speaking, the conditions involve boundedness of the variables, which is very reasonable in practice. Adult human heights are bounded above by 8 feet, for instance.
+￼
+￼80 CHAPTER 2. LINEAR REGRESSION MODELS
+Now let B = diag(􏰭εi, . . . , 􏰭εn). Recalling that the columns of A′ are the Xi, we see that A′ B is a p × n matrix whose ith column is 􏰭ε2i Xi . In partitioned matrix form, then
+A′B = (􏰭ε21X1, . . . 􏰭ε2nXn) But also in partitioned matrix form,
+ X1′  A= ... 
+Xn′
+Taking the product in the last two equations, we obtain
+n
+i=1
+(2.113)
+(2.114)
+(2.115)
+′􏰓2′
+A BA =
+􏰭εi XiXi
+So, in (2.108), we can replace Cov(εS) by A′BA/n. From previous cal- culations, we know that E(XX′) can be replaced by A′A/n. So, we can approximate (2.108) by
+􏰚 1 ′ −1 1 ′ 1 ′ −1􏰛 ′ −1 ′ ′ −1
+(nA A) (nA BA) (nA A) /n = (A A) A BA (A A) (2.116)
+The right-hand side is (3.14)!
+2.10.8 Distortion Due to Transformation
+Consider this famous inequality:
+Jensen’s Inequality: Suppose h is a convex function,13 and V is a random variable for which the expected values in (2.117) exist. Then
+E[h(V )] ≥ h(EV ) (2.117) 13This is “concave up,” in the calculus sense.
+￼￼￼￼
+￼2.10. MATHEMATICAL COMPLEMENTS 81
+In our context, h is our transformation in Section 3.3.7, and the E() are conditional means, i.e., regression functions. In the case of the log transform (and the square-root transform), h is concave-down, so the sense of the inequality is reversed:
+E[lnY|X =t]≤ln(E(Y|X =t) (2.118)
+Since equality will hold only in trivial cases, we see that the regression function of lnY will be smaller than the log of the regression function of Y.
+Say we assume that
+E(Y |X = t) = eβ0+β1t (2.119) and reason that this implies that a linear model would be reasonable for
+lnY:
+E(ln Y |X = t) = β0 + β1t (2.120)
+Jensen’s Inequality tells us that such reasoning may be risky. In fact, if we are in a substantially heteroscedastic setting (for Y , not ln Y ), the discrep- ancy between the two sides of (2.118) could vary a lot with t, potentially producing quite a bit of distortion to the shape of the regression curve. This follows from a result of Robert Becker,14 who expresses the difference between the left- and right-hand sides of (2.117) in terms of V ar(V ).
+￼14The Variance Drain and Jensen’s Inequality, CAEPR Working Paper 2012-004, Indiana University, 2012.
+￼82 CHAPTER 2. LINEAR REGRESSION MODELS

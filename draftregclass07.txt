@@ -1,0 +1,430 @@
+Chapter 7
+Measuring Factor Effects
+Throughout this book, we’ve noted the twin goals of regression and classi- fication analysis, Prediction and Description. In many cases, our method- ological approach has been aimed at Prediction. In this chapter, though, the theme will entirely be Description, with most (but not all) of the ma- terial being concerned with parametric models.
+We will see, though that attaining this goal may require some subtle analy- sis. It will be especially important to bear in mind the following principle:
+The regression coefficient (whether sample estimate or popu- lation value) for one predictor variable may depend on which other predictors are present.
+7.1 Example: Baseball Player Data
+In Section 1.7.1.2, we found that the data indicated that older baseball players — of the same height — tend to be heavier, with the difference being about 1 pound gain per year of age. This finding may surprise some, since athletes presumably go to great lengths to keep fit. Ah, so athletes are similar to ordinary people after all.
+We may then ask whether a baseball player’s weight is also related to the position he plays. So, let’s now bring the Position variable in our data into play. First, what is recorded for that variable?
+> levels (mlb$Position )
+193
+￼194 CHAPTER 7. MEASURING FACTOR EFFECTS
+[1] ”Catcher”
+[3] ”Outfielder”
+[5] ”Second Baseman”
+[7] ”Starting Pitcher” ”Third Baseman”
+”First Baseman” ”Relief Pitcher” ”Shortstop”
+￼￼￼￼￼o, all the outfield positions have been simply labeled “Outfielder,” though pitchers have been separated into starters and relievers.
+Technically, this variable, mlb$Position, is an R factor. This is a fancy name for an integer vector with labels, such that the labels are normally displayed rather than the codes. So actually catchers are coded 1, desig- nated hitters 2, first basemen 3 and so on, but in displaying the data frame, the labels are shown rather than the codes.
+The designated hitters are rather problematic, as they only exist in the American League, not the National League. Let’s restrict our analysis to the other players:
+> nondh <−
+mlb[mlb$Position != ”Designated Hitter” ,]
+> nrow(mlb) [1] 1034
+> nrow(nondh) [1] 1016
+We’ve deleted the designated hitters, assigning the result to nondh. A comparison of numbers of rows show that there were only 18 designated hitters in the data set anyway.
+In order to have a proper basis of comparison below, we should re-run the weight-height-age analysis:
+￼> summary(lm(Weight  ̃ Height + Age,data=nondh)) ...
+Coefficients :
+(Intercept) Height
+Age
+(Intercept) ∗∗∗ Height ∗∗∗ Age ∗∗∗
+...
+Multiple R−squared:
+0.318,
+Adjusted
+0.3166
+Estimate Std . Error −187.6382 17.9447 4.9236 0.2344 0.9115 0.1257
+t
+value −10.46 21.00 7.25
+Pr(>|t |) < 2e−16 < 2e−16
+8.25e−13
+R−squared:
+￼7.1. EXAMPLE: BASEBALL PLAYER DATA 195
+Basically, no change from before. Now, for simplicity, let’s consolidate into four kinds of positions: infielders, outfielders, catchers and pitchers. That means we’ll need three dummy variables:
+> poscodes <− as.integer(nondh$Position)
+> i n f l d <− as . integer ( poscodes==3 | poscodes==6 |
+poscodes==7 | poscodes==9)
+> outfld <− as.integer(poscodes==4)
+> pitcher <− as.integer(poscodes==5 | poscodes==8)
+Again, remember that catchers are designated via the other three dummies being 0.
+So, let’s run the regression:
+> lmpos <− lm(Weight  ̃ Height + Age + infld + outfld + pitcher ,data=nondh)
+> summary(lmpos) ...
+Coefficients :
+(Intercept) Height
+Age
+infld
+outfld pitcher
+−182.7216 4.9858 0.8628 −9.2075 −9.2061 −10.0600
+(Intercept) ∗∗∗ Height ∗∗∗ Age ∗∗∗ infld ∗∗∗ outfld ∗∗∗ pitcher ∗∗∗
+...
+Mult . R−squared : 0.3404 ,
+...
+Adj .
+R−squared
+:
+Estimate Std . Error
+t value 18.3241 −9.972 0.2405 20.729 0.1241 6.952 1.6836 −5.469 1.7856 −5.156 2.2522 −4.467
+Pr(>|t |) < 2e−16 < 2e−16
+6.45e−12 5.71e−08 3.04e−07 8.84e−06
+0.3372
+The estimated coefficients for the position variables are all negative. For example, for a given height and age, pitchers are on average about 10.1 pounds lighter than catchers of the same height, while outfielders the fig- ure is about 9.2 pounds. An approximate 95% confidence interval for the population value of the latter is
+9.2 \pm 2 \times 1.8 = (5.6,12.8)
+￼196 CHAPTER 7. MEASURING FACTOR EFFECTS
+So, the image of the “beefy” catcher is borne out.
+Note that the estimated coefficient for age shrank a little. In our original analysis, with just height and age as predictors, it had been 0.9115,1, but now is only 0.8628. The associated confidence interval, (0.61,1.11), is still we away from 0, indicating weight increase with age, but the effect is now smaller than before. This is an example of the phenomenon mentioned at the outset of this chapter that the coefficient for one predictor may depend on what other predictors are present.
+It also suggests that the age effect on weight is not uniform across playing positions. To investigate this, let’s add interaction terms:
+> summary(lm(Weight  ̃ Height + Age + infld + outfld + pitcher +
+Age∗infld + Age∗outfld + Age∗pitcher ,data=nondh)) ...
+Coefficients :
+Estimate ( Intercept ) −168.5453 Height 4.9854 Age 0.3837 infld −22.8916 outfld −27.9894 pitcher −31.9341
+Std . Error 20.3732 0.2407 0.3335 11.2429 11.9201 15.4175 0.3792 0.4033 0.5232
+t value −8.273 20.714
+1.151 −2.036 −2.348 −2.071
+1.221 1.591 1.427
+Pr(>|t |) 4.11e−16 < 2e−16
+0.2501 0.0420 0.0191 0.0386 0.2225 0.1120 0.1539
+Age: infld Age: outfld Age: pitcher
+(Intercept) ∗∗∗ Height ∗∗∗ Age
+infld ∗ outfld ∗ pitcher ∗ Age: infld
+Age: outfld Age: pitcher
+0.4629 0.6416 0.7467
+...
+Mult . R−squared : 0.3424 ,
+R−squared :
+This doesn’t look helpful. Confidence intervals for the estimated interac-
+tion coefficients include 0 but are wide. Thus there could be important
+1This was the case even after removing the Designated Hitters, not shown here.
+Adj
+.
+0.3372
+￼
+￼7.2. SIMPSON’S PARADOX 197
+interaction effects, or they could be tiny; we just don’t have a large enough sample to say much.
+Note that the coefficients for the position dummies changed quite a bit, but this doesn’t mean we now think there is a larger discrepancy between weights of catchers and the other players. For instance, for 30-year-old players, the estimated difference in mean weight between infielders and catchers of a given height is
+−22.8916 + 30 \times 0.4629 = −9.0046 similar to the -9.2075 figure we had before.
+7.2 Simpson’s Paradox
+The famous Simpson’s Paradox should not be considered a paradox, when viewed in the light of a central point we have been discussing in this chapter, which we will state a little differently here:
+The regression coefficient (sample or population) for a predictor variable may change substantially when another predictor is added. In particular, its sign may change, from positive to negative or vice versa.
+7.2.1 Example: UCB Admissions Data (Logit)
+The most often-cited example, in a tabular context, is that of the UC Berkeley admissions data (Bickel, 1975). The issue at hand was whether the university had been discriminating against women applicants for admission to graduate school.
+On the surface, things looked bad for the school — 44.5% of the male appli- cants had been admitted, compared to only 30.4% of the women. However, upon closer inspection it was found that the seemingly-low female rate was due to the fact that the women tended to apply to more selective academic departments, compared to the men. After correcting for the Department variable, it was found that rather than being victims of discrimination, the women actually were slightly favored over men. There were six departments in all, labeled A-F.
+The data set is actually included in base R. As mentioned, it is stored in the form of an R table:
+￼198 CHAPTER 7.
+> ucb <− UCBAdmissions > class(ucb)
+[1] ”table” > ucb
+, , Dept = A
+Gender
+Admit Male Female
+Admitted 512 89 Rejected 313 19
+, , Dept = B
+Gender
+Admit Male Female
+Admitted 353 17
+Rejected 207 8 ...
+MEASURING FACTOR EFFECTS
+In R, it is sometimes useful to convert a table to an artificial data frame, which in this case would have as many rows as there were applicants in the UCB study, 4526. The regtools function tbltofakedf() facilitates this:
+> ucbdf <− tbltofakedf (ucb) > dim(ucbdf)
+[1] 4526 3 > head(ucbdf)
+[1 ,] [2 ,] [3 ,] [4 ,] [5 ,] [6 ,]
+”Admitted” ”Admitted” ”Admitted” ”Admitted” ”Admitted” ”Admitted”
+”Male” ”A” ”Male” ”A” ”Male” ”A” ”Male” ”A” ”Male” ”A” ”Male” ”A”
+[,1] [,2] [,3]
+The first six rows are the same, and in fact there will be 512 such rows, since, as seen above, there were 512 male applicants who were admitted to Department A.
+Let’s analyze this data using logistic regression. With such coarsely discrete data, this is not a typical approach, but it will illustrate the dynamics of Simpson’s Paradox.
+First, convert to usable form, not R factors:
+￼7.2. SIMPSON’S PARADOX 199
+> ucbdf$admit <− as.integer(ucbdf[ ,1] == ’Admitted’) > ucbdf$male <− as.integer(ucbdf[,2] == ’Male’)
+# save work by using the ’dummies’ package
+> library (dummies)
+> d e p t <− u c b d f [ , 3 ]
+> deptdummies <− dummy(dept) > head(deptdummies)
+deptA deptB deptC deptD deptE deptF [1,]100000 [2,]100000 [3,]100000 [4,]100000 [5,]100000 [6,]100000
+> ucbdf1 <− cbind(ucbdf ,deptdummies[ , −6])[ , −(1:3)] # only 5 dummies > head(ucbdf1)
+V1 V2 1 Admitted Male 2 Admitted Male 3 Admitted Male 4 Admitted Male 5 Admitted Male 6 Admitted Male
+deptD deptE 100 200 300 400 500 600
+Now run the logit, first departments:
+Coefficients : ( Intercept ) −0.8305
+male 0.6104
+. , data=ucbdf1 , family=binomial )
+...
+> glm( admit
+ ̃
+... Coefficients :
+V3 admit A 1 A 1 A 1 A 1 A 1 A 1
+male deptA 1 1 1 1 1 1 1 1 1 1 1 1
+deptB deptC 0 0 0 0 0 0 0 0 0 0 0 0
+only with the
+male predictor, then adding the
+> glm(admit  ̃ male,data=ucbdf1,family=binomial) ...
+￼200
+( Intercept ) −2.62456 deptB 3.26308 deptE 1.56717
+...
+CHAPTER 7.
+male −0.09987 deptC 2.04388
+MEASURING FACTOR EFFECTS
+deptA 3.30648 deptD 2.01187
+So the sign for the male variable
+to slightly negative (women have the advantage). Needless to say this analysis (again, in table form, not logit) caused quite a stir, as the evidence against the university had looked so strong.
+By the way, note that the coefficients for all five dummies were positive, which reflects the fact that all the departments A-E had higher admissions rates than department F:
+> apply(ucb,c(1,3),sum) Dept
+Admit ABCDEF Admitted 601 370 322 269 147 46 Rejected 332 215 596 523 437 668
+7.2.2 A Geometric Look
+To see the problem geometrically, here is a variation of another oft-cited example: We have scalar variables Y , X and I, with:
+• I = 0 or 2, w.p. 1/2 each
+• X N(10−2I,0.5)
+• Y =X+3I+ε,withεN(0,0.5)
+So, the population regression function with two predictors is E(Y |X=t,I=k)=t+3k
+(7.1)
+switched from positive (men are favored)
+With just X as a predictor, we defer this to the exercises at the end of this chapter, but let’s simulate it all:
+￼7.2. SIMPSON’S PARADOX 201
+> n <− 1000
+> i <− sample(c(0,2),n,replace=TRUE)
+> x <− rnorm(n,mean=0,sd=0.5)
+> x <− x + 10 − 2∗i
+> eps <− rnorm(n,sd=0.5)
+> y <− x + 3∗i + eps
+> plot(x,y)
+> abline(coef(lm(y  ̃ x)))
+> idxs0 <− which(i == 0)
+> abline(coef(lm(y[ idxs0 ]  ̃ x[ idxs0 ]))) > idxs1 <− setdiff(1:n,idxs0)
+> abline(coef(lm(y[ idxs1 ]  ̃ x[ idxs1 ]))) >text(9.0,13.8,’reg. line, I=1’) >text(7.0,8.5,’reg. line, I=0’)
+> text(8.2,11.4,’reg. line, no I’)
+The result, shown in Figure 7.1, dramatizes the problem. If we I as a predictor, we positive slopes for the regression function (slopes plural, as there are two possible values of I. But if do not know/use I, the slope is negative.
+7.2.3 The Verdict
+Simpson’s is not really a paradox — let’s just call it Simpson’s Phenomenon — but is crucially important to keep in mind in applications in which Description is the goal. And the solution to the “paradox” is to think twice before deleting any predictor variables.
+Ironically, this last point is somewhat at odds with the theme of Chapter 9, in which we try to pare down the number of predictors. When we have correlated variables, such as Gender and Department in the admissions data, it might be tempting to delete one or more of them on the grounds of “redundancy,” but we first should check the effects of deletion, e.g. sign change.2
+On the other hand, this is rather consistent with the method of ridge re- gression in Chapter 8. That approach attempts to ameliorate the effects of correlated predictor variables , rather than resorting to deleting some of them.
+Once again, we see that regression and classification methodology does not
+2In the admissions data, the correlation, though substantial, would probably jot war- rant deletion in the first place, but the example does illustrate the dangers.
+￼
+￼202 CHAPTER 7. MEASURING FACTOR EFFECTS
+￼Figure 7.1: Geometric View of Simpson’s Paradox
+￼7.3. COMPARINGGROUPSINTHEPRESENCEOFCOVARIATES203
+always offer easy, pat solutions.
+7.3 Comparing Groups in the Presence of Co- variates
+Recall the my old consulting problem from Section 1.9.1:
+Long ago, when I was just finishing my doctoral study, I had my first experience in statistical consulting. A chain of hos- pitals was interested in comparing the levels of quality of care given to heart attack patients at its various locations. A prob- lem was noticed by the chain regarding straight comparison of raw survival rates: One of the locations served a largely elderly population, and since this demographic presumably has more difficulty surviving a heart attack, this particular hospital may misleadingly appear to be giving inferior care.
+How do we deal with such situations?
+7.3.1 ANCOVA
+There is a classical statistical method named Analysis of Covariance, used to compare several groups in terms of a variable Y , in the presence of covariates. It assumes:
+(a) Conditional mean response is a linear function of the covariates.
+(b) Coefficients of the predictors are the same across groups, except for
+the constant term β0.
+(c) Conditional variance is constant, both within and between groups.
+The difference between groups is then taken to be the difference between constant terms.
+But wait a minute, you ask, isn’t this just what we’ve been doing with dummy variables? The answer of course is yes. See the next section.
+￼204 CHAPTER 7. MEASURING FACTOR EFFECTS
+7.3.2 Example: Programmer/Engineer 2000 Census Data
+Consider again the census data on programmer and engineer salaries, par- ticularly the analysis in Section ??. Considering the dummy variables Gen- der, MS and PhD, we have six subgroups that could be compared.3 Our use here of lm(), plus the fact that we don’t have any interaction terms involving the dummies, implies assumptions (a)-(c) in the last section.
+The constant term for any group follows from such considerations. For example, the one for the group consisting of female PhDs, the constant term is
+63812.415 − 10336.835 + 20557.235 = −663592 (7.2) We could then compare the six groups in this manner.
+7.3.3 Answering Other Subgroup Questions
+But we could go further. The coefficients of the dummy variables are obvi- ously quite useful, but they are just marginal quantities, i.e. they measure the effect on mean response of a one-unit increase in a predictor, such as a one-year increase in age. It may also be useful to study overall effects within groups.
+In the programmer/engineer data, the estimated coefficient for PhD was $20557.235. But the distribution of the various predictors of those with doctorates will likely be substantially different from the data as a whole. The doctorate holders are more likely to be older, more likely to be male and so on. (Indeed, they may also be more likely to be unemployed.)
+So, how can we assess how the PhDs as a group are doing? For example, in purely financial terms, how much did having a PhD impact their wage income?
+We can answer such questions by appealing to the Law of Iterated Expec- tations,
+EV = E[E(V | U)]M (7.3)
+3The nature of the data definition is such that the MS and PhD variables can’t simultaneously be 1. Note that ordinarily we would be interested in the dummies indi- vidually, rather than defining the subgroups, but for the sake of illustration let’s suppose the groups are of interest.
+￼
+￼7.4. UNOBSERVED PREDICTOR VARIABLESS 205
+First, let’s establish a basis for comparison:
+> library(regtools)
+> data(prgeng)
+> pe <− prgeng
+> pe$ms <− as.integer(pe$educ == 14)
+> pe$phd <− as . integer ( pe$educ == 16)
+> pecs <− pe[pe$occ >= 100 & pe$occ <= 109,] > pecs1 <− pecs [ ,c(1 ,7 ,9 ,12 ,13 ,8)]
+> pecs1doc <− pecs1 [ pecs1$phd , ] > mean(pecs1doc$wageinc)
+[ 1 ] 75000
+So we estimate the mean wage income of all PhDs to be $75,000. But what if they didn’t have PhDs? What if they had stopped their education at a Master’s degree?
+We can answer that question using (7.3). We take our subgroup data, pecs1doc, change their status from PhD to MS, then average our estimated regression function over this subgroup:
+> pecs1doc$ms <− 1
+> pecs1doc$phd <− 0
+> lmout <− lm( wageinc  ̃ . , data=pecs1 )
+> prout <− predict(lmout,pecs1doc[,−7]) > mean(prout)
+[1] 77395.88
+Oh, this is a little disturbing. If these PhDs had not pursued a doctorate, they actually would have been making about $2400 more, rather than the $20,000 less that the coefficient of the PhD dummy variable had suggested.
+Of course, this then indicates a need for further analysis. For example, was the discrepancy due to the PhDs working in lower-paying sectors of the economy, such as education or civil service? And we should double- check the accuracy of our linear model, and so on. But it is clear that this approach can be used for lots of other interesting investigations.
+7.4 Unobserved Predictor Variabless
+In Statistical Heaven, we would have data on all the variables having sub- stantial relations to the response variable. Reality is sadly different, and
+￼206 CHAPTER 7. MEASURING FACTOR EFFECTS
+often we feel that our analyses are hampered for lack of data on crucial variables.
+Statisticians have actually developing methodology to deal with this prob- lem. Not surprisingly, the methods have stringent assumptions, and they are hard to verify. But they should be part of the toolkit of any data scien- tist, either to use where appropriate or at least understand when presented with such analyses done by others. The following sections will provide brief introductions to such methods.
+7.4.1 Instrumental Variables (IV)
+This one is quite controversial. It’s primarily used by economists, but has become increasingly popular in the social and life sciences.
+Suppose we are interested in the relation between Y and two predictors, X(1) and X(2). We observe Y and X(1) but not X(2). We believe that the two population regression functions (one predictor vs. two) are well approximated by the linear model:4
+E(Y | X(1)) = β01 + β11X(1) (7.4) E(Y | X(1), X(2)) = β02 + β12X(1) + β22X(2) (7.5)
+We are primarily interested in the role of X(1), i.e. the value of β12. How- ever, as has been emphasized so often in this chapter, generally
+β11 ̸= β12 (7.6)
+A commonly offered example concerns a famous economic study regarding the returns to education. Here Y is weekly wage and X(1) is the number of years of schooling. The concern was that this analysis doesn’t account for “ability”; highly-able people might pursue many years of education, and thus get a good wage due to their ability, rather than the education itself. If a measure of ability were included in our data, we could simply use it as a covariate and fit the model (7.5), but no such measure was included in the data.5
+4The second model does not imply the first. What if X(2) = X(1) 2, for instance?
+5Of course, even with better data, “ability” would be hard to define. Does it mean IQ (of which I am very skeptical), personal drive or what?
+￼
+￼7.4. UNOBSERVED PREDICTOR VARIABLESS 207
+The instrumental variable approach involves using a variable that is in- tended to remove from X(1) the portion of that variable that involves abil- ity. If this works — a big “if” — then we will be able to measure the effect of years of schooling without the confounding effect of ability. The instrumental variable, or simply the instrument, is observable.
+7.4.1.1 The IV Method
+Let Z denote our instrument. Its definition consists of two conditions (let ρ denote population correlation):
+(a) ρ(Z, X(1)) ̸= 0 (b) ρ(Z, X(2)) = 0
+In other words, the instrument is uncorrelated with the unseen predictor variable, but is correlated with the response variable.6
+In the years-of-schooling example, the instrument is distance from a college. The rationale here is that, if there are no nearby postsecondary institutions, the person will find it difficult to pursue a college education, and may well decide to forego it.7 That gives us condition (a), and it seems reasonable that this variable should be unrelated to ability.8 In this manner, we hope to capture that part of X(1) that is unrelated to ability.
+Where do these conditions (a) and (b) come from mathematically? Let’s first do a (population) calculation:
+Cov(Z, Y ) = β12Cov(Z, X(1) + β22Cov(Z, X(2)) = β12Cov(Z, X(1)) (7.7) and thus
+β12 = Cov(Z, Y ) (7.8) Cov(Z, X(1))
+= ρ(Z,Y) σ(Y) (7.9) ρ(Z, X(1)) σ(X(1))
+6Our focus here is on linear models. In nonlinear cases, we must ask for independence rather than merely lack of correlation.
+7The study was based on data from 1980, when there were fewer colleges in the U.S. than there are now.
+8This could be debated, of course. See Section 7.4.1.5.
+￼￼￼
+￼208 CHAPTER 7. MEASURING FACTOR EFFECTS
+where for any random variable W, σ(W) denotes its population standard deviation.
+Since we can estimate Cov(Z,Y) and Cov(Z,X(1)) from our sample, we can thus estimate the parameter of interest, β12 — in spite of not observing
+X(2).
+This is wonderful! Well, wait a minute...is it too good to be true? Well, as
+noted, the assumptions are crucial, such as:
+• We assume the linear models (7.4) and (7.5). The first can be assessed from our data, but the second cannot.
+• We assume condition (b) above, i.e. that our instrument is uncorre- lated with our unseen variable. Often we are comfortable with that assumption — e.g. that distance from a college is not related to ability — but again, it cannot be verified.
+• We need the instrument to have a fairly substantial correlation to the observed predictor, i.e. ρ(Z,X(1)) should be substantial. If it isn’t, then we have a small or even tiny denominator in (7.9), so that the
+sample variance of the quotient — and thus of our β12 will be large, certainly not welcome news.
+7.4.1.2 2 Stage Least Squares:
+Another way to look at the IV idea is 2 Stage Least Squares (2SLS), as follows. Recall the phrasing used above, that the instrument
+is a variable that is intended to remove from X(1) the portion of that variable that involves ability.
+That suggests that regressing X;(1) on Z.9 Let’s see what happens. Using (7.5), write
+E(Y | Z) = β0 + β11E(X(1)|Z) + β12E(X(2)|Z) (7.10) 9The term “regress V on U means to model the regression function of V given U.
+􏰭
+￼
+￼7.4. UNOBSERVED PREDICTOR VARIABLESS 209
+By assumption, Z and X(2) are uncorrelated. If they are also bivariate normally distributed, then they are independent. Assuming this, we have
+E(X(2)|Z) = E[X(2)] (7.11)
+In other words,
+E(Y | Z) = c + β11E(X(1)|Z) (7.12) for a constant c = β0 + E[X(2)].
+But E(X(1)|Z) is the regression of X(1) on Z. In other words, the process is as follows:
+2 Stage Least Squares:
+• First regress X(1) on the instrument Z, saving the fitted values.
+• Then regress Y on those fitted values. 􏰭
+• The resulting estimated slope will be β11, the estimate we are seeking.
+In other words, the IV method can be viewed as an application of 2SLS, with the predictor variable in the first stage being our instrument.
+In terms of R, this would mean
+lmout <− lm(x1  ̃ z)
+estreg <− predict(lmout)
+b11hat <− coef(lm(y  ̃ estreg ))[2]
+However, there are more sophisticated R packages for this, which do more
+than just find that point estimae β11, as we will see in the next section. 7.4.1.3 Example: Price Elasticity of Demand
+One of the popular R functions for IV computation is ivreg(), in the AER package. That package’s prime example deals with the effects of price on cigarette consumption. (Note: Our analysis here will be a simplified version of the example in the package.)
+􏰭
+￼210 CHAPTER 7. MEASURING FACTOR EFFECTS
+In the example, they first compute relative price, rprice, to adjust for inflation. They also compute an instrument, tdiff, as follows.
+The problem is that price and demand are interrelated; if demand increases, the price will likely go up too. So, the unseen variable here is that part of demand that comes from mutual interaction of price and demand. But part of price is also determined by tax on the product, which the authors use as their instrument:
+> data(”CigarettesSW” , package = ”AER”)
+> cgd <− CigarettesSW
+> cgd$rprice <− with(cgd, price/cpi)
+> cgd$tdiff <− with(cgd, (taxs − tax)/cpi)
+Now, we should check that this instrument will be useful. As noted earlier, it should have substantial correlation with its partner variable. Let’s check:
+> cor(cgd$rprice ,cgd$tdiff) [1] 0.7035012
+Good, so let’s run the IV model:
+> ivout <− ivreg(packs  ̃ rprice | tdiff , data=cgd) > summary( ivout )
+... Coefficients :
+( Intercept ) rprice
+( Intercept )
+rprice ∗∗∗
+...
+Multiple R−Squared : ...
+value Pr(>|t |) 12.924 < 2e−16 0.1559 −6.539 3.2e−09
+0.4905 , Adjusted R−squared : 0.4851
+Estimate Std . Error t 219.5764 16.9894
+−1.0195
+∗∗∗
+Not surprisingly (and gratifyingly to government policymakers who wish to reduce cigarette consumption), there does appear to be a substantial negative affect of a price increase on demand – apart from the effect that demand itself has on price.
+Note the syntax of ivreg(). In the formula, packs  ̃ rprice | tdiff
+￼7.4. UNOBSERVED PREDICTOR VARIABLESS 211
+the response and predictor variable go before the vertical line, and the instrument is listed after it.
+Just to check that we’re using ivreg() correctly, let’s use 2SLS:
+> summary(lm(packs  ̃ predict(lm(rprice ̃tdiff)),data=cgd)) ...
+Coefficients : ( Intercept )
+predict(lm( rprice
+ ̃
+tdiff ))
+Estimate 219.5764 −1.0195
+Std . Error 20.8631 0.1915
+( Intercept )
+predict(lm( rprice  ̃ tdiff ))
+...
+Multiple R−squared: 0.2317,
+...
+t value Pr(>|t|) 10.525 < 2e−16 ∗∗∗ −5.325 6.88e−07 ∗∗∗
+Adjusted R−squared:
+0.2235
+Yes, it matches. Note, though, that using 2SLS “manually” like this is not desirable, because the standard errors and so on that are emitted by the second lm() call won’t be correct; ivreg() does use 2SLS internally, but it make the proper corrections. For example, the standard error for price reported by 2SLS above is 0.1915, but actually should be 0.1559, according to ivreg().
+One more thing: Why not simply use the instrument directly as a predictor? We certainly could do that:
+...
+Coefficients :
+(Intercept) rprice tdiff
+223.9610 −1.0676 0.2004
+Indeed, in this instance, the estimated coefficients for the price variable were almost identical. But in general, this will not be the case, and in settings in which the quantity β12 is of central interest, the IV method can be useful.
+7.4.1.4 Multiple Predictors
+What if we have several observable predictors?10 The same analysis shows that we need one instrument for each one. How does the estimation then
+10We are still assuming just one unobserved predictor, which might be viewed as several of them combined.
+￼
+￼212 CHAPTER 7. MEASURING FACTOR EFFECTS
+work?
+Suppose our population model is
+E(Y | X(1), ..., X(k+1)) = β0,k+1 +β1,k+1X(1) +...+βk+1,k+1X(k+1) (7.13) with X(1),...,Xk observed but Xk+1 unobserved. The extension of (7.7)
+will then be
+Cov(Y, Zi) = β1,k+1Cov(X(1), Zi) + ... + βk,k+1Cov(X(k), Zi) (7.14)
+This sets up k linear equations in k unknowns, which can be solved for the estimated βj,k+1. This then is a Method of Moments estimator, so we can also obtain standard errors.
+In many cases, it is felt that a predictor is unrelated to the unobserved variable, and that predictor will serve as its own instrument. In such a situation, the fitted values reduce to the values of the predictor itself.
+7.4.1.5 The Verdict
+In our years-of-schooling example (Section 7.4.1.1), it was mentioned that the assumption that the distance variable was unreleated to ability was debatale. For example, we might reason that able children come from able parents, and able parents believe college is important enough that they should live near one. This is an example of why the IV approach is so controversial.
+Nevertheless, the possible effect of unseen variables itself can make an anal- ysis controversial. IVs may be used in an attempt to address such problems. However, extra care is warranted if this method is used.
+7.4.2 Random Effects Models
+Continuing our theme here in Section 7.4 of approaches to account for unseen variables, we now turn briefly to mixed effects models. Consider a usual linear regression model for one predictor X,
+E(Y |X=t)=β0+β1t (7.15)
+￼7.4. UNOBSERVED PREDICTOR VARIABLESS 213
+for unknown constants β0 and β1 that we estimated from the data.
+Now alter the model so that β0 is random, each unit (e.g. each person) having a different value, though all having a common value of β1. We might observe people over time, measuring something that we model as having a linear time trend; the slope of that trend is assumed the same for all people, but the starting point β0 is not.
+We might write our new model as
+E(Y |X=t)=β0+B+β1t (7.16)
+where α is a random variable having mean 0. Each person has a different value of B, with the slopes for people now being a random variable with mean β0 and variance σa2.
+It is more common to write
+Y = β0 + α + β1X + ε (7.17)
+where Eε has mean 0 and variance σe2. The population values to be esti- mated from our data are β0, β1, σa2 and σe2. Typically these are estimated via Maximum Likelihood (with the assumptions that α and ε have normal distributions, etc.), though the Method of Moments is possible too.
+The variables α and ε are called random effects (they are also called variance components), while the β0 + α + β1X portion of the model is called fixed effects. This phrasing is taken from the term fixed-X regression, which we saw in Section 2.2; actually, we could view this as a random-X setting, but the point is that even then we are not estimating the distribution of X. Due to the presence of both fixed and random effects, the term mixed-effects model is used.
+7.4.2.1 Example: Movie Ratings Data
+The famous Movie Lens data (http://files.grouplens.org/datasets/ movielens/ provide ratings of many movies by many users. We’ll use the 100,000-rating data here, which includes some demographic variables for the users. The R package lme4 will be our estimation vehicle.
+First we need to merge the ratings and demographic data: > ratings <− read.table(’u.data’)
+￼214 CHAPTER 7. MEASURING FACTOR EFFECTS
+> names(ratings) <− c(’usernum’,’movienum’,’rating’,’transID’) > d e m o g <− r e a d . t a b l e ( ’ u . u s e r ’ , s e p = ’ | ’ )
+> names(demog) <− c(’usernum’,’age’,’gender’,’occ’,’ZIP’)
+> u.big <− merge(ratings ,demog,by.x=1,by.y=1)
+> u <− u . b i g [ , c ( 1 , 3 , 5 , 6 ) ]
+We might speculate that older users are more lenient in their ratings. Let’s
+take a look:
+> z <− lmer(rating  ̃ age+gender+(1|usernum),data=u) > summary(z)
+...
+Random effects :
+Groups usernum Residual
+Name
+( Intercept )
+Variance Std . Dev . 0.175 0.4183 1.073 1.0357
+Number of obs: 100000, groups: usernum, 943
+Fixed effects : Estimate
+Std . Error 0.048085 0.001184 0.031795
+t
+value 72.14 2.98 −0.08
+( Intercept ) age
+genderM
+3.469074
+0.003525 −0.002484
+Correlation
+( Intr ) age
+of Fixed Effects : age −0.829
+genderM −0.461 −0.014
+First, a word on syntax. Here our regression formula was
+rating  ̃ age + gender + (1|usernum)
+Most of this looks the same as what we are accustomed to in lm(), but the last term indicates the random effect. In R formulas, ‘1’ is used to denote a constant term in a regression equation (we write ‘-1’ in our formula if we want no such term), and here ‘(1—usernum)’ specifies a random effects constant term which depends on usernum but is unobserved.
+So, what is the answer to our speculation about age? Blind use of signif- icance testing would mean announcing “Yes, there is a significant positive relation between age and ratings.” But the effect is tiny; a 10-year differ- ence in age would mean an average increase of only 0.03525, on a ratings scale of 1 to 5. There doesn’t seem to be much different between men and women either.
+￼7.4. UNOBSERVED PREDICTOR VARIABLESS 215
+The estimated variance of α, 0.175, is much smaller than that for ε, 1.073.
+Of course, much more sophisticated analyses can be done, adding a variance component for the movies, accounting for the different movie genres and so on.
+￼216 CHAPTER 7. MEASURING FACTOR EFFECTS
