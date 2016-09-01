@@ -123,7 +123,7 @@ So, to predict the weight of a 71.6-inch tall player, we would use μ(71.6) — 
 
 Our height data is only measured to the nearest inch, so instead of estimating values like μ(71.6), we’ll settle for μ(72) and so on. A very natural estimate for μ(72), again using the “hat” symbol to indicate “estimate of,” is the mean weight among all players in our sample for whom height is 72, i.e.
 
-    μ(72) = mean of all Wi such that Hi = 72 (1.4) 
+    μ(72) = mean of all W[i] such that H[i] = 72 (1.4) 
 
 R’s tapply() can give us all the μ(t) at once:
 
@@ -191,7 +191,7 @@ But again, in this chapter we are simply exploring, so let’s assume for now th
 - Since μ(t) is a population function, the constants c and d are population values, thus unknown. However, we can estimate them from our sample data. We do so using R’s lm() (“linear model”) function [4]:
 
 ```{r comment=NA}
-lmout <- lm(mlb$Weight ~ mlb$Height)
+lmout <- lm(Weight ~ Height, data = mlb)
 lmout
 ```
 
@@ -273,7 +273,7 @@ Let’s consider a parametric model for the baseball data,
 We can again use lm() to obtain sample estimates of c, d and e:
 
 ```{r comment=NA}
-lm(mlb$Weight ~ mlb$Height + mlb$Age) 
+lm(Weight ~ Height + Age, data = mlb) 
 ```
 
 Note that the notation mlb$Weight ~ mlb$Height + mlb$Age simply means “predict weight from height and age.” The variable to be predicted is specified to the left of the tilde, and the predictor variables are written to the right of it. The + does not mean addition.
@@ -643,7 +643,7 @@ Another way to see this is that in calling lm(), we can simply regard squared te
 
 ```{r comment=NA}
 shar$temp2 <- shar$temp^2
-lm(shar$reg ~ shar$temp + shar$temp2)
+lm(reg ~ temp + temp2, data = shar)
 ```
 
 And note that, sure enough, the coefficient of the squared term, e^ = −11756, did indeed turn out to be negative.
@@ -770,7 +770,7 @@ As with our bike-sharing data, we’ll add a quadratic term, in this case on the
 data(prgeng)
 prgeng$age2 <- prgeng$age^2
 edu <- prgeng$educ
-prgeng$ms <- as.integer(edu == 14) 
+prgeng$ms  <- as.integer(edu == 14) 
 prgeng$phd <- as.integer(edu == 16)
 prgeng$fem <- prgeng$sex - 1
 tmp <- prgeng[edu >= 13, ]
@@ -1033,7 +1033,7 @@ The return value from a call to lm() is an object of R’s S3 class structure; t
 Recall our usage, on the baseball player data:
 
 ```{r comment=NA}
-lmout <- lm(mlb$Weight ~ mlb$Height)
+lmout <- lm(Weight ~ Height, data = mlb)
 ```
 
 The call to coef extracted the vector of estimated regression coefficents (which we also could have obtained as lmout$coefficents). But here is what happened behind the scenes:
