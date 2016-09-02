@@ -1,0 +1,350 @@
+---
+title: "draftregclass03"
+author: "Robert A. Stevens"
+date: "August 31, 2016"
+output: html_document
+---
+
+*From Linear Models to Machine Learning: Regression and Classification, with R Examples*
+
+by Norman Matloff
+
+Chapter 3: The Assumptions in Practice
+
+This chapter will take a practical look at the classical assumptions of linear regression models:
+
+(a) Linearity:
+
+    E(Y | X~ = t~) = t~′*β  (3.1)
+
+(b) Normality: The conditional distribution of Y given X is normal.
+
+(c) Independence: The data (X[i], Y[i]) are independent across i.
+
+(d) Homoscedasticity:
+
+    Var(Y | X = t)  (3.2)
+
+is constant in t.
+
+Verifying assumption (a), and dealing with substantial departures from it, is the subject of an entire chapter, Chapter 6. So, this chapter will focus on assumptions (b)-(d).
+
+3.1 Normality Assumption
+
+We already discussed (b) in Section 2.6.2, but the topic deserves further comment. First, let’s review what was found before.
+
+Neither normality nor homoscedasticity is needed; β^ is unbiased, consistent and asymptotically normal without those assumptions. Standard statistical inference procedures, however, assume homoscedasticity. We’ll return to the latter issue in Section 3.3. But for now, let’s concentrate on the normality assumption. Retaining the homoscedasticity assumption for the moment, we found in the last chapter that:
+
+The conditional distribution of the least-squares estimator β^, given A, is approximately multivariate normal distributed with mean β and approximate covariance matrix
+
+    s^2*inv(A′*A)  (3.3)
+
+Thus the standard error of βj is the square root of element j of this matrix (counting the top-left element as being in row 0, column 0).
+
+Similarly, suppose we are interested in some linear combination λ′β of the elements of β, estimating it by λ′β^. The standard error is the square root of
+
+    s^2*λ′*inv(A′*A)*λ  (3.4)
+
+The reader should not overlook the word asymptotic in the above. Without assumption (a) above, our inference procedures (confidence intervals, significance tests) are valid, but only approximately. On the other hand, the reader should be cautioned (as in Section 2.6.1) that so-called “exact” inference methods, based on the Student-t distribution and so on, are themselves only approximate, since true normal distributions rarely if ever exist in real life.
+
+In other words:
+
+We must live with approximations one way or the other, and the end result is that the normality assumption is not very important.
+
+3.2 Independence Assumption — Don’t Overlook It
+
+Statistics books tend to blithely say things like “Assume the data are independent and identically distributed (i.i.d.),” without giving any comment to (i) how they might be nonindependent and (ii) what the consequences are of using standard statistical methods on nonindependent data. Let’s take a closer look at this.
+
+3.2.1 Estimation of a Single Mean
+
+Note the denominator S/sqrt(n) in (2.35). This is the standard error of W-, i.e. the estimated standard deviation of that quantity. That in turn comes from a derivation you may recall from statistics courses,
+
+    Var(W-) = Var(sum(W[i], i = 1:n)/n^2   (3.5) 
+            = sum(Var(W[i]), i = 1:n)/n^2  (3.6)
+
+and so on.
+
+In going from the second equation to the third, we are making use of the usual assumption that the Wi are independent. But suppose the Wi are correlated. Then the correct equation is
+
+    Var(sum(W[i], i = 1:n) = sum(Var(W[i]), i = 1:n) + 2*sum(Cov(W[i], W[j]), 1 ≤ i < j ≤ n)  (3.7)
+
+It is often the case that our data are positively correlated. Many data sets, for instance, consist of multiple measurements on the same person, say 10 blood pressure readings for each of 100 people. In such cases, the covariance terms in (3.7) will be positive, and (3.5) will yield too low a value. Thus the denominator in (2.35) will be smaller than it should be. That means that our confidence interval (2.37) will be too small (as will be p-values), a serious problem in terms of our ability to do valid inference.
+
+Here is the intuition behind this: Although we have 1000 blood pressure readings, the positive intra-person correlation means that there is some degree of repetition in our data. Thus we don’t have “1000 observations worth” of data, i.e. our effective n is less than 1000. Hence our confidence interval, computed using n = 1000, is overly optimistic.
+
+Note that W will still be an unbiased and consistent estimate of ν. In other words, W is still useful, even if inference procedures computed from it may be suspect.
+
+3.2.2 Estimation of Linear Regression Coefficients
+
+All of this applies to inference on regression coefficients as well. If our data is correlated, i.e. rows within (A, D) are not independent, then (??) will be incorrect, because the off-diagonal elements won’t be 0s. And if they are positive, (??) will be “too small,” and the same will be true for (3.3). Again, the result will be that our confidence intervals and p-values will be too small, i.e. overly optimistic. In such a situation, then our β^ will still be useful, but our inference procedures will be suspect.
+
+3.2.3 What Can Be Done?
+
+This is a difficult problem. Some possibilities are:
+
+- Simply note the dependency problem, e.g. in our report to a client, and state that though our estimates are valid (in the sense of statistical consistency), we don’t have reliable standard errors.
+
+- Somehow model the dependency, i.e. the off-diagonal elements of inv(A′*A).
+
+- Collapse the data in some way to achieve independence. 
+
+An example of this last point is presented in the next section.
+
+3.2.4 Example: MovieLens Data
+
+The MovieLens data (http://grouplens.org/) consists of ratings of various movies by various users. The 100K version, which we’ll analyze here, consists of columns User ID, Movie ID, Rating and Timestamp. There is one row per rating. If a user has rated, say eight movies, then he/she will have eight rows in the data matrix. Of course, most users have not rated most movies.
+
+Let Y[i, j] denote the ratings of user i, j = 1, 2, ..., N[i], where N[i] is the number of movies rated by this user. We are not taking into account which movies the user rates here, just analyzing general user behavior. We are treating the users as a random sample from a conceptual population of all potential users.
+
+As with the blood pressure example above, for fixed i, the Y[i, j] are not independent, since they come from the same user. Some users tend to give harsher ratings, others tend to give favorable ones. But we can form
+
+    T[i] = sum(Y[i, j], j = 1:N[i])  (3.8)
+
+the average rating given by user i, and we have independent random variables. And, if we treat the Ni as random too, and i.i.d., then the Ti are i.i.d., enabling standard statistical analyses.
+
+For instance, the MovieLens data include a few demographic variables for the users, and we can run the model, say,
+
+    mean rating = β0 + β1*age + β2*gender  (3.9) 
+
+and then pose questions such as “Do older people tend to give lower ratings?”
+
+3.3 Dropping the Homoscedasticity Assumption
+
+For an example of problems with the homoscedasticity assumption, again consider weight and height. It is intuitive that tall people have more variation in weight than do short people, for instance. We can confirm that in our baseball player data. Let’s find the sample standard deviations for each height group (restricting to the groups with over 50 observations), seen in Section 1.5.2):
+
+```{r comment=NA}
+library(freqparcoord)
+data(mlb)
+#m70 <- mlb[mlb$Height >= 70 & mlb$Height <= 77, ] 
+m70 <- subset(mlb, Height >= 70 & mlb$Height <= 77)
+#sds <- tapply(m70$Weight, m70$Height, sd)
+sds <- with(m70, tapply(Weight, Height, sd))
+par(pty = "s")
+plot(70:77 , sds)
+```
+
+**Figure 3.1:** Standard Deviations of Weight, By Height Group
+
+The result is shown in **Figure 3.1**. The upward trend is clearly visible, and thus the homoscedasticity assumption is not reasonable.
+
+(2.23) is called the ordinary least-squares (OLS) estimator of β, in contrast to weighted least-squares (WLS), a weighted version to be discussed shortly. Statistical inference on β using OLS is usually based on (2.46), which is in turn based on the homoscedasticity assumption — that (2.26) is constant in t. Yet that assumption is rarely if ever valid.
+
+Given the inevitable non-constancy of (2.26), there are questions that must be raised:
+
+- Do departures from constancy of (2.26) in t substantially impact the validity of statistical inference procedures that are based on (2.46)?
+
+- Can we somehow estimate the function σ2(t), and then use that information to perform a WLS analysis?
+
+- Can we somehow modify (2.46) for the heteroscedastic case? These points will be addressed in this section.
+
+3.3.1 Robustness of the Homoscedasticity Assumption
+
+In statistics parlance, we ask, “Is classical inference on β robust to the homoscedasticity assumption, meaning that there is not much effect on the validity of our inference procedures (confidence intervals, significance tests) unless the setting is quite profoundly heteroscedastic?” We can explore this idea via simulation.
+
+Let’s investigate settings in which
+
+    σ(t) = |μ(t)|^q (3.10)
+
+where q is a parameter to vary in the investigation. This includes several important cases:
+
+- q = 0: Homoscedasticity.
+
+- q = 0.5: Conditional distribution of Y given X is Poisson.
+
+- q = 1: Conditional distribution of Y given X is exponential.
+
+Here is the code:
+
+```{r comment=NA}
+simhet <- function(n, p, nreps, sdpow) { 
+  bh1s <- vector(length = nreps)
+  ses <- vector(length = nreps)
+  for(i in 1:nreps) {
+    x <- matrix(rnorm(n*p), ncol = p) 
+    meany <- x %*% rep(1, p)
+    sds <- abs(meany)^sdpow
+    y <- meany + rnorm(n, sd = sds) 
+    lmout <- lm(y ~ x)
+    bh1s[i] <- coef(lmout)[2]
+    ses[i] <- sqrt(vcov(lmout)[2, 2]) 
+  }
+  mean(abs(bh1s - 1.0) < 1.96*ses) 
+}
+
+#simhet(100, 5, 100000, 1) # 0.89933 (table lists 0.90203) - takes a long time!
+simhet(100, 5, 10000, 1)
+```
+
+The simulation finds the true confidence level (providing nreps is set to a large value) corresponding to a nominal 95% confidence interval. **Table 3.1** shows the results of a few runs, all with nreps set to 100000. We see that there is indeed an effect on the true confidence level.
+
+n   p q   conf. lvl.
+--- - --- ----------
+100 5 0.0 0.94683
+100 5 0.5 0.92359
+100 5 1.0 0.90203
+100 5 1.5 0.87889
+100 5 2.0 0.86129
+
+**Table 3.1:** Heteroscedasticity Effect Simulation
+
+3.3.2 Weighted Least Squares
+
+If one knows the function σ^2(t) (at least up to a constant multiple), one can perform a weighted least-squares (WLS) analysis. Here, instead of minimizing (2.12), one minimizes
+
+    sum((Y[i] − X~[i]′*b)^2/w[i], i = 1:n)/n  (3.11)
+
+(without the 1/n factor, of course), where
+
+    w[i] = σ^2(X[i])  (3.12)
+
+Just as one can show that in the homoscedastic case, OLS gives the optimal (minimum-variance unbiased) estimator, the same is true for WLS in heteroscedastic settings, provided we know the function σ^2(t) [1].
+
+R’s lm() function has an optional weights argument for specifying the wi. But needless to say, this situation is not common. To illustrate this point, consider the classical inference procedure for a single mean, reviewed in Section 2.6.1. If we don’t know the population mean ν, we are even less likely to know the population variance η2. The same holds in the regression context, concerning conditional means and conditional variances.
+
+One option would be to estimate the function σ(t) using nonparametric regression techniques [2]. For instance, we can use our k-NN function knnest() of Section 1.7.4, with the default for regestpts and applyf = var. Let’s run the analysis with and then without weights:
+
+```{r comment=NA}
+source("knnest.R")
+#w <− knnest(mlb[ , c(4 ,6 ,5)], mlb[ , c(4 ,6)], 20, scalefirst = TRUE, applyf = var)
+# no argument "applyf" in function, so remove it
+w <- knnest(mlb[ , c(4 ,6 ,5)], mlb[ , c(4 ,6)], 20, scalefirst = TRUE)
+summary(lm(Weight ~ Height + Age, data = mlb, weights = w))
+summary(lm(Weight ~ Height + Age, data = mlb))
+```
+
+The weighted analysis, the “true” one (albeit with the weights being only approximate), did give slightly different results than those of OLS. The standard error for the Age coefficient, for instance, was about 12% larger with WLS. This may seem small (and is small), but a 12% difference will have a large effect on the true confidence level. Consider this computation:
+
+```{r comment=NA}
+1 - 2*pnorm(-0.88*1.96)
+```
+
+In other words, a nominal 95% confidence interval only has confidence level at about 91.5%. Or, a nominal p-value of 5% is actually 8.5%. Use of the estimated weights makes a difference, with impacts on our statistical inference.
+
+On the other hand, we used a rather small value of k here, and there is no clear way to choose it.
+
+3.3.3 A Procedure for Valid Inference
+
+In principle, the delta method (Appendix ??) could be used to not only show that β^ is asymptotically normal, but also find its asymptotic covariance matrix without assuming homoscedasticity. We would then have available standard errors for the β^i and so on.
+
+However, the matrix differentiation needed to use the delta method would be far too complicated. Fortunately, though, there exists a rather simple procedure, originally developed by Eickert [3] and later refined by White and others [4], for finding valid asymptotic standard errors for β^ in the heteroscedastic case. This section will present the methodology, and test it on data.
+
+3.3.4 The Methodology
+
+Let’s first derive the correct expression for Cov(β|A) without the homoscedasticity assumption. Using our properties of covariance, this is
+
+    Cov(β^ | A) = inv(A′*A)*A′*diag(σ^2(X[1]), ..., σ^2(X[n])*A*inv(A′*A)  (3.13) 
+
+where diag(a[1], ..., a[k]) denotes the matrix with the a[i] on the diagonal and zeros elsewhere.
+
+Rather unwieldy, but the real problem is that we don’t know the σ(X[n]). However, the situation is more hopeful than it looks. It can be proven (as outlined in Section 2.10.7) that:
+
+In the heteroscedastic case, the approximate covariance matrix of β^ given A is
+
+    inv(A′*A)*A′*diag(ε^[1]^2, ..., ε^[n]^2)*A*inv(A′*A)  (3.14)
+
+where
+
+    ε^[i] = Y[i] − X~[i]′β^  (3.15)
+
+Again, the expression in (3.14) is rather unwieldy, but it is easy to program, and most important, we’re in business! We can now conduct statistical inference even in the heteroscedastic case.
+
+Code implementing (3.14) is available in R’s car and sandwich packages, as the functions hccm() and vcovHC(), respectively. (These functions also offer various refinements of the method.) These functions are drop-in replacements to the standard vcov().
+
+3.3.5 Simulation Test
+
+Let’s see if it works, at least in the small simulation experiment in Section 3.3.1. We use the same code as before, simply replacing the call to vcov() by one to vcovHC(). The results, shown in **Table 3.2**, are excellent.
+
+n   p q   conf. lvl.
+--- - --- ----------
+100 5 0.0 0.95176
+100 5 0.5 0.94928
+100 5 1.0 0.94910
+100 5 1.5 0.95001
+100 5 2.0 0.95283
+
+**Table 3.2:** Heteroscedasticity Correction Simulation
+
+3.3.6 Example: Bike-Sharing Data
+
+In Section 2.6.3, we found that the standard error for μ(75, 0, 1) − μ(62, 0, 1) was about 47.16. Let’s get a more accurate standard error, that does not assume homoscedasticity:
+
+```{r comment=NA, eval=FALSE}
+library(sandwich) # for function "vcovHC"
+# from Ch. 2
+lmout <- lm(reg ~ temp + temp2 + workingday + clearday, data = shar) 
+lamb <- c(0, 0.154, 0.186, 0, 0)
+#
+sqrt(t(lamb) %*% vcovHC(lmout) %*% lamb)
+```
+
+Not a very large difference in this case, but still of interest.
+
+3.3.7 Variance-Stabilizing Transformations
+
+Most classical treatments of regression analysis devote a substantial amount of space to transformations of the data. For instance, one might replace Y by ln(Y), and possibly apply the log to the predictors as well. There are several reasons why this might be done:
+
+(a) The distribution of Y given X may be skewed, and applying the log may make it more symmetric, thus more normal-like.
+
+(b) Log models may have some meaning relevant to the area of application, such as elasticity models in economics.
+
+(c) Applying the log may convert a heteroscedastic setting to one that is close to homoscedastic.
+
+One of the themes of this chapter has been that the normality assumption is not of much practical importance, which would indicate that Reason (a) above may not so useful. Reason (b) is domain-specific, and thus outside the scope of this book. But Reason (c) relates directly our current discussion on heteroscedasticity. Here is how transformations come into play.
+
+Recall that the delta method (Appendix ??) says, roughly, that if the random variable W is approximately normal with a small coefficient of variation (ratio of standard deviation to mean), and g is a smooth function, then the new random variable g(W) is also approximately normal, with mean g(EW) and variance
+
+    [g′(EW )]^2*Var(W)  (3.16) 
+
+Let’s consider that in the context of (3.10). Assuming that the regression function is always positive, (3.10) reduces to
+
+    σ(t) = μ(t)^q (3.17)
+
+Now, suppose (3.17) holds with q = 1. Take g(t) = ln(t). Then since
+
+    d/dt[ln(t)] = 1/t  (3.18)
+
+we see that (3.16) becomes
+
+    (1/μ(t)^2)·μ(t)^2 = 1  (3.19) 
+
+In other words Var(ln(Y) | X = t) is approximately 1, and we are back to the homoscedastic case. Similarly, if q = 0.5, then setting g(t) = sqrt(t) would give us approximate homoscedasticity.
+
+However, this method has real drawbacks: Distortion of the model, difficulty interpreting the coefficients and so on.
+
+Let’s look at a very simple model that illustrates the distortion issue. (It is further explored in Section 2.10.8.) Suppose X takes on the values 1 and 2. Given X = 1, Y is either 2 or 1/2, with probability 1/2 each. If X = 2, then Y is either 4 or 1/4, with probability 1/2 each. Let U = log2(Y).
+
+Let μ[Y] and μ[U] denote the regression functions of Y and U on X. An advantage of this very simple model is that, since X takes on only two values, both of these regression functions are linear.
+
+Then
+
+    μ[U](1) = 0.5·1 + 0.5·(−1) = 0  (3.20) 
+
+and similarly μ[U](2) = 0 as well.
+
+So, look at what we have. There is no relation between U and X at all! Yet the relation between Y and X is quite substantial. The transformation has destroyed the latter relation.
+
+Of course, this example is contrived, and one can construct examples with the opposite effect. Nevertheless, it shows that a log transformation can indeed bring about considerable distortion. This is to be expected in a sense, since the log function flattens out as we move to the right. Indeed, the U.S. Food and Drug Administration once recommended against using transformations [5].
+
+3.3.8 The Verdict
+
+While the examples here do not constitute a research study (the reader is encouraged to try the code in other settings, simulated and real), an overall theme is suggested.
+
+In principle, WLS provides more efficient estimates and correct statistical inference. What are the implications?
+
+If our goal is Prediction, then forming correct standard errors is typically of secondary interest, if at all. And unless there is really strong variation in the proper weights, having efficient estimates is not so important. In other words, for Prediction, OLS may be fine.
+
+The picture changes if the goal is Description, in which case correct standard errors may be important. For this, given that the method of Section 3.3.3, is now commonly available in statistical software packages (albeit not featured), this is likely to be the best way to cope with heteroscedasticity.
+
+3.4 Bibliographic Notes
+
+For more on the Eickert-White approach to correct inference under heteroscedasticity, see (Zeileis, 2006).
+
+[1] Mathematically, one is essentially transforming the original heteroscedastic problem to a homoscedastic one by replacing Y and X by Y/σ(X) and X/σ(X), respectively.
+
+[2] First proposed in R. Rose, *Nonparametric Estimation of Weights in Least-Squares Regression Analysis*, PhD dissertation, University of California, Davis, 1978, later studied extensively in various papers by Raymond Carroll.
+
+[3] Friedhelm Eickert, 1967, “Limit Theorems for Regression with Unequal and Dependent Errors,” *Proceedings of the Fifth Berkeley Symposium on Mathematical Statistics and Probability*, 1967, 5982.
+
+[4] For example, Halbert White, (1980), “A Heteroskedasticity-Consistent Covariance Matrix Estimator and a Direct Test for Heteroskedasticity,” Econometrica, 1980, 817838; James MacKinnon and Halbert White, “Some Heteroskedastic-Consistent Covariance Matrix Estimators with Improved Finite Sample Properties,” *Journal of Econometrics*, 1985, 305325.
+
+[5] Quoted in The Log Transformation Is Special, Statistics in Medicine, Oliver Keene, 1995, 811-819. That author takes the opposite point of view.

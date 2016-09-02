@@ -368,7 +368,11 @@ knnest <- function(xydata, regestpts, k, scalefirst = FALSE) {
 Each row of regestpts is a point at which we wish to estimate the regression function. For example, let’s estimate μ(72,25), based on the 20 nearest neighbors at each point:
 
 ```{r comment=NA}
-#knnest(mlb[ , c(4, 6, 5)], c(72, 25), 20, scalefirst = TRUE) # gives error
+#knnest(mlb[ , c(4, 6, 5)], c(72, 25), 20, scalefirst = TRUE) # gives an error
+# try scaling xydata and regestpts seperately, so don't change the data structures
+# calculate mean and sd vectors of xydata (with or without regestpts?)
+# then apply to mean and regestpts seperately to scale
+# seems to work with "scalefirst = TRUE" in Ch. 3, however - why?
 knnest(mlb[ , c(4, 6, 5)], c(72, 25), 20, scalefirst = FALSE) 
 ```
 
