@@ -9,7 +9,7 @@ output: html_document
 
 by Norman Matloff
 
-Chapter 3: The Assumptions in Practice
+# Chapter 3: The Assumptions in Practice
 
 This chapter will take a practical look at the classical assumptions of linear regression models:
 
@@ -29,7 +29,7 @@ is constant in t.
 
 Verifying assumption (a), and dealing with substantial departures from it, is the subject of an entire chapter, Chapter 6. So, this chapter will focus on assumptions (b)-(d).
 
-3.1 Normality Assumption
+## 3.1 Normality Assumption
 
 We already discussed (b) in Section 2.6.2, but the topic deserves further comment. First, let’s review what was found before.
 
@@ -51,11 +51,11 @@ In other words:
 
 We must live with approximations one way or the other, and the end result is that the normality assumption is not very important.
 
-3.2 Independence Assumption — Don’t Overlook It
+## 3.2 Independence Assumption — Don’t Overlook It
 
 Statistics books tend to blithely say things like “Assume the data are independent and identically distributed (i.i.d.),” without giving any comment to (i) how they might be nonindependent and (ii) what the consequences are of using standard statistical methods on nonindependent data. Let’s take a closer look at this.
 
-3.2.1 Estimation of a Single Mean
+### 3.2.1 Estimation of a Single Mean
 
 Note the denominator S/sqrt(n) in (2.35). This is the standard error of W-, i.e. the estimated standard deviation of that quantity. That in turn comes from a derivation you may recall from statistics courses,
 
@@ -74,11 +74,11 @@ Here is the intuition behind this: Although we have 1000 blood pressure readings
 
 Note that W will still be an unbiased and consistent estimate of ν. In other words, W is still useful, even if inference procedures computed from it may be suspect.
 
-3.2.2 Estimation of Linear Regression Coefficients
+### 3.2.2 Estimation of Linear Regression Coefficients
 
 All of this applies to inference on regression coefficients as well. If our data is correlated, i.e. rows within (A, D) are not independent, then (??) will be incorrect, because the off-diagonal elements won’t be 0s. And if they are positive, (??) will be “too small,” and the same will be true for (3.3). Again, the result will be that our confidence intervals and p-values will be too small, i.e. overly optimistic. In such a situation, then our β^ will still be useful, but our inference procedures will be suspect.
 
-3.2.3 What Can Be Done?
+### 3.2.3 What Can Be Done?
 
 This is a difficult problem. Some possibilities are:
 
@@ -90,7 +90,7 @@ This is a difficult problem. Some possibilities are:
 
 An example of this last point is presented in the next section.
 
-3.2.4 Example: MovieLens Data
+### 3.2.4 Example: MovieLens Data
 
 The MovieLens data (http://grouplens.org/) consists of ratings of various movies by various users. The 100K version, which we’ll analyze here, consists of columns User ID, Movie ID, Rating and Timestamp. There is one row per rating. If a user has rated, say eight movies, then he/she will have eight rows in the data matrix. Of course, most users have not rated most movies.
 
@@ -108,7 +108,7 @@ For instance, the MovieLens data include a few demographic variables for the use
 
 and then pose questions such as “Do older people tend to give lower ratings?”
 
-3.3 Dropping the Homoscedasticity Assumption
+## 3.3 Dropping the Homoscedasticity Assumption
 
 For an example of problems with the homoscedasticity assumption, again consider weight and height. It is intuitive that tall people have more variation in weight than do short people, for instance. We can confirm that in our baseball player data. Let’s find the sample standard deviations for each height group (restricting to the groups with over 50 observations), seen in Section 1.5.2):
 
@@ -116,11 +116,11 @@ For an example of problems with the homoscedasticity assumption, again consider 
 library(freqparcoord)
 data(mlb)
 #m70 <- mlb[mlb$Height >= 70 & mlb$Height <= 77, ] 
-m70 <- subset(mlb, Height >= 70 & mlb$Height <= 77)
+m70 <- subset(mlb, Height >= 70 & Height <= 77)
 #sds <- tapply(m70$Weight, m70$Height, sd)
 sds <- with(m70, tapply(Weight, Height, sd))
 par(pty = "s")
-plot(70:77 , sds)
+plot(70:77, sds)
 ```
 
 **Figure 3.1:** Standard Deviations of Weight, By Height Group
@@ -137,7 +137,7 @@ Given the inevitable non-constancy of (2.26), there are questions that must be r
 
 - Can we somehow modify (2.46) for the heteroscedastic case? These points will be addressed in this section.
 
-3.3.1 Robustness of the Homoscedasticity Assumption
+### 3.3.1 Robustness of the Homoscedasticity Assumption
 
 In statistics parlance, we ask, “Is classical inference on β robust to the homoscedasticity assumption, meaning that there is not much effect on the validity of our inference procedures (confidence intervals, significance tests) unless the setting is quite profoundly heteroscedastic?” We can explore this idea via simulation.
 
@@ -187,7 +187,7 @@ n   p q   conf. lvl.
 
 **Table 3.1:** Heteroscedasticity Effect Simulation
 
-3.3.2 Weighted Least Squares
+### 3.3.2 Weighted Least Squares
 
 If one knows the function σ^2(t) (at least up to a constant multiple), one can perform a weighted least-squares (WLS) analysis. Here, instead of minimizing (2.12), one minimizes
 
@@ -222,13 +222,13 @@ In other words, a nominal 95% confidence interval only has confidence level at a
 
 On the other hand, we used a rather small value of k here, and there is no clear way to choose it.
 
-3.3.3 A Procedure for Valid Inference
+### 3.3.3 A Procedure for Valid Inference
 
 In principle, the delta method (Appendix ??) could be used to not only show that β^ is asymptotically normal, but also find its asymptotic covariance matrix without assuming homoscedasticity. We would then have available standard errors for the β^i and so on.
 
 However, the matrix differentiation needed to use the delta method would be far too complicated. Fortunately, though, there exists a rather simple procedure, originally developed by Eickert [3] and later refined by White and others [4], for finding valid asymptotic standard errors for β^ in the heteroscedastic case. This section will present the methodology, and test it on data.
 
-3.3.4 The Methodology
+### 3.3.4 The Methodology
 
 Let’s first derive the correct expression for Cov(β|A) without the homoscedasticity assumption. Using our properties of covariance, this is
 
@@ -250,7 +250,7 @@ Again, the expression in (3.14) is rather unwieldy, but it is easy to program, a
 
 Code implementing (3.14) is available in R’s car and sandwich packages, as the functions hccm() and vcovHC(), respectively. (These functions also offer various refinements of the method.) These functions are drop-in replacements to the standard vcov().
 
-3.3.5 Simulation Test
+### 3.3.5 Simulation Test
 
 Let’s see if it works, at least in the small simulation experiment in Section 3.3.1. We use the same code as before, simply replacing the call to vcov() by one to vcovHC(). The results, shown in **Table 3.2**, are excellent.
 
@@ -264,7 +264,7 @@ n   p q   conf. lvl.
 
 **Table 3.2:** Heteroscedasticity Correction Simulation
 
-3.3.6 Example: Bike-Sharing Data
+### 3.3.6 Example: Bike-Sharing Data
 
 In Section 2.6.3, we found that the standard error for μ(75, 0, 1) − μ(62, 0, 1) was about 47.16. Let’s get a more accurate standard error, that does not assume homoscedasticity:
 
@@ -279,7 +279,7 @@ sqrt(t(lamb) %*% vcovHC(lmout) %*% lamb)
 
 Not a very large difference in this case, but still of interest.
 
-3.3.7 Variance-Stabilizing Transformations
+### 3.3.7 Variance-Stabilizing Transformations
 
 Most classical treatments of regression analysis devote a substantial amount of space to transformations of the data. For instance, one might replace Y by ln(Y), and possibly apply the log to the predictors as well. There are several reasons why this might be done:
 
@@ -325,7 +325,7 @@ So, look at what we have. There is no relation between U and X at all! Yet the r
 
 Of course, this example is contrived, and one can construct examples with the opposite effect. Nevertheless, it shows that a log transformation can indeed bring about considerable distortion. This is to be expected in a sense, since the log function flattens out as we move to the right. Indeed, the U.S. Food and Drug Administration once recommended against using transformations [5].
 
-3.3.8 The Verdict
+### 3.3.8 The Verdict
 
 While the examples here do not constitute a research study (the reader is encouraged to try the code in other settings, simulated and real), an overall theme is suggested.
 
@@ -335,7 +335,7 @@ If our goal is Prediction, then forming correct standard errors is typically of 
 
 The picture changes if the goal is Description, in which case correct standard errors may be important. For this, given that the method of Section 3.3.3, is now commonly available in statistical software packages (albeit not featured), this is likely to be the best way to cope with heteroscedasticity.
 
-3.4 Bibliographic Notes
+## 3.4 Bibliographic Notes
 
 For more on the Eickert-White approach to correct inference under heteroscedasticity, see (Zeileis, 2006).
 
