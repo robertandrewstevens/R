@@ -1,238 +1,195 @@
-Chapter 5
-Multiclass Classification Problems
+Chapter 5: Multiclass Classification Problems
+
 In classification problems we’ve discussed so far, we have assumed just two classes. The patient either has the disease in question, or not; the customer chooses to buy a certain item, or not; and so on.
-But in many applications, we have multiple classes. We may, for instance, be considering several different diseases that a patient might have.1 In computer vision applications, the number of classes can be quite large, say face recognition with data on a large number of people. Let m denote the number of classes, and label them 0, 1, ..., m - 1.
+
+But in many applications, we have multiple classes. We may, for instance, be considering several different diseases that a patient might have [1]. In computer vision applications, the number of classes can be quite large, say face recognition with data on a large number of people. Let m denote the number of classes, and label them 0, 1, ..., m - 1.
+
 Say for instance we wish to do machine recognition of handwritten digits, so we have 10 classes, with our variables being various patterns in the pixels, e.g. the number of (approximately) straight line segments. Instead of having a single response variable Y as before, we would now have 10 of them, setting Y (i) to be 1 or 0, according to whether the given digit is i, for i = 0, 1, ..., 9. We could run 10 logistic regression models, and then use each one to estimate the probability that our new image represents a certain digit.
-In general, as above, let Y (i), i = 0, ..., m − 1 be the indicator variables for
-1For a classification problem, the classes must be mutually exclusive. In this case, there would be the assumption that the patient does not have more than one of the diseases.
-123
-￼
-￼124 CHAPTER 5. MULTICLASS CLASSIFICATION PROBLEMS
-the classes, and define the class probabilities
-πi =P(Y(i) =1), i=0,1...,m−1
+
+In general, as above, let Y (i), i = 0, ..., m − 1 be the indicator variables for the classes, and define the class probabilities
+
+    π[i] = P(Y^(i) = 1), i = 0, 1..., m − 1  (5.1)
+
 Of course, we must have
-m−1
-􏰓 πi = 1 i=0
-We will still refer to Y , now meaning the value of i for which Y (i) = 1. Note that in this chapter, we will be concerned primarily with the Predic-
-tion goal, rather than Description.
+
+    sum(π[i], i = 0:(m - 1) = 1  (5.2)
+
+We will still refer to Y , now meaning the value of i for which Y^(i) = 1. 
+
+Note that in this chapter, we will be concerned primarily with the Prediction goal, rather than Description.
+
 5.1 The Key Equations
+
 Equations (4.29) and (4.37), and their generalizations, will play a key role here. Let’s relate our new multiclass notation to what we had in the two- class case before. If m = 2, then:
-• What we called Y (1) above was just called Y in our previous discussion of the two-class case.
-• The class probability π1 here was called simply π previously.
-Now, let’s review from the earlier material. (Keep in mind that typically X will be vector-valued, as we typically have more than one predictor vari- able.) For m = 2:
-• ThequantityofinterestisP(Y =1|X=t).
-• If X has a discrete distribution, then
-μ(t)=P(Y =1|X=t)= πP(X=t|Y =1) πP(X=t|Y =1)+(1−π)P(X=t|Y =0)
-(5.3)
-(5.1)
-(5.2)
-￼
-￼5.2. HOW DO WE USE MODELS FOR PREDICTION? 125
-• If X has a continuous distribution,
-μ(t)=P(Y =1|X=t)= πf1(t) (5.4)
-￼π f1(t) + (1 − π) f0(t) where the within-class densities of X are f1 and f0.2
-• Sometimes it is more useful to use the following equivalence to (5.4): P(Y =1|X=t)= 1 (5.5)
-1 + 1−π f0(t) π f1(t)
-Note that, in keeping with the notion that classification amounts to a re- gression problem (Section 1.12.1), we have used our regression function notation μ(t) above.
+
+- What we called Y^(1) above was just called Y in our previous discussion of the two-class case.
+
+- The class probability π1 here was called simply π previously.
+
+Now, let’s review from the earlier material. (Keep in mind that typically X will be vector-valued, as we typically have more than one predictor variable.) For m = 2:
+
+- ThequantityofinterestisP(Y = 1 | X = t).
+
+- If X has a discrete distribution, then
+
+    μ(t) = P(Y = 1 | X = t) = π*P(X = t | Y = 1)/(π*P(X = t | Y =1 ) + (1 − π)*P(X = t | Y =0)  (5.3)
+
+- If X has a continuous distribution,
+
+μ(t) = P(Y = 1 | X = t) = π*f[1](t)/(π*f[1](t) + (1 − π)*f[0](t) ) (5.4)
+
+where the within-class densities of X are f[1] and f[0] [2].
+
+- Sometimes it is more useful to use the following equivalence to (5.4): 
+
+    P(Y =1|X=t)= 1/(1 + (1 − π)*f[0](t)/(π*f[1](t))) (5.5)
+
+Note that, in keeping with the notion that clasification amounts to a regression problem (Section 1.12.1), we have used our regression function notation μ(t) above.
+
 Things generalize easily to the multiclass case. We are now interested in the quantities
-￼￼￼P(Y =i)=μi(t)=P(Y(i) =1|X=t), i=0,1,...,m−1 For continuous X, (5.4) becomes
-(5.6)
-(5.7)
-P(Y =i)=μi(t)=P(Y
-(i) πi fi(t) =1|X=t)=􏰖m−1πj fj(t)
-j=0
-￼5.2 How Do We Use Models for Prediction?
+
+    P(Y = i) = μ[i](t) = P(Y^(i) = 1 | X = t), i = 0, 1,..., m − 1  (5.6)
+
+For continuous X, (5.4) becomes
+
+    P(Y = i) = μ[i](t) = P(Y^(i) = 1 | X = t) = π[i]*f[i](t)/sum(π[j]*f[j](t), j = 0:(m - 1)  (5.7)
+
+5.2 How Do We Use Models for Prediction?
+
 In Section 1.8, we discussed the specifics of predicting new cases, in which we know “X” but not “Y,” after fitting a model to data in which both “X” and “Y” are known (our training data). The parametric and nonparametric cases were slightly different.
-2 Another term for the classification probabilities πi is prior probabilities. Readers familar with the controversy over Bayesian versus frequentist approaches to statistics may wonder if we are dealing with Bayesian analyses here. Actually, that is not the case; we are not working with subjective, “gut feeling” probabilities as in the controversial Bayesian methods. There is some connection, in the sense that (5.3) and (5.4) make use of Bayes’ Rule, but the latter is standard for all statisticians, frequentist and Bayesian alike. Note by the way that quantities nrobabilities like (5.4) are often termed posterior probabilities, again sounding Bayesian but again actually Bayesian/frequentist-neutral.
-￼
-￼126 CHAPTER 5. MULTICLASS CLASSIFICATION PROBLEMS
+
 The situation is the same here in the multiclass setting. The only difference is that now multiple functions μi(t), i = 0, 1, ..., m − 1 need to be estimated from our training data, as opposed to just μ(t) before.
-It should be noted, though, that some nonparametric methods do not ex- plicitly estimate μi(t), and instead only estimate “boundaries” involving those functions. These methods will be discussed in Chapter 11.
+
+It should be noted, though, that some nonparametric methods do not explicitly estimate μi(t), and instead only estimate “boundaries” involving those functions. These methods will be discussed in Chapter 11.
+
 5.3 Misclassification Costs
-One context to consider is the informal. Say we are trying to determine whether a patient has a particular disease, based on a vector X of various test results, demographic variables and so on for this patient. Denote the valueofXbytc,andsupposeourestimateofP(Y(1) =1|X=tc)is0.02. We estimate that this patient has only a 2% chance of having the disease. This isn’t very high, so we might simply stop there.
+
+One context to consider is the informal. Say we are trying to determine whether a patient has a particular disease, based on a vector X of various test results, demographic variables and so on for this patient. Denote the value of X by t[c], and suppose our estimate of P(Y(1) = 1 | X = t[c]) is 0.02. We estimate that this patient has only a 2% chance of having the disease. This isn’t very high, so we might simply stop there.
+
 On the other hand, a physician may have a hunch, based on information not in X and thus not in our sample data, that leads her to suspect that the patient does have the disease. The physician may thus order further tests and so on, in spite of the low estimated probability.
+
 Moreover, in the case of a catastrophic disease, the misclassification costs may not be equal; failing to detect the disease when it’s present may be a much more serious error than ordering further medical tests that turn out to be negative.
-So, in the context in which we’re doing classification based on “gut feeling,” our estimated P(Y(i) = 1 | X = tc) can be used as just one of several components that enter our final decision.
-In many applications today, though, our classification process will be auto- mated, done entirely by machine. Consider the example in Section 4.4.1 of classifying subject matter of Twitter tweets, say into financial tweets and all others, a two-class setting. Here again there may be unequal misclassi- fication costs, depending on our goals. If so, the prescription
-guess for Y =
-􏰜1, 0,
-if μ(tc) > 0.5 if μ(tc) ≤ 0.5
-(5.8)
+
+So, in the context in which we’re doing classification based on “gut feeling,” our estimated P(Y(i) = 1 | X = t[c]) can be used as just one of several components that enter our final decision.
+
+In many applications today, though, our classification process will be automated, done entirely by machine. Consider the example in Section 4.4.1 of classifying subject matter of Twitter tweets, say into financial tweets and all others, a two-class setting. Here again there may be unequal misclassification costs, depending on our goals. If so, the prescription
+
+    guess for Y = 1, if μ(t[c]) > 0.5 
+                  0, if μ(t[c]) ≤ 0.5  (5.8)
+
 from Section 1.13.2 is not what we want, as it implicitly assumed equal costs.
-￼5.4. ONE VS. ALL OR ALL VS. ALL? 127
+
 If we wish to automate, we’ll probably need to set up a formal cost structure. Let l0 denote our cost for guessing Y to be 1 when it’s actually 0, and define l1 for the opposite kind of error. Now reason as follows as to what we should guess for Y , knowing that X = tc. For convenience, write
-p=P(Y =1|X=tc) Suppose we guess Y to be 1. Then our expected cost is
-(1 − p)l0
+
+    p = P(Y = 1 | X = t[c])  (5.9)
+
+Suppose we guess Y to be 1. Then our expected cost is
+
+    (1 − p)l[0]  (5.10)
+
 If on the other hand we guess Y to be 0, our expected cost is
-pl1
-So, our strategy could be to choose our guess to be the one that gives us
-the smaller of (5.10) and (5.11):
-guess for Y =
+
+    p*l[1]  (5.11)
+
+So, our strategy could be to choose our guess to be the one that gives us the smaller of (5.10) and (5.11):
+
+    guess for Y = 1, if (1 − p)*l[0] ≤ p*l[1] 
+                  0, if (1 − p)*l[0] > p*l[1]  (5.12)
+
 In other words, given X, we guess Y to be 1 if
-μ(X) ≥ l0
-l0 + l1
-(5.12)
-(5.13)
-􏰜1, 0,
-if(1−p)l0 ≤pl1 if(1−p)l0 >pl1
-(5.9)
-(5.10)
-(5.11)
-￼This all seems pretty abstract, but it is actually simple. If we consider wrongly guessing Y to be 1 as 10 times worse than wrongly guessing Y to be 0, then the right-hand side of (5.13) is 1/11, or about 0.09. So, if we estimate the conditional probability of Y being 1 is more than 9%, we go ahead and guess 1.
+
+    μ(X) ≥ l[0]/(l[0] + l[1])  (5.13)
+
+This all seems pretty abstract, but it is actually simple. If we consider wrongly guessing Y to be 1 as 10 times worse than wrongly guessing Y to be 0, then the right-hand side of (5.13) is 1/11, or about 0.09. So, if we estimate the conditional probability of Y being 1 is more than 9%, we go ahead and guess 1.
+
 From this point onward, we will assume equal costs.
+
 5.4 One vs. All or All vs. All?
-Let’s consider the Vertebral Column data from the UC Irvine Machine Learning Repository. Here there are m = 3 classes: Normal, Disk Hernia
-￼1 #
-2 #
-3
-4 # 5
-6 #
-7 #
-8 #
-9 #
-One−vs.−All (OVA) and All−vs.All (AVA), logit models
-arguments :
-m: number of classes
-trnxy: X, Y training set; Y in last column;
-128 CHAPTER 5. MULTICLASS CLASSIFICATION PROBLEMS
-and Spondylolisthesis. The predictors are, as described on the UCI site, “six biomechanical attributes derived from the shape and orientation of the pelvis.” Consider two approaches we might take to predicting the status of the vertebral column, based on logistic regression:
-• One vs. All (OVA): Here we would fit 3 logit models to our training data, predicting each of the 3 classes, one at a time. The ith model would regress Y (i) against the 6 predictor variables, yielding μ􏰭i (t), i = 0,1,2. To predict Y for X = tc, we would guess Y to be whatever i has the largest value of μ􏰭i(tc), i.e. the most likely class, given the predictor values.
-• All vs. All (AVA): Here we would fit 3 logit models again, but with one model for each possible pair of clases. Our first model would pit class 0 against class 1, meaning that we would restrict our data to only those cases in which the class is 0 or 1, then predict class 0 in that restricted data set. Our second logit model would restrict to the classes 0 and 2, and predict 0, while the last model would be for classes 1 and 2, predicting 1. (We would still use our 6 predictor variables in each model.)
-Note that it was just coincidence that we have the same number of models in the OVA and AVA approaches here (3 each). In general, with m classes, we will run m logistic models (or kNN or whatever type of regression modeling we like) under OVA, but C(m, 2) = m(m − 1)/2 models under AVA.3
+
+Let’s consider the Vertebral Column data from the UC Irvine Machine Learning Repository. Here there are m = 3 classes: Normal, Disk Hernia and Spondylolisthesis. The predictors are, as described on the UCI site, “six biomechanical attributes derived from the shape and orientation of the pelvis.” Consider two approaches we might take to predicting the status of the vertebral column, based on logistic regression:
+
+- One vs. All (OVA): Here we would fit 3 logit models to our training data, predicting each of the 3 classes, one at a time. The ith model would regress Y (i) against the 6 predictor variables, yielding μ^[i](t), i = 0, 1, 2. To predict Y for X = t[c], we would guess Y to be whatever i has the largest value of μ^i(t[c]), i.e. the most likely class, given the predictor values.
+
+- All vs. All (AVA): Here we would fit 3 logit models again, but with one model for each possible pair of clases. Our first model would pit class 0 against class 1, meaning that we would restrict our data to only those cases in which the class is 0 or 1, then predict class 0 in that restricted data set. Our second logit model would restrict to the classes 0 and 2, and predict 0, while the last model would be for classes 1 and 2, predicting 1. (We would still use our 6 predictor variables in each model.)
+
+Note that it was just coincidence that we have the same number of models in the OVA and AVA approaches here (3 each). In general, with m classes, we will run m logistic models (or kNN or whatever type of regression modeling we like) under OVA, but C(m, 2) = m(m − 1)/2 models under AVA [3].
+
 5.4.1 R Code
+
 To make this concrete, here is code for the two approaches:
-Y coded 0 ,1 ,... ,m−1 for the m classes predx: X values from which to predict Y values tstxy: X, Y test set, same format
-10 #
-objects, taking them s at a time.
-￼3Here the notation C(r,s) means the number of combinations one can form from r
-￼5.4. ONE VS. ALL OR ALL VS. ALL? 129
-11
-12 #####################################################
-13 # ovalogtrn: generate estimated regression functions
-14 #####################################################
-15
-16 # 17 18#
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-# # #
-m:asabove trnxy : as above
-arguments :
-value:
-matrix of the betahat vectors , one per column
-ovalogtrn <− function(m,trnxy) {
-p <− ncol(trnxy)
-x <− a s . m a t r i x ( t r n x y [ , 1 : ( p − 1 ) ] ) y <− t r n x y [ , p ]
-outmat <− NULL
-for (i in 0:(m−1)) {
-ym<− as.integer(y == i)
-betahat <− coef(glm(ym  ̃ x,family=binomial)) outmat <− cbind(outmat,betahat)
+
+# One−vs.−All (OVA) and All−vs.All (AVA), 
+# logit models
+#
+# arguments :
+#
+# m: number of classes
+# trnxy: X, Y training set; Y in last column;
+#        Y coded 0, 1, ..., m − 1 for the m classes 
+# predx: X values from which to predict Y values 
+# tstxy: X, Y test set, same format
+
+#####################################################
+# ovalogtrn: generate estimated regression functions
+#####################################################
+
+# arguments :
+#
+# m: asabove 
+# trnxy: as above
+
+# value:
+#
+# matrix of the betahat vectors , one per column
+
+ovalogtrn <− function(m, trnxy) {
+  p <− ncol(trnxy)
+  x <− as.matrix(trnxy[ , 1:(p − 1)]) 
+  y <− trnxy[ , p]
+  outmat <− NULL
+  for(i in 0:(m − 1)) {
+    ym <− as.integer(y == i)
+    betahat <− coef(glm(ym ~ x, family = binomial)) 
+    outmat <− cbind(outmat, betahat)
+  }
+  outmat
 }
-outmat
+
+#####################################################
+# ovalogpred: predict Ys from new Xs #####################################################
+
+# arguments:
+#
+# coefmat: coef. matrix, output from ovalogtrn()
+# predx: as above
+#
+# value:
+#   vector of predicted Y values, in {0 ,1 ,... ,m − 1}, 
+#   one element for each row of predx
+
+ovalogpred <− function(coefmat, predx) {
+  # get est reg ftn values for each row of predx
+  # and each col of coefmat; vals from 
+  # coefmat[ , ] in tmp[ , i]
+  tmp <− as.matrix(cbind(1, predx)) %*% coefmat 
+  tmp <− logit(tmp)
+  apply(tmp, 1, which.max) − 1
 }
-##################################################### # ovalogpred: predict Ys from new Xs #####################################################
-# # # # # # # # #
-arguments :
-coefmat : predx :
-value:
-coef . as above
-matrix ,
-output from
-ovalogtrn ()
-vector of predicted Y values , in {0 ,1 ,... ,m−1}, one element for each row of predx
-ovalogpred <− function(coefmat,predx) {
-# get est reg ftn values for each row of predx
-￼130
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66 67#
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
+
+##################################################### 
+# avalogtrn: generate estimated regression functions #####################################################
+
+# arguments: 
+#
+#   m: as above
 trnxy : value:
 matrix in the
 as above
 of the betahat order of combin ()
 one per
 column ,
-CHAPTER 5. MULTICLASS CLASSIFICATION PROBLEMS
-# and each col of coefmat; vals from # coefmat[,] in tmp[,i]
-tmp <− as.matrix(cbind(1,predx)) %∗% coefmat tmp<− logit(tmp)
-apply(tmp,1 ,which.max) − 1
-}
-##################################################### # avalogtrn: generate estimated regression functions #####################################################
-#
-# #
-# #
-arguments : m:asabove
+
+
 avalogtrn <− function(m,trnxy) {
 p <− ncol(trnxy) n<−nrow(trnxy) x<−as.matrix(trnxy[,1:(p−1)]) y<−trnxy[,p]
 outmat <− NULL ijs <− combn(m,2)
@@ -286,7 +243,7 @@ vectors ,
 134
 135
 136
-5.4. ONE VS. ALL OR ALL VS. ALL? 131
+
 }
 ##################################################### # avalogpred: predict Ys from new Xs #####################################################
 # # # # # # # # # #
@@ -314,7 +271,7 @@ ypred
 }
 logit <− function(t) 1 / (1+exp(−t))
 For instance, under OVA, we call ovalogtrn() on our training data, yielding a logit coefficient matrix having m columns; the ith column will consist of
-￼132 CHAPTER 5. MULTICLASS CLASSIFICATION PROBLEMS
+
 the estimated coefficients from fitting a logit model predicting Y (i). We then use this matrix as input for predicting Y in all future cases that come our way, by calling ovalogpred() whenever we need to do a prediction.
 Under AVA, we do the same thing, calling avalogtrn() and avalogpred().
 5.4.2 Which Is Better?
@@ -327,8 +284,7 @@ Here we continue with the vertebrae data, applying the OVA and AVA methods to a 
 > vert$V7 <− as.numeric(vert$V7) − 1 > trnidxs <− sample(1:310 ,225)
 > predidxs <− setdiff (1:310 , trnidxs )
 4To avoid clutter, some messages, “glm.fit: fitted probabilities numerically 0 or 1 occurred,” have been removed, here and below. The warnings should not present a problem.
-￼￼
-￼5.4. ONE VS. ALL OR ALL VS. ALL? 133
+
 > ovout <− ovalogtrn (3 , vert [ trnidxs , ] )
 > predy <− ovalogpred(ovout,vert[predidxs ,1:6]) > mean(predy == vert[predidxs ,7])
 [1] 0.8823529
@@ -346,8 +302,7 @@ The real problem here, of course is that the logit is not a good model in such a
 5.4.5 Example: Letter Recognition Data
 Following up on the notion that AVA may work to reduce model bias, i.e. that AVA’s value occurs in settings in which our model is not very good, let’s look at an example in which we know the model is imperfect.
 The UCI Letters Recognition data set 5 uses various summaries of pixel 5https://archive.ics.uci.edu/ml/datasets/Letter+Recognition; a lso available
-￼
-￼134 CHAPTER 5. MULTICLASS CLASSIFICATION PROBLEMS
+
 ￼Figure 5.1: Three Artificial Regression Lines
 ￼5.4. ONE VS. ALL OR ALL VS. ALL? 135
 patterns to classify images of capital English letters. A naively applied logistic model may sacrifice some accuracy here, due to the fact that the predictors do not necessarily have monotonic relations with the response variable, the class identity.
@@ -372,8 +327,7 @@ lrtrn <− lr [1:14000 ,]
 lrtest <− lr [14001:20000 ,]
 ologout <− ovalogtrn(26,lrtrn[,c(2:17,1)]) ypred <− ovalogpred(ologout , lrtest [,−1])
 mean(ypred == lrtest [ ,1]) [1] 0.7193333
-￼
-￼136 CHAPTER 5. MULTICLASS CLASSIFICATION PROBLEMS
+
 Ah, much better. Not quite as good as AVA, but rather commensurate with sampling error, and we didn’t even try interaction terms.
 5.4.6 The Verdict
 With proper choice of model, it is my experience that OVA does as well as AVA, if not better. And in paper supporting OVA, Rifkin (2004) contends that some of the pro-AVA experiments were not done properly.
@@ -386,8 +340,7 @@ To explain this method, let’s review some material from Section 4.4.1.
 Let’s first temporarily go back to the two-class case, and use our past notation:
 Y =Y(1), π=π1 (5.14) For convenience, let’s reproduce (5.4) here:
 P(Y =1|X=t)= πf1(t) (5.15) π f1(t) + (1 − π) f0(t)
-￼
-￼5.5. THECLASSICALAPPROACH:FISHERLINEARDISCRIMINANTANALYSIS137
+
 5.5.2 Derivation
 As noted in Section 4.4.1, after substituting the multivariate normal density for the fi in (5.15), we find that
 ￼￼with
@@ -412,8 +365,7 @@ Without the assumption of equal covariance matrices, (5.21) turns out to
 be quadratic in t, and is called quadratic discriminant analysis.
 6Again assuming equal costs of the two types of misclassification.
 7The word discriminant alludes to our trying to distinguish between Y = 1 and Y = 0.
-￼￼
-￼138 CHAPTER 5. MULTICLASS CLASSIFICATION PROBLEMS
+
 5.5.3 Example: Vertebrae Data
 Let’s apply this to the vertebrae data, using the lda() function in the MASS library that is built-in to R. This function assumes that the class variable is a factor, so we won’t convert to numeric codes this time.
 5.5.3.1 LDA Code and Results
@@ -472,7 +424,7 @@ predpts <− scale(predpts ,center=ctr ,scale=scl)
 tmp<− get.knnx(x,predpts,1) idx <− tmp$nn.index
 regest <− xdata$regest[idx,] apply(regest,1,which.max) − 1
 }
-5.5. THECLASSICALAPPROACH:FISHERLINEARDISCRIMINANTANALYSIS139
+
 Recall that xdata is the output of preprocessx(), which determines the nearest neighbors and so on. We call the basic kNN function knnest() for each class, i.e. Y = i, i = 0,1,...,m − 2 (the probabilities for class m − 1 are obtained by subtraction from 1). These results are tacked onto xdata, and then input to ovaknnpred() whenever we need to do a prediction.
 And here is the run:
 > xdata <− preprocessx ( vert [ , −7] ,50)
@@ -483,7 +435,7 @@ And here is the run:
 Again, this was without the benefit of cross-validation, but about the same as for LDA.
 5.5.4 Multinomial Logistic Model
 Within the logit realm, one might also consider multinomial logistic re- gression. Here one makes the assumption that the m sets of coefficients βi, i > 0 are the same across all classes, with only β0 varying from class to class. Recall from Section 4.4.5 that the logistic model implies that inter- class boundaries are linear, i.e. hyperplanes; the multinomial logit model assumes these are parallel, as they are in the LDA case. This is a very stringent assumption, so this model may perform poorly.
-￼140 CHAPTER 5. MULTICLASS CLASSIFICATION PROBLEMS
+
 5.5.5 The Verdict
 If LDA’s assumptions hold, especially the one positing the same covariance matrix for “X” within each class, it can be a powerful tool. However, that assumption rarely holds in practice.
 As noted, the LDA setting for two classes implies that of the logistic model. Thus the latter (and not in multinomial form) is more general and “safer” than LDA. Accordingly, LDA is less widely used than in the past, but it gives us valuable perspective on the multiclass problem.
@@ -492,9 +444,9 @@ Since classification amounts to a regression problem, we could use non- parametr
 5.6.1 Methods for Density Estimation
 Say for simplicity that X is one-dimensional. You are already familiar with one famous nonparametric method for density estimation — the histogram! In R, we could use the hist() function for this, though we must remember to set the argument freq to FALSE, so as to have total area under the histogram equal to 1.0, as with a density. In the return value of hist(), the
 density component gives us fi(t).
-􏰭
+
 There are more advanced density estimation methods, such as the kernel method, which is implemented in R’s density() function in one dimen- sion, and some other packages on CRAN do so for some small numbers of dimensions. Also, the k-Nearest Neighbor approach can be used for den- sity estimation. All of this is explained in the Mathematical Complements section at the end of this chapter.
-￼5.7. THE ISSUE OF “UNBALANCED (AND BALANCED) DATA” 141
+
 5.6.2 Procedure
 Whenever we have a case to predict, i.e. we know its X value tc and need to predict its Y value, we do the following:
 For each i = 0, 1, ..., m − 1:
@@ -510,7 +462,7 @@ Here will discuss a topic that is usually glossed over in treatments of the clas
 For concreteness and simplicity, consider the two-class problem of predict- ing whether a customer will purchase a certain item (Y = 1) or not (Y = 0), based on a single predictor variable, X, the customer’s age. Suppose also that most of the purchasers are older.
 5.7.1 Why the Concern Regarding Balance?
 Though one typically is interested in the overall rate of incorrect classifi- cation, we may also wish to estimate rates of “false positives” and “false negatives.” In our customer purchasing example, for instance, we wish to ask, What percentage of the time do we predict that the customer does not purchase the item, among cases in which the purchase actually is made? One problem is that, although our overall misclassification rate is low, we may do poorly on a conditional error rate of this sort. This may occur, for example, if we have unbalanced data, as follows.
-￼142 CHAPTER 5. MULTICLASS CLASSIFICATION PROBLEMS
+
 Suppose only 1.5% of the customers in the population opt to buy the prod- uct.8 The concern among some ML researchers and practitioners is that, with random sampling (note the qualifier), the vast majority of the data in our sample will be from the class Y = 0, thus giving us “unbalanced” data. Then our statistical decision rule may not predict the other class well, and indeed may just predict almost everything to be Class 0. Let’s address this concern.
 Say we are using a logit model. If the model is accurate throughout the range of X, unbalanced data may not be such a problem. If most of our data have their X values in a smaller subrange, this will likely increase standard errors of the estimated regression coefficients, but not be a fundamental issue.
 On the other hand, say we do classification using nonparametric density estimation. Since even among older customers, rather few buy the product,
@@ -521,9 +473,7 @@ In this chapter, we have often dealt with expressions such as P (Y = 1) and P(Y 
 In our customer behavior context, P(Y = 1) is the unconditional proba- bility that a customer will buy the given item. If it is equal to 0.12, for example, that means that 12% of all customers purchase this item. By contrast, P (Y = 1 | X = 38) is a conditional probability, and if it is equal to 0.18, this would mean that among all people of age 38, 18% of them buy the item.
 The quantities π = P(Y = 1) and 1−π = P(Y = 0) play a crucial role, as can be seen immediately in (5.3) and (5.4). Let’s take a closer look at this. Continuing our customer-age example, X (age) has a continuous distribution, so (5.4) applies. Actually, it will be more useful to look at the equivalent equation, (5.5).
 8As mentioned earlier in the book, in some cases it may be difficult to define a target population, even conceptually. There is not much that can be done about this, unfortunately.
-􏰭
-￼
-￼5.7. THE ISSUE OF “UNBALANCED (AND BALANCED) DATA” 143
+
 5.7.2.1 It All Depends on How We Sample
 Say our training data set consists of records on 1000 customers. Let N1 and N0 denote the number of people in our data set who did and did not purchase the item, with N1 + N0 = 1000. If our data set can be regarded as a statistical random sample from the population of all customers, then we can estimate π from the data. If for instance 141 of the customers in our sample purchased the item, then we would set
 π􏰭= N1 =0.141 (5.22) 1000
@@ -537,8 +487,7 @@ Or, suppose we opt to use a logit model here. It turns out that we will run into
 where t = (t1 , ..., tp )′ . Here one can see that if one switches sampling schemes, then βi, i > 0 will not change, because the fi are within-class den- sities; only β0 changes. Indeed, our logit-estimation software will “think” that π1 and π0 are equal (or roughly so, since we just have a sample, not the population distribution), and thus produce the wrong constant term.
 In other words:
 9Or, this was our entire customer database, which we are treating as a random sample from the population of all customers.
-￼￼
-￼144 CHAPTER 5. MULTICLASS CLASSIFICATION PROBLEMS 􏰭
+
 Under sampling scheme (b), we are obtaining the wrong β0, 􏰭
 though the other βi are correct.
 If our goal is merely Description rather than Prediction, this may not be a concern, since we are usually interested only in the values of βi,i > 0. But if Prediction is our goal, as we assuming in this chapter, we do have a serious problem, since we will need all of the estimated coefficients in order to estimate P (Y |X = t) in (4.27).
@@ -550,8 +499,7 @@ Fortunately, there are remedies, as we will now see.
 As noted, use of “unnaturally balanced” data can seriously bias our classi- fication process. In this section, we turn to remedies.
 It is assumed here that we have an external data source for the class prob- abilities πi. For instance, in the English letters example above, there is much published data, such as at the Web page Practical Cryptography.10 They find that πA = 0.0855, πB = 0.0160, πC = 0.0316 and so on.
 10 http://practicalcryptography.com/cryptanalysis/ letter-frequencies-various- languages/english-letter-frequencies/.
-￼
-￼5.7. THE ISSUE OF “UNBALANCED (AND BALANCED) DATA” 145
+
 So, if we do have external data on the πi (or possibly want to make some “what if” speculations), how do we adjust our code output to correct the error?
 For LDA, R’s lda() function does the adjustment for us, using its priors argument. That code is based on the relation (4.40), which we now see is a special case of (5.23).
 The latter equation shows how to deal with the logit case as well: We
@@ -577,9 +525,7 @@ outmat
 }
 What about nonparametric settings? Equation (5.5) shows us how to make the necessary adjustment, as follows:
 (a) Our software has given us an estimate of the left-hand side of that equation.
-􏰭
-􏰭
-￼146 CHAPTER 5. MULTICLASS CLASSIFICATION PROBLEMS
+
 (b) We know the value that our software has used for its estimate of (1 − π)/π, which is N0/N1.
 (c) Using (a) and (b), we can solve for the estimate of fo(t)/f1(t).
 (d) Now plug the correct estimate of (1 − π)/π, and the result of (c), back into (5.5) to get the proper estimate of the desired conditional probability.
@@ -599,7 +545,7 @@ As discussed earlier, this data set has approximately equal frequencies for all 
 > wrongpriors <− tmp / sum(tmp)
 > data( ltrfreqs )
 > ltrfreqs <− ltrfreqs [order( ltrfreqs [ ,1]) ,] > truepriors <− ltrfreqs [ ,2] / 100
-￼5.8. EXAMPLE: LETTER RECOGNITION 147
+
 (Recall from Footnote 2 that the term priors refers to class probabili- ties, and that word is used both by frequentists and Bayesians. It is not “Bayesian” in the sense of subjective probability.)
 So, here is the straightforward analysis, taking the letter frequencies as they are, with 50 neighbors:
 > trnout <− ovaknntrn(lrtrn[,1],xdata,26,50) > ypred <− ovaknnpred(trnout , lrtest [,−1])
@@ -617,7 +563,7 @@ Only about 75%. But in order to prepare for the real world, we can make use of t
 Ah, very nice!
 ￼148
 5.9 5.9.1 5.10
-CHAPTER 5. MULTICLASS CLASSIFICATION PROBLEMS
+
 Mathematical Complements Nonparametric Density Estimation
 Bibliographic Notes
 5.11 Further Exploration: Data, Code and Math Problems
@@ -632,10 +578,16 @@ ucbd <− as.data.frame(UCBAdmissions)
 (b) Write a general function
 ovaavatbl <− function(tbl ,yname)
 that will perform the computation in part (a) for any table tbl, with the class variable having the name yname, returning the two mis- classification rates. Note that the name can be retrieved via
-￼5.11. FURTHEREXPLORATION:DATA,CODEANDMATHPROBLEMS149
+
 names(attr(tbl , ’dimnames’))
 2. Consider the two-class classification problem with scalar predictor.
 (a) Show that if the within-class distributions are exponential, the logistic model again is valid.
 (b) Do the same for the Poisson case.
 (c) Find general conditions in (4.20) that imply the logit model.
-￼150 CHAPTER 5. MULTICLASS CLASSIFICATION PROBLEMS
+
+
+[1] For a classification problem, the classes must be mutually exclusive. In this case, there would be the assumption that the patient does not have more than one of the diseases.
+
+[2] Another term for the classification probabilities πi is prior probabilities. Readers familar with the controversy over Bayesian versus frequentist approaches to statistics may wonder if we are dealing with Bayesian analyses here. Actually, that is not the case; we are not working with subjective, “gut feeling” probabilities as in the controversial Bayesian methods. There is some connection, in the sense that (5.3) and (5.4) make use of Bayes’ Rule, but the latter is standard for all statisticians, frequentist and Bayesian alike. Note by the way that quantities nrobabilities like (5.4) are often termed posterior probabilities, again sounding Bayesian but again actually Bayesian/frequentist-neutral.
+
+[3] Here the notation C(r,s) means the number of combinations one can form from r objects, taking them s at a time.
