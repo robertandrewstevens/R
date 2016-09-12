@@ -1,122 +1,144 @@
-Chapter 6
-Model Fit: Assessment and Improvement
+Chapter 6  Model Fit: Assessment and Improvement
+
 The Box quote from our first chapter is well worth repeating:
+
 All models are wrong, but some are useful — famed statistician George Box
+
 We have quite a bit of powerful machinery to fit parametric models. But are they any good on a given data set? We’ll discuss this subject here in this chapter.
+
 6.1 Aims of This Chapter
+
 Most regression books have a chapter on diagnostics, methods for assessing model fit and checking assumptions needed for statistical inference (confi- dence intervals and significance tests).
+
 In this chapter we concerned only with the model itself. Does, for instance, the model assume a linear relationship of the response variable with the predictors, when it actually is nonlinear? Are there extreme or erroneous observations that mar the fit of our model?
-We are not concerned here with assumptions that only affect inference, as 151
-￼152CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
-those were treated in Chapter 2.1 6.2 Methods
+
+We are not concerned here with assumptions that only affect inference, as those were treated in Chapter 2 [1]. 
+
+6.2 Methods
+
 There is a plethora of diagnostic methods! Entire books could and have been written on this topic. I treat only a few such methods here — some classical, some of my own — with the choice of methods presented stemming from these considerations:
-•
-•
-6.3
-This book generally avoids statistical methods that rely on assuming that our sample data is drawn from a normally distributed popula- tion.2 Accordingly, the material here on unusual observations does not make such an assumption.
-Intuitive clarity of a method is paramount. If a method can’t be ex- plained well to say, a reasonably numerate but nonstatistician client, then I prefer to avoid it.
-Notation
-Say we have data (Xi, Yi), i = 1, ..., n. Here the Xi are vectors,
-Xi =(X(1),...,X(p))′ ii
-p-component
-(6.1)
-and the Yi are scalars (including the case Y = 0, 1, ..., m − 1 in classification applications). We typically won’t worry too much in this chapter whether the n observations are independent.
+
+- This book generally avoids statistical methods that rely on assuming that our sample data is drawn from a normally distributed popula- tion.2 Accordingly, the material here on unusual observations does not make such an assumption.
+
+- Intuitive clarity of a method is paramount. If a method can’t be ex- plained well to say, a reasonably numerate but nonstatistician client, then I prefer to avoid it.
+
+6.3 Notation
+
+Say we have data (X[i], Y[i]), i = 1, ..., n. Here the X[i] are p-component vectors,
+
+    X[i] = (X[i](1), ..., X[i](p))′  (6.1)
+
+and the Y[i] are scalars (including the case Y = 0, 1, ..., m − 1 in classification applications). We typically won’t worry too much in this chapter whether the n observations are independent.
+
 As usual, let
-μ(t)=E(Y |X=t) (6.2) be our population regression function, and let μ􏰭(t) its estimate from our
-sample data.
-1The assumption of statistical independence was not covered there, and indeed will not be covered elsewhere in the book, in the sense of methods for assessing independence. The issue will of course be discussed in individual examples.
-2“Rely on” here means that the method is not robust to the normality assumption.
-￼
-￼6.4. GOALS OF MODEL FIT-CHECKING 153
+
+    μ(t) = E(Y | X = t)  (6.2) 
+
+be our population regression function, and let μ^(t) its estimate from our sample data.
+
 6.4 Goals of Model Fit-Checking
+
 What do we really mean when we ask whether a model fits a data set well? Our answer ought to be as follows:
+
 Possible Fit-Checking Goal:
-Our model fits well if μ􏰭(t) is near μ(t) for all t, or at least for t = X1,...,Xn.
+
+Our model fits well if μ^(t) is near μ(t) for all t, or at least for t = X[1], ..., X[n].
+
 That criterion is of course only conceptual; we don’t know the values of μ(t), so it’s an impossible criterion to verify. Nevertheless, it may serves well as a goal, and our various model-checking methods will be aimed at that goal.
+
 Part of the answer to our goals question goes back to the twin regression goals of Prediction and Description. We’ll explore this in the following sections.
+
 6.4.1 Prediction Context
-If our regression goal is Prediction and we are doing classification, our above Fit-Checking Goal may be much too stringent. Say for example m = 2. If μ(t) is 0.9 but μ􏰭(t = 0.62), we will still make the correct guess, Y = 1, even though our regression function estimate is well off the mark. Similarly, if μ(t) is near 0 (or less than 0.5, actually), we will make the proper guess for Y as long as our estimated value μ􏰭(t) is under 0.5.
+
+If our regression goal is Prediction and we are doing classification, our above Fit-Checking Goal may be much too stringent. Say for example m = 2. If μ(t) is 0.9 but μ&(t = 0.62), we will still make the correct guess, Y = 1, even though our regression function estimate is well off the mark. Similarly, if μ(t) is near 0 (or less than 0.5, actually), we will make the proper guess for Y as long as our estimated value μ&(t) is under 0.5.
+
 Still, other than the classification case, the above Fit-Checking Goal is appropriate. Errors in our estimate of the population regression function will impact our ability to predict, no matter what the size is of the true regression function.
+
 6.4.2 Description Context
-Good model fit is especially important when our regression goal is Descrip- tion. We really want assurance that the estimated regression coefficients represent the true regression function well. since we will be using them to describe the underlying process.
-￼154CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
+Good model fit is especially important when our regression goal is Description. We really want assurance that the estimated regression coefficients represent the true regression function well. since we will be using them to describe the underlying process.
+
 6.4.3 Center vs. Fringes of the Data Set
+
 Consider a Prediction setting, in the classification case. In Section 6.4.1 above, we saw that actually can afford a rather poor model fit in regions of the predictor space in which the population regression function is near 1 or 0.
-The same reasoning shows, though, that having a good fit in regions where μ(t) is mid-range, say in (0.25,0.75) is important. If μ􏰭(t) and μ(t) are on opposite sites of the number 0.5 (i.e. one below 0.5 and the other above), we will make the wrong decision (even though we make still be lucky and guess Y correctly).
-In classification contexts, the p-variate density of X is often “mound- shaped,” if not bell-shaped, within each class. (In fact, many clustering algorithms are aimed at this situation.) For such data, the regions of most sensitivity in the above sense will be the lines/curves separating the pairs of mounds. (Recall Figure 5.1.) The fringes of the data set, far from these pairwise boundaries, will be regions in which model fit is less important, again assuming a Prediction goal.
+
+The same reasoning shows, though, that having a good fit in regions where μ(t) is mid-range, say in (0.25,0.75) is important. If μ^(t) and μ(t) are on opposite sites of the number 0.5 (i.e. one below 0.5 and the other above), we will make the wrong decision (even though we make still be lucky and guess Y correctly).
+
+In classification contexts, the p-variate density of X is often “mound-shaped,” if not bell-shaped, within each class. (In fact, many clustering algorithms are aimed at this situation.) For such data, the regions of most sensitivity in the above sense will be the lines/curves separating the pairs of mounds. (Recall Figure 5.1.) The fringes of the data set, far from these pairwise boundaries, will be regions in which model fit is less important, again assuming a Prediction goal.
+
 In regression contexts (continous Y , count data etc.), the full data set will tend to be mound-shaped. Here good estimation will be important for Predicition and Description throughout the entire region. However, one must keep in mind that model fit will typically be better near the center of the data than at the fringes — and that the observations at the fringes typically have the heaviest impact on the estimated coefficients. This latter consideration is of course of great import in the Description case.
+
 We will return to these considerations at various points in this chapter.
+
 6.5 Example: Currency Data
+
 Fong and Ouliaris (1995) do an analysis of relations between currency rates for Canada, Germany, France, the UK and Japan (pre-European Union days). Do they move together? Let’s look at predicting the Japanese it yen from the others.
+
 This is time series data, and the authors of the above paper do a very sophisticated analysis along those lines. So, the data points, such for the pound, are not independent through time. But since we are just using the data as an example and won’t be doing inference (confidence intervals and significance tests), we will not worry about that here.
-￼6.5. EXAMPLE: CURRENCY DATA 155
+
 Let’s start with a straightforward linear model:
-> curr <− read.table(’EXC.ASC’,header=TRUE) > fout <− lm(Yen  ̃ .,data=cur1)
+
+> curr <− read.table(’EXC.ASC’, header = TRUE) 
+> fout <− lm(Yen ~ ., data = cur1)
 > head(curr)
-Can Mark Franc 1 0.9770 2.575 4.763 2 0.9768 2.615 4.818 3 0.9776 2.630 4.806 4 0.9882 2.663 4.825 5 0.9864 2.654 4.796 6 0.9876 2.663 4.818
-> summary( fout ) ...
-Coefficients : Estimate
-( Intercept ) 102.855 Can −45.941 Mark 147.328 Franc −21.790 Pound −48.771
-...
-Multiple R−squared :
-Pound Yen 0.41997 301.5 0.42400 302.4 0.42976 303.2 0.43241 301.9 0.43185 302.7 0.43163 302.5
-> curr1 <− curr
-> curr1[,−5] <− scale(curr1[,−5]) > fout1 <− lm(Yen  ̃ .,data=curr1) > summary( fout1 )
-... Coefficients :
-Estimate Std . ( Intercept ) 224.9451
-Error t 0.6197 362.999
-Pr(>|t |)
-< 2e−16 ∗∗∗
-Std .
-Error 14.663 11.979
-3.325
-t
-value
-7.015 −3.835 44.313
-Pr(>|t |) 5.12e−12 ∗∗∗ 0.000136 ∗∗∗
-< 2e−16 ∗∗∗
-< 2e−16 ∗∗∗ 0.000844 ∗∗∗
-1.463 −14.893 14.553 −3.351
-0.8923 , Adjusted R−squared : 0.8918
+> summary( fout )
+
 Not surprisingly, this model works well, with an adjusted R-squared value of about 0.89. The signs of the coefficients are interesting, with the it yen seeming to fluctuate opposite to all of the other currencies except for the German mark. Of course, professional financial analysts (domain experts, in the data science vernacular) should be consulted as to the reasons for such relations, but here we will proceed without such knowledge.
+
 It may be helpful to scale our data so as to better understand the roles of the predictors, though, so as to put make all the predictors commensurate. Each predictor will be divided by its standard deviation (and have its mean subtracted off), so all the predictors have standard deviation 1.0:
 value
-￼156CHAPTER 6.
-Can Mark Franc Pound
-...
-MODEL FIT: ASSESSMENT AND IMPROVEMENT
-−5.6151 1.4641 −3.835 0.000136 ∗∗∗
-57.8886 1.3064 44.313 < 2e−16 ∗∗∗ −34.7027 2.3301 −14.893 < 2e−16 ∗∗∗ −5.3316 1.5909 −3.351 0.000844 ∗∗∗
-SoGermanyandFranceappeartohavethemostinfluence.3 This,andthe signs (positive for the mark, negative for the franc), form a good example of the use of regression analysis for the Description goal.
-In the next few sections, we’ll use this example to illustrate the basic con- ceptss.
+
+> curr1 <− curr
+> curr1[,−5] <− scale(curr1[ , −5]) 
+> fout1 <− lm(Yen ~ .,data = curr1) 
+> summary( fout1 )
+
+So Germany and France appear to have the most influence [3]. This, and the signs (positive for the mark, negative for the franc), form a good example of the use of regression analysis for the Description goal.
+
+In the next few sections, we’ll use this example to illustrate the basic conceptss.
+
 6.6 Overall Measures of Model Fit
+
 We’ll look two broad categories of fit assessment methods. The first will consist of overall measures, while the second will involve relating fit to individual predictor variables.
+
 6.6.1 R-Squared, Revisited
+
 We have already seen one overall measure of model fit, the R-squared value (Section ??). As noted before, its cousin, Adjusted R-squared, is considered more useful, as it is aimed at compensating for overfitting.
+
 For the currency data above, the two R-squared values (ordinary and ad- justed) were 0.8923 and 0.8918, both rather high. Note that they didn’t differ much from each other, as there were well over 700 observations, which should easily handle a model with only 4 predictors (a topic we’ll discuss in Chapter 9).
-Recall that R-squared, whether a population value or the sample estimate reported by lm(), is the squared correlation between Y and its predicted value μ(X) or μ􏰭(X), respectively. Thus it can be calculated for any method of regression function estimation, not just the linear model. In particular, we can apply the concept to k-Nearest Neighbor methods.
-The point of doing this with kNN is that the latter in principle does not have model-fit issues. Whereas our linear model for the currency data assumes
-3Or, at least, seem to have the strongest relation with the Yen. We cannot claim causation.
-￼
-￼6.6. OVERALL MEASURES OF MODEL FIT 157
-a linear relationship between the Yen and the other currencies, kNN makes no assumptions on the form of the regression function. If kNN were to have a substantially larger R-squared value than that of our linear model, then we may be “leaving money on the table,” i.e. not fitting as well as we could with a more sophisticated parametric model.4
+
+Recall that R-squared, whether a population value or the sample estimate reported by lm(), is the squared correlation between Y and its predicted value μ(X) or μ^(X), respectively. Thus it can be calculated for any method of regression function estimation, not just the linear model. In particular, we can apply the concept to k-Nearest Neighbor methods.
+
+The point of doing this with kNN is that the latter in principle does not have model-fit issues. Whereas our linear model for the currency data assumes a linear relationship between the Yen and the other currencies, kNN makes no assumptions on the form of the regression function. If kNN were to have a substantially larger R-squared value than that of our linear model, then we may be “leaving money on the table,” i.e. not fitting as well as we could with a more sophisticated parametric model [4].
+
 So, let’s see what kNN tells us in the currency example:
-> xdata <− preprocessx ( curr1 [ , −5] ,25 , xval=TRUE) > kout <− knnest(curr1[,5],xdata,25)
-> cor(kout$regest , curr1 [ ,5])ˆ2
+
+> xdata <− preprocessx (curr1[ , −5], 25, xval = TRUE) 
+> kout <− knnest(curr1[ , 5], xdata, 25)
+> cor(kout$regest, curr1[ , 5])ˆ2
 [1] 0.9717136
+
 This would indicate that, in spite of a seemingly good fit for our linear model, it does not adequately describe the currency fluctuation process.
+
 However, we should raise a question as to whether the value of k here, 25, is a good one. Let’s investigate this with the regtools function kmin():
-> xdata <− preprocessx ( curr1 [ , −5] ,150 , xval=TRUE)
-> kminout <− kmin(curr1$Yen,xdata ,predwrong ,nk=30) > kminout$kmin
+
+> xdata <− preprocessx(curr1[ , −5], 150, xval = TRUE)
+> kminout <− kmin(curr1$Yen, xdata, predwrong, nk = 30) 
+> kminout$kmin
 [1] 5
-The “best” k, as determined by a cross-validated estimate of mean squared prediction error, is reported here to be 5 (which is the smallest value this function tried). This may seem very small, but as will be discused in Chapter 10, it is to be expected in light of the high R2 value we have with this data.
-Let’s rerun our R2 calculation with this value of k:
-> kout <− knnest(curr1[,5],xdata,5) > cor(kout$regest , curr1 [ ,5])ˆ2
+
+The “best” k, as determined by a cross-validated estimate of mean squared prediction error, is reported here to be 5 (which is the smallest value this function tried). This may seem very small, but as will be discused in Chapter 10, it is to be expected in light of the high R^2 value we have with this data.
+
+Let’s rerun our R^2 calculation with this value of k:
+
+> kout <− knnest(curr1[ , 5], xdata, 5) 
+> cor(kout$regest, curr1[ , 5])ˆ2
 [1] 0.9920137
+
 Even better! So, our linear model, which seemed so nice at first, is missing something. Maybe we can determine why via the methods in the following sections.
-4We could of course simply use kNN in the first place. But this would not give us the Description usefulness of the parametric model, and also would give us a higher estimation variance.
-￼
-￼158CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
+
+
 6.6.2 Plotting Parametric Fit Against Nonparametric One
 Let’s plot the μ􏰭 values of the linear model against those of kNN: > parvsnonparplot(fout1 ,kout)
 The result is shown in Figure 6.1. It suggests that the linear model is overestimating the regression function at times when the Yen is very low, moderately low or very high, and possibly underestimating in the moder- ately high range.
@@ -144,9 +166,9 @@ In any case, it’s clear that the linear model does not tell the whole story.
 It may be that the relationship with the response variable Y is close to linear for some predictors X(i) but not for others. How might we investigate that?
 6.7.1 Partial Residual Plots
 We might approach this by simply plotting a scatter diagram of Y against each predictor variable. However, the relation of Y with X(i) may change in the presence of the other X(j). A more sophisticated approach may be partial residual plots, also known as component + residual plots. These would be easy to code on one’s own, but the crPlot() function in the car package does the job nicely for us:
-￼6.7. DIAGNOSTICS RELATED TO INDIVIDUAL PREDICTORS 161
+
 ￼Figure 6.2: Residuas Against Linear Fitted Values
-￼162CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
 Figure 6.3: Partial Residuals Plot, Currency Data
 > crPlots(fout1)
 The resulting graph is shown in Figure 6.3. Before discussing these rather
@@ -164,7 +186,7 @@ pi =
 −...−β1X
 −β1X
 (j +1)
-￼6.7. DIAGNOSTICS RELATED TO INDIVIDUAL PREDICTORS 163
+
 In other words, we’ve started with (6.4), but removed the linear term con-
 tributed by predictor j, i.e. removed βpX(j). We then plot the pi against i
 predictor j, to try to discern a relation. In effect we are saying,
@@ -180,20 +202,18 @@ next plot
 next plot
 next plot
 􏰭
-￼164CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
 Figure 6.4: Nonparametric Fit Against the Mark
 The graph for for the mark is shown in Figure 6.4. Oh my gosh! With the partial residual plots, the mark and the franc seemed to be the only “clean” ones. Now we see that the situation for the mark is much more complex. The same is true for the other predictors (not shown here). This is indeed a difficult data set.
 Again, note that the use of smoothing has brought these effects into better focus, as discussed in Section 6.6.3.
 6.7.3 Freqparcoord
 Another graphical approach is via freqparcoord package, written by Yingkang Xie and me. The call
-￼
-￼6.7. DIAGNOSTICS RELATED TO INDIVIDUAL PREDICTORS 165
+
 Figure 6.5: Freqparcoord Plot, Currency Data
 produces the graph in Figure 6.5.
 What is depicted in this graph? First, this is a parallel coordinates plot, which is a method for visualizing multidimensional data in a 2-dimensional graph. This approach dates back to the 1800s, but was first developed in depth in modern times; see Inselberg (2009).
 The general method of parallel coordinates is quite simple. Here we draw p vertical axes, one for each variable. For each of our n data points, we draw a polygonal line from each axis to the next. The height of the line on axis j is the value of variable j for this data point. As Inselberg pointed out, in mathematical terms the plot performs a transformation mapping p-dimensional points to p − 1-segment lines. The practical effect is that we can visualize how our p variables vary together.
-￼
-￼166CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
 However, if our number of data points n is large, our parallel coordinates will consist of a chaotic jumble of lines, maybe even with the “black screen problem,” meaning that so much has been plotted that the graph is mostly black, no defining features.
 The solution to that problem taken by freqparcoord is to plot only the most frequently-occurring lines, meaning those corresponding to the origi- nal data points having the largest estimated p-dimensional density funciton.
 A function in the freqparcoord package, regdiag(), applies this to regres- sion diagnostics. The first variable plotted, i.e. the first vertical axis, is what we call the divergences, meaning the differences beween the parametric and nonparametric estimates of the population regression function,
@@ -202,9 +222,7 @@ numbers of standard deviations from the mean of the given variable.
 There are three groups, thus three subgraphs, for the upper 10%, middle 80% and lower 10% of the divergence values. So for instance the upper subgraph describes data points Xi at which the linear model greatly over- estimates the true regression function.
 What we see, then, is that in regions in which the linear model underes- timates, the Canadian dollar tends to be high and the mark low, with an opposite relation for the region of overestimation. Note that this is not the same as saying that the correlation between those two currencies is neg- ative; on the contrary, running cor(curr1) shows their correlation to be positive and tiny, about 0.01. This suggests that we might try adding a dollar/mark interaction term to our model, though the effect here seems mild, with peaks and valleys of only about 1 standard deviation..
 6.8 Effects of Unusual Observations on Model Fit
-Suppose we are doing a study of rural consumer behavior in a small country C in the developing world. One day, a few billionaires discover the idyllic beauty of rural C and decide to move there. We almost certainly would want to exclude data on these interlopers from our analysis. Second, most data contains errors. Obviously these must be excluded too, or corrected if
-￼6.8. EFFECTS OF UNUSUAL OBSERVATIONS ON MODEL FIT 167
-possible. These two types of observations are sometimes collectively called outliers, or simply unusual.
+Suppose we are doing a study of rural consumer behavior in a small country C in the developing world. One day, a few billionaires discover the idyllic beauty of rural C and decide to move there. We almost certainly would want to exclude data on these interlopers from our analysis. Second, most data contains errors. Obviously these must be excluded too, or corrected if possible. These two types of observations are sometimes collectively called outliers, or simply unusual.
 Though we may hear that Bill Gates has moved to C, and we can clean the data to remove the obvious errors, such as a human height of 25 feet or a negative weight. other extreme values or errors may not jump out at us. Thus it would be useful to have methods that attempt to find such observations in some mechanical way.
 6.8.1 The influence() Function
 Base R includes a very handy function, influence(). We input an object of type ”lm”, and it returns an R list. One of the components of that list,
@@ -244,7 +262,7 @@ Now this is interesting. There are 761 observations in this data set, and now we
 ( Intercept ) 224.965279 Pound −5.432882 > −5.652575
 Can Mark −5.652575 57.906698
 + 0.037431 [ 1 ] −5.615144
-￼6.8. EFFECTS OF UNUSUAL OBSERVATIONS ON MODEL FIT 169
+
 > tail(ia,5)
 [,1] [,2] [,3] [,4]
 757 0.05585538 0.1311110 0.1572411 0.1305925 758 0.05851087 0.1294412 0.1563013 0.1259741 759 0.05838813 0.1386614 0.1629851 0.1358875 760 0.05818730 0.1429951 0.1654354 0.1385146 761 0.05626212 0.1316884 0.1534207 0.1211305
@@ -266,7 +284,7 @@ Pound −5.332
 These are very
 rency almost doubled, and even the pound’s value changed almost 30%. That latter is a dramatic difference, in view of the fact that each individual
 substantial changes! The coefficient for the Canadian cur-
-￼170CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
 observation had only about a 2% influence on the pound.
 6.9 Automated Outlier Resistance
 The term robust in statistics generally means the ability of methodology to withstand problematic conditions. Linear regression models, for instance, are said to be “robust to the normality” assumption, meaning that (at least large-sample) inference on the coefficients with work well even though the distribution of Y given X is not normal.
@@ -279,7 +297,6 @@ It turns out (see the Mathematical Complements section at the end of this chapte
 In other words, in contrast to the regression function, i.e. the conditional mean, which minimizes mean squared prediction error, the conditional me- dian minimizes mean absolute error.
 Remember, as with regression, we are estimating an entire function here, as t varies. A nonparametric approach to this would be to use knnest() with nearf set to
 function ( predpt , nearxy )
-￼6.9. AUTOMATED OUTLIER RESISTANCE 171
 {
 ycol <− ncol(nearxy)
 median(nearxy[, ycol]) }
@@ -294,13 +311,12 @@ Sense (a) above will be particularly relevant here.
 Let’s apply rq() to the currency data:
 > qout <− rq(Yen  ̃ .,data=curr1) > qout
 ... Coefficients :
-￼172CHAPTER 6.
 ( Intercept ) 224.517899 Pound −5.320035
 ...
 > fout1
 ... Coefficients : ( Intercept )
 224.945 Franc −34.703
-MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
 Can −11.038238
 Mark Franc 53.854005 −27.443584
 Can Mark −5.615 57.889
@@ -321,8 +337,7 @@ One of the variables is Birth Order. Let’s make it numeric:
 > for (i in 1:length(z)) {
 + numorder[i] <− if(z[i]==’First’) 1 else + if(z[i]==’Second’) 2 else
 strikingly similar to what we obtained in Section 6.8.1.1 by
-￼
-￼6.10. EXAMPLE: VOCABULARY ACQUISITION 173
+
 + if(z[i]==’Third’) 3 else
 + if(z[i]==’Fourth’) 4 else
 + if(z[i]==’Fifth’) 5 else
@@ -360,8 +375,7 @@ Pr(>|t |)
 < 2e−16 ∗∗∗
 value
 0.6422 51.997 < 2e−16 ∗∗∗ 3.0885 −6.650 3.52e−11 ∗∗∗
-￼174CHAPTER 6.
-MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
 male
 asian
 black
@@ -398,14 +412,13 @@ othernonwhite −50.462963
 latino −68.629630
 momyrs 3.638889
 = ”vocab”)
-￼6.11. IMPROVING FIT 175
+
 Figure 6.6: Vocabulary vs. Age
 As seen in Figure 6.6, the middle-level children start out knowin much fewer words than the most voluble ones, but narrow the gap over time. By contrast, the kids with smaller vocabularies start out around the same level as the middle kids, but actually lose ground over time, suggesting that educational interventions may be helpful.
 6.11 Improving Fit
 The currency example seemed so simple at first, with a very nice adjusted R-squared value of 0.89, and with the yen seeming to have a clean linear relation with the franc and the mark. And yet we later encountered some troubling aspects to this data.
 First we noticed that the adjusted R-squared value for the kNN fit was even better, at 0.98. Thus there is more to this data than simple linear
-￼
-￼176CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
 relationships. Later we found that the last 18 data points, possibly more,
 have an inordinate influence on the βj. This too could be a reflection of nonlinear relationships between the currencies. The plots exhibited some strange, even grotesque, relations.
 So, let’s see what we might do to improve our parametric model. 6.11.1 Deleting Terms from the Model
@@ -482,10 +495,9 @@ we find that the age variable, and possibly wkswrkd, seem to have a quadratic re
 > pecs2$age2 <− pecs1$ageˆ2
 > pecs2$wks2 <− pecs1$wkswrkdˆ2 > n <− nrow(pecs1)
 > trnidxs <− sample(1:n,12000)
-￼
-￼6.11. IMPROVING FIT 179
-￼Figure 6.8: Mean Wage Income vs. Weeks Worked
-￼180CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
+Figure 6.8: Mean Wage Income vs. Weeks Worked
+
 > predidxs <− setdiff(1:n,trnidxs)
 > lmout1 <− lm(wageinc  ̃ .,data=pecs1[trnidxs ,]) > lmout2 <− lm(wageinc  ̃ .,data=pecs2[trnidxs ,]) > lmpred1 <− predict ( lmout1 , pecs1 [ predidxs , ] )
 > lmpred2 <− predict ( lmout2 , pecs2 [ predidxs , ] )
@@ -516,7 +528,7 @@ t value −14.271 17.125 −12.290 4.555 15.951 9.353 −15.271 4.462
 As usual, we should not make too much of the p-values, especially with a sample size this large (16411 for pecs1). So, all those asterisks don’t tell
 Adjusted R−squared:
 0.2381
-￼6.12. CLASSIFICATION SETTINGS 181
+
 us too much. But a confidence interval computed from the standard error shows that the absolute age-squared effect is at least about 34, far from 0, and it does make a difference, say on the first person in the sample:
 > predict(lmout1 , pecs1 [1 ,]) 1
 62406.48
@@ -534,8 +546,7 @@ It goes without saying that with any data set, we should first do proper cleanin
 > library(freqparcoord)
 > freqparcoord(pima[,−9],−10)
 6And of course should have done so for the other data earlier in this chapter, but I decided to keep the first analyses simple.
-￼
-￼182CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
 Here we display that 10 data points (predictors only, not response variable) whose estimated joint density is lowest, thus qualifying as “unusual.”
 The graph is shown in Figure 6.9. Again we see a jumble of lines, but look at the big dips in the variables BP and BMI, blood pressure and Body Mass Index. They seem unusual. Let’s look more closely at blood pressure:
 > table(pima$BP)
@@ -559,17 +570,17 @@ kNN. First, what value of k should we use?:
 > xdata <− preprocessx (pima[ , −9] ,150 , xval=TRUE)
 > kminout <− kmin(pima$Diab,xdata,lossftn=predwrong,nk=30) > kminout$kmin
 [1] 65
-￼6.12. CLASSIFICATION SETTINGS 183
-￼Figure 6.9: Outlier Hunt
-￼184CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
+Figure 6.9: Outlier Hunt
+
 Figure 6.10: Best k for Pima
+
 Note that here we used the predwrong() loss function, which computes the misclassification rate.
 The “best” value of k found was 65, but the plot suggests that smaller values might be tried, as seen in Figure 6.10. Let’s go with 50, and compare the parametric and nonparametric fits:
 > kout <− knnest(pima$Diab,xdata,50) > parvsnonparplot(glmout,kout)
 The results of the plot are shown in Figure 6.11. There does appear to be some overestimation by the logit at very high values of the regression function, indeed all the range past 0.5. This can’t be explained by the fact, noted before, that kNN tends to underestimate at the high end.
 Note carefully that if our goal is Prediction, it may not matter much at the high end. Recall the discussion on classification contexts in Section 6.4.1. If the true population regression value is 0.8 and we estimate it to be 0.88, we
-￼
-￼6.13. SPECIAL NOTE ON THE DESCRIPTION GOAL 185
+
 still predict Y = 1, which is the same as what we would predict if we knew the true population regression function. Similarly, if the true regression value is 0.25 but we estimate it to be 0.28, we still make the proper guess for Y .
 For Description, though, we should consider a richer model. Running non- parvsxplot() (not shown) suggests adding quadratic terms for the vari- ables Gluc, Insul, Genet and especially Age. Adding these, and rerun- ning knnest() with nearf = loclin to deal with kNN’s high-end bias, our new parametric-vs.-nonparametric plot is shown in Figure 6.12.
 The reader may ask if now we have underestimation by the parametric model at the high end, but we must take into account the fact that with nearf = loclin, we can get nonparametric estimates for the regression function that are smaller than 0 or greater than 1, which is impossible in the classification setting. The perceived “underestimation” actually occurs at values at which the nonparametric figures are larger than 1.
@@ -583,11 +594,11 @@ We’ll use the notation of Section 2.3.2 here. The hat matrix is defined as
 H = A(A′A)−1A′ (6.10) The name stems from the fact that we use H to obtain “Y-hat,” the pre-
 􏰭
 􏰭
-￼186CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
-￼Figure 6.11: Estimation of Regression Values, Two Methods
-￼6.14. MATHEMATICAL COMPLEMENTS 187
+
+Figure 6.11: Estimation of Regression Values, Two Methods
+
 ￼Figure 6.12: Estimation of Regression Values, Two Methods
-￼188CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
 dicted values for the elements of D: 􏰭􏰰􏰭
 so
 D􏰭 = Aβ􏰭 = A(A′A)−1A′D = HD
@@ -606,8 +617,7 @@ Di = μ􏰭(Xi ) β
 ′
 (6.11)
 (6.12)
-￼
-￼6.14. MATHEMATICAL COMPLEMENTS 189
+
 Let wi denote row i of H, which is also column i since H is symmetric. Then
 n
 hii = Hii = (H2)ii = wi′wi = h2ii + 􏰓 h2ij (6.18)
@@ -622,8 +632,7 @@ The famous Sherman-Morrison-Woodbury formula says that for an invert- ible matri
 In other words, if we have already gone to the trouble of computing a matrix inverse, and the matrix is then updated as above by adding uv′, then we do not have to compute the new inverse from scratch; we need only modify the old inverse, as specified above.
 Let’s apply that to Section 6.8.1, where we discussed the effect of deleting an observation from our data set. Setting B = A′A, u = X􏰯i and v = −X􏰯i, then the new version of A′A after deleting observation i is
 (A′A)(−i) = A′A + uv′ (6.21) That will be our value for the left-hand side of (6.20). Look what happens
-￼
-￼190CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
 to the right-hand side:
 1 + v′B−1u = 1 − X􏰯i′(A′A)−1X􏰯i
 But that subtracted term is just hii! Now that’s convenient. Now, again in (6.20), note that
@@ -646,7 +655,7 @@ E[(W −m)]
 (6.25) (t−m) fV (t)dt (6.26)
 􏰞m 􏰞∞
 = mP(W <m)− tfV(t)dt+ tfV(t)dt−mP(W >m) −∞ m
-￼6.15. FURTHEREXPLORATION:DATA,CODEANDMATHPROBLEMS191
+
 Differentiating with respect to m, we have
 0 = P (W < m)+mfV (m)−mfV (m)−mfV (m)−[P (W > m)+m(−fV (m))] (6.27)
 In other words,
@@ -655,11 +664,25 @@ i.e. m = median(W ).
 The extension to conditional median then follows the same argument as in
 Section 1.13.1.
 6.15 Further Exploration: Data, Code and Math Problems
+
 Exercises
+
 1. The contributors of the Forest Fire data set to the UCI Machine Learning Repository, https://archive.ics.uci.edu/ml/datasets/Forest+Fires, describe it as “a difficult regression problem.” Apply the methods of this chapter to attempt to tame this data set.
+
 2. Using the methods of this chapter, re-evaluate the two competing Poisson-based analyses in Section 4.5.
+
 3. Suppose the predictor vector X in a two-class classification problem has a joint density fX . Define the “population” residual r = Y − g(X), and its cumulative distribution function Fr.
+
 (a) Express Fr as an integral involving fX and the regression function μ(t).
+
 (b) Define a sample analog of (a), and use it to develop a graphical fit assessment tool for parametric models such as the logistic, using R’s empirical distribution function ecdf() and kNN.
+
 4. Write an R function analogous to influence() for quantreg objects.
-￼192CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
+
+[1] The assumption of statistical independence was not covered there, and indeed will not be covered elsewhere in the book, in the sense of methods for assessing independence. The issue will of course be discussed in individual examples.
+
+[2] “Rely on” here means that the method is not robust to the normality assumption.
+
+[3] Or, at least, seem to have the strongest relation with the Yen. We cannot claim causation.
+
+[4] We could of course simply use kNN in the first place. But this would not give us the Description usefulness of the parametric model, and also would give us a higher estimation variance.

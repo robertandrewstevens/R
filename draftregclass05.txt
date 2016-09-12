@@ -1,4 +1,4 @@
-Chapter 5: Multiclass Classification Problems
+Chapter 5: Multi-class Classification Problems
 
 In classification problems we’ve discussed so far, we have assumed just two classes. The patient either has the disease in question, or not; the customer chooses to buy a certain item, or not; and so on.
 
@@ -20,7 +20,7 @@ Note that in this chapter, we will be concerned primarily with the Prediction go
 
 5.1 The Key Equations
 
-Equations (4.29) and (4.37), and their generalizations, will play a key role here. Let’s relate our new multiclass notation to what we had in the two- class case before. If m = 2, then:
+Equations (4.29) and (4.37), and their generalizations, will play a key role here. Let’s relate our new multi-class notation to what we had in the two-class case before. If m = 2, then:
 
 - What we called Y^(1) above was just called Y in our previous discussion of the two-class case.
 
@@ -28,7 +28,7 @@ Equations (4.29) and (4.37), and their generalizations, will play a key role her
 
 Now, let’s review from the earlier material. (Keep in mind that typically X will be vector-valued, as we typically have more than one predictor variable.) For m = 2:
 
-- ThequantityofinterestisP(Y = 1 | X = t).
+- The quantity of interest is P(Y = 1 | X = t).
 
 - If X has a discrete distribution, then
 
@@ -36,7 +36,7 @@ Now, let’s review from the earlier material. (Keep in mind that typically X wi
 
 - If X has a continuous distribution,
 
-μ(t) = P(Y = 1 | X = t) = π*f[1](t)/(π*f[1](t) + (1 − π)*f[0](t) ) (5.4)
+    μ(t) = P(Y = 1 | X = t) = π*f[1](t)/(π*f[1](t) + (1 − π)*f[0](t) ) (5.4)
 
 where the within-class densities of X are f[1] and f[0] [2].
 
@@ -44,9 +44,9 @@ where the within-class densities of X are f[1] and f[0] [2].
 
     P(Y =1|X=t)= 1/(1 + (1 − π)*f[0](t)/(π*f[1](t))) (5.5)
 
-Note that, in keeping with the notion that clasification amounts to a regression problem (Section 1.12.1), we have used our regression function notation μ(t) above.
+Note that, in keeping with the notion that classification amounts to a regression problem (Section 1.12.1), we have used our regression function notation μ(t) above.
 
-Things generalize easily to the multiclass case. We are now interested in the quantities
+Things generalize easily to the multi-class case. We are now interested in the quantities
 
     P(Y = i) = μ[i](t) = P(Y^(i) = 1 | X = t), i = 0, 1,..., m − 1  (5.6)
 
@@ -58,7 +58,7 @@ For continuous X, (5.4) becomes
 
 In Section 1.8, we discussed the specifics of predicting new cases, in which we know “X” but not “Y,” after fitting a model to data in which both “X” and “Y” are known (our training data). The parametric and nonparametric cases were slightly different.
 
-The situation is the same here in the multiclass setting. The only difference is that now multiple functions μi(t), i = 0, 1, ..., m − 1 need to be estimated from our training data, as opposed to just μ(t) before.
+The situation is the same here in the multi-class setting. The only difference is that now multiple functions μi(t), i = 0, 1, ..., m − 1 need to be estimated from our training data, as opposed to just μ(t) before.
 
 It should be noted, though, that some nonparametric methods do not explicitly estimate μi(t), and instead only estimate “boundaries” involving those functions. These methods will be discussed in Chapter 11.
 
@@ -79,7 +79,7 @@ In many applications today, though, our classification process will be automated
 
 from Section 1.13.2 is not what we want, as it implicitly assumed equal costs.
 
-If we wish to automate, we’ll probably need to set up a formal cost structure. Let l0 denote our cost for guessing Y to be 1 when it’s actually 0, and define l1 for the opposite kind of error. Now reason as follows as to what we should guess for Y , knowing that X = tc. For convenience, write
+If we wish to automate, we’ll probably need to set up a formal cost structure. Let l0 denote our cost for guessing Y to be 1 when it’s actually 0, and define l1 for the opposite kind of error. Now reason as follows as to what we should guess for Y , knowing that X = t[c]. For convenience, write
 
     p = P(Y = 1 | X = t[c])  (5.9)
 
@@ -110,7 +110,7 @@ Let’s consider the Vertebral Column data from the UC Irvine Machine Learning R
 
 - One vs. All (OVA): Here we would fit 3 logit models to our training data, predicting each of the 3 classes, one at a time. The ith model would regress Y (i) against the 6 predictor variables, yielding μ^[i](t), i = 0, 1, 2. To predict Y for X = t[c], we would guess Y to be whatever i has the largest value of μ^i(t[c]), i.e. the most likely class, given the predictor values.
 
-- All vs. All (AVA): Here we would fit 3 logit models again, but with one model for each possible pair of clases. Our first model would pit class 0 against class 1, meaning that we would restrict our data to only those cases in which the class is 0 or 1, then predict class 0 in that restricted data set. Our second logit model would restrict to the classes 0 and 2, and predict 0, while the last model would be for classes 1 and 2, predicting 1. (We would still use our 6 predictor variables in each model.)
+- All vs. All (AVA): Here we would fit 3 logit models again, but with one model for each possible pair of classes. Our first model would pit class 0 against class 1, meaning that we would restrict our data to only those cases in which the class is 0 or 1, then predict class 0 in that restricted data set. Our second logit model would restrict to the classes 0 and 2, and predict 0, while the last model would be for classes 1 and 2, predicting 1. (We would still use our 6 predictor variables in each model.)
 
 Note that it was just coincidence that we have the same number of models in the OVA and AVA approaches here (3 each). In general, with m classes, we will run m logistic models (or kNN or whatever type of regression modeling we like) under OVA, but C(m, 2) = m(m − 1)/2 models under AVA [3].
 
@@ -135,7 +135,7 @@ To make this concrete, here is code for the two approaches:
 
 # arguments :
 #
-# m: asabove 
+# m: as above 
 # trnxy: as above
 
 # value:
@@ -182,412 +182,529 @@ ovalogpred <− function(coefmat, predx) {
 # arguments: 
 #
 #   m: as above
-trnxy : value:
-matrix in the
-as above
-of the betahat order of combin ()
-one per
-column ,
+#   trnxy: as above
+#
+# value: 
 
+#   matrix in the of the betahat vectors, one per column,
+#   in the order of combin()
 
-avalogtrn <− function(m,trnxy) {
-p <− ncol(trnxy) n<−nrow(trnxy) x<−as.matrix(trnxy[,1:(p−1)]) y<−trnxy[,p]
-outmat <− NULL ijs <− combn(m,2)
-doreg <− function(ij) { i <− i j [ 1 ] − 1
-j <− i j [ 2 ] − 1
-tmp <− rep(−1,n) tmp[y == i] <− 1 tmp[y == j] <− 0
-yij <− tmp[tmp != −1]
-xij <− x[tmp != −1,]
-coef(glm(yij  ̃ xij ,family=binomial))
+avalogtrn <− function(m, trnxy) {
+  p <− ncol(trnxy) 
+  n <− nrow(trnxy) 
+  x <− as.matrix(trnxy[ , 1:(p − 1)]) 
+  y <− trnxy[ , p]
+  outmat <− NULL 
+  ijs <− combn(m, 2)
+  doreg <− function(ij) { 
+    i <− ij[1] − 1
+    j <− ij[2] − 1
+    tmp <− rep(−1, n) 
+    tmp[y == i] <− 1 
+    tmp[y == j] <− 0
+    yij <− tmp[tmp != −1]
+    xij <− x[tmp != −1, ]
+    coef(glm(yij ~ xij, family = binomial))
+  }
+  coefmat <− NULL
+  for(k in 1:ncol(ijs)) {
+    coefmat <− cbind(coefmat, doreg(ijs[ , k])) 
+  }
+  coefmat
 }
-coefmat <− NULL
-for (k in 1:ncol(ijs)) {
-coefmat <− cbind(coefmat,doreg(ijs[,k])) }
-coefmat
-vectors ,
-￼97 98 99
-100
-101
-102
-103
-104
-105
-106
-107
-108
-109
-110
-111
-112
-113
-114
-115
-116
-117
-118
-119
-120
-121
-122
-123
-124
-125
-126
-127
-128
-129
-130
-131
-132
-133
-134
-135
-136
 
-}
-##################################################### # avalogpred: predict Ys from new Xs #####################################################
-# # # # # # # # # #
-arguments :
-m: as above coefmat : coef . predx : as above
-value:
-matrix ,
-output from
-avalogtrn ()
-vector of predicted Y values , in {0 ,1 ,... ,m−1}, one element for each row of predx
-avalogpred <− function(m,coefmat ,predx) { ijs <− combn(m,2) # as in avalogtrn()
-n <− nrow(predx)
-ypred <− vector(length = n) for (r in 1:n) {
-# predict the rth new observation
-xrow <− c(1,unlist(predx[r ,]))
-# wins[i] tells how many times class i−1 has won
-wins <− rep(0,m)
-for (k in 1:ncol(ijs)) {
-i<−ijs[1,k] #classi−1 j<−ijs[2,k] #classj−1 b h a t <− c o e f m a t [ , k ]
-mhat <− logit(bhat %∗% xrow)
-if (mhat >= 0.5) wins[i] <− wins[i] + 1 else wins[j] <− wins[j] + 1
-}
-ypred[r] <− which.max(wins) − 1 }
-ypred
-}
-logit <− function(t) 1 / (1+exp(−t))
-For instance, under OVA, we call ovalogtrn() on our training data, yielding a logit coefficient matrix having m columns; the ith column will consist of
+##################################################### 
+# avalogpred: predict Ys from new Xs #####################################################
 
-the estimated coefficients from fitting a logit model predicting Y (i). We then use this matrix as input for predicting Y in all future cases that come our way, by calling ovalogpred() whenever we need to do a prediction.
+# arguments :
+#
+#   m: as above
+#   coefmat: coef. matrix, output from avalogtrn()
+#   predx : as above
+#
+# value:
+#
+#   vector of predicted Y values, in {0, 1, ..., m − 1}, 
+#   one element for each row of predx
+
+avalogpred <− function(m, coefmat, predx) { 
+  ijs <− combn(m, 2) # as in avalogtrn()
+  n <− nrow(predx)
+  ypred <− vector(length = n) 
+  for(r in 1:n) {
+    # predict the rth new observation
+    xrow <− c(1, unlist(predx[r ,]))
+    # wins[i] tells how many times class i − 1 has won
+    wins <− rep(0, m)
+    for(k in 1:ncol(ijs)) {
+      i <− ijs[1, k] # class i − 1 
+      j <− ijs[2, k] # class j − 1 
+      bhat <− coefmat[ , k]
+      mhat <− logit(bhat %*% xrow)
+      if(mhat >= 0.5) wins[i] <− wins[i] + 1 
+      else wins[j] <− wins[j] + 1
+    }
+    ypred[r] <− which.max(wins) − 1 
+  }
+  ypred
+}
+
+logit <− function(t) 1/(1 + exp(−t))
+
+For instance, under OVA, we call ovalogtrn() on our training data, yielding a logit coefficient matrix having m columns; the ith column will consist of the estimated coefficients from fitting a logit model predicting Y (i). We then use this matrix as input for predicting Y in all future cases that come our way, by calling ovalogpred() whenever we need to do a prediction.
+
 Under AVA, we do the same thing, calling avalogtrn() and avalogpred().
+
 5.4.2 Which Is Better?
-Clearly, AVA involves a lot of computation. For fixed number of predictor variables p, here is a rough time estimate. For a logit model, the computa- tion will be proportional to the number of cases n (due to computing various sums over all cases). Say our training data is approximately balanced in terms of sizes of the classes, so that the data corresponding to class i has about n/m cases in it, Then the computation for one pair will be O(n/m), but there will be O(m2) pairs, so the total amount of computation will be O(mn) — potentially much larger than the O(n) used by OVA.
+
+Clearly, AVA involves a lot of computation. For fixed number of predictor variables p, here is a rough time estimate. For a logit model, the computation will be proportional to the number of cases n (due to computing various sums over all cases). Say our training data is approximately balanced in terms of sizes of the classes, so that the data corresponding to class i has about n/m cases in it, Then the computation for one pair will be O(n/m), but there will be O(m2) pairs, so the total amount of computation will be O(mn) — potentially much larger than the O(n) used by OVA.
+
 Well, then, do we benefit from that extra computation? At least at first glance, AVA would not seem to have much to offer. For instance, since each of its models uses much less than our full data, the resulting estimated coefficients will likely be less accurate than what we calculate under OVA. And if m is large, we will have so many pairs that at least some will likely be especially inaccurate. And yet some researchers claim they find AVA to work better.
+
 To better understand the situation, let’s consider an example and draw upon some intuition.
+
 5.4.3 Example: Vertebrae Data
-Here we continue with the vertebrae data, applying the OVA and AVA methods to a training set of 225 randomly chosen records, then predicting the remaining records:4
-> vert <− read.table(’Vertebrae/column 3C.dat’, header=FALSE)
-> vert$V7 <− as.numeric(vert$V7) − 1 > trnidxs <− sample(1:310 ,225)
-> predidxs <− setdiff (1:310 , trnidxs )
-4To avoid clutter, some messages, “glm.fit: fitted probabilities numerically 0 or 1 occurred,” have been removed, here and below. The warnings should not present a problem.
 
-> ovout <− ovalogtrn (3 , vert [ trnidxs , ] )
-> predy <− ovalogpred(ovout,vert[predidxs ,1:6]) > mean(predy == vert[predidxs ,7])
+Here we continue with the vertebrae data, applying the OVA and AVA methods to a training set of 225 randomly chosen records, then predicting the remaining records [4]:
+
+> vert <− read.table(’Vertebrae/column 3C.dat’, header = FALSE)
+> vert$V7 <− as.numeric(vert$V7) − 1 
+> trnidxs <− sample(1:310, 225)
+> predidxs <− setdiff(1:310, trnidxs)
+> ovout <− ovalogtrn(3, vert[trnidxs, ])
+> predy <− ovalogpred(ovout, vert[predidxs, 1:6]) 
+> mean(predy == vert[predidxs, 7])
 [1] 0.8823529
-> avout <− avalogtrn (3 , vert [ trnidxs , ] )
-> predy <− avalogpred(3,avout,vert[predidxs ,1:6]) > mean(predy == vert[predidxs ,7])
+> avout <− avalogtrn(3, vert[trnidxs, ])
+> predy <− avalogpred(3, avout, vert[predidxs, 1:6]) 
+> mean(predy == vert[predidxs, 7])
 [1] 0.8588235
-Note that ovalogpred() requires that Y be coded 0, 1, ..., m − 1, hence the
-call to as.numeric().
-The two correct-classification rates here are, of course, subject to sampling
-error, but in any case AVA did not seem superior.
-5.4.4 Intuition
-To put this in context, consider the artificial example in Figure 5.1, adapted from Friedman (1996). Here we have m = 3 classes, with p = 2 predictors. For each class, the bulk of the probability mass is assumed to lie within one of the circles.
-Now suppose a logistic model were used here. It implies that the prediction boundary between our two classes is linear. The figure shows that a logit model would fare well under AVA, because for any pair of classes, there is a straight line (pictured) that separates that pair of classes well. But under OVA, we’d have a problem; though a straight line separates the top circle from the bottom two, there is no straight line that separates the bottom- left circle well from the other two; the boundary between that bottom-left circle and the other two would be a curve.
-The real problem here, of course is that the logit is not a good model in such a situation.
-5.4.5 Example: Letter Recognition Data
-Following up on the notion that AVA may work to reduce model bias, i.e. that AVA’s value occurs in settings in which our model is not very good, let’s look at an example in which we know the model is imperfect.
-The UCI Letters Recognition data set 5 uses various summaries of pixel 5https://archive.ics.uci.edu/ml/datasets/Letter+Recognition; a lso available
 
-￼Figure 5.1: Three Artificial Regression Lines
-￼5.4. ONE VS. ALL OR ALL VS. ALL? 135
-patterns to classify images of capital English letters. A naively applied logistic model may sacrifice some accuracy here, due to the fact that the predictors do not necessarily have monotonic relations with the response variable, the class identity.
+Note that ovalogpred() requires that Y be coded 0, 1, ..., m − 1, hence the call to as.numeric().
+
+The two correct-classification rates here are, of course, subject to sampling error, but in any case AVA did not seem superior.
+
+5.4.4 Intuition
+
+To put this in context, consider the artificial example in Figure 5.1, adapted from Friedman (1996). Here we have m = 3 classes, with p = 2 predictors. For each class, the bulk of the probability mass is assumed to lie within one of the circles.
+
+Now suppose a logistic model were used here. It implies that the prediction boundary between our two classes is linear. The figure shows that a logit model would fare well under AVA, because for any pair of classes, there is a straight line (pictured) that separates that pair of classes well. But under OVA, we’d have a problem; though a straight line separates the top circle from the bottom two, there is no straight line that separates the bottom-left circle well from the other two; the boundary between that bottom-left circle and the other two would be a curve.
+
+The real problem here, of course is that the logit is not a good model in such a situation.
+
+5.4.5 Example: Letter Recognition Data
+
+Following up on the notion that AVA may work to reduce model bias, i.e. that AVA’s value occurs in settings in which our model is not very good, let’s look at an example in which we know the model is imperfect.
+
+The UCI Letters Recognition data set [5] uses various summaries of pixel patterns to classify images of capital English letters. A naively applied logistic model may sacrifice some accuracy here, due to the fact that the predictors do not necessarily have monotonic relations with the response variable, the class identity.
+
+Figure 5.1: Three Artificial Regression Lines
+
 The naive approach actually doesn’t do too poorly:
-> > > > > > > > > >
+
+> library(mlbench)
+> data(LetterRecognition)
+> lr <− LetterRecognition
+> lr[ , 1] <− as.numeric(lr[ , 1]) − 1 
+> # training and test sets
+> lrtrn <− lr[1:14000, ]
+> lrtest <− lr[14001:20000, ]
+> ologout <− ovalogtrn(26, lrtrn[ , c(2:17, 1)]) 
+> ypred <− ovalogpred(ologout, lrtest[ , −1])
+> mean(ypred == lrtest[ , 1]) 
+[1] 0.7193333
+
 We will see shortly that one can do considerably better. But for now, we have a live candidate for a “poor model example,” on which we can try AVA:
-> alogout <− avalogtrn(26,lrtrn[,c(2:17,1)]) > ypred <− avalogpred(26,alogout , lrtest [,−1]) > mean(ypred == lrtest [ ,1])
+
+> alogout <− avalogtrn(26, lrtrn[ , c(2:17, 1)]) 
+> ypred <− avalogpred(26, alogout, lrtest[ , −1]) 
+> mean(ypred == lrtest [ ,1])
 [1] 0.8355
+
 That is quite a difference! So, apparently AVA fixed a poor model. Of course, its better to make a good model in the first place. Based on our previous observation that the boundaries may be better approximated by curves than lines, let’s try a quadratic model.
-A full quad model with have all squares and interactions among the 16 predictors. But there are 16 · 17/2 = 136 of them! That risks overfitting, so let’s settle for just adding the squares of the predictors:
-> f o r ( i i n 2 : 1 7 ) l r <− c b i n d ( l r , l r [ , i ] ˆ 2 )
-> lrtrn <− lr [1:14000 ,]
-> lrtest <− lr [14001:20000 ,]
-> ologout <− ovalogtrn(26,lrtrn[,c(2:33,1)]) > ypred <− ovalogpred(ologout , lrtest [,−1])
-> mean(ypred == lrtest [ ,1]) [1] 0.8086667
-in the R package mlbench.
-library(mlbench)
-data( LetterRecognition )
-lr <− LetterRecognition
-lr[,1] <− as.numeric(lr[,1]) − 1 # training and test sets
-lrtrn <− lr [1:14000 ,]
-lrtest <− lr [14001:20000 ,]
-ologout <− ovalogtrn(26,lrtrn[,c(2:17,1)]) ypred <− ovalogpred(ologout , lrtest [,−1])
-mean(ypred == lrtest [ ,1]) [1] 0.7193333
+
+A full quad model with have all squares and interactions among the 16 predictors. But there are 16·17/2 = 136 of them! That risks overfitting, so let’s settle for just adding the squares of the predictors:
+
+> for(i in 2:17) lr <− cbind(lr, lr[ , i]ˆ2)
+> lrtrn <− lr[1:14000, ]
+> lrtest <− lr[14001:20000, ]
+> ologout <− ovalogtrn(26, lrtrn[ , c(2:33,1)]) 
+> ypred <− ovalogpred(ologout, lrtest[ , −1])
+> mean(ypred == lrtest[ , 1]) 
+[1] 0.8086667
 
 Ah, much better. Not quite as good as AVA, but rather commensurate with sampling error, and we didn’t even try interaction terms.
+
 5.4.6 The Verdict
+
 With proper choice of model, it is my experience that OVA does as well as AVA, if not better. And in paper supporting OVA, Rifkin (2004) contends that some of the pro-AVA experiments were not done properly.
+
 Clearly, though, our letters recognition example shows that AVA is worth considering. We will return to this issue later.
+
 5.5 The Classical Approach: Fisher Linear Discriminant Analysis
-Sir Ronald Fisher (1890-1962) was one of the pioneers of statistics. He called his solution to the multiclass problem linear discriminant analysis (LDA), now considered a classic.
+
+Sir Ronald Fisher (1890-1962) was one of the pioneers of statistics. He called his solution to the multi-class problem linear discriminant analysis (LDA), now considered a classic.
+
 It is assumed that within class i, the vector of predictor variables X has a multivariate normal distribution with mean vector μi and covariance matrix Σ. Note that the latter does not have a subscript i, i.e. the covariance matrix for X is the same in each class.
+
 5.5.1 Background
+
 To explain this method, let’s review some material from Section 4.4.1.
+
 Let’s first temporarily go back to the two-class case, and use our past notation:
-Y =Y(1), π=π1 (5.14) For convenience, let’s reproduce (5.4) here:
-P(Y =1|X=t)= πf1(t) (5.15) π f1(t) + (1 − π) f0(t)
+
+Y = Y^(1), π = π1 (5.14) 
+
+For convenience, let’s reproduce (5.4) here:
+
+P(Y = 1 | X = t)= π*f1(t)/(π*f1(t) + (1 − π)*f0(t))  (5.15) 
 
 5.5.2 Derivation
+
 As noted in Section 4.4.1, after substituting the multivariate normal density for the fi in (5.15), we find that
-￼￼with
+
+    P(Y = 1 | X = t) = 1/(1 + exp(−(β0 + β-′*t)))  (5.16)
+
+with
+
+    β0 =log(1 − π) − log(π) + (μ1'*μ1 − μ0'*μ0)/2  (5.17)
+
 and
-P(Y =1|X=t)= 1
-1 + e−(β0+β′t)
-β0 =log(1−π)−logπ+1(μ′1μ1−μ′0μ0) 2
-(5.16)
-(5.17)
-(5.18)
-￼β = (μ0 − μ1)′Σ−1
+
+    β- = (μ0 − μ1)′*inv(Σ)  (5.18)
+
 Intuitively, if we observe X = t, we should predict Y to be 1 if
-￼P(Y =1|X=t)>0.5 andthiswasshowninSection1.12.1tobetheoptimalstrategy.6 Combining
-this with (5.16), we predict Y to be 1 if
-1 > 0.5 (5.20)
+
+    P(Y = 1 | X = t) > 0.5  (5.19)
+
+and this was shown in Section 1.12.1 to be the optimal strategy [6]. Combining this with (5.16), we predict Y to be 1 if
+
+    1/(1 + exp(−(β0 + β′*t))) > 0.5  (5.20)
+
 which simplifies to
-(5.19)
-￼1 + e−(β0+β′t)
-￼β′t < −β0 (5.21) So it turns out that our decision rule is linear in t, hence the term linear in
-linear discriminant analysis.7
-Without the assumption of equal covariance matrices, (5.21) turns out to
-be quadratic in t, and is called quadratic discriminant analysis.
-6Again assuming equal costs of the two types of misclassification.
-7The word discriminant alludes to our trying to distinguish between Y = 1 and Y = 0.
+
+    β-′*t < −β0  (5.21) 
+
+So it turns out that our decision rule is linear in t, hence the term linear in linear discriminant analysis [7].
+
+Without the assumption of equal covariance matrices, (5.21) turns out to be quadratic in t, and is called quadratic discriminant analysis.
 
 5.5.3 Example: Vertebrae Data
+
 Let’s apply this to the vertebrae data, using the lda() function in the MASS library that is built-in to R. This function assumes that the class variable is a factor, so we won’t convert to numeric codes this time.
+
 5.5.3.1 LDA Code and Results
+
 Here is the code:
-> ldaout <− lda(V7  ̃ .,data=vert,CV=TRUE) > mean(ldaout$class == vert$V7)
+
+> ldaout <− lda(V7 ~ ., data = vert, CV = TRUE) 
+> mean(ldaout$class == vert$V7)
 [1] 0.8096774
+
 That CV argument tells lda() to predict the classes after fitting the model, using (5.4) and the multivariate normal means and covariance matrix that it estimated from the data. Here we find a correct-classification rate of about 81%. This is biased upward, since we didn’t bother here to set up separate training and test sets, but even then we did not do as well as our earlier logit analysis. Note that in the latter, we didn’t assume a common covariance matrix within each class, and that may have made the difference.
+
 5.5.3.2 Comparison to kNN
+
 By the way, that 81% figure is worth comparing to to that obtained using the k-Nearest Neighbor method. Here is the regtools code:
-ovaknntrn <− function(y,xdata ,m,k) {
-if (m< 3) stop(’m must be at least 3; use knnest()3’)
-x <− xdata$x
-outmat <− NULL
-for (i in 0:(m−2)) {
-yi <− as.integer(y == i)
-knnout <− knnest(yi,xdata,k)
-outmat <− cbind(outmat , knnout$regest )
-outmat <− cbind(outmat,1−apply(outmat ,1 ,sum)) xdata$regest <− outmat
-xdata
-}
-ovaknnpred <− function ( xdata , predpts ) {
-1
-2
-3
-4
-5
-6
-7
-8 9}
-10
-11
-12
-13
-14
-15
-￼16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-x <− xdata$x
-if (is.vector(predpts))
-predpts <− matrix( predpts ,nrow=1)
-# need to scale predpts with the same values that had been used in # the training set
-ctr <− xdata$scaling [ ,1]
-scl <− xdata$scaling [ ,2]
-predpts <− scale(predpts ,center=ctr ,scale=scl)
-tmp<− get.knnx(x,predpts,1) idx <− tmp$nn.index
-regest <− xdata$regest[idx,] apply(regest,1,which.max) − 1
+
+ovaknntrn <− function(y, xdata, m, k) {
+  if(m < 3) stop(’m must be at least 3; use knnest()3’)
+  x <− xdata$x
+  outmat <− NULL
+  for(i in 0:(m − 2)) {
+    yi <− as.integer(y == i)
+    knnout <− knnest(yi, xdata, k)
+    outmat <− cbind(outmat, knnout$regest)
+  }
+  outmat <− cbind(outmat, 1 − apply(outmat, 1, sum))
+  xdata$regest <− outmat
+  xdata
 }
 
-Recall that xdata is the output of preprocessx(), which determines the nearest neighbors and so on. We call the basic kNN function knnest() for each class, i.e. Y = i, i = 0,1,...,m − 2 (the probabilities for class m − 1 are obtained by subtraction from 1). These results are tacked onto xdata, and then input to ovaknnpred() whenever we need to do a prediction.
+ovaknnpred <− function(xdata, predpts) {
+  x <− xdata$x
+  if(is.vector(predpts))
+    predpts <− matrix(predpts, nrow = 1)
+  # need to scale predpts with the same values that had been
+  # used in the training set
+  ctr <− xdata$scaling[ , 1]
+  scl <− xdata$scaling[ , 2]
+  predpts <− scale(predpts, center = ctr, scale = scl)
+  tmp <− get.knnx(x, predpts, 1) 
+  idx <− tmp$nn.index
+  regest <− xdata$regest[idx, ] 
+  apply(regest, 1, which.max) − 1
+}
+
+Recall that xdata is the output of preprocessx(), which determines the nearest neighbors and so on. We call the basic kNN function knnest() for each class, i.e. Y = i, i = 0, 1, ..., m − 2 (the probabilities for class m − 1 are obtained by subtraction from 1). These results are tacked onto xdata, and then input to ovaknnpred() whenever we need to do a prediction.
+
 And here is the run:
-> xdata <− preprocessx ( vert [ , −7] ,50)
-> ovout <− ovaknntrn(vert[,7],xdata,3,50) > predy <− ovaknnpred(ovout,vert[,−7])
+
+> xdata <− preprocessx(vert[ , −7], 50)
+> ovout <− ovaknntrn(vert[ , 7], xdata, 3, 50) 
+> predy <− ovaknnpred(ovout, vert[ , −7])
 > # proportion correctly classified
 > mean(predy == vert$V7)
 [1] 0.8
+
 Again, this was without the benefit of cross-validation, but about the same as for LDA.
+
 5.5.4 Multinomial Logistic Model
-Within the logit realm, one might also consider multinomial logistic re- gression. Here one makes the assumption that the m sets of coefficients βi, i > 0 are the same across all classes, with only β0 varying from class to class. Recall from Section 4.4.5 that the logistic model implies that inter- class boundaries are linear, i.e. hyperplanes; the multinomial logit model assumes these are parallel, as they are in the LDA case. This is a very stringent assumption, so this model may perform poorly.
+
+Within the logit realm, one might also consider multinomial logistic regression. Here one makes the assumption that the m sets of coefficients βi, i > 0 are the same across all classes, with only β0 varying from class to class. Recall from Section 4.4.5 that the logistic model implies that inter-class boundaries are linear, i.e. hyperplanes; the multinomial logit model assumes these are parallel, as they are in the LDA case. This is a very stringent assumption, so this model may perform poorly.
 
 5.5.5 The Verdict
-If LDA’s assumptions hold, especially the one positing the same covariance matrix for “X” within each class, it can be a powerful tool. However, that assumption rarely holds in practice.
-As noted, the LDA setting for two classes implies that of the logistic model. Thus the latter (and not in multinomial form) is more general and “safer” than LDA. Accordingly, LDA is less widely used than in the past, but it gives us valuable perspective on the multiclass problem.
-5.6 Classification Via Density Estimation
-Since classification amounts to a regression problem, we could use non- parametric regression methods such as k-Nearest Neighbor if we desire a nonparametric approach, as above. However, Equations (5.4) and (5.7) sug- gest that one approach to the classification problem would be to estimate the within-class densities fi. Actually, this approach is not commonly used, as it is difficult to get good estimates, especially if the number of predictors is large. However, we will examine it in this section anyway, as it will yield some useful insights.
-5.6.1 Methods for Density Estimation
-Say for simplicity that X is one-dimensional. You are already familiar with one famous nonparametric method for density estimation — the histogram! In R, we could use the hist() function for this, though we must remember to set the argument freq to FALSE, so as to have total area under the histogram equal to 1.0, as with a density. In the return value of hist(), the
-density component gives us fi(t).
 
-There are more advanced density estimation methods, such as the kernel method, which is implemented in R’s density() function in one dimen- sion, and some other packages on CRAN do so for some small numbers of dimensions. Also, the k-Nearest Neighbor approach can be used for den- sity estimation. All of this is explained in the Mathematical Complements section at the end of this chapter.
+If LDA’s assumptions hold, especially the one positing the same covariance matrix for “X” within each class, it can be a powerful tool. However, that assumption rarely holds in practice.
+
+As noted, the LDA setting for two classes implies that of the logistic model. Thus the latter (and not in multinomial form) is more general and “safer” than LDA. Accordingly, LDA is less widely used than in the past, but it gives us valuable perspective on the multi-class problem.
+
+5.6 Classification Via Density Estimation
+
+Since classification amounts to a regression problem, we could use non- parametric regression methods such as k-Nearest Neighbor if we desire a nonparametric approach, as above. However, Equations (5.4) and (5.7) suggest that one approach to the classification problem would be to estimate the within-class densities f[i]. Actually, this approach is not commonly used, as it is difficult to get good estimates, especially if the number of predictors is large. However, we will examine it in this section anyway, as it will yield some useful insights.
+
+5.6.1 Methods for Density Estimation
+
+Say for simplicity that X is one-dimensional. You are already familiar with one famous nonparametric method for density estimation — the histogram! In R, we could use the hist() function for this, though we must remember to set the argument freq to FALSE, so as to have total area under the histogram equal to 1.0, as with a density. In the return value of hist(), the density component gives us f[i](t).
+
+There are more advanced density estimation methods, such as the kernel method, which is implemented in R’s density() function in one dimension, and some other packages on CRAN do so for some small numbers of dimensions. Also, the k-Nearest Neighbor approach can be used for density estimation. All of this is explained in the Mathematical Complements section at the end of this chapter.
 
 5.6.2 Procedure
-Whenever we have a case to predict, i.e. we know its X value tc and need to predict its Y value, we do the following:
-For each i = 0, 1, ..., m − 1:
-• Collect the observations in our training data for which Y = i.
-• Set π􏰭i to the proportion of cases for which Y = i, among all the cases.
-• Use the X values in our collected data to form our estimated density 􏰭
-for X within class i, fi(tc).
-• Guess the Y value for the new case to be whichever i yields the largest
-􏰭
-value of (5.7), with fj(tc) in place of fj(t) and with π􏰭j in place of πj.
-5.7 The Issue of “Unbalanced (and Balanced) Data”
-Here will discuss a topic that is usually glossed over in treatments of the classification problem, and indeed is often misunderstood in the machine learning (ML) research literature, where one sees much questionable hand- wringing over “the problem of unbalanced data.” On the contrary, the real problem is often that the data are balanced.
-For concreteness and simplicity, consider the two-class problem of predict- ing whether a customer will purchase a certain item (Y = 1) or not (Y = 0), based on a single predictor variable, X, the customer’s age. Suppose also that most of the purchasers are older.
-5.7.1 Why the Concern Regarding Balance?
-Though one typically is interested in the overall rate of incorrect classifi- cation, we may also wish to estimate rates of “false positives” and “false negatives.” In our customer purchasing example, for instance, we wish to ask, What percentage of the time do we predict that the customer does not purchase the item, among cases in which the purchase actually is made? One problem is that, although our overall misclassification rate is low, we may do poorly on a conditional error rate of this sort. This may occur, for example, if we have unbalanced data, as follows.
 
-Suppose only 1.5% of the customers in the population opt to buy the prod- uct.8 The concern among some ML researchers and practitioners is that, with random sampling (note the qualifier), the vast majority of the data in our sample will be from the class Y = 0, thus giving us “unbalanced” data. Then our statistical decision rule may not predict the other class well, and indeed may just predict almost everything to be Class 0. Let’s address this concern.
+Whenever we have a case to predict, i.e. we know its X value t[c] and need to predict its Y value, we do the following:
+
+For each i = 0, 1, ..., m − 1:
+
+- Collect the observations in our training data for which Y = i.
+
+- Set π^[i] to the proportion of cases for which Y = i, among all the cases.
+
+- Use the X values in our collected data to form our estimated density for X within class i, f^[i](t[c]).
+
+- Guess the Y value for the new case to be whichever i yields the largest value of (5.7), with f^[j](t[c]) in place of f[j](t) and with π^[j] in place of π[j].
+
+5.7 The Issue of “Unbalanced (and Balanced) Data”
+
+Here will discuss a topic that is usually glossed over in treatments of the classification problem, and indeed is often misunderstood in the machine learning (ML) research literature, where one sees much questionable handwringing over “the problem of unbalanced data.” On the contrary, the real problem is often that the data are balanced.
+
+For concreteness and simplicity, consider the two-class problem of predicting whether a customer will purchase a certain item (Y = 1) or not (Y = 0), based on a single predictor variable, X, the customer’s age. Suppose also that most of the purchasers are older.
+
+5.7.1 Why the Concern Regarding Balance?
+
+Though one typically is interested in the overall rate of incorrect classification, we may also wish to estimate rates of “false positives” and “false negatives.” In our customer purchasing example, for instance, we wish to ask, What percentage of the time do we predict that the customer does not purchase the item, among cases in which the purchase actually is made? One problem is that, although our overall misclassification rate is low, we may do poorly on a conditional error rate of this sort. This may occur, for example, if we have unbalanced data, as follows.
+
+Suppose only 1.5% of the customers in the population opt to buy the product [8]. The concern among some ML researchers and practitioners is that, with random sampling (note the qualifier), the vast majority of the data in our sample will be from the class Y = 0, thus giving us “unbalanced” data. Then our statistical decision rule may not predict the other class well, and indeed may just predict almost everything to be Class 0. Let’s address this concern.
+
 Say we are using a logit model. If the model is accurate throughout the range of X, unbalanced data may not be such a problem. If most of our data have their X values in a smaller subrange, this will likely increase standard errors of the estimated regression coefficients, but not be a fundamental issue.
-On the other hand, say we do classification using nonparametric density estimation. Since even among older customers, rather few buy the product,
-we won’t have much data from Class 1, so our estimate of f1 probably won’t be very accurate. Thus Equation (5.5) then suggests we have a problem. Nevertheless, short of using a parametric model, there really is no solution.
-Ironically, a more pressing issue is that we may have data that is too bal- anced, the subject of our next section.
+
+On the other hand, say we do classification using nonparametric density estimation. Since even among older customers, rather few buy the product, we won’t have much data from Class 1, so our estimate of f^[1] probably won’t be very accurate. Thus Equation (5.5) then suggests we have a problem. Nevertheless, short of using a parametric model, there really is no solution.
+
+Ironically, a more pressing issue is that we may have data that is too balanced, the subject of our next section.
+
 5.7.2 A Crucial Sampling Issue
-In this chapter, we have often dealt with expressions such as P (Y = 1) and P(Y = 1 |X = t). These seem straightforward, but actually they may be undefined, due to our sampling design, as we’ll see here.
-In our customer behavior context, P(Y = 1) is the unconditional proba- bility that a customer will buy the given item. If it is equal to 0.12, for example, that means that 12% of all customers purchase this item. By contrast, P (Y = 1 | X = 38) is a conditional probability, and if it is equal to 0.18, this would mean that among all people of age 38, 18% of them buy the item.
-The quantities π = P(Y = 1) and 1−π = P(Y = 0) play a crucial role, as can be seen immediately in (5.3) and (5.4). Let’s take a closer look at this. Continuing our customer-age example, X (age) has a continuous distribution, so (5.4) applies. Actually, it will be more useful to look at the equivalent equation, (5.5).
-8As mentioned earlier in the book, in some cases it may be difficult to define a target population, even conceptually. There is not much that can be done about this, unfortunately.
+
+In this chapter, we have often dealt with expressions such as P(Y = 1) and P(Y = 1 |X = t). These seem straightforward, but actually they may be undefined, due to our sampling design, as we’ll see here.
+
+In our customer behavior context, P(Y = 1) is the unconditional probability that a customer will buy the given item. If it is equal to 0.12, for example, that means that 12% of all customers purchase this item. By contrast, P (Y = 1 | X = 38) is a conditional probability, and if it is equal to 0.18, this would mean that among all people of age 38, 18% of them buy the item.
+
+The quantities π = P(Y = 1) and 1 − π = P(Y = 0) play a crucial role, as can be seen immediately in (5.3) and (5.4). Let’s take a closer look at this. Continuing our customer-age example, X (age) has a continuous distribution, so (5.4) applies. Actually, it will be more useful to look at the equivalent equation, (5.5).
 
 5.7.2.1 It All Depends on How We Sample
+
 Say our training data set consists of records on 1000 customers. Let N1 and N0 denote the number of people in our data set who did and did not purchase the item, with N1 + N0 = 1000. If our data set can be regarded as a statistical random sample from the population of all customers, then we can estimate π from the data. If for instance 141 of the customers in our sample purchased the item, then we would set
-π􏰭= N1 =0.141 (5.22) 1000
-The trouble is, though, that the expression P (Y = 1) may not even make sense with some data. Consider two sampling plans that may have been followed by whoever assembled our data set.
-(a) He sampled 1000 customers from our full customer database.9
-(b) He opted to sample 500 customers from those who purchased the
-item, and 500 from those who did not buy it.
+
+π^ = N1/1000 = 0.141  (5.22)
+
+The trouble is, though, that the expression P(Y = 1) may not even make sense with some data. Consider two sampling plans that may have been followed by whoever assembled our data set.
+
+(a) He sampled 1000 customers from our full customer database [9].
+
+(b) He opted to sample 500 customers from those who purchased the item, and 500 from those who did not buy it.
+
 Say we are using the density estimation approach to estimate P (Y | X = t), in (5.5). In sampling scheme (a), N1 and N0 are random variables, and as noted we can estimate π by the quantity N1/1000. But in sampling scheme (b), we have no way to estimate π from our data.
+
 Or, suppose we opt to use a logit model here. It turns out that we will run into similar trouble in sampling scheme (b), as follows. From (4.27) and (5.5), write the population relation
-β0 + β1t1 + ... + βptp = − ln((1 − π)/π) − ln[f0(t)/f1(t)] (5.23)
-where t = (t1 , ..., tp )′ . Here one can see that if one switches sampling schemes, then βi, i > 0 will not change, because the fi are within-class den- sities; only β0 changes. Indeed, our logit-estimation software will “think” that π1 and π0 are equal (or roughly so, since we just have a sample, not the population distribution), and thus produce the wrong constant term.
+
+    β0 + β1*t[1] + ... + βp*t[p] = −ln((1 − π)/π) − ln[f[0](t)/f[1](t)]  (5.23)
+
+where t = (t[1], ..., t[p])′ . Here one can see that if one switches sampling schemes, then βi, i > 0 will not change, because the fi are within-class densities; only β0 changes. Indeed, our logit estimation software will “think” that π1 and π0 are equal (or roughly so, since we just have a sample, not the population distribution), and thus produce the wrong constant term.
+
 In other words:
-9Or, this was our entire customer database, which we are treating as a random sample from the population of all customers.
 
-Under sampling scheme (b), we are obtaining the wrong β0, 􏰭
-though the other βi are correct.
-If our goal is merely Description rather than Prediction, this may not be a concern, since we are usually interested only in the values of βi,i > 0. But if Prediction is our goal, as we assuming in this chapter, we do have a serious problem, since we will need all of the estimated coefficients in order to estimate P (Y |X = t) in (4.27).
-A similar problem arises if we use the k-Nearest Neighbor method. Suppose for instance that the true value of π is low, say 0.06, i.e. only 6% of customers buy the product. Consider estimation of P (Y | X = 38). Under the k-NN approach, we would find the k closest observations in our sample data to 38, and estimate P (Y | X = 38) to be the proportion of those neighboring observations in which the customer bought the product. The problem is that under sampling scenario (b), there will be many more among those neighbors who bought the product than there “should” be. Our analysis won’t be valid.
+Under sampling scheme (b), we are obtaining the wrong β0, though the other βi are correct.
+
+If our goal is merely Description rather than Prediction, this may not be a concern, since we are usually interested only in the values of βi, i > 0. But if Prediction is our goal, as we assuming in this chapter, we do have a serious problem, since we will need all of the estimated coefficients in order to estimate P(Y |X = t) in (4.27).
+
+A similar problem arises if we use the k-Nearest Neighbor method. Suppose for instance that the true value of π is low, say 0.06, i.e. only 6% of customers buy the product. Consider estimation of P(Y | X = 38). Under the k-NN approach, we would find the k closest observations in our sample data to 38, and estimate P(Y | X = 38) to be the proportion of those neighboring observations in which the customer bought the product. The problem is that under sampling scenario (b), there will be many more among those neighbors who bought the product than there “should” be. Our analysis won’t be valid.
+
 So, all the focus on unbalanced data in the literature is arguably misplaced. As we saw in Section 5.7.1, it is not so much of an issue in the parametric case, and in any event there really isn’t much we can do about it. At least, things do work out as the sample size grows. By contrast, with sampling scheme (b), we have a permanent bias, even as the sample size grows.
-Scenario (b) is not uncommon. In the UCI Letters Recognition data set mentioned earlier for instance, there are between 700 and 800 cases for each English capital letter, which does not reflect that wide variation in letter frequencies. The letter ’E’, for example, is more than 100 times as frequent as the letter ’Z’, according to published data (see below).
-Fortunately, there are remedies, as we will now see.
-5.7.2.2 Remedies
-As noted, use of “unnaturally balanced” data can seriously bias our classi- fication process. In this section, we turn to remedies.
-It is assumed here that we have an external data source for the class prob- abilities πi. For instance, in the English letters example above, there is much published data, such as at the Web page Practical Cryptography.10 They find that πA = 0.0855, πB = 0.0160, πC = 0.0316 and so on.
-10 http://practicalcryptography.com/cryptanalysis/ letter-frequencies-various- languages/english-letter-frequencies/.
 
-So, if we do have external data on the πi (or possibly want to make some “what if” speculations), how do we adjust our code output to correct the error?
+Scenario (b) is not uncommon. In the UCI Letters Recognition data set mentioned earlier for instance, there are between 700 and 800 cases for each English capital letter, which does not reflect that wide variation in letter frequencies. The letter ’E’, for example, is more than 100 times as frequent as the letter ’Z’, according to published data (see below).
+
+Fortunately, there are remedies, as we will now see.
+
+5.7.2.2 Remedies
+
+As noted, use of “unnaturally balanced” data can seriously bias our classification process. In this section, we turn to remedies.
+
+It is assumed here that we have an external data source for the class probabilities π[i]. For instance, in the English letters example above, there is much published data, such as at the Web page Practical Cryptography [10]. They find that π[A] = 0.0855, π[B] = 0.0160, π[C] = 0.0316 and so on.
+
+So, if we do have external data on the π[i] (or possibly want to make some “what if” speculations), how do we adjust our code output to correct the error?
+
 For LDA, R’s lda() function does the adjustment for us, using its priors argument. That code is based on the relation (4.40), which we now see is a special case of (5.23).
-The latter equation shows how to deal with the logit case as well: We
-simply adjust the β0 that glm() gives us as follows. (a) Add ln(N0/N1).
+
+The latter equation shows how to deal with the logit case as well: We simply adjust the β0 that glm() gives us as follows. 
+
+(a) Add ln(N0/N1).
+
 (b) Subtract ln[(1 − π)/π)], where π is the true class probability.
-Note that for an m-class setting, we estimate m logistic regression functions,
-adjusting β0 in each case. The function ovalogtrn() now will include an option for this:
+
+Note that for an m-class setting, we estimate m logistic regression functions, adjusting β^0 in each case. The function ovalogtrn() now will include an option for this:
+
 ovalogtrn <− function (m, trnxy , truepriors = NULL) {
-p <− ncol(trnxy)
-x <− a s . m a t r i x ( t r n x y [ , 1 : ( p − 1 ) ] ) y <− t r n x y [ , p ]
-outmat <− NULL
-for (i in 0:(m− 1)) {
-ym<− as.integer(y == i)
-betahat <− coef(glm(ym  ̃ x, family = binomial)) outmat <− cbind(outmat, betahat)
+  p <− ncol(trnxy)
+  x <− as.matrix(trnxy[ , 1:(p − 1)]) 
+  y <− trnxy[ , p]
+  outmat <− NULL
+  for(i in 0:(m − 1)) {
+    ym <− as.integer(y == i)
+    betahat <− coef(glm(ym ~ x, family = binomial)) 
+    outmat <− cbind(outmat, betahat)
+  }
+  if(!is.null(truepriors)) {
+    tmp <− table(y)
+    wrongpriors <− tmp/sum(tmp) 
+    outmat[1, ] <− outmat[1, ]
+      − log((1 − truepriors)/truepriors)
+      + log((1 − wrongpriors)/wrongpriors)
+  }
+  outmat
 }
-if (!is.null(truepriors)) {
-tmp <− table(y)
-wrongpriors <− tmp/sum(tmp) outmat[1 , ] <− outmat[1 , ]
-− log((1 − truepriors)/truepriors)
-+ log((1 − wrongpriors)/wrongpriors)
-}
-outmat
-}
+
 What about nonparametric settings? Equation (5.5) shows us how to make the necessary adjustment, as follows:
+
 (a) Our software has given us an estimate of the left-hand side of that equation.
 
 (b) We know the value that our software has used for its estimate of (1 − π)/π, which is N0/N1.
+
 (c) Using (a) and (b), we can solve for the estimate of fo(t)/f1(t).
+
 (d) Now plug the correct estimate of (1 − π)/π, and the result of (c), back into (5.5) to get the proper estimate of the desired conditional probability.
+
 Code for this is straightforward:
-classadjust <− function(econdprobs , wrongratio , trueratio ) { fratios <− (1 / econdprobs − 1) ∗ (1 / wrongratio)
-1 / (1 + trueratio ∗ fratios) }
+
+classadjust <− function(econdprobs, wrongratio, trueratio ) {
+  fratios <− (1/econdprobs − 1)*(1/wrongratio)
+  1/(1 + trueratio*fratios) 
+}
+
 Note that if we are taking the approach described in the paragraph labeled “A variation” in Section 1.8.2, we do this adjustment only at the stage in which we fit the training data. No further adjustment at the prediction stage is needed.
+
 5.8 Example: Letter Recognition
+
 Let’s try out the kNN analysis on the letter data. First, some data prep:
-> > > > > > > >
-library(mlbench)
-data( LetterRecognition )
-lr <− LetterRecognition # code Y values
-lr[,1] <− as.numeric(lr[,1]) − 1 # training and test sets
-lrtrn <− lr [1:14000 ,] lrtest <− lr [14001:20000 ,]
+
+> library(mlbench)
+> data(LetterRecognition)
+> lr <− LetterRecognition # code Y values
+> lr[ , 1] <− as.numeric(lr[ , 1]) − 1 
+> # training and test sets
+> lrtrn <− lr[1:14000, ] 
+> lrtest <− lr [14001:20000, ]
+
 As discussed earlier, this data set has approximately equal frequencies for all the letters, which is unrealistic. The regtools package contains the correct frequencies, obtained from the Practical Cryptography Web site cited before. Let’s load those in:
-> wrongpriors <− tmp / sum(tmp)
-> data( ltrfreqs )
-> ltrfreqs <− ltrfreqs [order( ltrfreqs [ ,1]) ,] > truepriors <− ltrfreqs [ ,2] / 100
 
-(Recall from Footnote 2 that the term priors refers to class probabili- ties, and that word is used both by frequentists and Bayesians. It is not “Bayesian” in the sense of subjective probability.)
+> wrongpriors <− tmp/sum(tmp)
+> data(ltrfreqs)
+> ltrfreqs <− ltrfreqs[order(ltrfreqs[ , 1]), ] 
+> truepriors <− ltrfreqs[ , 2]/100
+
+(Recall from Footnote 2 that the term priors refers to class probabilities, and that word is used both by frequentists and Bayesians. It is not “Bayesian” in the sense of subjective probability.)
+
 So, here is the straightforward analysis, taking the letter frequencies as they are, with 50 neighbors:
-> trnout <− ovaknntrn(lrtrn[,1],xdata,26,50) > ypred <− ovaknnpred(trnout , lrtest [,−1])
-> mean(ypred == lrtest [ ,1])
+
+> trnout <− ovaknntrn(lrtrn[ , 1], xdata, 26, 50) 
+> ypred <− ovaknnpred(trnout, lrtest[ , −1])
+> mean(ypred == lrtest[ , 1])
 [1] 0.8641667
+
 In light of the fact that we have 26 classes, 86% accuracy is pretty good. But it’s misleading: We did take the trouble of separating into training and test sets, but as mentioned, the letter frequencies are unrealistic. How well would our classifier do in the “real world”? To simulate that, let’s create a second test set with correct letter frequencies:
-> newidxs <− sample(0:25 ,6000 , replace=T, prob=truepriors ) > lrtest1 <− lrtest [newidxs ,]
+
+> newidxs <− sample(0:25, 6000, replace = TRUE, prob = truepriors) 
+> lrtest1 <− lrtest[newidxs, ]
+
 Now we can try our classifier on this more realistic data:
-> ypred <− ovaknnpred(trnout,lrtest1[,−1]) > mean(ypred == lrtest1 [ ,1])
+
+> ypred <− ovaknnpred(trnout, lrtest1[ , −1]) 
+> mean(ypred == lrtest1[ , 1])
 [1] 0.7543415
+
 Only about 75%. But in order to prepare for the real world, we can make use of the truepriors argument in ovaknntrn()
-> trnout1 <− ovaknntrn(lrtrn[,1],xdata,26,50,truepriors) > ypred <− ovaknnpred(trnout1,lrtest1[,−1])
-> mean(ypred == lrtest1 [ ,1])
+
+> trnout1 <− ovaknntrn(lrtrn[ , 1], xdata, 26, 50, truepriors) 
+> ypred <− ovaknnpred(trnout1, lrtest1[ , −1])
+> mean(ypred == lrtest1[ , 1])
 [1] 0.8787988
+
 Ah, very nice!
-￼148
-5.9 5.9.1 5.10
 
-Mathematical Complements Nonparametric Density Estimation
-Bibliographic Notes
+5.9 Mathematical Complements 
+
+5.9.1 Nonparametric Density Estimation
+
+5.10 Bibliographic Notes
+
 5.11 Further Exploration: Data, Code and Math Problems
-Exercises
-1. Here we will consider the “OVA and AVA” approaches to the multiclass problem (Section 5.4), using the UCBAdmissions data set that is built in to R. This data set comes in the form of a counts table, which can be viewed in proportion terms via
-UCBAdmissions / sum(UCBAdmissions)
-For the sake of this experiment, let’s take those cell proportions to be pop- ulation values, so that for instance 7.776% of all applicants are male, apply to departmental program F and are rejected. The accuracy of our classifi- cation process then is not subject to the issue of variance of estimators of logistic regression coefficients or the like.
-(a) Which would work better in this population, OVA or AVA, say in terms of overall misclassification rate?
-[Computational hint: First convert the table to an artificial data frame:
-ucbd <− as.data.frame(UCBAdmissions)
-]
-(b) Write a general function
-ovaavatbl <− function(tbl ,yname)
-that will perform the computation in part (a) for any table tbl, with the class variable having the name yname, returning the two mis- classification rates. Note that the name can be retrieved via
 
-names(attr(tbl , ’dimnames’))
+Exercises
+
+1. Here we will consider the “OVA and AVA” approaches to the multi-class problem (Section 5.4), using the UCBAdmissions data set that is built in to R. This data set comes in the form of a counts table, which can be viewed in proportion terms via
+
+UCBAdmissions /sum(UCBAdmissions)
+
+For the sake of this experiment, let’s take those cell proportions to be population values, so that for instance 7.776% of all applicants are male, apply to departmental program F and are rejected. The accuracy of our classification process then is not subject to the issue of variance of estimators of logistic regression coefficients or the like.
+
+(a) Which would work better in this population, OVA or AVA, say in terms of overall misclassification rate?
+
+[Computational hint: First convert the table to an artificial data frame:
+
+ucbd <− as.data.frame(UCBAdmissions)
+
+]
+
+(b) Write a general function
+
+ovaavatbl <− function(tbl, yname)
+
+that will perform the computation in part (a) for any table tbl, with the class variable having the name yname, returning the two misclassification rates. Note that the name can be retrieved via
+
+names(attr(tbl, ’dimnames’))
+
 2. Consider the two-class classification problem with scalar predictor.
+
 (a) Show that if the within-class distributions are exponential, the logistic model again is valid.
+
 (b) Do the same for the Poisson case.
+
 (c) Find general conditions in (4.20) that imply the logit model.
 
 
 [1] For a classification problem, the classes must be mutually exclusive. In this case, there would be the assumption that the patient does not have more than one of the diseases.
 
-[2] Another term for the classification probabilities πi is prior probabilities. Readers familar with the controversy over Bayesian versus frequentist approaches to statistics may wonder if we are dealing with Bayesian analyses here. Actually, that is not the case; we are not working with subjective, “gut feeling” probabilities as in the controversial Bayesian methods. There is some connection, in the sense that (5.3) and (5.4) make use of Bayes’ Rule, but the latter is standard for all statisticians, frequentist and Bayesian alike. Note by the way that quantities nrobabilities like (5.4) are often termed posterior probabilities, again sounding Bayesian but again actually Bayesian/frequentist-neutral.
+[2] Another term for the classification probabilities πi is prior probabilities. Readers familiar with the controversy over Bayesian versus frequentist approaches to statistics may wonder if we are dealing with Bayesian analyses here. Actually, that is not the case; we are not working with subjective, “gut feeling” probabilities as in the controversial Bayesian methods. There is some connection, in the sense that (5.3) and (5.4) make use of Bayes’ Rule, but the latter is standard for all statisticians, frequentist and Bayesian alike. Note by the way that quantities probabilities like (5.4) are often termed posterior probabilities, again sounding Bayesian but again actually Bayesian/frequentist-neutral.
 
-[3] Here the notation C(r,s) means the number of combinations one can form from r objects, taking them s at a time.
+[3] Here the notation C(r, s) means the number of combinations one can form from r objects, taking them s at a time.
+
+[4] To avoid clutter, some messages, “glm.fit: fitted probabilities numerically 0 or 1 occurred,” have been removed, here and below. The warnings should not present a problem.
+
+[5] https://archive.ics.uci.edu/ml/datasets/Letter+Recognition; also available in the R package mlbench.
+
+[6] Again assuming equal costs of the two types of misclassification.
+
+[7] The word discriminant alludes to our trying to distinguish between Y = 1 and Y = 0.
+
+[8] As mentioned earlier in the book, in some cases it may be difficult to define a target population, even conceptually. There is not much that can be done about this, unfortunately.
+
+[9] Or, this was our entire customer database, which we are treating as a random sample from the population of all customers.
+
+[10] http://practicalcryptography.com/cryptanalysis/letter-frequencies-various-languages/english-letter-frequencies/
