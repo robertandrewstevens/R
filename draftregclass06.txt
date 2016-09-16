@@ -137,108 +137,141 @@ Let’s rerun our R^2 calculation with this value of k:
 
 Even better! So, our linear model, which seemed so nice at first, is missing something. Maybe we can determine why via the methods in the following sections.
 
-
-
 6.6.2 Plotting Parametric Fit Against Nonparametric One
-Let’s plot the μ􏰭 values of the linear model against those of kNN: > parvsnonparplot(fout1 ,kout)
-The result is shown in Figure 6.1. It suggests that the linear model is overestimating the regression function at times when the Yen is very low, moderately low or very high, and possibly underestimating in the moder- ately high range.
+
+Let’s plot the μ^ values of the linear model against those of kNN: 
+
+> parvsnonparplot(fout1, kout)
+
+The result is shown in Figure 6.1. It suggests that the linear model is overestimating the regression function at times when the Yen is very low, moderately low or very high, and possibly underestimating in the moderately high range.
+
 We must view this cautiously, though. First, of course, there is the issue of sampling variation; the apparent model bias effects here may just be sampling anomalies.
+
 Second, kNN itself is subject to some bias at the edges of a data set. This will be discussed in detail in Section ??, but the implications are that in the currency case kNN tends to overestimate for low values of the Yen, and underestimate at the high end. This can be addressed by doing locally- linear smoothing, an option offered by knnest(), but let’s not use it for now.
+
 The “hook shape” at the left end, and a “tail” in the middle suggest odd nonlinear effects, possibly some local nonlinearities, which kNN is picking up but which the linear model misses.
+
 6.6.3 Residuals vs. Smoothing
+
 In any regression analysis, the quantities
-ri = Yi − μ􏰭(Xi) (6.3)
+
+    r[i] = Y[i] − μ^(X[i])  (6.3)
+
 are traditionally called the residual values, or simply the residuals. They are of course the prediction errors we obtain when fitting our model and then predicting our Yi from our Xi. The smaller these values are in absolute value, the better, but also we hope that they may inform us of inaccuracies in our model, say nonlinear relations between Y and our predictor variables.
+
 In the case of a linear model, the residuals are
-􏰭􏰭i 􏰭i
-ri =Yi −β0 −β1X(1) −...−βpX(p) (6.4)
-￼6.6. OVERALL MEASURES OF MODEL FIT 159
-￼Figure 6.1: Estimation of Regression Values, Two Methods
-￼160CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT
-Many diagnostic methods for checking linear regression models are based on residuals. In turn, their convenient computation typically involves first computing the hat matrix, about which there is some material in the Math- ematical Complements section at the end of this chapter.
+
+    r[i] = Y[i] − β0^ − β1^*X[i]^(1) − ... −βp^*X[i]^(p)  (6.4)
+
+Figure 6.1: Estimation of Regression Values, Two Methods
+
+Many diagnostic methods for checking linear regression models are based on residuals. In turn, their convenient computation typically involves first computing the hat matrix, about which there is some material in the Mathematical Complements section at the end of this chapter.
+
 The generic R function plot() can be applied to any object of class ”lm” (including the subclass ”glm”). Let’s do that with fout1:
+
 > plot(fout1)
-Hit <Return> to see next plot: Hit <Return> to see next plot: Hit <Return> to see next plot: Hit <Return> to see next plot:
+Hit <Return> to see next plot: 
+Hit <Return> to see next plot: 
+Hit <Return> to see next plot: 
+Hit <Return> to see next plot:
+
 We obtain a series of graphs, displayed sequentially. Most of them involve more intricate concepts than we’ll use in this book (recall Section 6.2), but let’s look at the first plot, shown in Figure 6.2. The “hook” and “tail” are visible here too.
 Arguably the effects are more clearly in Figure 6.1. This is due to the fact that the latter figure is plotting smoothed values, not residuals. In other words, residuals and smoothing play complementary roles to each other: Smoothing-based plots can more easily give us “the big picture,” but residuals may enable us to spot some fine details.
-In any case, it’s clear that the linear model does not tell the whole story.
-6.7 Diagnostics Related to Individual Predic- tors
-It may be that the relationship with the response variable Y is close to linear for some predictors X(i) but not for others. How might we investigate that?
-6.7.1 Partial Residual Plots
-We might approach this by simply plotting a scatter diagram of Y against each predictor variable. However, the relation of Y with X(i) may change in the presence of the other X(j). A more sophisticated approach may be partial residual plots, also known as component + residual plots. These would be easy to code on one’s own, but the crPlot() function in the car package does the job nicely for us:
 
-￼Figure 6.2: Residuas Against Linear Fitted Values
+In any case, it’s clear that the linear model does not tell the whole story.
+
+6.7 Diagnostics Related to Individual Predictors
+
+It may be that the relationship with the response variable Y is close to linear for some predictors X^(i) but not for others. How might we investigate that?
+
+6.7.1 Partial Residual Plots
+
+We might approach this by simply plotting a scatter diagram of Y against each predictor variable. However, the relation of Y with X^(i) may change in the presence of the other X^(j). A more sophisticated approach may be partial residual plots, also known as component + residual plots. These would be easy to code on one’s own, but the crPlot() function in the car package does the job nicely for us:
+
+Figure 6.2: Residuas Against Linear Fitted Values
 
 Figure 6.3: Partial Residuals Plot, Currency Data
-> crPlots(fout1)
-The resulting graph is shown in Figure 6.3. Before discussing these rather
-bizarre results, let’s ask what these plots are depicting.
-Here is how the partial-residual method works. The partial residuals for a
-￼predictor X(j) are defined to be
-ri +βjX(j) i
-(6.5)
-(p) −...−βpX (6.6)
-pi =
-= Yi −β0 −β1X
-􏰭
-(j −1) 􏰭􏰭i􏰭i􏰭i􏰭i
-(1)
-−...−β1X
-−β1X
-(j +1)
 
-In other words, we’ve started with (6.4), but removed the linear term con-
-tributed by predictor j, i.e. removed βpX(j). We then plot the pi against i
-predictor j, to try to discern a relation. In effect we are saying,
+> crPlots(fout1)
+
+The resulting graph is shown in Figure 6.3. Before discussing these rather bizarre results, let’s ask what these plots are depicting.
+
+Here is how the partial-residual method works. The partial residuals for a predictor X^(j) are defined to be
+
+p[i] = r[i] +β[j]*X[i]^(j)   (6.5)
+     = Y[i] − β0 − β1*X[i]^(1) − ... −β1*X[i]^(j − 1) − β1*X[i]^(j + 1) − ... − βp*X[i]^(p) (6.6)
+
+In other words, we’ve started with (6.4), but removed the linear term contributed by predictor j, i.e. removed βp*X[i]^(j). We then plot the p[i] against i predictor j, to try to discern a relation. In effect we are saying,
+
 Cancel that linear contribution of predictor j. Let’s start fresh with this predictor, and see how adding it in a possibly nonlinear form might extend the collective predictive ability of the other predictors.
+
 If the resulting graph looks nonlinear, we may profit from modifying our model to one that reflects a nonlinear relation.
+
 In that light, what might we glean from Figure 6.3? First, we see that the only “clean” relations are the one for the franc and the one for the mark. No wonder, then, that we found earlier that these two currencies seemed to have the strongest linear relation to the Yen. There does seem to be some nonlinearity in the case of the franc, with a more negative slope for low franc values, and this may be worth pursuing, say by adding a quadratic term.
+
 For the Canadian dollar and the pound, though, the relations don’t look “clean” at all. On the contrary, the points in the graphs clump together much more than we typically encounter in scatter plots.
+
 But even the mark is not off the hook (pardon the pun), as the “hook” shape noticed earlier is here for that currency, and apparently for the Canadian dollar as well. So, whatever odd phenomenon is at work may be related to these two currencies,
-6.7.2 Plotting Nonparametric Fit Against Each Pre- dictor
+
+6.7.2 Plotting Nonparametric Fit Against Each Predictor
+
 As noted, one approach would be to draw many scatter diagrams, plotting Y individually against each X(i). But scatter diagrams are, well, scattered. A better way is to plot the nonparametric fit against each predictor. The regtools function nonparvsxplot() does this, plotting one graph for each predictor, presented in succession with user prompts:
-> nonparvsxplot(kout) next plot
+
+> nonparvsxplot(kout) 
 next plot
 next plot
 next plot
-􏰭
+next plot
 
 Figure 6.4: Nonparametric Fit Against the Mark
+
 The graph for for the mark is shown in Figure 6.4. Oh my gosh! With the partial residual plots, the mark and the franc seemed to be the only “clean” ones. Now we see that the situation for the mark is much more complex. The same is true for the other predictors (not shown here). This is indeed a difficult data set.
+
 Again, note that the use of smoothing has brought these effects into better focus, as discussed in Section 6.6.3.
+
 6.7.3 Freqparcoord
-Another graphical approach is via freqparcoord package, written by Yingkang Xie and me. The call
+
+Another graphical approach is via freqparcoord package, written by Yingkang Xie and me. The call produces the graph in Figure 6.5.
 
 Figure 6.5: Freqparcoord Plot, Currency Data
-produces the graph in Figure 6.5.
+
 What is depicted in this graph? First, this is a parallel coordinates plot, which is a method for visualizing multidimensional data in a 2-dimensional graph. This approach dates back to the 1800s, but was first developed in depth in modern times; see Inselberg (2009).
-The general method of parallel coordinates is quite simple. Here we draw p vertical axes, one for each variable. For each of our n data points, we draw a polygonal line from each axis to the next. The height of the line on axis j is the value of variable j for this data point. As Inselberg pointed out, in mathematical terms the plot performs a transformation mapping p-dimensional points to p − 1-segment lines. The practical effect is that we can visualize how our p variables vary together.
+
+The general method of parallel coordinates is quite simple. Here we draw p vertical axes, one for each variable. For each of our n data points, we draw a polygonal line from each axis to the next. The height of the line on axis j is the value of variable j for this data point. As Inselberg pointed out, in mathematical terms the plot performs a transformation mapping p-dimensional points to (p − 1)-segment lines. The practical effect is that we can visualize how our p variables vary together.
 
 However, if our number of data points n is large, our parallel coordinates will consist of a chaotic jumble of lines, maybe even with the “black screen problem,” meaning that so much has been plotted that the graph is mostly black, no defining features.
-The solution to that problem taken by freqparcoord is to plot only the most frequently-occurring lines, meaning those corresponding to the origi- nal data points having the largest estimated p-dimensional density funciton.
+
+The solution to that problem taken by freqparcoord is to plot only the most frequently-occurring lines, meaning those corresponding to the original data points having the largest estimated p-dimensional density funciton.
+
 A function in the freqparcoord package, regdiag(), applies this to regres- sion diagnostics. The first variable plotted, i.e. the first vertical axis, is what we call the divergences, meaning the differences beween the parametric and nonparametric estimates of the population regression function,
-μ􏰭linmod(Xi)−μ􏰭knn(Xi), i=1,...,n (6.7) The other axes represent our predictor variables. Vertical measures are
-numbers of standard deviations from the mean of the given variable.
-There are three groups, thus three subgraphs, for the upper 10%, middle 80% and lower 10% of the divergence values. So for instance the upper subgraph describes data points Xi at which the linear model greatly over- estimates the true regression function.
-What we see, then, is that in regions in which the linear model underes- timates, the Canadian dollar tends to be high and the mark low, with an opposite relation for the region of overestimation. Note that this is not the same as saying that the correlation between those two currencies is neg- ative; on the contrary, running cor(curr1) shows their correlation to be positive and tiny, about 0.01. This suggests that we might try adding a dollar/mark interaction term to our model, though the effect here seems mild, with peaks and valleys of only about 1 standard deviation..
+
+μ[linmod](X[i]) − μ[knn](X[i]), i = 1, ..., n  (6.7) 
+
+The other axes represent our predictor variables. Vertical measures are numbers of standard deviations from the mean of the given variable.
+
+There are three groups, thus three subgraphs, for the upper 10%, middle 80% and lower 10% of the divergence values. So for instance the upper subgraph describes data points Xi at which the linear model greatly overestimates the true regression function.
+
+What we see, then, is that in regions in which the linear model underestimates, the Canadian dollar tends to be high and the mark low, with an opposite relation for the region of overestimation. Note that this is not the same as saying that the correlation between those two currencies is negative; on the contrary, running cor(curr1) shows their correlation to be positive and tiny, about 0.01. This suggests that we might try adding a dollar/mark interaction term to our model, though the effect here seems mild, with peaks and valleys of only about 1 standard deviation.
+
 6.8 Effects of Unusual Observations on Model Fit
+
 Suppose we are doing a study of rural consumer behavior in a small country C in the developing world. One day, a few billionaires discover the idyllic beauty of rural C and decide to move there. We almost certainly would want to exclude data on these interlopers from our analysis. Second, most data contains errors. Obviously these must be excluded too, or corrected if possible. These two types of observations are sometimes collectively called outliers, or simply unusual.
+
 Though we may hear that Bill Gates has moved to C, and we can clean the data to remove the obvious errors, such as a human height of 25 feet or a negative weight. other extreme values or errors may not jump out at us. Thus it would be useful to have methods that attempt to find such observations in some mechanical way.
+
 6.8.1 The influence() Function
-Base R includes a very handy function, influence(). We input an object of type ”lm”, and it returns an R list. One of the components of that list,
-coefficients, is just what we want: It has a column for each βj, and a row
-for each observation in our data set. Row i, column j tells us how much
-β􏰭 would change if observation i were deleted from the data set.5 If the j
-change is large, we should take a close look at observation i, to determine whether it is “unusual.”
+
+Base R includes a very handy function, influence(). We input an object of type ”lm”, and it returns an R list. One of the components of that list, coefficients, is just what we want: It has a column for each βj, and a row for each observation in our data set. Row i, column j tells us how much β would change if observation i were deleted from the data set [5]. If the j change is large, we should take a close look at observation i, to determine whether it is “unusual.”
+
 6.8.1.1 Example: Currency Data
+
 Let’s take a look:
-> infcfs <− influence(fout1)$coef > head( infcfs )
-( Intercept ) Can Mark 1 −0.01538183 0.03114368 −0.009961471 2 −0.02018040 0.03743135 −0.018141461 3 −0.02196501 0.03583000 −0.024654614 4 −0.02877846 0.02573926 −0.050914092 5 −0.02693571 0.02564799 −0.046012297 6 −0.02827297 0.02524051 −0.050186868
-Pound 1 0.07751692 2 0.10129967 3 0.10190745 4 0.13201466 5 0.12140985 6 0.13027910
-Franc −0.07634899 −0.09488785 −0.08885551 −0.08862127 −0.08261002 −0.08733993
-􏰭
+
+> infcfs <− influence(fout1)$coef 
+> head(infcfs)
+
 ￼5The entire computation does not need to be done from scratch. The Sherman- Morrison-Woodbury formula provides a shortcut. See the Mathematical Complements section at the end of this chapter.
-￼168CHAPTER 6. MODEL FIT: ASSESSMENT AND IMPROVEMENT 􏰭
+
 So, if we were to remove the second data point, this says that β0 would 􏰭
 decline by 0.02018040, β1 would increase by 0.03743135, and so on. Let’s check to be sure:
 > coef(fout1) ( Intercept ) 224.945099 Pound −5.331583
