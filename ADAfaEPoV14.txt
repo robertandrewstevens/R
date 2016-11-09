@@ -1,0 +1,647 @@
+
+Chapter 14
+Estimating Distributions and Densities
+We have spent a lot of time looking at how to estimate expectations (which is re- gression). We have also seen how to estimate variances, by turning it into a problem about expectations. We could extend the same methods to looking at higher mo- ments — if you need to find the conditional skewness or kurtosis functions1, you can tackle that in the same way as finding the conditional variance. But what if we want to look at the whole distribution?
+You’ve already seen the parametric solution to the problem in earlier statistics courses: posit a parametric model for the density (Gaussian, Student’s t, exponential, gamma, beta, Pareto, ...) and estimate the parameters. Maximum likelihood esti- mates are generally consistent and efficient for such problems. Chapter E reminded us of how this machinery can be extended to multivariate data. But suppose you don’t have any particular parametric density family in mind, or want to check one — how could we estimate a probability distribution non-parametrically?
+14.1 Histograms Revisited
+For most of you, making a histogram was probably one of the first things you learned how to do in intro stats (if not before). This is a simple way of estimating a distribu- tion: we split the sample space up into bins, count how many samples fall into each bin, and then divide the counts by the total number of samples. If we hold the bins fixed and take more and more data, then by the law of large numbers we anticipate that the relative frequency for each bin will converge on the bin’s probability.
+So far so good. But one of the things you learned in intro stats was also to work with probability density functions, not just probability mass functions. Where do we get pdfs? Well, one thing we could do is to take our histogram estimate, and then say
+1When you find out what the kurtosis is good for, be sure to tell the world. 314
+￼
+315 14.2. “THEFUNDAMENTALTHEOREMOFSTATISTICS”
+that the probability density is uniform within each bin. This gives us a piecewise- constant estimate of the density.
+Unfortunately, this isn’t going to work — isn’t going to converge on the true pdf — unless we can shrink the bins of the histogram as we get more and more data. To see this, think about estimating the pdf when the data comes from any of the standard distributions, like an exponential or a Gaussian. We can approximate the true pdf f (x) to arbitrary accuracy by a piecewise-constant density (indeed, that’s what happens every time we plot it on our screens), but, for a fixed set of bins, we can only come so close to the true, continuous density.
+This reminds us of our old friend the bias-variance trade-off, and rightly so. If we use a large number of very small bins, the minimum bias in our estimate of any density becomes small, but the variance in our estimates grows. (Why does variance increase?) To make some use of this insight, though, there are some things we need to establish first.
+• Is learning the whole distribution non-parametrically even feasible? • How can we measure error so deal with the bias-variance trade-off?
+14.2 “The Fundamental Theorem of Statistics”
+Let’s deal with the first point first. In principle, something even dumber than shrink- ing histograms will work to learn the whole distribution. Suppose we have one- dimensional samples x1,x2,...xn with a common cumulative distribution function F . The empirical cumulative distribution function on n samples, F ̃ (a) is
+ ̃ 1􏰥n
+(14.1) In words, this is just the fraction of the samples which are ≤ a. Then the Glivenko-
+1(−∞,a])(xi)
+Fn(a)≡ n
+max|F ̃ (a)−F(a)|→0 (14.2)
+n
+￼Cantelli theorem says
+i=1
+an
+So the empirical CDF converges to the true CDF everywhere; the maximum gap between the two of them goes to zero. Pitman (1979) calls this the “fundamental theorem of statistics”, because it says we can learn distributions just by collecting enough data.2 The same kind of result also holds for higher-dimensional vectors.
+2Notethatforanyone,fixedvalueofa,that|F ̃n(a)−F(a)|→0isjustanapplicationofthelawoflarge numbers. The extra work Glivenko and Cantelli did was to show that this held for infinitely many values of a at once, so that even if we focus on the biggest gap between the estimate and the truth, that still shrinks with n. Here’s a sketch, with no details. Fix an ε > 0; first show that there is some finite set of points on theline,callthem b1,...bm(ε),suchthat|F ̃n(a)−F ̃n(bi)|<εand|F(a)−F(bi)|<εforsome bi. Next,show
+that, for large enough n, |F (bi ) − F ̃n (bi )| < ε for all the bi . (This follows from the law of large numbers and the fact that m(ε) is finite.) Finally, use the triangle inequality to conclude that, for large enough n, |F ̃n (a) − F (a)| < 3ε. Since ε can be made arbitrarily small, the Glivenko-Cantelli theorem follows. This general strategy — combining pointwise convergence theorems with approximation arguments — forms
+00:02 Monday 18th April, 2016
+￼
+[[TODO: Mention DKW inequality and correspond- ing confidence band for the CDF]]
+14.3. ERRORFORDENSITYESTIMATES 316
+If the Glivenko-Cantelli theorem is so great, why aren’t we just content with the empirical CDF? Sometimes we are, but it inconveniently doesn’t give us a probability density. Suppose that x1,x2,...xn are sorted into increasing order. What probability does the empirical CDF put on the interval (xi , xi+1)? Clearly, zero. (Whereas the interval [xi,xi+1] gets probability 2/n.) This could be right, but we have centuries of experience now with probability distributions, and this tells us that pretty often we can expect to find some new samples between our old ones. So we’d like to get a non-zero density between our observations.
+Using a uniform distribution within each bin of a histogram doesn’t have this issue, but it does leave us with the problem of picking where the bins go and how many of them we should use. Of course, there’s nothing magic about keeping the bin size the same and letting the number of points in the bins vary; we could equally well pick bins so they had equal counts.3 So what should we do?
+14.3 Error for Density Estimates
+Our first step is to get clear on what we mean by a “good” density estimate. There are three leading ideas:
+􏰤ˆ2
+(f (x)− f (x)) dx should be small: the squared deviation from the true den-
+sity should be small, averaging evenly over all space.
+􏰤ˆ
+|f (x)− f (x)|dx should be small: minimize the average absolute, rather than
+squared, deviation.
+􏰤 f(x)log f(x)dx should be small: the average log-likelihood ratio should be 􏰨
+Option (1) is reminiscent of the MSE criterion we’ve used in regression. Option (2) looks at what’s called the L1 or total variation distance between the true and
+1􏰤ˆ
+the estimated density. It has the nice property that 2 |f (x)− f (x)|dx is exactly the
+maximum error in our estimate of the probability of any set. Unfortunately it’s a bit tricky to work with, so we’ll skip it here. (But see Devroye and Lugosi (2001)). Finally, minimizing the log-likelihood ratio is intimately connected to maximizing
+the core of what’s called empirical process theory, which underlies the consistency of basically all the non-parametric procedures we’ve seen. If this line of thought is at all intriguing, the closest thing to a gentle introduction is Pollard (1989).
+3A specific idea for how to do this is sometimes called a k − d tree. We have d random variables and want a joint density for all of them. Fix an ordering of the variables Start with the first variable, and find the thresholds which divide it into k parts with equal counts. (Usually but not always k = 2.) Then sub-divide each part into k equal-count parts on the second variable, then sub-divide each of those on the third variable, etc. After splitting on the dth variable, go back to splitting on the first, until no further splits are possible. With n data points, it takes about logk n splits before coming down to individual data points. Each of these will occupy a cell of some volume. Estimate the density on that cell as one over that volume. Of course it’s not strictly necessary to keep refining all the way down to single points.
+00:02 Monday 18th April, 2016
+1. 2. 3.
+f (x) kept low.
+￼￼￼
+317 14.3. ERRORFORDENSITYESTIMATES
+the likelihood. We will come back to this (§14.6), but, like most texts on density es- timation, we will give more attention to minimizing (1), because it’s mathematically tractable.
+Notice that
+􏰧 ˆ2 􏰧2 􏰧ˆ 􏰧ˆ2
+(f(x)−f(x)) dx= f (x)dx−2 f(x)f(x)dx+ f (x)dx (14.3) ˆ
+The first term on the right hand side doesn’t depend on the estimate f (x) at all, so ˆ
+we can ignore it for purposes of optimization. The third one only involves f , and is just an integral, which we can do numerically. That leaves the middle term, which involves both the true and the estimated density; we can approximate it by
+− n
+i=1
+2 􏰥n ˆ
+f (xi ) (14.4)
+The reason we can do this is that, by the Glivenko-Cantelli theorem, integrals over the true density are approximately equal to sums over the empirical distribution.
+So our final error measure is
+2􏰥nˆ 􏰧ˆ2
+−n f(xi)+ f (x)dx (14.5) i=1
+In fact, this error measure does not depend on having one-dimension data; we can use it in any number of dimensions.4 For purposes of cross-validation (you knew that
+was coming, right?), we can estimate fˆ on the training set, and then restrict the sum to points in the testing set.
+14.3.1 Error Analysis for Histogram Density Estimates
+We now have the tools to do most of the analysis of histogram density estimation. (We’ll do it in one dimension for simplicity.) Choose our favorite location x, which lies in a bin whose boundaries are x0 and x0 + h. We want to estimate the density at x, and this is
+ˆ 11􏰥n
+fn(x)= h n
+￼￼1(x0,x0+h](xi) (14.6)
+￼￼i=1
+Let’s call the sum, the number of points in the bin, b. It’s a random quantity, B ∼ Binomial(n, p), where p is the true probability of falling into the bin, p = F (x0 +
+h) − F (x0). The mean of B is n p, and the variance is n p(1 − p), so 􏰪ˆ􏰫1
+􏰌 fn(x) = nh􏰌[B]
+= n[F(x0 +h)−F(x0)]
+nh
+= F(x0 +h)−F(x0)
+h
+(14.7) (14.8) (14.9)
+￼￼￼￼4Admittedly, in high-dimensional spaces, doing the final integral can become numerically challenging. 00:02 Monday 18th April, 2016
+14.3. ERRORFORDENSITYESTIMATES and the variance is
+318
+(14.10) (14.11) (14.12)
+(14.13)
+􏰎
+􏰪ˆ􏰫1
+fn(x) = n2h2 􏰎[B]
+= n[F(x0 +h)−F(x0)][1−F(x0 +h)+F(x0)] n2h2
+􏰪 ˆ 􏰫 1 − F (x0 + h) + F (x0)
+￼￼= 􏰌 fn(x) If we let h → 0 as n → ∞, then
+􏰪ˆ 􏰫
+􏰌 fh(x) →lim
+h→0
+nh
+F(x0+h)−F(x0) h
+=f(x0)
+￼￼since the pdf is the derivative of the CDF. But since x is between x0 and x0 + h, f (x0) → f (x). So if we use smaller and smaller bins as we get more data, the his- togram density estimate is unbiased. We’d also like its variance to shrink as the same grows. Since 1 − F (x0 + h) + F (x0) → 1 as h → 0, to get the variance to go away we
+need nh → ∞.
+To put this together, then, our first conclusion is that histogram density estimates
+willbeconsistentwhenh→0butnh→∞asn→∞. Thebin-widthhneedsto shrink, but slower than n−1.
+At what rate should it shrink? Small h gives us low bias but (as you can verify from the algebra above) high variance, so we want to find the trade-off between the
+􏰪ˆ􏰫
+two. One can calculate the bias at x from our formula for 􏰌 fh(x) through a
+somewhat lengthy calculus exercise, analogous to what we did for kernel smoothing in Chapter 45; the upshot is that the integrated squared bias is
+􏰗 􏰪 􏰫􏰘 2
+􏰧 ˆ2h􏰧􏰑′􏰒2 2
+f(x)−􏰌 fh(x) dx=12 f (x) dx+o(h )
+We already got the variance at x, and when we integrate that over x we find
+􏰧 􏰪ˆ 􏰫 1 −1 􏰎 fh(x) dx=nh+o(n )
+(14.14)
+(14.15)
+(14.16)
+(14.17)
+￼￼So the total integrated squared error is 2
+ISE= h 􏰧 􏰑f′(x)􏰒2dx+ 1 +o(h2)+o(n−1) 12 nh
+￼￼Differentiating this with respect to h and setting it equal to zero, we get hopt 􏰧 􏰑f′(x)􏰒2dx= 1
+6 nh2 opt
+￼￼￼5You need to use the intermediate value theorem multiple times; see for instance Wasserman (2006, sec. 6.8).
+00:02 Monday 18th April, 2016
+319 14.4. KERNELDENSITYESTIMATES  6 1/3
+hopt =􏰤􏰑f′(x)􏰒2dx n−1/3 =O(n−1/3) (14.18)
+So we need narrow bins if the density changes rapidly (􏰤 􏰑f ′(x)􏰒2dx is large), and wide bins if the density is relatively flat. No matter how rough the density, the bin width should shrink like O(n−1/3). Plugging that rate back into the equation for the ISE, we see that it is O(n−2/3).
+It turns out that if we pick h by cross-validation, then we attain this optimal rate in the large-sample limit. By contrast, if we knew the correct parametric form and just had to estimate the parameters, we’d typically get an error decay of O(n−1). This is substantially faster than histograms, so it would be nice if we could make up some of the gap, without having to rely on parametric assumptions.
+14.4 Kernel Density Estimates
+It turns out that one can improve the convergence rate, as well as getting smoother estimates, by using kernels. The kernel density estimate is
+1􏰥n 1 􏰙x−xi􏰚
+f􏰨(x)= K (14.19)
+n i=1 h h
+where K is a kernel function such as we encountered when looking at kernel regres-
+sion. (The factor of 1/h inside the sum is so that f􏰨 will integrate to 1; we could h
+have included it in both the numerator and denominator of the kernel regression formulae, but then it would’ve just canceled out.) As before, h is the bandwdith of the kernel. We’ve seen typical kernels in things like the Gaussian. One advantage of using them is that they give us a smooth density everywhere, unlike histograms, and in fact we can even use them to estimate the derivatives of the density, should that be necessary.6
+14.4.1 Analysis of Kernel Density Estimates
+How do we know that kernels will in fact work? Well, let’s look at the mean and vari- ance of the kernel density estimate at a particular point x, and use Taylor’s theorem
+6The advantage of histograms is that they’re computationally and mathematically simpler. 00:02 Monday 18th April, 2016
+￼￼￼￼h
+￼
+14.4. KERNELDENSITYESTIMATES
+on the density.
+􏰪 􏰫 1􏰥n 􏰛1􏰙x−Xi􏰚􏰜
+320
+(14.20)
+(14.21) (14.22) (14.23)
+(14.24)
+􏰌 f􏰨(x) h
+= 􏰌K
+ni=1 h h 􏰛1 􏰙x−X􏰚􏰜
+= 􏰌hKh
+􏰧 1 􏰙x−t􏰚
+= h K h f (t )d t 􏰧
+= K(u)f (x − hu)du
+􏰧􏰹 h2u2 􏰼
+= K(u) f(x)−huf′(x)+ 2 f′′(x)+o(h2) du h2 f ′′(x) 􏰧 2 2
+￼￼￼￼￼￼￼￼= f(x)+ 2 K(u)u du+o(h )
+because, by definition, 􏰤 K(u)du = 1 and 􏰤 uK(u)du = 0. If we call 􏰤 K(u)u2du =
+σK2 , then the bias of the kernel density estimate is
+􏰪 􏰫 h2σK2 f ′′(x) 2
+(14.25) (14.26)
+￼􏰌 f􏰨(x) −f(x)= h
+So the bias will go to zero if the bandwidth h shrinks to zero. What about the variance? Use Taylor’s theorem again:
+􏰪􏰫 􏰎 f􏰨(x)
+￼2
++o(h) (14.27)
+￼￼￼h
+(14.28) 1􏰹 􏰛1 2􏰙x−X􏰚􏰜 􏰙 􏰛1 􏰙x−X􏰚􏰜􏰚2􏰼
+1 􏰛1 􏰙x−X􏰚􏰜 = 􏰎 K
+nhh
+=n􏰌h2K h −􏰌hK h
+(14.29) (14.30) (14.31)
+￼￼￼￼￼1􏰛􏰧1 2􏰙x−t􏰚
+= n h2K h dt−
+􏰷 2􏰺2􏰜 f(x)+O(h )
+￼￼￼1􏰛􏰧1 2
+= n hK (u)f(x−hu)du−f (x)+O(h )
+2 2􏰜 1􏰛􏰧12􏰑 ′􏰒2 􏰜
+￼￼= n hK (u) f(x)−huf (x) du−f (x)+O(h) (14.32) f(x)􏰧 2
+= hn K (u)du+O(1/n) (14.33)
+￼￼￼Thiswillgotozeroifnh→∞asn→∞. Sotheconclusionisthesameasfor histograms: h has to go to zero, but slower than 1/n.
+Since the expected squared error at x is the bias squared plus the variance, h4σK4 (f ′′(x))2 f (x) 􏰧 2
+4 + hn K (u)du+small (14.34) 00:02 Monday 18th April, 2016
+￼￼
+321 14.4. KERNELDENSITYESTIMATES the expected integrated squared error is
+h4σ4 􏰧 􏰤K2(u)du ISE ≈ K ( f ′′ ( x ))2 d x +
+4 nh Differentiating with respect to h for the optimal bandwidth hopt, we find
+(14.35)
+(14.36)
+(14.37)
+￼￼􏰧
+(f ′′(x))2dx = 􏰟 􏰤K2(u)du 􏰠1/5
+σK4 􏰤(f′′(x))2dx
+􏰤 K2(u)du nh2
+h3 σ4 opt K
+￼hopt =
+opt
+n−1/5 =O(n−1/5)
+￼That is, the best bandwidth goes to zero like one over the fifth root of the number of sample points. Plugging this into Eq. 14.35, the best ISE = O(n−4/5). This is better than the O(n−2/3) rate of histograms, but still includes a penalty for having to figure out what kind of distribution we’re dealing with. Remarkably enough, using cross-validation to pick the bandwidth gives near-optimal results.7
+As an alternative to cross-validation, or at least a starting point, one can use Eq. 14.37 to show that the optimal bandwidth for using a Gaussian kernel to estimate a Gaussian distribution is 1.06σn−1/5, with σ being the standard deviation of the Gaus- sian. This is sometimes called the Gaussian reference rule or the rule-of-thumb bandwidth. When you call density in R, this is basically what it does.
+Yet another technique is the plug-in method. Eq. 14.37 calculates the optimal bandwidth from the second derivative of the true density. This doesn’t help if we don’t know the density, but it becomes useful if we have an initial density estimate which isn’t too bad. In the plug-in method, we start with an initial bandwidth (say from the Gaussian reference rule) and use it to get a preliminary estimate of the den- sity. Taking that crude estimate and “plugging it in” to Eq. 14.37 gives us a new bandwidth, and we re-do the kernel estimate with that new bandwidth. Iterating this a few times is optional but not uncommon.
+14.4.2 Joint Density Estimates
+The discussion and analysis so far has been focused on estimating the distribution of a one-dimensional variable. Just as kernel regression can be done with multiple input variables (§4.3), we can make kernel density estimates of joint distributions. We simply need a kernel for the vector:
+1 􏰥n
+f (⃗x) =
+K
+kernel are σK and 􏰤 K2(u)d u. This is the source of the (correct) folklore that the choice of kernel is less important than the choice of bandwidth.
+00:02 Monday 18th April, 2016
+􏰨
+K(⃗x − x⃗ ) i
+(14.38) error of
+￼n i=1
+Eq. 14.35
+￼7Substituting
+1.25n−4/5σ4/5􏰑􏰤 (f ′′(x))2dx􏰒1/5􏰑􏰤 K2(u)du􏰒4/5. The only two parts of this which depend on the
+Eq. 14.37
+into
+gives a
+squared
+14.4. KERNELDENSITYESTIMATES 322
+One could use any multivariate distribution as the kernel (provided it is centered and has finite covariance). Typically, however, just as in smoothing, one uses a product kernel, i.e., a product of one-dimensional kernels,
+K(⃗x−x⃗i)=K1(x1−xi1)K2(x2−xi2)...Kp(xp −xip), (14.39) Doing this requires a bandwidth for each coordinate, so the over-all form of the joint
+PDF estimate is
+ x j − x j 
+􏰥n 􏰦d
+f(⃗x)= 􏰣 K 
+􏰨
+i nphjh
+(14.40)
+1
+￼￼[[ATTN: Move to chapter on smoothing?]]
+Going through a similar analysis for p-dimensional data shows that the ISE goes to zero like O(n−4/(4+p)), and again, if we use cross-validation to pick the bandwidths, asymptotically we attain this rate. Unfortunately, if p is large, this rate becomes very slow — for instance, if p = 24, the rate is O(n−1/7). There is simply no universally good way to learn arbitrary high-dimensional distributions. This is the same “curse of dimensionality” we saw in regression (§9.3). The fundamental problem is that in high dimensions, there are just too different possible distributions which are too hard to tell apart.
+Evading the curse of dimensionality for density estimation needs some special assumptions. Parametric models make the very strong assumption that we know exactly what the distribution function looks like, and we just need to fill in a few constants. It’s potentially less drastic to hope the distribution has some sort of spe- cial structure we can exploit, and most of the rest of Part II will be about searching for various sorts of useful structure8. If none of these options sound appealing, or plausible, we’ve got little alternative but to accept a very slow convergence of density estimates.
+14.4.3 Categorical and Ordered Variables
+Estimating probability mass functions with discrete variables can be straightforward: there are only a finite number of values, and so one just counts how often they occur and takes the relative frequency. If one has a discrete variable X and a continuous variable Y and one wants a joint distribution, one could just get a separate density for Y for each value of x, and tabulate the probabilities for x.
+In principle, this will work, but it can be practically awkward if the number of levels for the discrete variable is large compared to the number of samples. Moreover, for the joint distribution problem, it has us estimating completely separate distribu- tions for Y for every x, without any sharing of information between them. It would seem more plausible to smooth those distributions towards each others. To do this, we need kernels for discrete variables.
+Several sets of such kernels have been proposed. The most straightforward, how- ever, are the following. If X is a categorical, unordered variable with c possible values,
+8As Wiener (1956), the reason the ability to do nonparametric estimation doesn’t make scientific the- ories redundant is that good theories usefully constrain the distributions we’re searching for, and tell us what structures to look for.
+00:02 Monday 18th April, 2016
+j=1 j i=1 j=1 j
+￼
+323
+then, for 0 ≤ h < 1,
+14.4. KERNELDENSITYESTIMATES
+K(x1, x2) = is a valid kernel. For an ordered x,
+1 − h h/(c − 1)
+x1 = x2 x ̸= x
+(14.41)
+(14.42)
+􏰝
+􏰙 c
+K(x1,x2)= |x1 −x2| h 1 2 (1−h) 1 2
+􏰚 |x −x |
+c−|x −x |
+where |x1 − x2| should be understood as just how many levels apart x1 and x2 are. As h → 0, both of these become indicators, and return us to simple relative frequency counting. Both of these are implemented in np.
+14.4.4 Practicalities
+The standard R function density implements one-dimensional kernel density esti- mation, defaulting to Gaussian kernels with the rule-of-thumb bandwidth. There are some options for doing cleverer bandwidth selection, including a plug-in rule. (See the help file.)
+For more sophisticated methods, and especially for more dimensions, you’ll need to use other packages. The np package estimates joint densities using the npudens function. (The u is for “unconditional”.) This has the same sort of automatic band- width selection as npreg, using cross-validation. Other packages which do kernel density estimation include KernSmooth and sm.
+14.4.5 Kernel Density Estimation in R: An Economic Example
+The data set oecdpanel, in the np library, contains information about much the same sort of variables at the Penn World Tables data you worked with in the home- work, over much the same countries and years, but with some of the variables pre- transformed, with identifying country information removed, and slightly different data sources. See help(oecdpanel) for details.
+Here’s an example of using npudens with variables from the oecdpanel data set, from problem set A.13. We’ll look at the joint density of popgro (the logarithm of the population growth rate) and inv (the logarithm of the investment rate). Figure 14.1 illustrates how to call the command, and a useful trick where we get np’s plotting function to do our calculations for us, but then pass the results to a different graphics routine. (See help(npplot).) The distribution we get has two big modes, one at a comparatively low population growth rate (≈ −2.9 — remember this is logged so it’s not actually a shrinking population) and high investment (≈ −1.5), and the other at a lower rate of investment (≈ −2) and higher population growth (≈ −2.6). There is a third, much smaller mode at high population growth (≈ −2.7) and very low investment (≈ −4).
+00:02 Monday 18th April, 2016
+12
+14.4. KERNELDENSITYESTIMATES
+324
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼1.4
+0.8
+1.1 1.2 1.3
+1.5 1.6
+0.9
+1.3
+1.4 1.5 1.6
+2.2 2.1
+￼￼￼0.7
+1.0
+1.7 1.8 1.9 2.0
+￼0.1
+0.1
+0.2
+￼−1
+−2
+−3
+−4
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼−3.4 −3.2
+−3.0
+−2.8
+−2.6
+popgro
+￼data(oecdpanel)
+popinv <- npudens(~popgro + inv, data = oecdpanel)
+fhat <- plot(popinv, plot.behavior = "data")$d1
+library(lattice)
+contourplot(fhat$dens ~ fhat$eval$Var1 * fhat$eval$Var2, cuts = 20, xlab = "popgro",
+    ylab = "inv", labels = list(cex = 0.5))
+FIGURE 14.1: Gaussian kernel estimate of the joint distribution of logged population growth rate ( popgro) and investment rate ( inv). Notice that npudens takes a formula, but that there is no dependent variable on the left-hand side of the ∼. With objects produced by the np library, one can give the plotting function the argument plot.behavior — the default is plot, but if it’s set to data (as here), it calculates all the information needed to plot and returns a separate set of objects, which can be plotted in other functions. (The value plot-data does both.) See help(npplot) for more.
+00:02 Monday 18th April, 2016
+0.1
+0.2
+0.6
+0.5
+0.4
+0.3
+inv
+325 14.5. CONDITIONALDENSITYESTIMATION
+14.5 Conditional Density Estimation
+In addition to estimating marginal and joint densities, we will often want to get con- ditional densities. The most straightforward way to get the density of Y given X,
+fY |X (y | x), is
+f􏰨 (x,y) f􏰨 (y|x)= X,Y
+f􏰨 ( x ) X
+(14.43)
+￼Y|X
+i.e., to estimate the joint and marginal densities and divide one by the other.
+To be concrete, let’s suppose that we are using a product kernel to estimate the
+joint density, and that the marginal density is consistent with it:
+f􏰨 (x,y) = X,Y
+1 􏰥n 􏰴x−xi􏰶 􏰴y−yi􏰶 K ￼ K
+(14.44) (14.45)
+￼￼nhh X h Y h XYi=1 X Y
+1􏰥n 􏰴x−xi􏰶 K
+f􏰨(x) =
+X nhXh
+￼￼X i=1 X
+Thusweneedtopicktwobandwidths,hX andhY,oneforeachvariable.
+This might seem like a solved problem — we just use cross-validation to find hX
+and h so as to minimize the integrated squared error for f􏰨 , and then plug in to Y X,Y
+Equation 14.43. However, this is a bit hasty, because the optimal bandwidths for the joint density are not necessarily the optimal bandwidths for the conditional density. An extreme but easy to understand example is when Y is actually independent of X . Since the density of Y given X is just the density of Y , we’d be best off just ignoring X by taking hX = ∞. (In practice, we’d just use a very big bandwidth.) But if we want to find the joint density, we would not want to smooth X away completely like this.
+The appropriate integrated squared error measure for the conditional density is 􏰧􏰧􏰗 􏰘2
+dxf (x) dy f (y|x)−f􏰨 (y|x) (14.46) X Y|X Y|X
+and this is what we want to minimize by picking hX and hY . The cross-validation goes as usual.
+One nice, and quite remarkable, property of cross-validation for conditional den- sity estimation is that it can detect and exploit conditional independence. Say that X = (U,V), and that Y is independent of U given V — symbolically, Y U | V. Then fY|U,V (y | u,v) = fY|V (y | v), and we should just ignore U in our estimation of the conditional density. It turns out that when cross-validation is used to pick
+bandwidths for conditional density estimation, h􏰩 → ∞ when Y U | V , but not U
+otherwise (Hall et al., 2004). In other words, cross-validation will automatically de- tect which variables are irrelevant, and smooth them away.
+00:02 Monday 18th April, 2016
+|=
+|=
+14.5. CONDITIONALDENSITYESTIMATION 326
+14.5.1 Practicalities and a Second Example
+The np package implements kernel conditional density estimation through the func- tion npcdens. The syntax is pretty much exactly like that of npreg, and indeed we can think of estimating the conditional density as a sort of regression, where the dependent variable is actually a distribution.
+To give a concrete example, let’s look at how the distribution of countries’ pop- ulation growth rates has changed over time, using the oecdpanel data (Figure 14.2). The selected bandwidth for year is 10, while that for popgro is 0.048. (Note that year is being treated as a continuous variable.)
+You can see from the figure that the mode for population growth rates is towards the high end of observed values, but the mode is shrinking and becoming less pro- nounced over time. The distribution in fact begins as clearly bimodal, but the smaller mode at the lower growth rate turns into a continuous “shoulder”. Over time, Fig- ure 14.2 population growth rates tend to shrink, and the dispersion of growth rates narrows.
+Let’s expand on this point. One of the variables in oecdpanel is oecd, which is 1 for countries which are members of the Organization for Economic Cooperation and Development, and 0 otherwise. The OECD countries are basically the “devel- oped” ones (stable capitalist democracies). We can include OECD membership as a conditioning variable for population growth (we need to use a categorical-variable kernel), and look at the combined effect of time and development (Figure 14.3).
+What the figure shows is that OECD and non-OECD countries both have uni- modal distributions of growth rates. The mode for the OECD countries has become sharper, but the value has decreased. The mode for non-OECD countries has also decreased, while the distribution has become more spread out, mostly by having more probability of lower growth rates. (These trends have continued since 1995.) In words, despite the widespread contrary impression, population growth has actually been slowing for decades in both rich and poor countries.
+00:02 Monday 18th April, 2016
+￼327
+14.5. CONDITIONALDENSITYESTIMATION
+3.0
+2.5
+2.0 pdf 1.5 1.0
+0.5
+−2.4
+−2.6
+1995
+−2.8 −3.0
+1990 1985
+1980 year
+popgro
+−3.2
+1975
+−3.4
+1965
+1970
+pop.cdens <- npcdens(popgro ~ year, data = oecdpanel)
+plotting.grid <- expand.grid(year = seq(from = 1965, to = 1995, by = 1), popgro = seq(from = -3.5,
+    to = -2.4, length.out = 300))
+fhat <- predict(pop.cdens, newdata = plotting.grid)
+wireframe(fhat ~ plotting.grid$year * plotting.grid$popgro, scales = list(arrows = FALSE),
+    xlab = "year", ylab = "popgro", zlab = "pdf")
+FIGURE 14.2: Conditional density of logarithmic population growth rates as a function of time.
+00:02 Monday 18th April, 2016
+￼14.5. CONDITIONALDENSITYESTIMATION 328
+01
+44 33 pdf 2 pdf 2
+11
+−2.4 −2.6
+−2.8 −3.0
+popgro−3.2
+1995 1990
+1985 1980
+1975 1970 year
+1965
+−2.4 −2.6
+−2.8 −3.0
+popgro−3.2
+1995 1990
+1985 1980
+1975 1970 year
+1965
+pop.cdens.o <- npcdens(popgro ~ year + factor(oecd), data = oecdpanel)
+oecd.grid <- expand.grid(year = seq(from = 1965, to = 1995, by = 1), popgro = seq(from = -3.4,
+    to = -2.4, length.out = 300), oecd = unique(oecdpanel$oecd))
+fhat <- predict(pop.cdens.o, newdata = oecd.grid)
+wireframe(fhat ~ oecd.grid$year * oecd.grid$popgro | oecd.grid$oecd, scales = list(arrows = FALSE),
+    xlab = "year", ylab = "popgro", zlab = "pdf")
+FIGURE 14.3: Conditional density of population growth rates given year and OECD membership. The left panel is countries not in the OECD, the right is ones which are.
+00:02 Monday 18th April, 2016
+329 14.6. MOREONTHEEXPECTEDLOG-LIKELIHOODRATIO
+14.6 More on the Expected Log-Likelihood Ratio
+Iwanttosayjustabitmoreabouttheexpectedlog-likelihoodratio􏰤 f(x)log f(x)dx. 􏰨
+￼f (x) More formally, this is called the Kullback-Leibler divergence or relative entropy of
+f from f , and is also written D(f ∥f ). Let’s expand the log ratio: 􏰧􏰧
+􏰨􏰨
+D(f∥f)=− f(x)logf(x)dx+ f(x)logf(x)dx (14.47) The second term does not involve the density estimate, so it’s irrelevant for purposes
+of optimizing over f . (In fact, we’re just subtracting off the entropy of the true density.) Just as with the squared error, we could try approximating the integral with
+a sum:
+which is just the log-likelihood per observation. Since we know and like maximum likelihood methods, why not just use this?
+Well, let’s think about what’s going to happen if we plug in the kernel density estimate:
+
+1 􏰥n n i=1
+1 􏰥n nh j=1
+􏰴 x − x 􏰶
+1 􏰥n n i=1
+􏰥n
+􏰴 x − x 􏰶 j i
+􏰨
+􏰨􏰨
+K
+j
+i
+ = − log n h + h
+log 
+K
+􏰧 1􏰥n
+f (x)log f (x)dx ≈ log f (x ) (14.48)
+􏰨n􏰨i i=1
+￼log 
+If we take h to be very small, K( xj −xi ) ≈ 0 unless xj = xi , so the over-all likelihood
+￼￼￼￼￼h
+j=1
+h
+
+￼becomes
+(14.49) ≈−lognh+logK(0) (14.50)
+which goes to +∞ as h → 0. So if we want to maximize the likelihood of a kernel density estimate, we always want to make the bandwidth as small as possible. In fact, the limit is to say that the density is
+ ̃ 1􏰥n
+f(x)= n
+whereδistheDiracdeltafunction.9 Ofcourse,thisisjustthesamedistributionas the empirical CDF.
+Why is maximum likelihood failing us here? Well, it’s doing exactly what we asked it to: to find the distribution where the observed sample is as probable as possi- ble. Giving any probability to values of x we didn’t see can only come at the expense
+9Recall that the delta function is defined by how it integrates with other functions: 􏰤 δ(x)f (x)dx = f (0). You can imagine δ(x) as zero everywhere except at the origin, where it has an infinitely tall, in- finitely narrow spike, the area under the spike being one. If you are suspicious that this is really a bona fide function, you’re right; strictly speaking it’s just a linear operator on functions. We can however ap- proximate it as the limit of well-behaved functions. For instance, take δh (x) = 1/h when x ∈ [−h/2, h/2] with δh (x) = 0 elsewhere, and let h go to zero. But this is where we came in. . .
+00:02 Monday 18th April, 2016
+i=1
+δ(x−xi) (14.51)
+￼￼
+14.7. SIMULATINGFROMDENSITYESTIMATES 330
+of the probability of observed values, so Eq. 14.51 really is the unrestricted maximum likelihood estimate of the distribution. Anything else imposes some restrictions or constraints which don’t, strictly speaking, come from the data. However, those re- strictions are what let us generalize to new data, rather than just memorizing the training sample.
+One way out of this is to use the cross-validated log-likelihood to pick a band- width, i.e., to restrict the sum in Eq. 14.48 to running over the testing set only. This way, very small bandwidths don’t get an unfair advantage for concentrating around the training set. (If the test points are in fact all very close to the training points, then small bandwidths get a fair advantage.) This is in fact the default procedure in the np package, through the bwmethod option ("cv.ml" vs. "cv.ls").
+14.7 Simulating from Density Estimates 14.7.1 Simulating from Kernel Density Estimates
+There are times when one wants to draw random values from the estimated distri- bution. This is easy with kernel density estimates, because each kernel is itself a probability density, generally a very tractable one. The pattern goes like so. Suppose the kernel is Gaussian, that we have scalar observations x1,x2,...xn, and the selected bandwidth is h. Then we pick an integer i uniformly at random from 1 to n, and in- vokernorm(1,x[i],h).10 Usingadifferentkernel,we’djustneedtousetherandom number generator function for the corresponding distribution.
+To see that this gives the right distribution needs just a little math. A kernel K(x, xi , h) with bandwidth h and center xi is a probability density function. The probability the KDE gives to any set A is just an integral:
+(14.52) (14.53)
+(14.54) (14.55)
+introducing C to stand for the probability distribution corresponding to the kernel. The simulation procedure works if the probability that the simulated value X ̃ falls into A matches this. To generate X ̃ , we first pick a random data point, which really
+10In fact, if we want to draw a sample of size q, rnorm(q,sample(x,q,replace=TRUE),h) will work in R — it’s important though that sampling be done with replacement.
+00:02 Monday 18th April, 2016
+􏰧 􏰨􏰨
+F(A) =
+= n
+f(x)dx
+A
+􏰧 1 􏰥n
+K(x, xi , h)d x
+￼A
+1 􏰥n 􏰧
+i=1
+K(x, xi , h)d x = n C(A,xi,h)
+= n
+1 􏰥n
+￼i=1 A i=1
+￼￼
+331 14.7. SIMULATINGFROMDENSITYESTIMATES means picking a random integer J , uniformly from 1 to n. Then
+Pr􏰳X ̃ ∈A􏰵
+= 􏰌􏰷1A(X ̃)􏰺
+= 􏰌􏰷􏰌􏰷1A(X ̃) | J􏰺􏰺
+= 􏰌􏰷C(A,xJ,h)􏰺
+1 􏰥n
+= n C(A,xi,h)
+i=1
+(14.56) (14.57) (14.58)
+(14.59)
+￼The first step uses the fact that a probability is the expectation of an indicator func- tion; the second uses the law of total expectation; the last steps us the definitions of C and J , and the distribution of J .
+14.7.1.1 Sampling from a Joint Density
+The procedure given above works with only trivial modification for sampling from a joint, multivariate distribution. If we’re using a product kernel, we pick a random data point, and then draw each coordinate independently from the kernel distribu- tion centered on our random point. (See Code Example 27 below.) The argument for correctness actually goes exactly as before.
+14.7.1.2 Sampling from a Conditional Density
+Sampling from a conditional density estimate with product kernels is again straight- forward. The one trick is that one needs to do a weighted sample of data points. To see why, look at the conditional distribution (not density) function:
+F􏰨 ( Y ∈ A | X = x ) 􏰧
+(14.60)
+(14.61)
+(14.62)
+(14.63)
+=
+=
+=
+=
+=
+f􏰨 (y|x)dy Y|X
+A
+􏰧 1 􏰢n K 􏰗x−xi􏰘K 􏰗y−yi􏰘
+￼￼￼nhXhY
+i=1 X hX Y hY f􏰨 ( x )
+dy
+￼A
+X 􏰧 􏰥n
+􏰴 x − x i 􏰶
+hX hY
+1 􏰥n 􏰴x−xi􏰶􏰧 􏰴y−yi􏰶 KX KY dy
+nh h f􏰨(x)i=1 hX A hY XYX
+1 􏰥n 􏰴x−xi􏰶
+KX CY(A,yi,hY)
+nh f􏰨(x)i=1 hX XX
+1
+nh h f􏰨(x) Ai=1
+􏰴 y − y i 􏰶 KX KY dy
+￼￼￼XYX
+￼￼￼(14.64) 􏰗x−xi 􏰘, and then
+￼￼If we select the data point i with a weight proportional to K
+X hX
+￼generateY ̃fromtheKY distributioncenteredatyi,then,Y ̃willfollowtheappropri- ate probability density function.
+00:02 Monday 18th April, 2016
+14.7. SIMULATINGFROMDENSITYESTIMATES 332
+14.7.2 Drawing from Histogram Estimates
+Sampling from a histogram estimate is also simple, but in a sense goes in the opposite order from kernel simulation. We first randomly pick a bin by drawing from a multi- nomial distribution, with weights proportional to the bin counts. Once we have a bin, we draw from a uniform distribution over its range.
+14.7.3 Examples of Simulating from Kernel Density Estimates
+To make all this more concrete, let’s continue working with the oecdpanel data. Section 14.4.5 shows the joint pdf estimate for the variables popgro and inv in that data set. These are the logarithms of the population growth rate and investment rate. Undoing the logarithms and taking the density gives Figure 14.4.
+Let’s abbreviate the actual (not logged) population growth rate as X and the actual (not logged) investment rate as Y in what follows.
+Since this is a joint distribution, it implies a certain expected value for Y/X, the ratio of investment rate to population growth rate11. Extracting this by direct calculation from popinv2 would not be easy; we’d need to do the integral
+joint distribution, say (X ̃1,Y ̃1),(X ̃2,Y ̃2),...(X ̃T ,Y ̃T ), and average: 1􏰥T Y ̃i T→∞ 􏰛Y􏰜
+T X ̃ = g ̃T −→ 􏰌 X (14.66) i=1 i
+where the convergence happens because that’s the law of large numbers. If the num- ber of simulation points T is big, then g ̃T ≈ 􏰌 [Y /X ]. How big do we need to make T ? Use the central limit theorem:
+􏰋
+g ̃T 􏰐􏰄 (􏰌[Y/X],􏰎[g ̃1]/ T) (14.67)
+How do we find the variance 􏰎[g ̃1]? We approximate it by simulating.
+Code Example 27 is a function which draws from the fitted kernel density es- timate. First let’s check that it works, by giving it something easy to do, namely
+reproducing the means, which we can work out:
+11Economically, we might want to know this because it would tell us about how quickly the capital stock per person grows.
+00:02 Monday 18th April, 2016
+􏰧1􏰧1y
+x=0 y=0xX,Y
+f􏰨 (x,y)dydx (14.65) To find 􏰌 [Y /X ] by simulation, however, we just need to generate samples from the
+￼￼￼￼￼￼signif(mean(exp(oecdpanel$popgro)), 3)
+## [1] 0.0693
+signif(mean(exp(oecdpanel$inv)), 3)
+## [1] 0.172
+signif(colMeans(rpopinv(200)), 3)
+## pop.growth.rate     invest.rate
+##          0.0694          0.1770
+￼
+333 14.7. SIMULATINGFROMDENSITYESTIMATES
+popinv2 <- npudens(~exp(popgro) + exp(inv), data = oecdpanel)
+FIGURE 14.4: Gaussian kernel density estimate for the un-logged population growth rate and investment rate. (Plotting code omitted — can you re-make the figure?)
+00:02 Monday 18th April, 2016
+￼￼
+14.7. SIMULATINGFROMDENSITYESTIMATES 334
+￼￼rpopinv <- function(n) {
+    n.train <- length(popinv2$dens)
+    ndim <- popinv2$ndim
+    points <- sample(1:n.train, size = n, replace = TRUE)
+    z <- matrix(0, nrow = n, ncol = ndim)
+    for (i in 1:ndim) {
+        coordinates <- popinv2$eval[points, i]
+        z[, i] <- rnorm(n, coordinates, popinv2$bw[i])
+    }
+    colnames(z) <- c("pop.growth.rate", "invest.rate")
+return(z) }
+￼￼￼CODE EXAMPLE 27: Simulating from the fitted kernel density estimate popinv2. Can you see how to modify it to draw from other bivariate density estimates produced by npudens? From higher-dimensional distributions? Can you replace the for loop with less iterative code?
+This is pretty satisfactory for only 200 samples, so the simulator seems to be working. Now we just use it:
+This tells us that 􏰌 [Y /X ] ≈ 2.67 ± 0.036.
+Suppose we want not the mean of Y /X but the median?
+Getting the whole distribution of Y/X is not much harder (Figure 14.5). Of course complicated things like distributions converge more slowly than simple things like means or medians, so we want might want to use more than 2000 simulated values for the distribution. Alternately, we could repeat the simulation many times, and look at how much variation there is from one realization to the next (Figure 14.6).
+Of course, if we are going to do multiple simulations, we could just average them together. Say that g ̃(1), g ̃(2), ... g ̃(s) are estimates of our statistic of interest from s
+into one grand average:
+￼z <- rpopinv(2000)
+signif(mean(z[, "invest.rate"]/z[, "pop.growth.rate"]), 3)
+## [1] 2.67
+signif(sd(z[, "invest.rate"]/z[, "pop.growth.rate"])/sqrt(2000), 3)
+## [1] 0.0356
+￼signif(median(z[, "invest.rate"]/z[, "pop.growth.rate"]), 3)
+## [1] 2.36
+TTT
+independent realizations of the model, each of size T . We can just combine them
+g ̃s,T = s
+i=1
+g ̃T (14.68)
+1􏰥s (1)
+￼AsanaverageofIIDquantities,thevarianceofg ̃s,T is1/stimesthevarianceofg ̃(1). T
+00:02 Monday 18th April, 2016
+￼335 14.7. SIMULATINGFROMDENSITYESTIMATES
+Probability density
+0.00 0.05 0.10 0.15 0.20 0.25
+02468
+Y/X
+YoverX <- z[, "invest.rate"]/z[, "pop.growth.rate"]
+plot(density(YoverX), xlab = "Y/X", ylab = "Probability density", main = "")
+rug(YoverX, side = 1)
+FIGURE 14.5: Distribution of Y /X implied by the joint density estimate popinv2.
+By this point, we are getting the sampling distribution of the density of a nonlin- ear transformation of the variables in our model, with no more effort than calculating a mean.
+00:02 Monday 18th April, 2016
+￼14.7. SIMULATINGFROMDENSITYESTIMATES 336
+Probability density
+0.00 0.05 0.10 0.15 0.20 0.25 0.30
+0 2 4 6 8 10
+Y/X
+plot(0, xlab = "Y/X", ylab = "Probability density", type = "n", xlim = c(-1,
+    10), ylim = c(0, 0.3))
+one.plot <- function() {
+    zprime <- rpopinv(2000)
+    YoverXprime <- zprime[, "invest.rate"]/zprime[, "pop.growth.rate"]
+    density.prime <- density(YoverXprime)
+    lines(density.prime, col = "grey")
+}
+invisible(replicate(50, one.plot()))
+FIGURE 14.6: Showing the sampling variability in the distribution of Y/X by “over-plotting”. Each line is a distribution from an estimated sample of size 2000, as in Figure 14.5; here 50 of them are plotted on top of each other. The thickness of the bands indicates how much variation there is from simulation to simulation at any given value of Y /X . (Setting the type of the initial plot to n, for “null”, creates the plotting window, axes, legends, etc., but doesn’t actually plot anything.)
+00:02 Monday 18th April, 2016
+337 14.8. EXERCISES
+14.8 Exercises
+1. Reproduce Figure 14.4?
+2. Qualitatively, is this compatible with Figure 14.1?
+3. Howcouldweusepopinv2tocalculateajointdensityforpopgroandinv(not exp(popgro) and exp(inv))?
+4. Should the density popinv2 implies for those variables be the same as what we’d get from directly estimating their density with kernels?
+5. YouaregivenakernelK whichsatisfiesK(u)≥0,􏰤 K(u)du =1,􏰤 uK(u)du = 0, 􏰤 u2K(u)d u = σK2 < ∞. You are also given a bandwidth h > 0, and a collec- tion of n univariate observations x1,x2,...xn. Assume that the data are inde- pendent samples from some unknown density f .
+(a) Give the formula for fˆ, the kernel density estimate corresponding to h
+these data, this bandwidth, and this kernel.
+(b) Find the expectation of a random variable whose density is fˆ, in terms
+h
+of the sample moments, h, and the properties of the kernel function.
+(c) Find the variance of a random variable whose density is fˆ, in terms of h
+the sample moments, h, and the properties of the kernel function.
+(d) How must h change as n grows to ensure that the expectation and vari-
+ance of fˆ will converge on the expectation and variance of f ? h
+6. Many variables have natural range restrictions, like being non-negative, or lie in some interval. Kernel density estimators don’t respect these restrictions, so they can give positive probability density to impossible values. One way around this is the transformation method (or “trick”): use an invertible function q to map the limited range of X to the whole real line, find the density of the transformed variable, and then undo the transformation.
+In what follows, X is a random variable with pdf f , Y is a random variable with pdf g, and Y = q(X), for a known function q. You may assume that q is continuous, differentiable and monotonically increasing, inverse q−1 exists, and is also continuous, differentiable and monotonically increasing.
+(a) Find g(y) in terms of f and q.
+(b) Find f(x)intermsof g andq.
+(c) Suppose X is confined to the unit interval [0,1] and q(x) = log x . Find
+￼f (x) in terms of g and this particular q.
+1−x
+(d) The beta distribution is confined to [0,1]. Draw 1000 random values from the beta distribution with both shape parameters equal to 1/2. Call this sample x, and plot its histogram. (Hint: ?rbeta.)
+00:02 Monday 18th April, 2016
+14.8. EXERCISES 338
+(e) Fit a Gaussian kernel density estimate to x , using density, npudens, or any other existing one-dimensional density estimator you like.
+(f) Find a Gaussian kernel density estimate for logit(x).
+(g) Using your previous results, convert the KDE for logit(x) into a den-
+sity estimate for x .
+(h) Makeaplotshowing(i)thetruebetadensity,(ii)the“raw”kerneldensity estimate from 6e, and (iii) the transformed KDE from 6g. Make sure that the plotting region shows all three curves adequately, and that the three curves are visually distinct.
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

@@ -1,0 +1,339 @@
+
+
+Appendix E
+Multivariate Distributions
+E.1 Review of Definitions
+Let’s review some definitions from basic probability. When we have a random vector X⃗ with p different components, X1,X2,...Xp, the joint cumulative distribution function is
+F(⃗a)=F(a ,a ,...a )=Pr􏰳X ≤a ,X ≤a ,...X ≤a 􏰵 12p1122pp
+Thus
+This is the probability that X is in a (hyper-)rectangle, rather than just in an interval.
+Of course,
+F(⃗b)−F(⃗a)=Pr􏰳a <X ≤b ,a <X ≤b ,...a <X ≤b 􏰵 111222ppp
+The joint probability density function is
+∂ pF(a1,...ap)􏰕􏰕
+p(⃗x)=p(x1,x2,...xp)= ∂a ...∂a 􏰕􏰕
+1 p 􏰕⃗a=⃗x
+(E.3)
+(E.4)
+(E.1) (E.2)
+￼􏰧a1 􏰧a2 􏰧ap F(⃗a)= ...
+−∞−∞ −∞
+p(x1,x2,...xp)dxp ...dx2dx1
+(In this case, the order of integration doesn’t matter. Why?)
+From these, and especially from the joint PDF, we can recover the marginal PDF
+of any group of variables, say those numbered 1 through q, 􏰧
+p(x1,x2,...xq)= p(x1,x2,...xp)dxq+1dxq+2...dxp (E.5) (What are the limits of integration here?) Then the conditional pdf for some variables
+given the others — say, use variables 1 through q to condition those numbered q + 1 737
+E.2. MULTIVARIATEGAUSSIANS through p — just comes from division:
+p(xq+1,xq+2,...xp|X1 =x1,...Xq =xq)= p(x1,x2,...xp) p(x1,x2,...xq)
+These two tricks can be iterated, so, for instance,
+􏰧
+738
+(E.6)
+(E.7)
+￼p(x3|x1) = E.2 Multivariate Gaussians
+p(x3, x2|x1)d x2
+The multivariate Gaussian is just the generalization of the ordinary Gaussian to vec- tors. Scalar Gaussians are parameterized by a mean μ and a variance σ2, so we write X ∼ 􏰄 (μ, σ 2 ). Multivariate Gaussians, likewise, are parameterized by a mean vector
+μ⃗ , and a variance-covariance matrix Σ, written X⃗ ∼ 􏰃 􏰉 􏰄 (μ⃗ , Σ). The components
+of μ⃗ are the means of the different components of X⃗ . The i , j th component of Σ is the covariance between Xi and Xj (so the diagonal of Σ gives the component variances).
+Just as the probability density of scalar Gaussian is
+􏰳 2􏰵−1/2 􏰾 1 (x − μ)2 􏱀
+p(x)= 2πσ exp −2 σ2 the probability density of the multivariate Gaussian is
+−p/2􏰝1 −1 􏰞 p (⃗x ) = (2π det Σ) exp − 2 (⃗x − μ⃗ ) · Σ (⃗x − μ⃗ )
+(E.8)
+￼￼(E.9) Finally, remember that the parameters of a Gaussian change along with linear trans-
+￼formations
+and we can use this to “standardize” any Gaussian to having mean 0 and variance 1
+X ∼􏰄 (μ,σ2)⇔aX +b ∼􏰄 (aμ+b,a2σ2) (E.10) (by looking at X −μ ). Likewise, if
+￼then
+X⃗ ∼ 􏰃 􏰉 􏰄 (μ⃗ , Σ) (E.11) aX⃗ + ⃗b ∼ 􏰃 􏰉 􏰄 (aμ⃗ + ⃗b , aΣaT ) (E.12)
+σ
+In fact, the analogy between the ordinary and the multivariate Gaussian is so com- pletethatitisverycommontonotreallydistinguishthetwo,andwrite􏰄 forboth. The multivariate Gaussian density is most easily visualized when p = 2, as in Figure E.1. The probability contours are ellipses1. The density changes compara- tively slowly along the major axis, and quickly along the minor axis. The two points
+1Recall that a circle consists of all points at a constant distance, the radius, from a single point, the center. An ellipse likewise defined by two points, the foci, and consists of all points where the sum of the distance from the foci is constant. The major axis of the ellipse is the line linking the foci; the minor axis is the line perpendicular to the major axis, through the mid-point between the foci.
+00:02 Monday 18th April, 2016
+￼
+739 E.2. MULTIVARIATEGAUSSIANS
+marked + in the figure have equal geometric distance from μ⃗ , but the one to its right lies on a higher probability contour than the one above it, because of the directions of their displacements from the mean.
+E.2.1 Linear Algebra and the Covariance Matrix
+We can use some facts from linear algebra to understand the general pattern here, for arbitrary multivariate Gaussians in an arbitrary number of dimensions. The co- variance matrix Σ is symmetric and positive-definite, so we know from linear algebra that it can be written in terms of its eigenvalues and eigenvectors:
+Σ = vT dv (E.13)
+where d is the diagonal matrix of the eigenvalues of Σ, and v is the matrix whose columns are the eigenvectors of Σ. Because the eigenvectors are all of length 1, and they are all perpendicular to each other, it is easy to check that vT v = I, so v−1 = vT and v is an orthogonal matrix. What actually shows up in the equation for the multivariate Gaussian density is Σ−1, which is
+(vT dv)−1 = v−1d−1􏰳vT 􏰵−1 = vT d−1v (E.14)
+Geometrically, orthogonal matrices represent rotations. Multiplying by v rotates the coordinate axes so that they are parallel to the eigenvectors of Σ. Probabilisti- cally, this tells us that the axes of the probability-contour ellipse are parallel to those eigenvectors. The radii of those axes are proportional to the square roots of the eigen- values. To see that, look carefully at the math. Fix a level for the probability density whose contour we want, say f0. Then we have
+−p/2􏰝1 −1 􏰞
+(2π det Σ) exp − 2 (⃗x − μ⃗ ) · Σ
+(⃗x − μ⃗ )
+f0 = c =
+= 􏰳d−1/2 v(⃗x − μ⃗ )􏰵T 􏰳d−1/2 v(⃗x − μ⃗ )􏰵 􏰖 −1/2 􏰖2
+where c combines f0 and all the other constant factors, and d−1/2 is the diagonal matrix whose entries are one over the square roots of the eigenvalues of Σ. The v(⃗x − μ⃗ ) term takes the displacement of ⃗x from the mean, μ⃗ , and replaces the components of that vector with its projection on to the eigenvectors. Multiplying by d−1/2 then scales those projections, and so the radii have to be proportional to the square roots of the eigenvalues.2
+2If you know about principal components analysis and think that all this manipulation of eigenvectors and eigenvalues of the covariance matrix seems familiar, you’re right; this was one of the ways in which PCA was originally discovered. But PCA does not require any distributional assumptions. If you do not know about PCA, read Chapter 16.
+00:02 Monday 18th April, 2016
+￼( ⃗x − μ⃗ ) · Σ − 1 ( ⃗x − μ⃗ )
+= ( ⃗x − μ⃗ ) T v T d − 1 v ( ⃗x − μ⃗ )
+= (⃗x −μ⃗)T vT d−1/2d−1/2v(⃗x −μ⃗)
+(E.15)
+(E.16) (E.17) (E.18)
+(E.19)
+(E.20)
+= 􏰖􏰖 d v ( ⃗x − μ⃗ ) 􏰖􏰖
+￼
+E.2. MULTIVARIATEGAUSSIANS 740
+￼￼￼0.02
+●
+0.14
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼−3 −2 −1 0 1 2 3
+￼library(mvtnorm)
+x.points <- seq(-3,3,length.out=100)
+y.points <- x.points
+z <- matrix(0,nrow=100,ncol=100)
+mu <- c(1,1)
+sigma <- matrix(c(2,1,1,1),nrow=2)
+for (i in 1:100) {
+  for (j in 1:100) {
+     z[i,j] <- dmvnorm(c(x.points[i],y.points[j]),mean=mu,sigma=sigma)
+} }
+contour(x.points,y.points,z)
+points(mu[1], mu[2], pch=16)
+FIGURE E.1: Probability density contours for a two-dimensional multivariate (= bivariate) 􏰙1􏰚 􏰙2 1􏰚
+Gaussian, with mean μ⃗ = 1 (solid dot), and variance matrix Σ = 1 1 . Using
+expand.grid, as in Chapter 4, would be more elegant coding than this double for loop. 00:02 Monday 18th April, 2016
+−3 −2 −1 0 1 2 3
+0.04
+0.06
+0.08 0.1
+0.12
+741 E.2. MULTIVARIATEGAUSSIANS
+E.2.2 Conditional Distributions and Least Squares
+Suppose that X⃗ is bivariate Gaussian, so p = 2, with mean vector m⃗u = (μ1,μ2), 􏰛Σ11 Σ12􏰜
+and variance matrix Σ Σ . One can show (Exercise 5) that the conditional 21 22
+distribution of X2 given X1 is Gaussian, and in fact
+X2|X1 =x1 ∼􏰄(μ2+Σ21Σ−1(x1−μ1),Σ22−Σ21Σ−1Σ12) (E.21)
+To understand what is going on here, remember from Chapter 1 that the optimal
+slope for linearly regressing X2 on X1 would be Cov [X2 , X1 ] /􏰎 [X1 ]. This is precisely
+the same as Σ Σ−1. So in the bivariate Gaussian case, the best linear regression and 21 11
+the optimal regression are exactly the same — there is no need to consider nonlinear regressions. Moreover, we get the same conditional variance for each value of x1, so the regression of X2 on X1 is homoskedastic, with independent Gaussian noise. This is, in short, exactly the situation which all the standard regression formulas aim at.
+More generally, if X1,X2,...Xp are multivariate Gaussian, then conditioning on X1,...Xq gives the remaining variables Xq+1,...Xp a Gaussian distribution as well.
+􏰛ΣAA ΣAB􏰜
+If we say that μ⃗ = (μ⃗A,μ⃗B) and Σ = Σ Σ , where A stands for the condi-
+BA BB tioning variables and B for the conditioned, then
+X⃗B|X⃗A=⃗xa ∼􏰃􏰉􏰄(μ⃗B +ΣBAΣ−1(⃗xA−μ⃗A),ΣBB −ΣBAΣ−1ΣAB) (E.22) AA AA
+(Remember that here ΣBA = ΣTAB [Why?].) This, too, is just doing a linear regression ofX⃗B onX⃗A.
+E.2.3 Projections of Multivariate Gaussians
+A useful fact about multivariate Gaussians is that all their univariate projections are alsoGaussian.Thatis,ifX⃗ ∼􏰃􏰉􏰄(μ⃗,Σ),andwefixanyunitvectorw⃗,thenw⃗·X⃗
+has a Gaussian distribution. This is easy to see if Σ is diagonal: then w⃗ · X⃗ reduces to a sum of independent Gaussians, which we know from basic probability is also Gaussian. But we can use the eigen-decomposition of Σ to check that this holds more generally.
+One can also show that the converse is true: if w⃗ · X⃗ is a univariate Gaussian for every choice of w⃗ , then X⃗ must be multivariate Gaussian. This fact is more useful for probability theory than for data analysis3, but it’s still worth knowing.
+E.2.4 Computing with Multivariate Gaussians
+Computationally, it is not hard to write functions to calculate the multivariate Gaus- sian density, or to generate multivariate Gaussian random vectors. Unfortunately, no
+3It’s a special case of a result called the Cramér-Wold theorem, or the Cramér-Wold device, which asserts that two random vectors X⃗ and Y⃗ have the same distribution if and only if w⃗ · X⃗ and w⃗ · Y⃗ have the same distribution for every w⃗ .
+00:02 Monday 18th April, 2016
+11 11
+￼
+E.3. INFERENCEWITHMULTIVARIATEDISTRIBUTIONS 742
+one seems to have thought to put a standard set of such functions in the basic set of R packages, so you have to use a different library. The MASS library contains a func- tion, mvrnorm, for generating multivariate Gaussian random vectors. The mvtnorm contains functions for calculating the density, cumulative distribution and quantiles of the multivariate Gaussian, as well as generating random vectors4. The package mixtools, which will use in Chapter 19 for mixture models, includes functions for the multivariate Gaussian density and for random-vector generation.
+E.3 Inference with Multivariate Distributions
+As with univariate distributions, there are several ways of doing statistical inference for multivariate distributions. Here I will focus on parametric inference, since non- parametric inference is covered in Chapter 14.
+Parameter estimation by maximum likelihood, the sampling distribution of the MLE, and the resulting hypothesis tests and confidence sets work exactly as they do for one-dimensional distributions. That is to say, they are special cases of general results about estimation by minimizing a loss function, described in App. H.4.
+E.3.1 Model Comparison
+Out of sample, models can be compared on log-likelihood. When a strict out-of- sample comparison is not possible, we can use cross-validation.
+In sample, a likelihood ratio test can be used. This has two forms, depending on the relationship between the models. Suppose that there is a large or wide model, with parameter Θ, and a narrow or small model, with parameter θ, which we get by fixing some of the components of Θ. Thus the dimension of Θ is q and that of θ is r < q. Since every distribution we can get from the narrow model we can also get from the wide model, in-sample the likelihood of the wide model must always be larger. Thus
+l(Θ) − l(θ) ≥ 0 (E.23) Here we have a clear null hypothesis, which is that the data comes from the narrower,
+smaller model. Under this null hypothesis, as n → ∞, 􏰨􏰨2
+􏰨􏰨
+2[l(Θ) − l(θ)] 􏰐 χq − r (E.24) provided that the restriction imposed by the small model doesn’t place it on the
+boundary of the parameter space of Θ. (See Appendix I.)
+For instance, suppose that X⃗ is bivariate, and the larger model is an unrestricted
+12 22
+􏰝 􏰛Σ11 Σ12􏰜􏰞
+(μ1,μ2), Σ Σ . A possible narrow model might im-
+Gaussian, so Θ =
+pose the assumption that the components of X are uncorrelated, so θ = (μ1 , μ2 ), 0 Σ
+⃗ 􏰝 􏰛Σ110􏰜􏰞 22
+.
+￼4It also has such functions for multivariate t distributions, which are to multivariate Gaussians exactly as ordinary t distributions are to univariate Gaussians.
+00:02 Monday 18th April, 2016
+743 E.3. INFERENCEWITHMULTIVARIATEDISTRIBUTIONS
+This is a restriction on the broader model, but not one which is on the boundary of the parameter space, so the large-sample χ 2 distribution should apply. A restriction which would be on the boundary would be to insist that X2 was constant, so Σ22 = 0. (This would also force Σ12 = 0.)
+If, on the other hand, that we have two models, with parameters θ and ψ, and they are completely non-nested, meaning there are no parameter combinations where
+p(·;θ) = p(·;ψ) (E.25) then in many ways things become easier. For fixed parameter values θ0, ψ0, the mean
+log-likelihood ratio is just an average of IID terms: 1 1􏰥n
+n [l(θ0) − l(ψ0)] ≡ n
+1 􏰥n
+= n
+Λi
+log p(x ;ψ )
+(E.26)
+(E.27)
+￼￼i=1
+p ( x i ; θ 0 ) i=1 i0
+￼￼By the law of large numbers, then, the mean log-likelihood ratio converges to an expected value 􏰌 [Λ]. This is positive if θ0 has a higher expected log-likelihood than ψ0, and negative the other way around. Furthermore, by the central limit theorem, as n grows, the fluctuations around this expected value are Gaussian, with variance
+σ2/n.Wecanestimateσ2 bythesamplevarianceoflog p(xi;θ0). Λ Λ p(xi;ψ0)
+￼Ordinarily, we don’t have just a single parameter value for each model, but also ordinarily,θ􏰨 andψ􏰨 bothconvergetolimits,whichwecancallθ andψ.At
+MLE MLE 0 0
+the cost of some fancy probability theory, one can show that, in the non-nested case,
+􏰋n l(θ) − l(ψ) n σΛ2
+andthatwecanconsistentlyestimate􏰌[Λ]andσΛ2 by“pluggingin”θ􏰨andψ􏰨inplace of θ0 and ψ0. This gives the Vuong test for comparing the two models (Vuong, 1989). The null hypothesis in the Vuong test is that the two models are equally good (and neither is exactly true). In this case,
+􏰐 􏰄 (0, 1) (E.29)
+If V is significantly positive, we have evidence in favor of the θ model being better (though not necessarily true), while if it is significantly negative we have evidence in favor of the ψ model being better.
+The cases where two models partially overlap is complicated; see Vuong (1989) for the gory details5.
+5If you are curious about why this central-limit-theorem argument doesn’t work in the nested case,
+notice that when we have nested models, and the null hypothesis is true, then Θ → θ, so the numerator in the Vuong test statistic, [l(θ􏰨) − l(ψ􏰨)]/n, is converging to zero, but so is the denominator σΛ2 . Since 0/0 is undefined, we need to use a stochastic version of L’Hoptial’s rule, which gives us back Eq. E.24. See, yet again, Vuong (1989).
+00:02 Monday 18th April, 2016
+￼V = 􏰋
+􏰨􏰨
+􏰨􏰨
+􏰐 􏰄 (􏰌[Λ],1) (E.28)
+￼￼1 l(θ) − l(ψ)
+￼￼n σ􏰨Λ
+￼￼􏰨􏰨
+E.3. INFERENCEWITHMULTIVARIATEDISTRIBUTIONS 744
+E.3.2 Goodness-of-Fit
+For univariate distributions, we often assess goodness-of-fit through the Kolmogorov- Smirnov (KS) test6, where the test statistic is
+d =max|F􏰨 (a)−F(a)| (E.30) KS a n
+with F􏰨 being the empirical CDF, and F its theoretical counterpart. The null hy- n
+pothesis here is that the data were drawn IID from F , and what Kolmogorov and Smirnov did was to work out the distribution of dK S under this null hypothesis, and show it was the same for all F (at least for large n). This lets us actually calculate p values.
+We could use such a test statistic for multivariate data, where we’d just take the maximum over vectors a, rather than scalars. But the problem is that we do not know its sampling distribution under the null hypothesis in the multivariate case — Kol- mogorov and Smirnov’s arguments don’t work there — so we don’t know whether a given value of dK S is large or small or what.
+There is however a fairly simple approximate way of turning univariate tests into multivariateones. Supposeourdataconsistsofvectors⃗x1,⃗x2,...⃗xn. Pickaunitvector w⃗ , and set zi = w⃗ · ⃗xi . Geometrically, this is just the projection of the data along the direction w⃗, but these projections are univariate random variables. If the ⃗xi were drawn from F , then the zi must have been drawn from the corresponding projection of F , call it Fw⃗ . If we can work out the latter distribution, then we can apply our favorite univariate test to the zi . If the fit is bad, then we know that the ⃗xi can’t have comefromF.Ifthefitisgoodforthezi,thenthefitisalsogoodforthe⃗xi —atleast along the direction w⃗ . Now, we can either carefully pick w⃗ to be a direction which we care about for some reason, or we can chose it randomly. If the projection of the ⃗xi alongseveralrandomdirectionsmatchesthatofF,itbecomesratherunlikelythat they fail to match overall7.
+To summarize:
+1. Chose a random unit vector W⃗ . (For instance, let U⃗ ∼ 􏰃􏰉 􏰄 (0,Ip), and
+W⃗ =U⃗/∥U⃗∥.)
+2. CalculateZi =W⃗ ·⃗xi.
+3. CalculatethecorrespondingprojectionofthetheoreticaldistributionF,callit F W⃗ .
+4. Apply your favorite univariate goodness-of-fit test to Z⃗i and FW⃗ .
+6I discuss the KS test here for concreteness. Much the same ideas apply to the Anderson-Darling test, the Cramér-von Mises test, and others which, not being such good ideas, were only invented by one person. 7Theoretically, we appeal to the Cramér-Wold device again: the random vectors X⃗ and Y⃗ have the same distribution if and only if w⃗ · X⃗ and w⃗ · Y⃗ have the same distribution for every w⃗ . Failing to match for any w⃗ implies that X⃗ and Y⃗ have different distributions. Conversely, if X⃗ and Y⃗ differ in distribution at all, w⃗ · X⃗ must differ in distribution from w⃗ · Y⃗ for some choice of w⃗ . Randomizing the choice of w⃗ gives us
+power to detect a lot of differences in distribution.
+00:02 Monday 18th April, 2016
+￼
+745 E.4. UNCORRELATED̸=INDEPENDENT 5. Repeat (1)–(4) multiple times, with correction for multiple testing.
+E.4 Uncorrelated ̸= Independent
+As you know, two random variables X and Y are uncorrelated when their correla-
+[[ATTN: Multiple compar- isons as an appendix topic?]]
+tion coefficient is zero: Since
+ρ(X,Y)=0 (E.31) Cov[X,Y]
+ρ(X,Y)= 􏰮􏰎[X]􏰎[Y] (E.32)
+￼￼being uncorrelated is the same as having zero covariance. Since Cov[X,Y]=􏰌[XY]−􏰌[X]􏰌[Y] (E.33)
+having zero covariance, and so being uncorrelated, is the same as 􏰌[XY]=􏰌[X]􏰌[Y] (E.34)
+One says that “the expectation of the product factors”. If ρ(X , Y ) ̸= 0, then X and Y are correlated.
+As you also know, two random variables are independent when their joint prob- ability distribution is the product of their marginal probability distributions: for all x and y,
+pX,Y(x,y)= pX(x)pY(y) (E.35) Equivalently8, the conditional distribution is the same as the marginal distribution:
+pY |X (y|x) = pY (y) (E.36)
+If X and Y are not independent, then they are dependent. If, in particular, Y is a function of X , then they always dependent9
+If X and Y are independent, then they are also uncorrelated. To see this, write the expectation of their product:
+􏰌[XY] = = = =
+=
+􏰧􏰧
+􏰧􏰧
+xypX,Y(x,y)dxdy
+(E.37)
+(E.38)
+(E.39)
+(E.40) (E.41)
+xypX(x)pY(y)dxdy 􏰧 􏰙􏰧 􏰚
+xpX(x) ypY(y)dy dx 􏰙􏰧 􏰚􏰙􏰧 􏰚
+xpX(x)dx ypY(y)dy 􏰌[X]􏰌[Y]
+￼8Why is this equivalent?
+9 For the sake of mathematical quibblers: a non-constant function of X .
+00:02 Monday 18th April, 2016
+E.5. EXERCISES 746
+However, if X and Y are uncorrelated, then they can still be dependent. To see an extreme example of this, let X be uniformly distributed on the interval [−1, 1]. If X ≤0,thenY =−X,whileifX ispositive,thenY =X. Youcaneasilycheckfor yourself that:
+• Y is uniformly distributed on [0, 1]; • 􏰌[XY|X≤0]=􏰤0 −x2dx=−1/3;
+−1
+• 􏰌[XY|X>0]=􏰤1x2dx=+1/3;
+0
+• 􏰌[XY]=0(hint:lawoftotalexpectation);
+• 􏰌[X]=0;
+• Cov[X,Y]=􏰌[XY]−􏰌[X]􏰌[Y]=0;
+• The joint distribution of X and Y is not uniform on the rectangle [−1, 1] × [0, 1], as it would be if X and Y were independent (Figure E.2).
+The only general case when lack of correlation implies independence is when the joint distribution of X and Y is a multivariate Gaussian.
+E.5 Exercises
+1. WriteafunctiontocalculatethedensityofamultivariateGaussianwithagiven mean vector and covariance matrix. Check it against an existing function from one of the packages mentioned in §E.2.4.
+2. WriteafunctiontogeneratemultivariateGaussianrandomvectors,usingrnorm.
+3. If X⃗ has mean μ⃗ and variance-covariance matrix Σ, and w⃗ is a fixed, non-
+random vector, find the mean and variance of w · X .
+4. If X⃗ ∼ 􏰃 􏰉 􏰄 (μ⃗ , Σ), and b and c are two non-random matrices, find the
+covariance matrix of bX⃗ and cX⃗ .
+5. Prove Eq. E.21.
+6. One multivariate generalization of the Pareto distribution is defined by
+p −a
+􏰳􏰵􏰥
+Pr X1 ≥x1,X2 ≥X2,...Xp ≥xp = whenallxj ≥sj.
+(a) Find the joint pdf of all the variables.
+00:02 Monday 18th April, 2016
+j=1
+(xj/sj)−p+1
+(E.42)
+747 E.5. EXERCISES
+￼● ●
+● ●●
+￼●
+● ●
+● ●
+● ●
+●● ●
+● ● ● ● ● ●
+●
+●
+● ●
+● ● ●
+●
+● ●
+●●
+● ● ●
+● ● ●
+● ●
+● ● ●
+● ●● ●
+● ● ●
+● ● ●●
+●
+●
+● ●
+● ●● ● ●
+● ●
+●
+● ● ●
+● ●
+● ●●
+●
+● ●
+● ●
+● ● ●
+● ●
+● ●
+● ●
+●● ● ●
+● ● ●
+●● ● ● ●●
+● ●●
+● ●
+● ●●
+● ●
+●● ●
+●
+●
+● ●
+● ●
+●
+● ●●
+● ●
+● ●
+● ●
+● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼−1.0 −0.5 0.0 0.5 1.0
+x
+FIGURE E.2: An example of two random variables which are uncorrelated but strongly dependent. The grey “rug plots” on the axes show the marginal distributions of the samples from X and Y .
+00:02 Monday 18th April, 2016
+￼x <- runif(200,min=-1,max=1)
+y <- ifelse(x>0,x,-x)
+plot(x,y,pch=16)
+rug(x,side=1,col="grey")
+rug(y,side=2,col="grey")
+0.0 0.2 0.4
+0.6 0.8 1.0
+y
+E.5. EXERCISES 748
+(b) Show that the marginal distribution of each Xj is a univariate Pareto dis- tribution, and find its parameters.
+(c) ShowthattheconditionaldistributionofanyXj giventheothervariables is a univariate Pareto distribution, and find its parameters. Hint: It is not the same as the marginal distribution.
+[[TODO: Move model-comparison, goodness-of-fit stuff to main text]]
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

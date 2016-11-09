@@ -1,0 +1,623 @@
+Advanced Data Analysis from an Elementary Point of View
+Cosma Rohilla Shalizi
+For my parents
+and in memory of my grandparents
+00:02 Monday 18th April, 2016
+2
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/
+Contents in Brief
+Introduction 23
+I Regression and Its Generalizations 26
+1 Regression Basics 27
+2 The Truth about Linear Regression 52
+3 Model Evaluation 73
+4 Smoothing in Regression 97
+5 Simulation 127
+6 The Bootstrap 140
+7 Weighting and Variance 168
+8 Splines 194
+9 Additive Models 210
+10 Testing Regression Specifications 234
+11 Logistic Regression 251
+12 GLMs and GAMs 281
+13 Trees 289
+II Distributions and Latent Structure 313
+14 Density Estimation
+314
+3
+CONTENTS IN BRIEF 4
+15 Relative Distributions and Smooth Tests 339 16 Principal Components Analysis 368 17 Factor Models 393 18 Nonlinear Dimensionality Reduction 424 19 Mixture Models 450 20 Graphical Models 481
+III Dependent Data 502 21 Time Series 503 22 Spatial and Network Data 550 23 Simulation-Based Inference 560
+IV Causal Inference 572 24 Graphical Causal Models 573 25 Identifying Causal Effects 581 26 Experimental Causal Inference 602 27 Estimating Causal Effects 608 28 Discovering Causal Structure 620
+Appendices 639
+A Data-Analysis Problem Sets 639
+B Linear Algebra Reminders 724
+C Big O and Little o Notation 733
+D Taylor Expansions 735
+E Multivariate Distributions 737
+F Algebra with Expectations and Variances 749
+00:02 Monday 18th April, 2016
+5
+G PropagationofError H Optimization
+I χ 2 and Likelihood Ratios
+J Proof of the Gauss-Markov Theorem
+K Rudimentary Graph Theory
+L Information Theory
+M More about Hypothesis Testing
+N Programming
+O Generating Random Variables
+Acknowledgments
+CONTENTS IN BRIEF
+                  752
+                  754
+                  774
+                  777
+                  779
+                  782
+                  783
+                  784
+                  820
+                  828
+830
+Bibliography
+00:02 Monday 18th April, 2016
+CONTENTS IN BRIEF
+6
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/
+Contents
+Introduction 23
+I 1
+TotheReader......................................... 23 ConceptsYouShouldKnow ............................... 24
+Regression and Its Generalizations 26
+Regression Basics 27
+1.1 Statistics,DataAnalysis,Regression....................... 27
+1.2 GuessingtheValueofaRandomVariable ................... 28 1.2.1 EstimatingtheExpectedValue..................... 29
+1.3 TheRegressionFunction.............................. 29 1.3.1 SomeDisclaimers ............................. 30
+1.4 EstimatingtheRegressionFunction....................... 33
+1.4.1 TheBias-VarianceTradeoff ....................... 33
+1.4.2 TheBias-VarianceTrade-OffinAction. . . . . . . . . . . . . . . . 35
+1.4.3 Ordinary Least Squares Linear Regression as Smoothing . . . . 35
+1.5 LinearSmoothers................................... 40
+1.5.1 k-Nearest-NeighborRegression .................... 40
+1.5.2 KernelSmoothers ............................. 43
+1.5.3 SomeGeneralTheoryforLinearSmoothers . . . . . . . . . . . . 46
+1.5.3.1 Standard error of predicted mean values . . . . . . . . 46
+1.5.3.2 (Effective)DegreesofFreedom . . . . . . . . . . . . . . 46
+1.5.3.3 PredictionErrors ....................... 48 1.5.3.4 InferentialStatistics...................... 49
+1.6 FurtherReading ................................... 50
+1.7 Exercises ........................................ 50
+The Truth about Linear Regression 52
+2.1 OptimalLinearPrediction: MultipleVariables. . . . . . . . . . . . . . . . 52
+2.1.1 Collinearity ................................. 54
+2.1.2 ThePredictionandItsError ...................... 55
+2.1.3 EstimatingtheOptimalLinearPredictor . . . . . . . . . . . . . . 55
+7
+2
+CONTENTS 8
+2.1.3.1 Unbiasedness and Variance of Ordinary Least Squares Estimates ............................ 56
+2.2 Shifting Distributions, Omitted Variables, and Transformations . . . . 57
+2.2.1 ChangingSlopes .............................. 57 2.2.1.1 R2:DistractionorNuisance? ............... 57
+2.2.2 Omitted Variables and Shifting Distributions . . . . . . . . . . . 59
+2.2.3 ErrorsinVariables............................. 63
+2.2.4 Transformation............................... 64
+2.3 AddingProbabilisticAssumptions........................ 67 2.3.1 ExaminetheResiduals .......................... 68 2.3.2 OnSignificantCoefficients ....................... 69
+2.4 LinearRegressionIsNotthePhilosopher’sStone . . . . . . . . . . . . . . 70
+2.5 FurtherReading ................................... 71
+2.6 Exercises ........................................ 72
+3 Model Evaluation 73
+3.1 WhatAreStatisticalModelsFor? ........................ 73
+3.2 Errors,InandOutofSample ........................... 74
+3.3 Over-FittingandModelSelection ........................ 78
+3.4 Cross-Validation ................................... 83
+3.4.1 DataSplitting ................................ 85 3.4.2 k-FoldCross-Validation(CV)...................... 85 3.4.3 Leave-one-outCross-Validation..................... 90
+3.5 Warnings ........................................ 91 3.5.1 InferenceafterSelection ......................... 92 3.5.2 ParameterInterpretation......................... 93
+3.6 FurtherReading ................................... 94
+3.7 Exercises ........................................ 95
+4 Smoothing in Regression 97
+4.1 HowMuchShouldWeSmooth?......................... 97
+4.2 AdaptingtoUnknownRoughness........................100
+4.2.1 BandwidthSelectionbyCross-Validation . . . . . . . . . . . . . . 106
+4.2.2 Convergence of Kernel Smoothing and Bandwidth Scaling . . . 108
+4.2.3 SummaryonKernelSmoothingin1D................111
+4.3 KernelRegressionwithMultipleInputs ....................111
+4.4 InterpretingSmoothers:Plots...........................112
+4.5 AveragePredictiveComparisons.........................118
+4.6 ComputationalAdvice:npreg ..........................120
+4.7 FurtherReading ...................................126
+4.8 Exercises ........................................126
+00:02 Monday 18th April, 2016
+9 CONTENTS
+5 Simulation 127
+5.1 WhatIsaSimulation?................................127
+5.2 HowDoWeSimulateStochasticModels?...................128
+5.2.1 ChainingTogetherRandomVariables ................128
+5.2.2 RandomVariableGeneration......................128
+5.2.2.1 Built-in Random Number Generators . . . . . . . . . . 128
+5.2.2.2 Transformations........................129
+5.2.2.3 QuantileMethod .......................129
+5.2.3 Sampling...................................130
+5.2.3.1 SamplingRowsfromDataFrames . . . . . . . . . . . . 131
+5.2.3.2 MultinomialsandMultinoullis ..............131
+5.2.3.3 ProbabilitiesofObservation................132
+5.3 RepeatingSimulations ...............................132
+5.4 WhySimulate? ....................................133
+5.4.1 UnderstandingtheModel;MonteCarlo . . . . . . . . . . . . . . . 133
+5.4.2 CheckingtheModel............................134
+5.4.2.1 “Exploratory” Analysis of Simulations . . . . . . . . . 134 5.4.3 SensitivityAnalysis ............................136
+5.5 FurtherReading ...................................139
+5.6 Exercises ........................................139
+6 The Bootstrap 140
+6.1 Stochastic Models, Uncertainty, Sampling Distributions . . . . . . . . . 140
+6.2 TheBootstrapPrinciple ..............................142
+6.2.1 VariancesandStandardErrors .....................144
+6.2.2 BiasCorrection...............................144
+6.2.3 ConfidenceIntervals ...........................144
+6.2.3.1 Other Bootstrap Confidence Intervals . . . . . . . . . 146 6.2.4 HypothesisTesting ............................149 6.2.4.1 Double bootstrap hypothesis testing . . . . . . . . . . 149
+6.2.5 Model-Based Bootstrapping Example: Pareto’s Law of Wealth Inequality ..................................150 6.3 Resampling.......................................154 6.3.1 Model-Basedvs.ResamplingBootstraps . . . . . . . . . . . . . . . 156
+6.4 BootstrappingRegressionModels ........................156
+6.4.1 Re-sampling Points: Parametric Model Example . . . . . . . . . 157
+6.4.2 Re-sampling Points: Non-parametric Model Example . . . . . . 159
+6.4.3 Re-samplingResiduals:Example....................162
+6.5 BootstrapwithDependentData .........................164
+6.6 ThingsBootstrappingDoesPoorly .......................164
+6.7 WhichBootstrapWhen?..............................165
+6.8 FurtherReading ...................................166
+6.9 Exercises ........................................166
+00:02 Monday 18th April, 2016
+CONTENTS 10
+7 Weighting and Variance 168
+7.1 WeightedLeastSquares...............................168
+7.2 Heteroskedasticity..................................170
+7.2.1 Weighted Least Squares as a Solution to Heteroskedasticity . . 174
+7.2.2 Some Explanations for Weighted Least Squares . . . . . . . . . . 174
+7.2.3 FindingtheVarianceandWeights...................178
+7.3 ConditionalVarianceFunctionEstimation..................178
+7.3.1 Iterative Refinement of Mean and Variance: An Example . . . . 180 7.3.2 RealDataExample:OldHeteroskedastic..............183
+7.4 Re-sampling Residuals with Heteroskedasticity . . . . . . . . . . . . . . . 187
+7.5 LocalLinearRegression ..............................187
+7.5.1 ForandAgainstLocallyLinearRegression . . . . . . . . . . . . . 189 7.5.2 Lowess ....................................192
+7.6 FurtherReading ...................................192
+7.7 Exercises ........................................193
+8 Splines 194
+8.1 SmoothingbyPenalizingCurveFlexibility..................194 8.1.1 TheMeaningoftheSplines .......................195
+8.2 Computational Example: Splines for Stock Returns . . . . . . . . . . . . 196 8.2.1 ConfidenceBandsforSplines......................199
+8.3 BasisFunctionsandDegreesofFreedom....................202 8.3.1 BasisFunctions...............................202
+8.4 SplinesinMultipleDimensions .........................204
+8.5 SmoothingSplinesversusKernelRegression . . . . . . . . . . . . . . . . . 205
+8.6 SomeoftheMathBehindSplines ........................205
+8.7 FurtherReading ...................................207
+8.8 Exercises ........................................208
+9 Additive Models 210
+9.1 AdditiveModels ...................................210
+9.2 PartialResidualsandBack-fitting.........................211 9.2.1 Back-fittingforLinearModels .....................211 9.2.2 BackfittingAdditiveModels.......................213
+9.3 TheCurseofDimensionality...........................213
+9.4 Example: CaliforniaHousePricesRevisited . . . . . . . . . . . . . . . . . 217
+9.5 InteractionTermsandExpansions........................227
+9.6 ClosingModelingAdvice .............................231
+9.7 FurtherReading ...................................232
+9.8 Exercises ........................................233
+10 Testing Regression Specifications 234
+10.1 TestingFunctionalForms .............................234 10.1.1 ExamplesofTestingaParametricModel. . . . . . . . . . . . . . . 236 10.1.2 Remarks ...................................241
+10.2 WhyUseParametricModelsAtAll? ......................246 00:02 Monday 18th April, 2016
+11
+10.3 10.4
+CONTENTS
+10.2.1 Why We Sometimes Want Mis-Specified Parametric Models . . 246 FurtherReading ...................................250 Exercises ........................................250
+11 Logistic Regression 251
+11.1 ModelingConditionalProbabilities.......................251
+11.2 LogisticRegression..................................252
+11.2.1 Likelihood Function for Logistic Regression . . . . . . . . . . . . 256
+11.3 NumericalOptimizationoftheLikelihood..................257 11.3.1 IterativelyRe-WeightedLeastSquares . . . . . . . . . . . . . . . . 257
+11.4 GeneralizedLinearandAdditiveModels....................259 11.4.1 GeneralizedAdditiveModels......................260
+11.5 ModelChecking ...................................260 11.5.1 Residuals...................................260 11.5.2 Non-parametricAlternatives ......................261 11.5.3 Calibration..................................261
+11.6 AToyExample....................................262
+11.7 WeatherForecastinginSnoqualmieFalls ...................267
+11.8 LogisticRegressionwithMoreThanTwoClasses..............280
+11.9 Exercises ........................................280
+12 GLMs and GAMs 281
+12.1
+Generalized Linear Models and Iterative Least Squares . . . . . . . . . . . 281
+12.1.1 GLMsinGeneral..............................283
+12.1.2 ExamplesofGLMs ............................283
+12.1.2.1 VanillaLinearModels....................283 12.1.2.2 BinomialRegression.....................284 12.1.2.3 PoissonRegression......................284
+12.1.3 Uncertainty .................................285
+12.1.4 ModelingDispersion ...........................285
+12.1.5 LikelihoodandDeviance.........................285
+12.1.5.1 Maximum Likelihood and the Choice of Link Func-
+tion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 286
+12.1.6 R:glm.....................................287
+GeneralizedAdditiveModels ...........................287 FurtherReading ...................................287 Exercises ........................................288
+289
+PredictionTrees ...................................289 RegressionTrees ...................................292
+13.2.1 Example:CaliforniaRealEstateAgain. . . . . . . . . . . . . . . . 292
+13.2.2 RegressionTreeFitting..........................297
+13.2.2.1 Cross-ValidationandPruninginR . . . . . . . . . . . . 301
+13.2.3 UncertaintyinRegressionTrees....................305
+ClassificationTrees..................................306
+00:02 Monday 18th April, 2016
+12.2 12.3 12.4
+13 Trees
+13.1 13.2
+13.3
+II
+12
+13.3.1 MeasuringInformation..........................306
+13.3.2 MakingPredictions ............................307
+13.3.3 MeasuringError ..............................308
+13.3.3.1 MisclassificationRate ....................308 13.3.3.2 AverageLoss..........................308 13.3.3.3 LikelihoodandCross-Entropy . . . . . . . . . . . . . . 309 13.3.3.4 Neyman-PearsonApproach ................310
+13.4 FurtherReading ...................................311
+13.5 Exercises ........................................311
+Distributions and Latent Structure 313
+CONTENTS
+14 Density Estimation 314
+14.1 HistogramsRevisited ................................314
+14.2 “TheFundamentalTheoremofStatistics”...................315
+14.3 ErrorforDensityEstimates............................316
+14.3.1 Error Analysis for Histogram Density Estimates . . . . . . . . . 317
+14.4 KernelDensityEstimates .............................319
+14.4.1 AnalysisofKernelDensityEstimates . . . . . . . . . . . . . . . . 319
+14.4.2 JointDensityEstimates .........................321
+14.4.3 CategoricalandOrderedVariables ..................322
+14.4.4 Practicalities.................................323
+14.4.5 Kernel Density Estimation in R: An Economic Example . . . . 323
+14.5 ConditionalDensityEstimation.........................325 14.5.1 PracticalitiesandaSecondExample. . . . . . . . . . . . . . . . . . 326
+14.6 MoreontheExpectedLog-LikelihoodRatio . . . . . . . . . . . . . . . . . 329
+14.7 SimulatingfromDensityEstimates .......................330
+14.7.1 Simulating from Kernel Density Estimates . . . . . . . . . . . . . 330 14.7.1.1 SamplingfromaJointDensity . . . . . . . . . . . . . . 331 14.7.1.2 Sampling from a Conditional Density . . . . . . . . . . 331
+14.7.2 DrawingfromHistogramEstimates .................332
+14.7.3 Examples of Simulating from Kernel Density Estimates . . . . . 332
+14.8 Exercises ........................................337
+15 Relative Distributions and Smooth Tests 339
+15.1 SmoothTestsofGoodnessofFit.........................339
+15.1.1 From Continuous CDFs to Uniform Distributions . . . . . . . 339
+15.1.2 TestingUniformity ............................340
+15.1.3 Neyman’sSmoothTest..........................340
+15.1.3.1 15.1.3.2 15.1.3.3 15.1.3.4
+15.1.4 Smooth 15.1.4.1
+ChoiceofFunctionBasis..................342 ChoiceofNumberofBasisFunctions. . . . . . . . . . 343 Application:Combiningp-Values ............343 Density Estimation by Series Expansion . . . . . . . . 346
+Tests of Non-Uniform Parametric Families . . . . . . . 346 EstimatedParameters ....................347
+00:02 Monday 18th April, 2016
+13
+15.2
+15.3 15.4
+CONTENTS
+15.1.5
+ImplementationinR ...........................349 15.1.5.1 SomeExamples ........................349 Conditional Distributions and Calibration . . . . . . . . . . . . . 353
+15.1.6 RelativeDistributions................................354
+15.2.1 EstimatingtheRelativeDistribution . . . . . . . . . . . . . . . . . 356
+15.2.2 RImplementationandExamples ...................356
+15.2.2.1 Example: Conservative versus Liberal Brains . . . . . 356
+15.2.2.2 Example: Economic Growth Rates . . . . . . . . . . . 360 15.2.3 AdjustingforCovariates.........................360 15.2.3.1 Example:AdjustingGrowthRates. . . . . . . . . . . . 363 FurtherReading ...................................367 Exercises ........................................367
+16 Principal Components Analysis 368
+16.1 MathematicsofPrincipalComponents.....................368
+16.1.1 MinimizingProjectionResiduals ...................369
+16.1.2 MaximizingVariance ...........................371
+16.1.3 MoreGeometry;BacktotheResiduals . . . . . . . . . . . . . . . 372
+16.1.3.1 ScreePlots ...........................374
+16.1.4 StatisticalInference,orNot.......................374
+16.2 Example1:Cars ...................................375
+16.3 Example2:TheUnitedStatescirca1977....................379
+16.4 LatentSemanticAnalysis..............................382 16.4.1 Principal Components of the New York Times . . . . . . . . . . 383
+16.5 PCAforVisualization................................385
+16.6 PCACautions.....................................388
+16.7 FurtherReading ...................................388
+16.8 Exercises ........................................391
+17 Factor Models 393
+17.1 FromPCAtoFactorAnalysis ..........................393 17.1.1 Preservingcorrelations..........................395
+17.2 TheGraphicalModel ................................395
+17.2.1 Observables Are Correlated Through the Factors . . . . . . . . . 397 17.2.2 Geometry: Approximation by Linear Subspaces . . . . . . . . . 398
+17.3 RootsofFactorAnalysisinCausalDiscovery . . . . . . . . . . . . . . . . 400
+17.4 Estimation .......................................401
+17.4.1 DegreesofFreedom............................402
+17.4.2 ACluefromSpearman’sOne-FactorModel . . . . . . . . . . . . 403
+17.4.3 Estimating Factor Loadings and Specific Variances . . . . . . . . 404
+17.5 MaximumLikelihoodEstimation........................405 17.5.1 AlternativeApproaches .........................406 17.5.2 EstimatingFactorScores.........................406
+17.6 TheRotationProblem ...............................406
+17.7 FactorAnalysisasaPredictiveModel......................407 17.7.1 HowManyFactors?............................408
+00:02 Monday 18th April, 2016
+CONTENTS 14
+17.7.1.1 R2andGoodnessofFit ...................409
+17.8 FactorModelsversusPCAOnceMore.....................410
+17.9 ExamplesinR.....................................411
+17.9.1 Example1:BacktotheUScirca1977 ................411
+17.9.2 Example2:Stocks .............................415
+17.10Reification,andAlternativestoFactorModels . . . . . . . . . . . . . . . . 415 17.10.1 The Rotation Problem Again . . . . . . . . . . . . . . . . . . . . . . 415 17.10.2 Factors or Mixtures? . . . . . . . . . . . . . . . . . . . . . . . . . . . . 416 17.10.3TheThomsonSamplingModel ....................417 17.11FurtherReading ...................................422
+18 Nonlinear Dimensionality Reduction 424
+18.1 Why We Need Nonlinear Dimensionality Reduction . . . . . . . . . . . 424
+18.2 LocalLinearityandManifolds ..........................428
+18.3 LocallyLinearEmbedding(LLE) ........................431
+18.3.1 FindingNeighborhoods .........................431
+18.3.2 FindingWeights ..............................432 18.3.2.1 k>p...............................433
+18.3.3 FindingCoordinates ...........................434
+18.4 MoreFunwithEigenvaluesandEigenvectors . . . . . . . . . . . . . . . . 435
+18.4.1 FindingtheWeights............................435 18.4.1.1 k>p...............................436
+18.4.2 FindingtheCoordinates .........................437
+18.5 Calculation.......................................438 18.5.1 FindingtheNearestNeighbors.....................438 18.5.2 CalculatingtheWeights .........................440 18.5.3 CalculatingtheCoordinates.......................444
+18.6 Example.........................................448
+18.7 FurtherReading ...................................448
+18.8 Exercises ........................................448
+19 Mixture Models 450
+19.1 TwoRoutestoMixtureModels..........................450
+19.1.1 FromFactorAnalysistoMixtureModels . . . . . . . . . . . . . . 450
+19.1.2 From Kernel Density Estimates to Mixture Models . . . . . . . 450
+19.1.3 MixtureModels...............................451
+19.1.4 Geometry ..................................452
+19.1.5 Identifiability ................................452
+19.1.6 ProbabilisticClustering .........................453
+19.1.7 Simulation..................................454
+19.2 EstimatingParametricMixtureModels.....................454 19.2.1 MoreabouttheEMAlgorithm.....................456 19.2.2 TopicModelsandProbabilisticLSA .................459
+19.3 Non-parametricMixtureModeling .......................459
+19.4 WorkedComputatingExample..........................459 19.4.1 MixtureModelsinR ...........................459
+00:02 Monday 18th April, 2016
+15
+19.5 19.6
+CONTENTS
+19.4.2 FittingaMixtureofGaussianstoRealData . . . . . . . . . . . . 459
+19.4.3 Calibration-checkingfortheMixture. . . . . . . . . . . . . . . . . 464
+19.4.4 Selecting the Number of Clusters by Cross-Validation . . . . . . 466
+19.4.5 Interpreting the Clusters in the Mixture, or Not . . . . . . . . . 471
+19.4.6 Hypothesis Testing for Mixture-Model Selection . . . . . . . . . 476
+FurtherReading ...................................479 Exercises ........................................479
+20 Graphical Models 481
+III
+20.1 ConditionalIndependenceandFactorModels . . . . . . . . . . . . . . . . 481
+20.2 DirectedAcyclicGraph(DAG)Models ....................482 20.2.1 Conditional Independence and the Markov Property . . . . . . 483
+20.3 ConditionalIndependenceandd-Separation . . . . . . . . . . . . . . . . . 484 20.3.1 D-SeparationIllustrated .........................486 20.3.2 Linear Graphical Models and Path Coefficients . . . . . . . . . . 489 20.3.3 PositiveandNegativeAssociations ..................491
+20.4 IndependenceandInformation..........................492
+20.5 ExamplesofDAGModelsandTheirUses...................494 20.5.1 MissingVariables..............................496
+20.6 Non-DAGGraphicalModels ...........................497 20.6.1 UndirectedGraphs ............................497 20.6.2 DirectedbutCyclicGraphs.......................498
+20.7 FurtherReading ...................................499
+20.8 Exercises ........................................501
+Dependent Data 502
+21 Time Series 503
+21.1 WhatTimeSeriesAre................................503
+21.2 Stationarity ......................................505
+21.2.1 Autocorrelation ..............................506
+21.2.2 TheErgodicTheorem ..........................509 21.2.2.1 The World’s Simplest Ergodic Theorem . . . . . . . . 509 21.2.2.2 RateofConvergence.....................511 21.2.2.3 WhyErgodicityMatters ..................511
+21.3 MarkovModels....................................512 21.3.1 MeaningoftheMarkovProperty ...................513
+21.4 AutoregressiveModels ...............................514
+21.4.1 AutoregressionswithCovariates....................514
+21.4.2 AdditiveAutoregressions ........................517
+21.4.3 LinearAutoregression ..........................517 21.4.3.1 “Unit Roots” and Stationary Solutions . . . . . . . . . 522
+21.4.4 ConditionalVariance...........................522
+21.4.5 Regression with Correlated Noise; Generalized Least Squares . 523
+21.5 BootstrappingTimeSeries.............................525
+00:02 Monday 18th April, 2016
+CONTENTS 16
+21.5.1 ParametricorModel-BasedBootstrap . . . . . . . . . . . . . . . . 525 21.5.2 BlockBootstraps..............................525 21.5.3 SieveBootstrap...............................528
+21.6 Cross-Validation ...................................528 21.6.1 Testing Stationarity by Cross-Prediction . . . . . . . . . . . . . . 528
+21.7 TrendsandDe-Trending ..............................529 21.7.1 ForecastingTrends.............................533 21.7.2 SeasonalComponents...........................536 21.7.3 DetrendingbyDifferencing.......................536 21.7.4 CautionswithDetrending........................537 21.7.5 BootstrappingwithTrends .......................537
+21.8 BreaksinTimeSeries ................................539
+21.8.1 LongMemorySeries ...........................539
+21.8.2 ChangePointsandStructuralBreaks.................539 21.8.2.1 ChangePointsandLongMemory . . . . . . . . . . . . 539
+21.8.3 ChangePointDetection .........................541
+21.9 TimeSerieswithLatentVariables ........................541
+21.9.1 Examples...................................541
+21.9.1.1 21.9.1.2 21.9.1.3 21.9.1.4
+General Gaussian-Linear State Space Model . . . . . . 541 Autoregressive-Moving Average (ARMA) Models . . 541 RegimeSwitching.......................543 Noisily-Observed Dynamical Systems . . . . . . . . . 543
+21.9.2 StateEstimation ..............................543 21.9.2.1 ParticleFiltering .......................544 21.9.2.2 ParameterEstimation ....................544 21.9.2.3 Prediction............................544
+21.10MovingAveragesandCycles ...........................544 21.10.1 Yule-Slutsky . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 546 21.11LongitudinalData ..................................546 21.12MultivariateTimeSeries ..............................546 21.13FurtherReading ...................................548 21.14Exercises ........................................548
+22 Spatial and Network Data 550
+22.1 Least-SquaresOptimalLinearPrediction ...................550 22.1.1 ExtensiontoVectors ...........................552 22.1.2 Estimation..................................552 22.1.3 StrongerProbabilisticAssumptions. . . . . . . . . . . . . . . . . . 552 22.1.4 Nonlinearity?................................553
+22.2 ApplicationtoSpatialandSpatio-TemporalData . . . . . . . . . . . . . . 553 22.2.1 SpecialCase:OneScalarField .....................553 22.2.2 RoleofSymmetryAssumptions....................554 22.2.3 AWorkedExample ............................555
+22.3 SpatialSmoothingwithSplines..........................555
+22.4 DataonNetworks..................................557 22.4.1 AdaptingSpatialTechniques ......................557
+00:02 Monday 18th April, 2016
+17 CONTENTS
+22.4.2 LaplacianSmoothing ...........................557 22.5 FurtherReading ...................................558
+23 Simulation-Based Inference 560
+IV
+23.1 TheMethodofSimulatedMoments.......................560
+23.1.1 TheMethodofMoments ........................560
+23.1.2 AddingintheSimulation ........................561
+23.1.3 An Example: Moving Average Models and the Stock Market . 562
+23.2 IndirectInference...................................567
+23.3 FurtherReading ...................................568
+23.4 Exercises ........................................568
+23.5 SomeDesignNotesontheMethodofMomentsCode. . . . . . . . . . . 570
+Causal Inference 572
+24 Graphical Causal Models 573
+24.1 CausationandCounterfactuals..........................573
+24.2 CausalGraphicalModels..............................574 24.2.1 Calculatingthe“effectsofcauses”...................575 24.2.2 BacktoTeeth ................................576
+24.3 Conditional Independence and d -Separation Revisited . . . . . . . . . . . 579
+24.4 FurtherReading ...................................579
+24.5 Exercises ........................................580
+25 Identifying Causal Effects 581
+25.1 CausalEffects,InterventionsandExperiments. . . . . . . . . . . . . . . . 581 25.1.1 TheSpecialRoleofExperiment ....................582
+25.2 IdentificationandConfounding .........................583
+25.3 IdentificationStrategies...............................586
+25.3.1 The Back-Door Criterion: Identification by Conditioning . . . 588 25.3.1.1 TheEntnerRules.......................589
+25.3.2 The Front-Door Criterion: Identification by Mechanisms . . . 591
+25.3.2.1 The Front-Door Criterion and Mechanistic Expla- nation ..............................592
+25.3.3 InstrumentalVariables ..........................593 25.3.3.1 SomeInvalidInstruments .................595 25.3.3.2 Critique of Instrumental Variables . . . . . . . . . . . . 595
+25.3.4 FailuresofIdentification.........................598
+25.4 Summary........................................600 25.4.1 FurtherReading ..............................600
+25.5 Exercises ........................................601
+00:02 Monday 18th April, 2016
+CONTENTS 18
+26 Experimental Causal Inference 602
+26.1 WhyExperiment? ..................................602 26.1.1 Jargon.....................................602
+26.2 BasicIdeasGuidingExperimentalDesign...................603
+26.3 Randomization....................................603
+26.3.1 CausalIdentification ...........................603 26.3.1.1 Randomization and Linear Models . . . . . . . . . . . 603 26.3.1.2 Randomization and Non-Linear Models . . . . . . . . 604
+26.3.2 ModesofRandomization ........................604 26.3.2.1 IIDAssignment........................604 26.3.2.2 PlannedAssignment.....................605
+26.3.3 Perspectives:Unitsvs.Treatments...................605
+26.4 ChoiceofLevels ...................................605 26.4.1 ParameterEstimationorPrediction. . . . . . . . . . . . . . . . . . 605 26.4.2 MaximizingYield .............................605 26.4.3 ModelDiscrimination ..........................605 26.4.4 MultipleGoals ...............................606
+26.5 MultipleManipulatedVariables .........................606 26.5.1 FactorialDesigns..............................606
+26.6 Blocking ........................................606 26.6.1 Within-SubjectDesigns..........................606
+26.7 Summaryontheelementsofanexperimentaldesign. . . . . . . . . . . . 606
+26.8 “Whattheexperimentdiedof”..........................606
+26.9 FurtherReading ...................................607
+26.10Exercises ........................................607
+27 Estimating Causal Effects 608
+27.1 EstimatorsintheBack-andFront-DoorCriteria . . . . . . . . . . . . . . 608
+27.1.1 EstimatingAverageCausalEffects...................609
+27.1.2 Avoiding Estimating Marginal Distributions . . . . . . . . . . . . 609
+27.1.3 Matching...................................610
+27.1.4 PropensityScores .............................613
+27.1.5 PropensityScoreMatching .......................614
+27.2 Instrumental-VariablesEstimates.........................616
+27.3 UncertaintyandInference.............................617
+27.4 Recommendations..................................617
+27.5 FurtherReading ...................................618
+27.6 Exercises ........................................619
+28 Discovering Causal Structure 620
+28.1 TestingDAGs .....................................621
+28.2 TestingConditionalIndependence .......................622
+28.3 FaithfulnessandEquivalence ...........................623
+28.3.1 PartialIdentificationofEffects.....................624
+28.4 CausalDiscoverywithKnownVariables ...................624 28.4.1 ThePCAlgorithm ............................627
+00:02 Monday 18th April, 2016
+19
+28.5 28.6 28.7 28.8 28.9
+CONTENTS
+28.4.2 CausalDiscoverywithHiddenVariables . . . . . . . . . . . . . . 628 28.4.3 OnConditionalIndependenceTests .................629 SoftwareandExamples...............................629 LimitationsonConsistencyofCausalDiscovery . . . . . . . . . . . . . . 634 FurtherReading ...................................635 Exercises ........................................635 Pseudo-codefortheSGSandPCAlgorithms. . . . . . . . . . . . . . . . . 636 28.9.1 TheSGSAlgorithm............................636 28.9.2 ThePCAlgorithm ............................637
+Appendices 639
+A Data-Analysis Problem Sets 639
+A.1 YourDaddy’sRichandYourMomma’sGoodLooking . . . . . . . . . . 639
+A.2 ...ButWeMakeItUpinVolume ........................645
+A.3 PastPerformance,FutureResults ........................647
+A.4 FreeSoil.........................................650
+A.5 ThereWereGiantsintheEarthinThoseDay . . . . . . . . . . . . . . . . 653
+A.6 TheSoundofGunfire,OffintheDistance ..................657
+A.7 TheBulletortheBallot? ..............................660
+A.8 ADiversifiedPortfolio ...............................664
+A.9 TheMonkey’sPaw..................................666
+A.10 Specific Problems . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 667
+A.11 Formatting Instructions and Rubric . . . . . . . . . . . . . . . . . . . . . . . 668
+A.12 What’s That Got to Do with the Price of Condos in California? . . . . 670
+A.13TheAdvantagesofBackwardness ........................673 A.14It’sNottheHeatthatGetsYou .........................676 A.15NiceDemoCity,butWillItScale? .......................679
+A.15.1 Version 1 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 679 A.15.1.1 Background...........................679 A.15.1.2 TasksandQuestions.....................681
+A.15.2 Version 2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 682 A.15.2.1 ...................................682 A.15.2.2 ...................................683 A.15.2.3 Problems ............................684
+A.16 Fair’s Affairs . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 686
+A.17 How the North American Paleofauna Got a Crook in Its Regression
+Line ...........................................687
+A.18 How the Hyracotherium Got Its Mass . . . . . . . . . . . . . . . . . . . . . . 690
+A.19 How the Recent Mammals Got Their Size Distribution . . . . . . . . . . 692
+A.20 Red Brain, Blue Brain . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 695
+A.21BroughttoYoubytheLettersD,AandG ..................697 A.22 Teacher, Leave Those Kids Alone! (They’re the Control Group) . . . . 701 A.23EstimatingwithDAGs ...............................704 A.24UseandAbuseofConditioning .........................707
+00:02 Monday 18th April, 2016
+CONTENTS 20
+A.25WhatMakestheUnionStrong? .........................709 A.26 AnInsufficientlyRandomWalkDownWallStreet . . . . . . . . . . . . . 713 A.27 PredictingNineoftheLastFiveRecessions . . . . . . . . . . . . . . . . . . 716 A.28 DebtNeedsTimeforWhatItKillstoGrowIn . . . . . . . . . . . . . . . 718 A.29 How Tetracycline Came to Peoria . . . . . . . . . . . . . . . . . . . . . . . . 719 A.30 Formatting Instructions and Rubric . . . . . . . . . . . . . . . . . . . . . . . 722
+B Linear Algebra Reminders 724
+B.1 Vector Space, Linear Subspace, Linear Independence . . . . . . . . . . . . 724
+B.2 InnerProduct,OrthogonalVectors.......................725
+B.3 OrthonormalBases .................................725
+B.4 Rank...........................................726
+B.5 EigenvaluesandEigenvectorsofMatrices ...................726
+B.6 SpecialKindsofMatrix...............................727
+B.7 MatrixDecompositions...............................727
+B.7.1 SingularValueDecomposition.....................727
+B.7.2 Eigen-Decomposition or Spectral Decomposition of Matrix . . 728
+B.7.3 SquareRootofaMatrix .........................728
+B.8 OrthogonalProjections,IdempotentMatrices . . . . . . . . . . . . . . . . 728
+B.9 RCommandsforLinearAlgebra ........................729
+B.10 Vector Calculus . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 729
+B.11 Function Spaces . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 729
+B.11.1 Bases......................................730
+B.11.2 Eigenvalues and Eigenfunctions of Operators . . . . . . . . . . . 730
+B.12FurtherReading ...................................731 B.13Exercises ........................................731
+C Big O and Little o Notation 733
+D TaylorExpansions 735
+E Multivariate Distributions 737
+E.1 ReviewofDefinitions................................737
+E.2 MultivariateGaussians ...............................738
+E.2.1 LinearAlgebraandtheCovarianceMatrix . . . . . . . . . . . . . 739
+E.2.2 Conditional Distributions and Least Squares . . . . . . . . . . . . 741
+E.2.3 ProjectionsofMultivariateGaussians . . . . . . . . . . . . . . . . 741
+E.2.4 ComputingwithMultivariateGaussians. . . . . . . . . . . . . . . 741
+E.3 InferencewithMultivariateDistributions...................742 E.3.1 ModelComparison ............................742 E.3.2 Goodness-of-Fit...............................744
+E.4 Uncorrelated̸=Independent ...........................745
+E.5 Exercises ........................................746
+00:02 Monday 18th April, 2016
+21
+CONTENTS
+F Algebra with Expectations and Variances 749
+F.1 Variance-CovarianceMatricesofVectors....................750 F.2 QuadraticForms...................................751
+G PropagationofError 752
+H Optimization 754
+H.1 BasicConceptsofOptimization .........................754
+H.2 Newton’sMethod ..................................756
+H.3 OptimizationinR..................................758
+H.4 Small-NoiseAsymptoticsforOptimization. . . . . . . . . . . . . . . . . . 758
+H.4.1 ApplicationtoMaximumLikelihood ................763
+H.4.2 TheAkaikeInformationCriterion ..................764
+H.5 ConstrainedandPenalizedOptimization ...................765
+H.5.1 ConstrainedOptimization .......................765
+H.5.2 LagrangeMultipliers ...........................765
+H.5.3 PenalizedOptimization .........................766
+H.5.4 ConstrainedLinearRegression.....................767
+H.5.5 Statistical Remark: “Ridge Regression” and “The Lasso” . . . . 770
+H.6 FurtherReading ...................................772
+I χ 2 and Likelihood Ratios 774
+J Proof of the Gauss-Markov Theorem 777
+K Rudimentary Graph Theory 779
+L Information Theory 782
+M More about Hypothesis Testing 783
+N Programming 784
+N.1 Functions........................................784
+N.2 FirstExample:ParetoQuantiles .........................785
+N.3 FunctionsWhichCallFunctions.........................786
+N.3.1 Sanity-CheckingArguments ......................788
+N.4 LayeringFunctionsandDebugging.......................789 N.4.1 MoreonDebugging............................792
+N.5 AutomatingRepetitionandPassingArguments . . . . . . . . . . . . . . . 794
+N.6 AvoidingIteration:ManipulatingObjects...................804 N.6.1 ifelseandwhich.............................805 N.6.2 applyandItsVariants ..........................807
+N.7 MoreComplicatedReturnValues ........................808
+N.8 Re-WritingYourCode:AnExtendedExample................810
+N.9 GeneralAdviceonProgramming ........................816 N.9.1 Commentyourcode ...........................816 N.9.2 Usemeaningfulnames ..........................817
+00:02 Monday 18th April, 2016
+CONTENTS 22
+N.9.3 Checkwhetheryourprogramworks.................817 N.9.4 Avoidwritingthesamethingtwice..................818 N.9.5 Startfromthebeginningandbreakitdown . . . . . . . . . . . . 818 N.9.6 Break your code into many short, meaningful functions . . . . 818
+N.10FurtherReading ...................................819
+O GeneratingRandomVariables 820
+O.1 RejectionMethod ..................................820
+O.2 The Metropolis Algorithm and Markov Chain Monte Carlo . . . . . . . 821
+O.3 GeneratingUniformRandomNumbers....................824
+O.4 FurtherReading ...................................828
+O.5 Exercises ........................................828
+Acknowledgments Bibliography
+828 830
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/
+Introduction To the Reader
+This book began as the notes for 36-402, Advanced Data Analysis, at Carnegie Mel- lon University. This is the methodological capstone of the core statistics sequence taken by our undergraduate majors (usually in their third year), and by undergradu- ate students from a range of other departments. By this point, students have taken classes in introductory statistics and data analysis, probability theory, mathematical statistics, and modern linear regression (“401”). This book does not presume that you once learned but have forgotten the material from the pre-requisites; it presumes that you know that material and can go beyond it. The book also presumes a firm grasp on linear algebra and multivariable calculus, and that you can read and write simple functions in R. If you are lacking in any of these areas, now would be an excellent time to leave.
+ADA is a class in statistical methodology: its aim is to get students to understand something of the range of modern1 methods of data analysis, and of the consider- ations which go into choosing the right method for the job at hand (rather than distorting the problem to fit the methods you happen to know). Statistical theory is kept to a minimum, and largely introduced as needed. Since ADA is also a class in data analysis, there are a lot of assignments in which large, real data sets are analyzed with the new methods.
+There is no way to cover every important topic for data analysis in just a semester. Much of what’s not here — sampling theory and survey methods, experimental de- sign, advanced multivariate methods, hierarchical models, the intricacies of categor- ical data, graphics, data mining — gets covered by our other undergraduate classes. Other important areas, like dependent data, inverse problems, advanced model selec- tion or robust estimation, have to wait for graduate school.
+The mathematical level of these notes is deliberately low; nothing should be be- yond a competent third-year undergraduate. But every subject covered here can be profitably studied using vastly more sophisticated techniques; that’s why this is ad- vanced data analysis from an elementary point of view. If reading these pages inspires anyone to study the same material from an advanced point of view, I will consider my troubles to have been amply repaid.
+1Just as an undergraduate “modern physics” course aims to bring the student up to about 1930 (more specifically, to 1926), this class aims to bring the student up to about 1990, maybe 1995.
+23
+￼
+CONTENTS 24
+A final word. At this stage in your statistical education, you have gained two kinds of knowledge — a few general statistical principles, and many more specific procedures, tests, recipes, etc. Typical students are much more comfortable with the specifics than the generalities. But the truth is that while none of your recipes are wrong, they are tied to assumptions which hardly ever hold2. Learning more flexible and powerful methods, which have a much better hope of being reliable, will demand a lot of hard thinking and hard work. Those of you who succeed, however, will have done something you can be proud of.
+Exercises and Problem Sets
+There are two kinds of assignments included here. Mathematical and computational exercises go at the end of chapters, since they are mostly connected to those pieces of content. (Many of them are complements to, or filling in details of, material in the chapters.) There are also data-centric problem sets, in Appendix A; most of these draw on material from multiple chapters, and many of them are based on specific papers.
+Concepts You Should Know
+If more than a handful of these are unfamiliar, it is very unlikely that you are ready for this course.
+Random variable; distribution, population, sample. Cumulative distribution function, probability mass function, probability density function. Specific distri- butions: Bernoulli, binomial, Poisson, geometric, Gaussian, exponential, t , Gamma. Expectation value. Variance, standard deviation. Sample mean, sample variance. Me- dian, mode. Quartile, percentile, quantile. Inter-quartile range. Histograms.
+Joint distribution functions. Conditional distributions; conditional expectations and variances. Statistical independence and dependence. Covariance and correlation; why dependence is not the same thing as correlation. Rules for arithmetic with ex- pectations, variances and covariances. Laws of total probability, total expectation, total variation. Contingency tables; odds ratio, log odds ratio.
+Sequences of random variables. Stochastic process. Law of large numbers. Cen- tral limit theorem.
+Parameters; estimator functions and point estimates. Sampling distribution. Bias of an estimator. Standard error of an estimate; standard error of the mean; how and why the standard error of the mean differs from the standard deviation. Consistency of estimators. Confidence intervals and interval estimates.
+2“Econometric theory is like an exquisitely balanced French recipe, spelling out precisely with how many turns to mix the sauce, how many carats of spice to add, and for how many milliseconds to bake the mixture at exactly 474 degrees of temperature. But when the statistical cook turns to raw materials, he finds that hearts of cactus fruit are unavailable, so he substitutes chunks of cantaloupe; where the recipe calls for vermicelli he uses shredded wheat; and he substitutes green garment dye for curry, ping-pong balls for turtle’s eggs and, for Chalifougnac vintage 1883, a can of turpentine.” — Stefan Valavanis, quoted in Roger Koenker, “Dictionary of Received Ideas of Statistics” (http://www.econ.uiuc.edu/~roger/ dict.html), s.v. “Econometrics”.
+00:02 Monday 18th April, 2016
+￼
+25 CONTENTS
+Hypothesis tests. Tests for differences in means and in proportions; Z and t tests; degrees of freedom. Size, significance, power. Relation between hypothesis tests and confidence intervals. χ 2 test of independence for contingency tables; degrees of freedom. KS test for goodness-of-fit to distributions.
+Linear regression. Meaning of the linear regression function. Fitted values and residuals of a regression. Interpretation of regression coefficients. Least-squares esti- mate of coefficients. Matrix formula for estimating the coefficients; the hat matrix. R2; why adding more predictor variables never reduces R2. The t-test for the signifi- cance of individual coefficients given other coefficients. The F -test and partial F -test for the significance of regression models. Degrees of freedom for residuals. Examina- tion of residuals. Confidence intervals for parameters. Confidence intervals for fitted values. Prediction intervals.
+Likelihood. Likelihood functions. Maximum likelihood estimates. Relation be- tween maximum likelihood, least squares, and Gaussian distributions. Relation be- tween confidence intervals and the likelihood function. Likelihood ratio test.
+To Teachers
+The usual one-semester course for this class has contained Chapters 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 17, 19, 20, 24, 25, 27, 28 and 21, and Appendices E and N (the latter quite early on). Other chapters have rotated in and out from year to year. One of the problem sets from Appendix A (or a similar one) was due every week, either as homework or as a take-home exam. Solutions for these are available, via e-mail, to teachers; providing solutions to those using the book for self-study is, sadly, not feasible.
+Corrections and Updates The page for this book is http://www.stat.cmu.edu/ ~cshalizi/ADAfaEPoV/. The latest version will live there. The book will eventually be published by Cambridge University Press, at which point there will still be a free next-to-final draft at that URL, and errata. While the book is still in a draft, the PDF contains notes to myself for revisions, [[like so]]; you can ignore them.
+[[Also marginal self ]]
+notes-to-
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/
+Part I
+Regression and Its Generalizations
+26
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

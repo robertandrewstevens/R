@@ -1,0 +1,56 @@
+
+Appendix F
+Algebra with Expectations and Variances
+The following are all straightforward consequences of the definitions of expectation, variance, and covariance, but you will probably end up learning them by heart, either deliberately, or because you keep using them so often. Many of these have catch- phrases associated with them; I’ve given them in parentheses.
+• (“Linearity of expectations”; “Expectation is a linear operator”)
+• •
+􏰌[aX +bY]=a􏰌[X]+b􏰌[Y] 􏰎[X]=􏰌􏰷X2􏰺−(􏰌[X])2 =􏰌􏰷(X −􏰌[X])2􏰺
+(F.1) (F.2)
+(F.3)
+(F.4)
+(F.5)
+(F.6) (F.7)
+Cov[X,Y]=􏰌[XY]−􏰌[X]􏰌[Y]=􏰌[(X −􏰌[X])(Y −􏰌[Y])]
+• (“Covariance is symmetric”)
+Cov[X,Y]=Cov[Y,X]
+• (“Variance is covariance with itself”)
+• •
+Cov[X,X]=􏰎[X] 􏰎[aX +b]=a2􏰎[X]
+Cov[aX +b,Y]=aCov[X,Y] 749
+F.1. VARIANCE-COVARIANCEMATRICESOFVECTORS 750 •
+􏰎[X +Y]=􏰎[X]+􏰎[Y]+2Cov[X,Y] (F.8) nnn n n−1
+􏰥X =􏰥􏰥Cov􏰷X ,X 􏰺=􏰥􏰎􏰓X 􏰔+2􏰥􏰥Cov􏰷X ,X 􏰺 iijiij
+•
+􏰎
+the i th coordinate of X⃗ , so
+􏰌􏰷X⃗􏰺 ≡􏰌􏰓Xi􏰔 i
+􏰷⃗􏰺 􏰧
+􏰌 X = ⃗xp(⃗x)d⃗x
+(F.12) (F.13)
+i=1 i=1 j=1 i=1 i=1 j>i
+• (“Law of total expectation”)
+􏰌[X]=􏰌[􏰌[X|Y]] (F.10) Remember: 􏰌 [X |Y ] is a function of Y ; it’s random.
+• (“Law of total variance”)
+􏰎[X]=􏰎[􏰌[X|Y]]+􏰌[􏰎[Y|X]] (F.11)
+• (“Independent implies uncorrelated”) If X and Y are independent, Cov [X , Y ] = 0. The reverse is not true; Cov [X , Y ] = 0 is even compatible with Y being a function of X .
+F.1 Variance-Covariance Matrices of Vectors
+A random vector X⃗ has both an expectation value and a variance, just like a random scalar.
+The expectation value is another vector. Its ith coordinate is the expectation of
+This is the obvious generalization of how things work with random scalars.
+On the other hand, every coordinate of X⃗ has its own variance, and in general those coordinates have some covariance with each other. Therefore the variance of a
+p-dimensional random vector is a p × p matrix of variances and covariances: 􏰎􏰷X⃗􏰺 ≡Cov􏰷X,X􏰺 (F.14)
+ijij
+􏰎􏰷X⃗􏰺=􏰌􏰷X⃗ ⊗X⃗􏰺−􏰌􏰷X⃗􏰺⊗􏰌􏰷X⃗􏰺 (F.15)
+Therefore
+where ⊗ is outer product. If you think of a vector as a p × 1 matrix, then this just
+means 􏰌􏰷XT X􏰺−􏰌[X]T 􏰌[X].
+00:02 Monday 18th April, 2016
+(F.9)
+751 F.2. QUADRATICFORMS
+F.2 Quadratic Forms
+A quadratic form is an expression of the form ⃗x · a⃗x, or equivalently ⃗xT a⃗x. The most common quadratic forms we encounter in statistics are ones where the vector is random but the matrix is not. In that case,
+􏰌􏰷X⃗TaX⃗􏰺=tr(a􏰎􏰷X⃗􏰺)+􏰌􏰷X⃗􏰺T a􏰌􏰷X⃗􏰺 (F.16) Unfortunately, the variance of quadratic forms depends on the distribution of X⃗ ,
+and there usually isn’t a nice closed-form expression.
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

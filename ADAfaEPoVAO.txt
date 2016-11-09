@@ -1,0 +1,212 @@
+
+Appendix O
+Generating Random Variables
+O.1 Rejection Method
+The quantile method of §5.2.2.3 is a very general approach to drawing from a given distribution, but presumes we can compute the quantile function efficiently. Another general alternative, which avoids needing quantiles, is the rejection method. Suppose that we want to generate Z, with probability density function fZ, and we have a method to generate R, with p.d.f. ρ, called the proposal distribution. Also suppose thatfZ(x)≤ρ(x)M,forsomeconstantM>1.Forinstance,iffZ hasalimitedrange [a, b ], we could take ρ to be the uniform distribution on [a, b ], and M the maximum density of fZ .
+The rejection method algorithm then goes as follows. 1. Generate a proposal R from ρ.
+2. Generate a uniform U , independently of R.
+3. IsMUρ(R)<fZ(R)?
+• If yes, “accept the proposal” by returning R and stopping.
+• If no, “reject the proposal”, discard R and U , and go back to (1)
+If ρ is uniform, this just amounts to checking whether MU < fZ(R), with M the maximum density of Z.
+Computationally, the idea looks like Example 46.
+One way to understand the rejection method is as follows. Imagine drawing the curve of fZ (x). The total area under this curve is 1, because 􏰤 d x fZ (x) = 1. The
+areabetweenanytwopointsaandb onthehorizontalaxisis􏰤b dxfZ(x)=FZ(b)− a
+FZ (a). It follows that if we could uniformly sample points from the area between the curve and the horizontal axis, their x coordinates would have exactly the distribution function we are looking for. If ρ is a uniform distribution, then we are drawing a rectangle which just encloses the curve of fZ , sampling points uniformly from the rectangle (with x coordinates R and y coordinates M U ), and only keeping the ones
+820
+O.2. THEMETROPOLISALGORITHMANDMARKOVCHAINMONTE 821 CARLO
+￼￼rrejection.1 <- function(dtarget,dproposal,rproposal,M) {
+  rejected <- TRUE
+  while(rejected) {
+    R <- rproposal(1)
+    U <- runif(1)
+    rejected <- (M*U*dproposal(R) < dtarget(R))
+}
+return(R) }
+rrejection <- function(n,dtarget,dproposal,rproposal,M) {
+  replicate(n,rrejection.1(dtarget,dproposal,rproposal,M))
+}
+￼￼￼CODE EXAMPLE 46: An example of how the rejection method would be used. The arguments dtarget, dproposal and rproposal would all be functions. This is not quite industrial-strength code, because it does not let us pass arguments to those functions flexibly. See online code for com- ments. [[TODO: find those comments!]]
+which fall under the curve. When ρ is not uniform, but we can sample from it nonetheless, then we are uniformly sampling from the area under M ρ, and keeping only the points which are also below fZ .
+Example. Thebetadistribution, f(x;a,b)= Γ(a+b) xa−1(1−x)b−1,isdefinedon Γ(a)Γ(b)
+the unit interval1. While its quantile function can be calculated and so we could use the quantile method, we could also use the reject method, taking the uniform distri- bution for the proposals. Figure O.1 illustrates how it would go for the Beta(5,10) distribution
+The rejection method’s main drawback is speed. The probability of accepting on any given pass through the algorithm is 1/M (exercise 1a). Thus produce n random variables from it takes, on average, nM cycles (exercise 1b). Clearly, we want M to be as small, which means that we want the proposal distribution ρ to be close to the target distribution fZ . Of course if we’re using the rejection method because it’s hard to draw from the target distribution, and the proposal distribution is close to the targetdistribution,itmaybehardtodrawfromtheproposal.
+[[TODO: Rejection method
+when proposal distribution is
+￼non-uniform]] O.2 The Metropolis Algorithm and Markov Chain Monte
+Carlo
+One very important, but tricky, way of getting past the limitations of the rejection method is what’s called the Metropolis algorithm. Once again, we have a density
+1HereΓ(a)=􏰤∞ dxe−xxa−1. Itisnotobvious,butforintegera,Γ(a)=(a−1)!. Thedistributiongets 0
+its name because Γ(a+b) is called the beta function of a and b, a kind of continuous generalization of Γ(a)Γ(b)
+􏰑a+b 􏰒. The beta distribution arises in connection with problems about minima and maxima, and inference a
+￼￼for binomial distributions.
+00:02 Monday 18th April, 2016
+O.2. THEMETROPOLISALGORITHMANDMARKOVCHAINMONTE
+CARLO
+822
+￼−
+++++++ −−− ++
+−
+−−
+−−− −−−− −−
+￼−−+−−−− −−−
+− + +− −− − −−− ++
+￼− − − −+ − −− −−− − −
+−−+−− −−− +− −−−−−
+−−−+++ −−−− − +++ −− −− −−
+−−+++−−−− −−−− −
+−− ++ − +−
+−−++−− ++−
+−−−− −−−
+−++− −−−−
+++−−−−−−
++−−− −−−
+−−++++ + −−
++ − −−− −− ++−−
+−−−++++−−−−−− −−+++−−−
+−+++++−−
+++−−−−
+−−−− −−++−−
++ ++++− −− +++−−−
++++−− ++−−
+−+++ −−− −− −− + + + − − − −
+−+++ + + −+++−
+−−+ ++++ + −− ++++−−−
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼0.0 0.2 0.4
+0.6 0.8 1.0
+x
+￼M <- 3.3
+curve(dbeta(x,5,10),from=0,to=1,ylim=c(0,M))
+r <- runif(300,min=0,max=1)
+u <- runif(300,min=0,max=1)
+below <- (M*u*dunif(r,min=0,max=1) <= dbeta(r,5,10))
+points(r,M*u,pch=ifelse(below,"+","-"))
+FIGURE O.1: Illustration of the rejection method for generating random numbera from a Beta(5,10) distribution. The proposal distribution is uniform on the range of the beta, which is [0,1]. Points are thus sampled uniformly from the rectangle which runs over [0,1] on the hori- zontal axis and [0, 3.3] on the vertical axis, i.e., M = 3.3, because the density of the Beta is < 3.3 everywhere. (This is not the lowest possible M but it is close.) Proposed points which fall below the Beta’s pdf are marked + and are accepted; those above the pdf curve are marked − and are rejected. In this case, exactly 67% of proposals are rejected.
+00:02 Monday 18th April, 2016
+dbeta(x, 5, 10)
+0.0 0.5 1.0 1.5 2.0 2.5 3.0
+O.2. THEMETROPOLISALGORITHMANDMARKOVCHAINMONTE 823 CARLO
+fZ from which we wish to sample. Once again, we introduce a distribution for “pro- posals”, and accept or reject proposals depending on the density fZ . The twist now is that instead of making independent proposals each time, the next proposal depends on the last accepted value — the proposal distribution is a conditional pdf ρ(r|z).
+Assume for simplicity that ρ(r|z) = rho(z|r). (For instance, we could have a Gaussian proposal distribution centered on z.) Then the Metropolis algorithm goes as follows.
+1. Start with value Z0 (fixed or random).
+2. Generate R from the conditional distribution ρ(·|Zt ). 3. Generate a uniform U , independent of R.
+4. IsU≤fZ(R)/fZ(Zt)?
+• Ifyes,setZt+1 =Randgoto(2) • Ifnot,setZt+1 =Zt andgoto(2)
+Mostlysimply,thealgorithmisrununtilt =n,atwhichpointitreturnsZ1,Z2,...Zn. In practice, better results are obtained if it’s run for n+n0 steps, and the first n0 values of Z are discarded — this is called “burn-in”.
+Notice that if fZ (R) > fZ (Zt ), then R is always accepted. The algorithm always ac- cepts proposals which move it towards places where the density is higher than where it currently is. If fZ (R) < fZ (Zt ), then the algorithm accepts the move with some probability, which shrinks as the density at R gets lower. It should not be hard to persuade yourself that the algorithm will spend more time in places where fZ is high.
+It’s possible to say a bit more. Successive values of Zt are dependent on each other, but Zt+1 Zt−1|Zt — this is a Markov process. The target distribution fZ is in fact exactly the stationary distribution of the Markov process. If the proposal distributions have broad enough support that the algorithm can get from any z to any z′ in a finite number of steps, then the process will “mix”. (In fact we only need to be able to visit points where fZ > 0.) This means that if we start with an arbitrary distribution for Z0, the distribution of Zt approaches fZ and stays there — the point ofburn-inistogivethisconvergencetimetohappen.ThefractionoftimeZt isclose to x is in fact proportional to fZ(x), so we can use the output of the algorithm as, approximately, so many draws from that distribution.2
+It would seem that the Metropolis algorithm should be superior to the rejection method, since to produce n random values we need only n steps, or n + n0 to handle burn-in, not nM steps. However, this is deceptive, because if the proposal distribu- tion is not well-chosen, the algorithm ends up staying stuck in the same spot for, perhaps, a very long time. Suppose, for instance, that the distribution is bimodal. If Z0 starts out in between the modes, it’s easy for it to move rapidly to one peak or the other, and spend a lot of time there. But to go from one mode to the other, the algorithm has to make a series of moves, all in the same direction, which all reduce
+2And if the dependence between Zt and Zt+1 bothers us, we can always randomly permute them, once we have them.
+00:02 Monday 18th April, 2016
+￼|=
+￼￼[[TODO: Cites on Kol- mogorov complexity]]
+O.3. GENERATINGUNIFORMRANDOMNUMBERS 824
+fZ , which happens but is unlikely. It thus takes a very long time to explore the whole distribution. The“best”optimalproposaldistributionismakeρ(r|z)= fZ(r),i.e.,to just sample from the target distribution. If we could do that, of course, we wouldn’t need the Metropolis algorithm, but trying to make ρ close to fZ is generally a good idea.
+The original Metropolis algorithm was invented in the 1950s to facilitate design- ing the hydrogen bomb. It relies on the assumption that the proposal distribution is symmetric, ρ(r|z) = ρ(z|r). It is sometimes convenient to allow an asymmetric
+proposal distribution, in which case one accepts R if U ρ(R|Zt ) ≤ fZ (R) . This is called ρ(Zt |R) fZ (Zt )
+Metropolis-Hastings. Both are examples of the broader class of Markov Chain Monte Carlo algorithms, where we give up on getting independent samples from the target distribution, and instead make the target the invariant distribution of a Markov process.
+O.3 Generating Uniform Random Numbers
+Everything previously to this rested on being able to generate uniform random num- bers, so how do we do that? Well, really that’s a problem for computer scientists. . . But it’s good to understand a little bit about the basic ideas.
+First of all, the numbers we get will be produced by some deterministic algo- rithm, and so will be merely pseudorandom rather than truly random. But we would like the deterministic algorithm to produce extremely convoluted results, so that its output looks random in as many ways that we can test as possible. Dependencies should be complicated, and correlations between easily-calculated functions of suc- cessive pseudorandom numbers should be small and decay quickly. (In fact, “truly random” can be defined, more or less, as the limit of the algorithm becoming in- finitely complicated.) Typically, pseudorandom number generators are constructed to produce a sequence of uniform values, starting with an initial value or seed. In normal operation, the seed is set from the computer’s clock; when debugging, the seed can be held fixed, to ensure that results can be reproduced exactly.
+Probably the simplest example is incommensurable rotations. Imagine a watch which fails very slightly, but deterministically, to keep proper time, so that its second hand advances φ ̸= 1 seconds in every real second of time. The position of the watch after t seconds is
+θt =θ0+tαmod60 (O.1)
+If φ is commensurable with 60, meaning α/60 = k/m for some integers k, m, then the positions would just repeat every 60k seconds. If α is incommensurable, because it is an irrational number, then θt never repeats. In this case, not only does θt never repeat, but it is uniformly distributed between 0 and 60, in the sense that the fraction of time it spends in any sub-interval is just proportional to the length of the interval (exercise 2).
+You could use this as a pseudo-random number generator, with θ0 as the seed, but it would not be a very good one, for two reasons. First, exactly representing an irrational number α on a digital computer is impossible, so at best you could use a
+00:02 Monday 18th April, 2016
+825 O.4. FURTHERREADING
+￼￼arnold.map <- function(v) {
+  theta <- v[1]
+  phi <- v[2]
+  theta.new <- (theta+phi)%%1
+  phi.new <- (theta+2*phi)%%1
+  return(c(theta.new,phi.new))
+}
+rarnold <- function(n,seed) {
+  z <- vector(length=n)
+  for (i in 1:n) {
+    seed <- arnold.map(seed)
+    z[i] <- seed[1]
+  }
+return(z) }
+￼￼￼CODE EXAMPLE 47: A function implementing the Arnold cat map (Eq. O.3), and a second function which uses it as a pseudo-random number generator. See online version for comments. [[TODO: find those comments]]
+rational number such that the period 60k is large. Second, and more pointedly, the successiveθt arereallytooclosetoeachother,andtoosimilar.Evenifweonlytook, say, every 50th value, they’d still be quite correlated with each other.
+One way this has been improved is to use multiple incommensurable rotations. Say we have a second inaccurate watch, φt = φ0 + βt mod 60, where β is incom- mensurable with both 60 and with α. We record θt when φt is within some small window of 0.3
+Another approach is to use more aggressively complicated deterministic map- pings. Take the system
+θt+1 = θt +φt mod1 (O.2) φt+1 = θt +2φt mod1
+This is known as “Arnold’s cat map”, after the great Soviet mathematician V. I. Arnold, and Figure O.2. We can think of this as the second-hand θt advancing not by a fixed amount α every second, but by a varying amount φt . The variable φt , meanwhile, advances by the amount φt + θt . The effect of this is that if we look at only one of the two coordinates, say θt , we get a sequence of numbers which, while deterministic, is uniformly distributed, and very hard to predict (Figure O.3).
+00:02 Monday 18th April, 2016
+[[TODO: Mersenne twisters]]
+O.4. FURTHERREADING 826
+FIGURE O.2: Effect of the Arnold cat map. The original image is 300 × 300, and mapped into the unit square. The cat map is then applied to the coordinates of each pixel separately, giving a new pixel which inherits the old color. (This can most easily seen in the transition from the original to time 1.) The original image re-assembles itself at time 300 because all the original coordinates we multiples of 1/300. If we had sampled every, say, 32 time-steps, it would have taken much longer to see a repetition. In the meanwhile, following the x coordinate of a single pixel from the original image would provide a very creditable sequence of pseudo-random values. (Figure from Wikipedia, s.v. “Arnold’s cat map”. See also http://math.gmu.edu/~sander/movies/arnold.html.)
+00:02 Monday 18th April, 2016
+￼
+827
+O.4. FURTHERREADING
+￼￼￼￼￼￼￼￼￼￼0.0 0.2 0.4
+0.6 0.8 1.0
+Histogram of z
+￼￼z
+￼● ●●●●●● ● ● ● ●●●●●● ● ●●● ●●●●● ●●●● ●● ●●●●● ●● ● ●
+￼●●●●●●●● ●● ●●●●●●●●●●● ●● ●●● ● ●● ● ●●●●
+● ●●●●● ●●●●● ● ● ●●●●●●●●●● ●●●●●
+●●● ● ●● ●● ● ● ●● ● ● ●● ● ● ● ●●● ●●●●● ●●●● ● ● ●●●●●● ●●● ●●●● ● ●●
+●●●●●●● ●●●●●●●●●● ●● ●●●●● ●● ●● ●●●●● ● ● ●●●● ●
+●●●●●●●● ● ●●●●●● ●● ●●●
+●● ● ● ● ● ● ● ● ●
+●● ●●●●● ●●●●● ●●
+●● ●●●●●●●● ●●●●●●●●●●●
+●● ● ●● ●●●●● ●●
+●●●●●●●●●● ● ●●●● ●●●●●
+●● ● ● ● ● ●● ● ●● ●● ●●● ● ● ●●●●●●● ●● ●●● ●
+● ●●●●●● ●● ●●●●● ●●●● ● ●●
+●● ●●●●●●● ● ●●● ●●● ●● ●●●●● ●●●●●●● ● ●●● ●● ●●
+●●● ●●●●●●●●● ● ● ●● ●● ●● ● ●● ●●●●●●●●● ●●● ●
+●●●●●●●●●● ●● ●●●● ●●●●● ● ●●●●●●●●● ●
+●●● ● ●●●●●●●●●●●●●●●●● ●● ●●●● ●● ●●● ●●●●●● ●● ●●●●●●●●●●●●● ●●● ● ● ●● ●●●●●●●●●● ●● ● ●● ● ●● ● ●● ●
+●● ● ●●
+●● ● ●●●●●●●● ●● ● ● ● ● ●●●● ●●● ●● ●●●●●●●●●● ●●● ●●●●●●●●●●
+●● ●●●●● ● ●● ●●●● ● ●●●●● ● ● ● ● ● ● ●● ● ●●●●●●●●●●●● ●●●●●●●●●
+● ●●● ●●●● ●●●●●●● ●●●●●●● ●●●●
+●●● ●●●● ●●● ●●●●
+● ● ●●●
+●●●
+● ● ●
+●●● ● ●● ● ● ●●●● ●
+●●●●●●●●●● ● ●●●●● ●●●● ● ●● ● ● ● ● ●● ●● ● ● ● ● ●● ●●
+● ● ●●● ● ●● ● ●● ●● ● ●● ●●●●●
+● ● ● ●
+● ● ●
+●
+● ●●
+￼￼￼￼￼￼￼￼￼￼￼￼￼0.0 0.2 0.4
+0.6 0.8 1.0
+FIGURE O.3: Left: histogram from 1000 samples of the θ coordinate of the Arnold cat map, started from (0.11124,0.42111). Right: scatter-plot of successive values from the sample, showing that the dependence is very subtle.
+00:02 Monday 18th April, 2016
+Zt
+￼par(mfrow=c(2,1))
+z <- rarnold(1000,c(0.11124,0.42111))
+hist(z,probability=TRUE)
+plot(z[-1000],z[-1],xlab=expression(Z[t]),ylab=expression(Z[t+1]))
+par(mfrow=c(1,1))
+Zt+1 Density
+0.0 0.4 0.8 0.0 0.4 0.8 1.2
+O.4. FURTHERREADING 828
+O.4 Further Reading
+There are good discussions of methods of random variable generation in Press et al. (1992) [[Monahan]] [[others]]. At a higher level of technicality, [[Devroye]] is au- thoritative. Press et al. (1992) also covers techniques for generating uniform random numbers. Also, [[refs. on discrepancy theory/equidistribution.]] Ruelle (1991) pro- vides a thought-provoking and inspiring guide to the idea that a deterministic system can look random, among many other topics.
+On Monte Carlo: [[Robert and Casella]] is a standard authority on applications and techniques common in statistics. Newman and Barkema (1999) is excellent if you know some physics, especially thermodynamics.
+On Markov chain Monte Carlo, the books already named, together with the [[Gilks book]], are worth consulting. Anyone attempting to use the technique should read both Geyer (1992), attacking such practices as “burn-in”, “thinning”, the use of convergence diagnostics, etc., and their defense by Gelman and Rubin (1992). Geyer has, to my mind, the better of the argument, but people I respect strongly disagree.
+O.5 Exercises
+1. (a) Prove that a draw in the rejection method of §O.1 is accepted is accepted with probability 1/M. That is, the rejection probability of the rejection method is 1 − 1/M .
+(b) Provethatgeneratingnrandomvalueswiththerejectionmethodrequires on average nM proposals.
+2. Prove that when α in Eq. O.1 is irrational, then the fraction of times at which θt fallsintoanygiveninterval[a,b]isproportionaltoitslength:
+[[TODO: Clean up]]
+1 􏰥n
+n
+b − a
+1[a,b]θt −−→ 60 (O.3)
+n→∞
+￼￼t=1
+￼3The core idea here actually dates back to a medieval astronomer named Nicholas Oresme in the 1300s, as part of an argument that the universe would not repeat exactly (von Plato, 1994, pp. 279–284).
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

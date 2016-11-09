@@ -1,0 +1,685 @@
+
+Chapter 1
+Regression: Predicting and Relating Quantitative Features
+1.1 Statistics, Data Analysis, Regression
+Statistics is the branch of mathematical engineering which designs and analyses meth- ods for drawing reliable inferences from imperfect data.
+The subject of most sciences is some aspect of the world around us, or within us. Psychology studies minds; geology studies the Earth’s composition and form; economics studies production, distribution and exchange; mycology studies mush- rooms. Statistics does not study the world, but some of the ways we try to under- stand the world — some of the intellectual tools of the other sciences. Its utility comes indirectly, through helping those other sciences.
+This utility is very great, because all the sciences have to deal with imperfect data. Data may be imperfect because we can only observe and record a small fraction of what is relevant; or because we can only observe indirect signs of what is truly relevant; or because, no matter how carefully we try, our data always contain an element of noise. Over the last two centuries, statistics has come to handle all such imperfections by modeling them as random processes, and probability has become so central to statistics that we introduce random events deliberately (as in sample surveys).1
+Statistics, then, uses probability to model inference from data. We try to math- ematically understand the properties of different procedures for drawing inferences: Under what conditions are they reliable? What sorts of errors do they make, and how often? What can they tell us when they work? What are signs that something has gone wrong? Like other branches of engineering, statistics aims not just at un- derstanding but also at improvement: we want to analyze data better: more reliably, with fewer and smaller errors, under broader conditions, faster, and with less mental
+1Two excellent, but very different, histories of how statistics came to this understanding are Hacking (1990) and Porter (1986).
+27
+￼
+1.2. GUESSINGTHEVALUEOFARANDOMVARIABLE 28
+effort. Sometimes some of these goals conflict — a fast, simple method might be very error-prone, or only reliable under a narrow range of circumstances.
+One of the things that people most often want to know about the world is how different variables are related to each other, and one of the central tools statistics has for learning about relationships is regression.2 In your linear regression class, you learned about how it could be used in data analysis, and learned about its properties. In this book, we will build on that foundation, extending beyond basic linear regres- sion in many directions, to answer many questions about how variables are related to each other.
+This is intimately related to prediction. Being able to make predictions isn’t the only reason we want to understand relations between variables — we also want to answer “what if?” questions — but prediction tests our knowledge of relations. (If we misunderstand, we might still be able to predict, but it’s hard to see how we could understand and not be able to predict.) So before we go beyond linear regression, we will first look at prediction, and how to predict one variable from nothing at all. Then we will look at predictive relationships between variables, and see how linear regression is just one member of a big family of smoothing methods, all of which are available to us.
+1.2 Guessing the Value of a Random Variable
+We have a quantitative, numerical variable, which we’ll imaginatively call Y . We’ll suppose that it’s a random variable, and try to predict it by guessing a single value for it. (Other kinds of predictions are possible — we might guess whether Y will fall within certain limits, or the probability that it does so, or even the whole probability distribution of Y . But some lessons we’ll learn here will apply to these other kinds of predictions as well.) What is the best value to guess? More formally, what is the optimal point forecast for Y ?
+To answer this question, we need to pick a function to be optimized, which should measure how good our guesses are — or equivalently how bad they are, i.e., how big an error we’re making. A reasonable start point is the mean squared error:
+MSE(m) ≡ 􏰌􏰷(Y − m)2􏰺 (1.1)
+2The origin of the name is instructive (Stigler, 1986). It comes from 19th century investigations into the relationship between the attributes of parents and their children. People who are taller (heavier, faster, . . . ) than average tend to have children who are also taller than average, but not quite as tall. Likewise, the children of unusually short parents also tend to be closer to the average, and similarly for other traits. This came to be called “regression towards the mean,” or even “regression towards mediocrity”; hence the line relating the average height (or whatever) of children to that of their parents was “the regression line,” and the word stuck.
+00:02 Monday 18th April, 2016
+￼
+29 1.3. THEREGRESSIONFUNCTION So we’d like to find the value μ where MSE(m) is smallest.
+MSE(m)
+d MSE dm
+= 􏰌􏰷(Y−m)2􏰺
+= (􏰌[Y−m])2+􏰎[Y−m] = (􏰌[Y−m])2+􏰎[Y]
+= (􏰌[Y]−m)2+􏰎[Y]
+= −2(􏰌[Y]−m)+0 = 0
+= 0
+= 􏰌[Y]
+(1.2)
+(1.3) (1.4) (1.5)
+(1.6)
+(1.7)
+(1.8) (1.9)
+￼d MSE 􏰕􏰕 dm 􏰕􏰕
+￼􏰕m=μ 2(􏰌[Y]−μ) μ
+So, if we gauge the quality of our prediction by mean-squared error, the best predic- tion to make is the expected value.
+1.2.1 Estimating the Expected Value
+Of course, to make the prediction 􏰌 [Y ] we would have to know the expected value of Y. Typically, we do not. However, if we have sampled values, y1,y2,...yn, we can estimate the expectation from the sample mean:
+1 􏰥n
+μ􏰨 ≡ n
+If the samples are independent and identically distributed (IID), then the law of large
+numbers tells us that
+μ􏰨→􏰌[Y]=μ (1.11)
+and algebra with variances (Exercise 1) tells us something about how fast the conver- gence is, namely that the squared error will typically be about 􏰎 [Y ] /n.
+Of course the assumption that the yi come from IID samples is a strong one, but we can assert pretty much the same thing if they’re just uncorrelated with a common expected value. Even if they are correlated, but the correlations decay fast enough, all that changes is the rate of convergence (§21.2.2.1). So “sit, wait, and average” is a pretty reliable way of estimating the expectation value.
+1.3 The Regression Function
+Of course, it’s not very useful to predict just one number for a variable. Typically, we have lots of variables in our data, and we believe they are related somehow. For example, suppose that we have data on two variables, X and Y , which might look like Figure 1.1.3 The feature Y is what we are trying to predict, a.k.a. the dependent
+3Problem set A.29 features data that looks rather like these made-up values. 00:02 Monday 18th April, 2016
+yi (1.10)
+￼i=1
+￼
+1.3. THEREGRESSIONFUNCTION 30
+variable or output or response, and X is the predictor or independent variable or covariate or input. Y might be something like the profitability of a customer and X their credit rating, or, if you want a less mercenary example, Y could be some measure of improvement in blood cholesterol and X the dose taken of a drug. Typically we won’t have just one input feature X but rather many of them, but that gets harder to draw and doesn’t change the points of principle.
+Figure 1.2 shows the same data as Figure 1.1, only with the sample mean added on. This clearly tells us something about the data, but also it seems like we should be able to do better — to reduce the average error — by using X , rather than by ignoring it.
+Let’s say that the we want our prediction to be a function of X , namely f (X ). What should that function be, if we still use mean squared error? We can work this out by using the law of total expectation, i.e., the fact that 􏰌 [U ] = 􏰌 [􏰌 [U |V ]] for any random variables U and V .
+MSE(f) = = =
+􏰌􏰷(Y−f(X))2􏰺 (1.12) 􏰌􏰷􏰌􏰷(Y − f (X))2|X􏰺􏰺 (1.13) 􏰌􏰷􏰎[Y|X]+(􏰌[Y − f (X)|X])2􏰺 (1.14)
+When we want to minimize this, the first term inside the expectation doesn’t depend on our prediction, and the second term looks just like our previous optimization only with all expectations conditional on X , so for our optimal function μ(x) we get
+μ(x)=􏰌[Y|X =x] (1.15)
+In other words, the (mean-squared) optimal conditional prediction is just the condi- tional expected value. The function μ(x) is called the regression function. This is what we would like to know when we want to predict Y .
+1.3.1 Some Disclaimers
+It’s important to be clear on what is and is not being assumed here. Talking about X as the “independent variable” and Y as the “dependent” one suggests a causal model, which we might write
+Y ←μ(X)+ε (1.16)
+where the direction of the arrow, ←, indicates the flow from causes to effects, and ε is some noise variable. If the gods of inference are very, very kind, then ε would have a fixed distribution, independent of X , and we could without loss of generality take it to have mean zero. (“Without loss of generality” because if it has a non-zero mean, we can incorporate that into μ(X ) as an additive constant.) However, no such assumption is required to get Eq. 1.15. It works when predicting effects from causes, or the other way around when predicting (or “retrodicting”) causes from effects, or indeed when there is no causal relationship whatsoever between X and Y4. It is
+4We will cover causal inference in detail in Part IV.
+00:02 Monday 18th April, 2016
+￼
+31 1.3. THEREGRESSIONFUNCTION
+￼●●● ●
+● ●
+●
+●
+● ●● ●
+●
+●● ●
+￼￼￼￼●●
+● ●● ●●●●●
+●
+●● ● ●
+￼●● ●●
+● ●● ●● ● ● ●
+●●● ●● ●●
+●●
+●● ●● ●●●
+￼￼￼●● ● ●
+●
+●
+● ●●
+￼￼￼￼￼￼● ●● ●
+● ●
+●● ●
+●● ●
+●● ● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼● ●●
+●●
+● ●
+￼￼￼●
+￼￼￼● ●
+● ●
+● ●●●
+●● ●
+￼￼￼●
+￼￼￼￼● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0.0 0.2 0.4
+0.6 0.8 1.0
+x
+￼plot(all.x, all.y, xlab = "x", ylab = "y")
+rug(all.x, side = 1, col = "grey")
+rug(all.y, side = 2, col = "grey")
+FIGURE 1.1: Scatterplot of the (made up) running example data. rug() add horizontal and vertical ticks to the axes to mark the location of the data (in grey so they’re less strong than the main tick-marks). This isn’t necessary but is often helpful. The data are in the examples.Rda file.
+00:02 Monday 18th April, 2016
+0.0 0.2 0.4
+0.6 0.8 1.0
+y
+1.3. THEREGRESSIONFUNCTION
+32
+￼●●● ●
+● ●
+●
+● ●
+●
+●
+●●
+●●● ●● ●●
+●● ●● ●●●
+●
+●● ●
+￼￼￼￼●●
+● ●● ●●●●●
+●● ●●
+● ●● ●
+●
+●● ● ●
+● ●● ●● ● ● ●
+￼￼￼￼￼￼￼￼￼￼●● ●
+● ●●
+● ●● ●
+● ●
+●● ●
+●● ●
+●● ● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼● ●●
+●●
+● ●
+￼￼￼●
+￼￼￼●● ●
+￼￼￼●
+￼● ●
+● ●
+● ●●●
+￼￼￼● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0.0 0.2 0.4
+0.6 0.8 1.0
+￼plot(all.x, all.y, xlab = "x", ylab = "y")
+rug(all.x, side = 1, col = "grey")
+rug(all.y, side = 2, col = "grey")
+abline(h = mean(all.y), lty = "dotted")
+FIGURE 1.2: Data from Figure 1.1, with a horizontal line showing the sample mean of Y .
+00:02 Monday 18th April, 2016
+x
+0.0 0.2 0.4
+0.6 0.8 1.0
+y
+33 1.4. ESTIMATINGTHEREGRESSIONFUNCTION always true that
+Y|X =μ(X)+η(X) (1.17)
+where η(X ) is a random variable with expected value 0, but as the notation indicates the distribution of this variable generally depends on X .
+It’s also important to be clear that when we find the regression function is a con- stant, μ(x) = μ0 for all x, that this does not mean that X and Y are statistically independent. If they are independent, then the regression function is a constant, but turning this around is the logical fallacy of “affirming the consequent”5.
+1.4 Estimating the Regression Function
+Wewanttofindtheregressionfunctionμ(x)=􏰌[Y|X =x],andwhatwe’vegotisa big set of training examples, of pairs (x1,y1),(x2,y2),...(xn,yn). What should we do? If X takes on only a finite set of values, then a simple strategy is to use the condi-
+tional sample means:
+μ􏰨(x)= 1 􏰥 yi (1.18) #{i:xi =x}i:xi=x
+By the same kind of law-of-large-numbers reasoning as before, we can be confident thatμ􏰨(x)→􏰌[Y|X =x].
+Unfortunately, this only works when X takes values in a finite set. If X is contin- uous, then in general the probability of our getting a sample at any particular value is zero, as is the probability of getting multiple samples at exactly the same value of x. This is a basic issue with estimating any kind of function from data — the function will always be undersampled, and we need to fill in between the values we see. We also need to somehow take into account the fact that each yi is a sample from the conditional distribution of Y |X = xi , and generally not equal to 􏰌 􏰓Y |X = xi 􏰔. So any kind of function estimation is going to involve interpolation, extrapolation, and smoothing.
+Different methods of estimating the regression function — different regression methods, for short — involve different choices about how we interpolate, extrapolate and smooth. This involves our making a choice about how to approximate μ(x) by a limited class of functions which we know (or at least hope) we can estimate. There is no guarantee that our choice leads to a good approximation in the case at hand, though it is sometimes possible to say that the approximation error will shrink as we get more and more data. This is an extremely important topic and deserves an extended discussion, coming next.
+1.4.1 The Bias-Variance Tradeoff
+Suppose that the true regression function is μ(x), but we use the function μ􏰨 to make our predictions. Let’s look at the mean squared error at X = x in a slightly different
+5As in combining the fact that all human beings are featherless bipeds, and the observation that a cooked turkey is a featherless biped, to conclude that cooked turkeys are human beings. An econome- trician stops there; an econometrician who wants to be famous writes a best-selling book about how this proves that Thanksgiving is really about cannibalism.
+00:02 Monday 18th April, 2016
+￼￼
+1.4. ESTIMATINGTHEREGRESSIONFUNCTION 34
+way than before, which will make it clearer what happens when we can’t use μ to make predictions. We’ll begin by expanding (Y − μ􏰨(x))2, since the MSE at x is just the expectation of this.
+(Y − μ􏰨(x))2 (1.19)
+= (Y − μ(x) + μ(x) − μ􏰨(x))2
+= (Y − μ(x))2 + 2(Y − μ(x))(μ(x) − μ􏰨(x)) + (μ(x) − μ􏰨(x))2 (1.20)
+Eq. 1.17 tells us that Y − μ(X ) = η, a random variable which has expectation zero (and is uncorrelated with X ). When we take the expectation of Eq. 1.20, nothing happens to the last term (since it doesn’t involve any random quantities); the middle term goes to zero (because 􏰌 [Y − μ(X )] = 􏰌 [η] = 0), and the first term becomes the variance of η. This depends on x, in general, so let’s call it σx2. We have
+MSE(μ􏰨(x)) = σx2 + (μ(x) − μ􏰨(x))2 (1.21)
+The σx2 term doesn’t depend on our prediction function, just on how hard it is, in- trinsically, to predict Y at X = x. The second term, though, is the extra error we
+get from not knowing μ. (Unsurprisingly, ignorance of μ cannot improve our pre- dictions.) This is our first bias-variance decomposition: the total MSE at x is de- composed into a (squared) bias μ(x) − μ􏰨(x), the amount by which our predictions are systematically off, and a variance σx2, the unpredictable, “statistical” fluctuation around even the best prediction.
+All of the above assumes that μ􏰨 is a single fixed function. In practice, of course, μ􏰨 is something we estimate from earlier data. But if those data are random, the exact
+regression function we get is random too; let’s call this random function M􏰨n , where the subscript reminds us of the finite amount of data we used to estimate it. What we have analyzed is really MSE(M􏰨n(x)|M􏰨n = μ􏰨), the mean squared error conditional on a
+particular estimated regression function. What can we say about the prediction error of the method, averaging over all the possible training data sets?
+MSE(M􏰨n (x))
+= 􏰌􏰷(Y−M􏰨n(X))2|X=x􏰺 (1.22)
+􏰷􏰷2􏰺􏰺 = 􏰌 􏰌 (Y−M􏰨n(X))|X=x,M􏰨n=μ􏰨 |X=x
+= 􏰌􏰷σx2+(μ(x)−M􏰨n(x))2|X=x􏰺
+= σx2+􏰌􏰷(μ(x)−M􏰨n(x))2|X=x􏰺
+= σx2 +􏰌􏰷(μ(x)−􏰌􏰷M􏰨n(x)􏰺+􏰌􏰷M􏰨n(x)􏰺−M􏰨n(x))2􏰺(1.26) = σx2+􏰳μ(x)−􏰌􏰷M􏰨n(x)􏰺􏰵2+􏰎􏰷M􏰨n(x)􏰺 (1.27)
+This is our second bias-variance decomposition — I pulled the same trick as before, adding and subtract a mean inside the square. The first term is just the variance of the process; we’ve seen that before and it isn’t, for the moment, of any concern. The second term is the bias in using M􏰨n to estimate μ — the approximation bias
+00:02 Monday 18th April, 2016
+(1.23) (1.24) (1.25)
+35 1.4. ESTIMATINGTHEREGRESSIONFUNCTION
+or approximation error. The third term, though, is the variance in our estimate of the regression function. Even if we have an unbiased method (μ(x) = 􏰌􏰷M􏰨n(x)􏰺), if there is a lot of variance in our estimates, we can expect to make large errors.
+The approximation bias has to depend on the true regression function. For ex-
+ample, if 􏰌􏰷M􏰨n(x)􏰺 = 42 + 37x, the error of approximation will be zero if μ(x) =
+42 + 37x, but it will be larger and x-dependent if μ(x) = 0. However, there are flex- ible methods of estimation which will have small approximation biases for all μ in a broad range of regression functions. The catch is that, at least past a certain point, decreasing the approximation bias can only come through increasing the estimation variance. This is the bias-variance trade-off. However, nothing says that the trade- off has to be one-for-one. Sometimes we can lower the total error by introducing some bias, since it gets rid of more variance than it adds approximation error. The next section gives an example.
+In general, both the approximation bias and the estimation variance depend on n. A method is consistent6 when both of these go to zero as n → ∞ — that is, if werecoverthetrueregressionfunctionaswegetmoreandmoredata.7 Again,con- sistency depends not just on the method, but also on how well the method matches the data-generating process, and, again, there is a bias-variance trade-off. There can be multiple consistent methods for the same problem, and their biases and variances don’t have to go to zero at the same rates.
+1.4.2 The Bias-Variance Trade-Off in Action
+Let’s take an extreme example: we could decide to approximate μ(x) by a constant μ0. The implicit smoothing here is very strong, but sometimes appropriate. For in- stance, it’s appropriate when μ(x) really is a constant! Then trying to estimate any additional structure in the regression function is just so much wasted effort. Alter- nately, if μ(x) is nearly constant, we may still be better off approximating it as one. For instance, suppose the true μ(x) = μ0 + a sin (ν x), where a ≪ 1 and ν ≫ 1 (Figure 1.3 shows an example). With limited data, we can actually get better predictions by estimating a constant regression function than one with the correct functional form.
+1.4.3 Ordinary Least Squares Linear Regression as Smoothing
+Let’s revisit ordinary least-squares linear regression from this point of view. We’ll assume that the predictor variable X is one dimensional, and that both X and Y are
+6To be precise, consistent for μ, or consistent for conditional expectations. More generally, an estimator of any property of the data, or of the whole distribution, is consistent if it converges on the truth.
+7You might worry about this claim, especially if you’ve taken more probability theory — aren’t we
+just saying something about average performance of the M􏰨n , rather than any particular estimated regres-
+sion function? But notice that if the estimation variance goes to zero, then by Chebyshev’s inequality,
+􏰷􏰺 Pr(|X−􏰌[X]|≥a)≤􏰎[X]/a2,eachM􏰨n(x)comesarbitrarilycloseto􏰌 M􏰨n(x) witharbitrarilyhigh
+probability. If the approximation bias goes to zero, therefore, the estimated regression functions converge in probability on the true regression function, not just in mean.
+00:02 Monday 18th April, 2016
+￼
+1.4. ESTIMATINGTHEREGRESSIONFUNCTION
+36
+￼￼●
+●●
+●
+●
+●
+●
+●
+●
+● ●
+●
+￼￼￼●
+●
+●
+●●● ●
+●
+●
+●
+●●
+●
+￼￼￼￼￼￼￼￼￼￼￼￼0.0 0.2 0.4
+ugly.func <- function(x) {
+    1 + 0.01 * sin(100 * x)
+0.6 0.8
+1.0
+x
+￼}
+x <- runif(25)
+y <- ugly.func(x) + rnorm(length(x), 0, 0.5)
+plot(x, y, xlab = "x", ylab = "y")
+curve(ugly.func, add = TRUE)
+abline(h = mean(y), col = "red")
+sine.fit = lm(y ~ 1 + sin(100 * x))
+curve(sine.fit$coefficients[1] + sine.fit$coefficients[2] * sin(100 * x), col = "blue",
+add = TRUE)
+FIGURE 1.3: Arapidly-varyingbutnearly-constantregressionfunction;Y =1+0.01sin100x+ε, with ε ∼ 􏰄 (0,0.1) and X ∼ Unif(0,1). Red: flat line at the sample mean. Blue: estimated function of form μ􏰨0 +aˆsin100x. With just a few observations, the constant actually predicts better on new data (square-root MSE, RMSE, of 0.53 than does the estimate sine function (RMS error on new data 0.59). The bias of using the wrong functional form is less than the extra variance of estimation, so using the true model right actually hurts us.
+00:02 Monday 18th April, 2016
+0.0 0.5
+1.0 1.5 2.0
+y
+37 1.4. ESTIMATINGTHEREGRESSIONFUNCTION
+centered (i.e. have mean zero) — neither of these assumptions is really necessary, but they reduce the book-keeping.
+We choose to approximate μ(x) by α+βx, and ask for the best values a, b of those constants. These will be the ones which minimize the mean-squared error.
+􏰌􏰷(Y −α−βX)2􏰺
+= 􏰌􏰷􏰎[Y|X]+(􏰌[Y −α−βX|X])2􏰺
+MSE(α,β) =
+= 􏰌􏰷􏰌􏰷(Y −α−βX)2|X􏰺􏰺
+(1.28) (1.29) (1.30) (1.31)
+= 􏰌[􏰎[Y|X]]+􏰌􏰷(􏰌[Y −α−βX|X])2􏰺
+The first term doesn’t depend on α or β, so we can drop it for purposes of optimiza-
+tion. Taking derivatives, and then bringing them inside the expectations,
+a = 􏰌[Y]−b􏰌[X]=0 using the fact that X and Y are centered; and,
+∂ MSE ∂β
+∂ MSE ∂α
+= 􏰌[2(Y −α−βX)(−1)] 􏰌[Y−a−bX] = 0
+(1.32)
+(1.33) (1.34)
+(1.35) (1.36) (1.37)
+￼= 􏰌[2(Y −α−βX)(−X)]
+￼􏰌[XY]−b􏰌􏰷X2􏰺 = 0
+b = Cov[X,Y]
+￼􏰎[X]
+again using the centering of X and Y . That is, the mean-squared optimal linear pre-
+diction is
+μ(x)= xCov[X,Y] (1.38) 􏰎[X]
+￼Now, if we try to estimate this from data, there are (at least) two approaches. One is to replace the true population values of the covariance and the variance with their sample values, respectively
+and
+1 􏰥 xi2 ni
+1 􏰥 yi xi ni
+RSS(α,β)≡􏰥􏰑yi −α−βxi􏰒2 (1.41) i
+00:02 Monday 18th April, 2016
+(1.40) (again, assuming centering). The other is to minimize the residual sum of squares,
+(1.39)
+￼￼
+1.4. ESTIMATINGTHEREGRESSIONFUNCTION 38 You may or may not find it surprising that both approaches lead to the same answer:
+We are now in a position to see how the least-squares linear regression model is really a smoothing of the data. Let’s write the estimated regression function explicitly in terms of the training data points.
+(1.44) (1.45)
+(1.46) (1.47)
+a􏰨 = 0 (1.42) 􏰢i yi xi
+􏰨b = 􏰢ixi2 (1.43) Provided that 􏰎 [X ] > 0, this will converge with IID samples, so we have a consistent
+￼estimator.8
+μ􏰨(x) = 􏰨b x
+􏰢i yi xi
+= x 􏰢i xi2
+￼􏰥 xi
+= yi 􏰢 x2 x
+ijj = 􏰥y xi x
+i n σˆ 2 iX
+￼￼whereσˆX2 isthesamplevarianceofX.Inwords,ourpredictionisaweightedaverage of the observed values yi of the dependent variable, where the weights are propor-
+tional to how far xi is from the center (relative to the variance), and proportional to the magnitude of x. If xi is on the same side of the center as x, it gets a positive weight, and if it’s on the opposite side it gets a negative weight.
+Figure 1.4 adds the least-squares regression line to Figure 1.1. You will have no- ticed that this is only very slightly different from the constant regression function; the coefficient on X is −0.018. Visually, the problem is that there should be a positive slope in the left-hand half of the data, and a negative slope in the right, but the slopes and the densities are balanced so that the best single slope is near zero.9
+Mathematically, the problem arises from the peculiar way in which least-squares linear regression smoothes the data. As I said, the weight of a data point depends on how far it is from the center of the data, not how far it is from the point at which we are trying to predict. This works when μ(x) really is a straight line, but otherwise — e.g., here — it’s a recipe for trouble. However, it does suggest that if we could somehow just tweak the way we smooth the data, we could do better than linear regression.
+8Eq. 1.42 may look funny, but remember that we’re assuming X and Y have been centered. Centering doesn’t change the slope of the least-squares line but does change the intercept; if we go back to the un-
+centered variables the intercept becomes Y − 􏰨b X , where the bar denotes the sample mean.
+9The standard test of whether this coefficient is zero is about as far from rejecting the null hypothesis
+as you will ever see, p = 0.86. Remember this the next time you look at regression output. 00:02 Monday 18th April, 2016
+￼￼￼
+39 1.4. ESTIMATINGTHEREGRESSIONFUNCTION
+￼●●● ●
+● ●
+●
+● ●
+●
+●
+●●
+●●● ●● ●●
+●● ●●
+● ●● ●
+●
+●● ●
+￼￼￼￼●●
+● ●● ●●●●●
+●
+●● ● ●
+● ●● ●● ● ● ●
+●● ●● ●●●
+￼￼￼￼￼￼￼￼￼￼￼●● ●
+● ●●
+● ●● ●
+● ●
+●● ●
+●● ●
+●● ● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼● ●●
+●●
+● ●
+￼￼￼●
+￼￼￼●● ●
+￼￼￼●
+￼● ●
+● ●
+● ●●●
+￼￼￼● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0.0 0.2 0.4
+0.6 0.8 1.0
+x
+￼plot(all.x, all.y, xlab = "x", ylab = "y")
+rug(all.x, side = 1, col = "grey")
+rug(all.y, side = 2, col = "grey")
+abline(h = mean(all.y), lty = "dotted")
+fit.all = lm(all.y ~ all.x)
+abline(fit.all)
+FIGURE 1.4: Data from Figure 1.1, with a horizontal line at the mean (dotted) and the ordinary least squares regression line (solid). (The abline adds a line to the current plot with intercept a and slope b; it’s set up to take the appropriate coefficients from the output of lm.)
+00:02 Monday 18th April, 2016
+0.0 0.2 0.4
+0.6 0.8 1.0
+y
+1.5. LINEARSMOOTHERS 40
+1.5 Linear Smoothers
+The sample mean and the linear regression line are both special cases of linear smoothers,
+which are estimates of the regression function with the following form: μ􏰨(x)=􏰥yiw􏰨(xi,x) (1.48)
+i
+These are called linear smoothers because the predictions are linear in the responses yi ; as functions of x they can be and generally are nonlinear.
+As I just said, the sample mean is a special case; see Exercise 7. Ordinary linear regression is another special case, where w􏰨(xi , x) = (xi /nσˆX2 )x (from Eq. 1.47). Both of these, as remarked earlier, ignore how far xi is from x. Let us look at some linear smoothers which are not so silly.
+1.5.1 k-Nearest-Neighbor Regression
+At the other extreme from ignoring the distance between xi and x, we could do
+nearest-neighbor regression:
+w􏰨(xi , x) = 0 otherwise (1.49)
+This is very sensitive to the distance between xi and x. If μ(x) does not change too rapidly, and X is pretty thoroughly sampled, then the nearest neighbor of x among the xi is probably close to x, so that μ(xi ) is probably close to μ(x). However, yi = μ(xi )+noise, so nearest-neighbor regression will include the noise into its prediction. We might instead do k-nearest neighbor regression,
+􏰝 1/k xi one of the k nearest neighbors of x
+w􏰨(xi , x) = 0 otherwise (1.50)
+Again, with enough samples all the k nearest neighbors of x are probably close to x, so their regression functions there are going to be close to the regression function at x. But because we average their values of yi , the noise terms should tend to cancel each other out. As we increase k, we get smoother functions — in the limit k = n and we just get back the constant. Figure 1.5 illustrates this for our running example data.10 To use k-nearest-neighbors regression, we need to pick k somehow. This means we need to decide how much smoothing to do, and this is not trivial. We will return to this point in Chapter 3.
+Because k-nearest-neighbors averages over only a fixed number of neighbors, each of which is a noisy sample, it always has some noise in its prediction, and is generally not consistent. This may not matter very much with moderately-large data (espe- cially once we have a good way of picking k). If we want consistency, we need to let
+10The code uses the k-nearest neighbor function provided by the package FNN (Beygelzimer et al., 2013). This requires one to give both a set of training points (used to learn the model) and a set of test points (at which the model is to make predictions), and returns a list where the actual predictions are in the pred element — see help(knn.reg) for more, including examples.
+00:02 Monday 18th April, 2016
+􏰝 1 xi nearest neighbor of x
+￼
+41 1.5. LINEARSMOOTHERS k grow with n, but not too fast; it’s enough that as n → ∞, k → ∞ and k/n → 0
+(Györfi et al., 2002, Thm. 6.1, p. 88).
+00:02 Monday 18th April, 2016
+1.5. LINEARSMOOTHERS
+42
+￼●●● ●
+● ●
+●
+● ●
+●
+●
+●●
+●●● ●● ●●
+●● ●● ●●●
+●
+●● ●
+￼￼￼￼●●
+● ●● ●●●●●
+●● ●●
+● ●● ●
+●
+●● ● ●
+● ●● ●● ● ● ●
+￼￼￼￼￼￼￼￼￼￼￼●● ●
+● ●●
+● ●● ●
+● ●
+●● ●
+●● ●
+●● ● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼● ●●
+●●
+● ●
+￼￼￼●
+￼￼￼●● ●
+￼￼￼●
+￼● ●
+● ●
+● ●●●
+￼￼￼● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼all 1 3 5 20
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0.0 0.2 0.4
+0.6 0.8 1.0
+x
+￼library(FNN)
+plot.seq <- matrix(seq(from = 0, to = 1, length.out = 100), byrow = TRUE)
+lines(plot.seq, knn.reg(train = all.x, test = plot.seq, y = all.y, k = 1)$pred,
+    col = "red")
+lines(plot.seq, knn.reg(train = all.x, test = plot.seq, y = all.y, k = 3)$pred,
+    col = "green")
+lines(plot.seq, knn.reg(train = all.x, test = plot.seq, y = all.y, k = 5)$pred,
+    col = "blue")
+lines(plot.seq, knn.reg(train = all.x, test = plot.seq, y = all.y, k = 20)$pred,
+    col = "purple")
+legend("center", legend = c("all", "1", "3", "5", "20"), lty = c("dashed", rep("solid",
+    4)), col = c("black", "red", "green", "blue", "purple"))
+FIGURE 1.5: Points from Figure 1.1 with horizontal dashed line at the mean and the k-nearest- neighbor regression curves for the indicated k. Increasing k smoothes out the regression line, pulling it towards the mean. — The code is repetitive; can you define functions to simplify it?
+00:02 Monday 18th April, 2016
+0.0 0.2 0.4
+0.6 0.8 1.0
+y
+43 1.5. LINEARSMOOTHERS
+1.5.2 Kernel Smoothers
+Changing k in a k-nearest-neighbors regression lets us change how much smoothing we’re doing on our data, but it’s a bit awkward to express this in terms of a number of data points. It feels like it would be more natural to talk about a range in the independent variable over which we smooth or average. Another problem with k- NN regression is that each testing point is predicted using information from only a few of the training data points, unlike linear regression or the sample mean, which always uses all the training data. It’d be nice if we could somehow use all the training data, but in a location-sensitive way.
+There are several ways to do this, as we’ll see, but a particularly useful one is kernel smoothing, a.k.a. kernel regression or Nadaraya-Watson regression. To begin with, we need to pick a kernel function11 K(xi , x) which satisfies the following properties:
+1. K(xi,x)≥0
+2. K(xi , x) depends only on the distance xi − x, not the individual arguments 3. 􏰤xK(0,x)dx=0
+4. 0<􏰤x2K(0,x)dx<∞
+These conditions together (especially the last one) imply that K(xi , x) → 0 as |xi − x| → ∞. Two examples of such functions are the density of the Unif(−h/2,h/2)
+h) distribution. Here The Nadaraya-Watson estimate of the regression function is
+￼distribution, and the density of the standard Gaussian 􏰄 (0, h can be any positive number, and is called the bandwidth.
+􏰋
+￼i.e., in terms of Eq. 1.48,
+􏰥 K(xi,x) μ􏰨(x)= yi 􏰢 K(x ,x)
+ijj K(xi,x)
+w􏰨(xi , x) = 􏰢j K(xj , x)
+(1.51)
+(1.52)
+￼(Notice that here, as in k-NN regression, the sum of the weights is always 1. Why?)12 What does this achieve? Well, K(xi , x) is large if xi is close to x, so this will place a lot of weight on the training data points close to the point where we are trying to predict. More distant training points will have smaller weights, falling off towards zero. If we try to predict at a point x which is very far from any of the training data points, the value of K(xi , x) will be small for all xi , but it will typically be much,
+11There are many other mathematical objects which are also called “kernels”. Some of these meanings are related, but not all of them. (Cf. “normal”.)
+12What do we do if K(xi,x) is zero for some xi? Nothing; they just get zero weight in the average. What do we do if all the K(xi,x) are zero? Different people adopt different conventions; popular ones are to return the global, unweighted mean of the yi , to do some sort of interpolation from regions where the weights are defined, and to throw up our hands and refuse to make any predictions (computationally, return NA).
+00:02 Monday 18th April, 2016
+￼
+1.5. LINEARSMOOTHERS 44
+muchsmallerforallthexi whicharenotthenearestneighborofx,sow􏰨(xi,x)≈1for thenearestneighborand≈0foralltheothers.13 Thatis,farfromthetrainingdata, our predictions will tend towards nearest neighbors, rather than going off to ±∞, as linear regression’s predictions do. Whether this is good or bad of course depends on the true μ(x) — and how often we have to predict what will happen very far from the training data.
+Figure 1.6 shows our running example data, together with kernel regression esti- mates formed by combining the uniform-density, or box, and Gaussian kernels with different bandwidths. The box kernel simply takes a region of width h around the point x and averages the training data points it finds there. The Gaussian kernel gives reasonably large weights to points within h of x, smaller ones to points within 2h, tinyonestopointswithin3h,andsoon,shrinkinglikee−(x−xi)2/2h. Aspromised,the bandwidth h controls the degree of smoothing. As h → ∞, we revert to taking the global mean. As h → 0, we tend to get spikier functions — with the Gaussian kernel at least it tends towards the nearest-neighbor regression.
+If we want to use kernel regression, we need to choose both which kernel to use, and the bandwidth to use with it. Experience, like Figure 1.6, suggests that the bandwidth usually matters a lot more than the kernel. This puts us back to roughly where we were with k-NN regression, needing to control the degree of smoothing, without knowing how smooth μ(x) really is. Similarly again, with a fixed bandwidth h, kernel regression is generally not consistent. However, if h → 0 as n → ∞, but doesn’t shrink too fast, then we can get consistency.
+￼13Take a Gaussian kernel in one dimension, for instance, so K(xi , x) ∝ e−(xi −x)2/2h2 . Say xi is the nearest neighbor, and |xi − x| = L, with L ≫ h. So K(xi , x) ∝ e−L2/2h2 , a small number. But now for any other xj , K(xi , x) ∝ e−L2/2h2 e−(xj −xi )L/2h2 e−(xj −xi )2/2h2 ≪ e−L2/2h2 . — This assumes that we’re using a kernel like the Gaussian, which never quite goes to zero, unlike the box kernel.
+00:02 Monday 18th April, 2016
+45 1.5. LINEARSMOOTHERS
+￼●
+●● ●
+￼￼￼￼●●
+● ●● ●●●●●
+￼●
+●● ● ●
+￼￼●●● ●
+● ●
+●
+●
+●● ●●
+● ●● ●
+● ●● ●● ● ● ●
+●●● ●● ●●
+●●
+●● ●● ●●●
+￼￼￼●● ● ●
+●
+●
+● ●●
+● ●● ●
+● ●
+●● ●
+●● ●
+●● ● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼● ●●
+●●
+● ●
+￼￼￼●
+￼￼￼●● ●
+￼￼￼●
+￼● ●
+● ●
+● ●●●
+￼￼￼● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0.0 0.2 0.4 0.6 0.8 1.0
+x
+lines(ksmooth(all.x, all.y, "box", bandwidth = 2), col = "red")
+lines(ksmooth(all.x, all.y, "box", bandwidth = 1), col = "green")
+lines(ksmooth(all.x, all.y, "box", bandwidth = 0.1), col = "blue")
+lines(ksmooth(all.x, all.y, "normal", bandwidth = 2), col = "red", lty = "dashed")
+lines(ksmooth(all.x, all.y, "normal", bandwidth = 1), col = "green", lty = "dashed")
+lines(ksmooth(all.x, all.y, "normal", bandwidth = 0.1), col = "blue", lty = "dashed")
+FIGURE 1.6: Data from Figure 1.1 together with kernel regression lines. Solid colored lines are box-kernel estimates, dashed colored lines Gaussian-kernel estimates. Red, h = 2; green, h = 1; blue, h = 0.1 (per the definition of bandwidth in the ksmooth function). Note the abrupt jump around x = 0.75 in the box-kernel/h = 0.1 (solid green) line — with a small bandwidth the box kernel is unable to interpolate smoothly across the break in the training data, while the Gaussian kernel can.
+00:02 Monday 18th April, 2016
+￼0.0 0.2 0.4
+0.6 0.8 1.0
+y
+1.5. LINEARSMOOTHERS 46
+1.5.3 Some General Theory for Linear Smoothers
+Some key parts of the theory you are familiar with for linear regression models car- ries over more generally to linear smoothers. They are not quite so important any more, but they do have their uses, and they can serve as security objects during the transition to non-parametric regression.
+Throughout this sub-section, we will temporarily assume that Y = μ(X ) + ε, with the noise terms ε have constant variance σ2, and being uncorrelated with each other at different observations. Also, we will define the smoothing, influence or hat matrix wˆ by wˆi j = wˆ(xi , xj ). This records how much influence observation yj had
+onthesmoother’sfittedvalueforμ(xi),which(remember)isμ􏰨(xi)orμ􏰨i forshort14, hence the name “hat matrix” for wˆ.
+1.5.3.1 Standard error of predicted mean values
+It is easy to get the standard error of any predicted mean value μ􏰨(x), by first working out its variance:
+􏰎[μ􏰨(x)]= 􏰎  n
+j=1 n
+n
+􏰥
+w ( x j , x ) Y j  = 􏰥􏰎􏰷w(x ,x)Y 􏰺
+(1.53) (1.54)
+(1.55)
+(1.56)
+j=1
+jj
+= 􏰥w2(x ,x)􏰎􏰷Y 􏰺 jj
+j=1
+n
+= σ2􏰥w2(xj,x) j=1
+The second line uses the assumption that the noise is uncorrelated, and the last the
+assumption that the noise variance is constant. In particular, for a point xi which
+appearedinthetrainingdata,􏰎􏰓μ􏰨(xi)􏰔=σ2􏰢j w2 . ij
+Notice that this is the variance in the predicted mean value, μ􏰨(x). It is not an estimate of 􏰎 [Y | X = x ], though we will see how conditional variances can be esti- mated using nonparametric regression in Chapter 7.
+Notice also that we have not had to assume that the noise is Gaussian. If we did add that assumption, this formula would also give us a confidence interval for the fitted value (though we would still have to worry about estimating σ).
+1.5.3.2 (Effective) Degrees of Freedom
+For linear regression models, you will recall that the number of “degrees of freedom” was just defined as the number of coefficients (including the intercept). While degrees
+14This is often written as yˆi , but that’s not very logical notation; the quantity is a function of yi , not an estimate of it; it’s an estimate of μ(xi ).
+00:02 Monday 18th April, 2016
+￼
+47 1.5. LINEARSMOOTHERS
+of freedom are less important for other sorts of regression than for linear models, they’re still worth knowing about, so I’ll explain here how they are calculated.
+The first thing to realize is that we can’t use the number of parameters to define degrees of freedom in general, since most linear smoothers don’t have parameters. Instead, we have to go back to the reasons why the number of parameters matters in ordinary linear models15. We’ll start with an n × p data matrix of predictor variables x (possibly including an all-1 column for an intercept), and an n × 1 column ma- trix of response values y. The ordinary least squares estimate of the p-dimensional coefficient vector β is
+βˆ = 􏰳xT x􏰵−1xT y This lets us write the fitted values in terms of x and y:
+μ􏰨 = xβˆ
+= 􏰗x􏰳xT x􏰵−1xT 􏰘y
+= wy
+(1.57)
+(1.58) (1.59) (1.60)
+where w is the n × n matrix, with wi j saying how much of each observed yj con- tributes to each fitted μ􏰨i . This is what, a little while ago, I called the influence or hat matrix, in the special case of ordinary least squares.
+Notice that w depends only on the predictor variables in x; the observed response values in y don’t matter. If we change around y, the fitted values μ􏰨 will also change, but only within the limits allowed by w. There are n independent coordinates along which y can change, so we say the data have n degrees of freedom. Once x (and thus w) are fixed, however, μ􏰨 has to lie in a p-dimensional linear subspace in this n-dimensional space, and the residuals have to lie in the (n − p)-dimensional space orthogonal to it.
+Geometrically, the dimension of the space in which μ􏰨 = wy is confined is the rank of the matrix w. Since w is an idempotent matrix (Exercise 5), its rank equals its trace. And that trace is, exactly, p:
+trw = tr􏰗x􏰳xT x􏰵−1xT 􏰘 = tr􏰗xT x􏰳xT x􏰵−1􏰘
+= trIp=p
+since for any matrices a,b, tr(ab) = tr(ba), and xT x is a p × p matrix16.
+(1.61)
+(1.62) (1.63)
+For more general linear smoothers, we can still write Eq. 1.48 in matrix form,
+μ􏰨 = wy (1.64)
+We now define the degrees of freedom17 to be the trace of w:
+d f (μ􏰨) ≡ trw (1.65)
+15What follows uses some concepts and results from linear algebra; see Appendix B for reminders. 16This all assumes that xT x has an inverse. Can you work out what happens when it does not?
+17Some authors prefer to say “effective degrees of freedom”, to emphasize that we’re not just counting
+￼parameters.
+00:02 Monday 18th April, 2016
+1.5. LINEARSMOOTHERS 48 This is not necessarily a whole number.
+Covariance of Observations and Fits Eq. 1.65 defines the number of degrees of freedom for linear smoothers. A yet more general definition includes nonlinear meth- ods, assuming that Yi = μ(xi ) + εi , and the εi consist of uncorrelated noise of con- stant18 variance σ2. This is
+n
+df(μ􏰨)≡ 1 􏰥Cov􏰓Yi,μ􏰨(xi)􏰔 (1.66)
+In words, this is the normalized covariance between each observed response Yi and the corresponding predicted value, μ􏰨(xi ). This is a very natural way of measuring how flexible or stable the regression model is, by seeing how much it shifts with the data.
+￼If we do have a linear smoother, Eq. 1.66 reduces to Eq. 1.65.
+σ2 i=1
+n
+= Cov Yi , 􏰥 wi j Y j  j=1
+n
+= 􏰥w Cov􏰷Y ,Y 􏰺 ijij
+line the assumption that εi is uncorrelated and has constant variance. Therefore
+1 􏰥n
+df(μ􏰨)=σ2 1.5.3.3 Prediction Errors
+Bias Because linear smoothers are linear in the response variable, it’s easy to work out (theoretically) the expected value of their fits:
+Cov 􏰓Yi , μ􏰨(xi )􏰔
+(1.67)
+(1.68)
+j=1
+= wii􏰎􏰓Yi􏰔=σ2wii
+(1.69) Here the first line uses the fact that we’re dealing with a linear smoother, and the last
+σ2wii =trw (1.70)
+￼as promised.
+In matrix form,
+􏰓􏰔
+(1.71)
+(1.72)
+i=1
+n
+􏰥􏰷􏰺 􏰌μ􏰨i = wij􏰌Yj
+j=1
+􏰌 [μ􏰨] = w􏰌 [Y]
+This means the smoother is unbiased if, and only if, w􏰌 [Y] = 􏰌 [Y], that is, if 􏰌 [Y] is an eigenvector of w. Turned around, the condition for the smoother to be unbiased is
+￼18But see Exercise 10.
+(In − w)􏰌 [Y] = 0 (1.73) 00:02 Monday 18th April, 2016
+49 1.5. LINEARSMOOTHERS
+In general, (In − w)􏰌 [Y] ̸= 0, so linear smoothers are more or less biased. Different smoothers are, however, unbiased for different families of regression functions. Ordi- nary linear regression, for example, is unbiased if and only if the regression function really is linear.
+In-sample mean squared error When you studied linear regression, you learned that the expected mean-squared error on the data used to fit the model is σ2(n− p)/n. This formula generalizes to other linear smoothers. Let’s first write the residuals in matrix form.
+y−μ􏰨 = y−wy = Iny−wy = (In−w)y
+The in-sample mean squared error is n−1 ∥y − μ􏰨∥2, so 1∥y−μ􏰨∥2 = 1∥(In−w)y∥2
+nn
+= 1yT (In −wT )(In −w)y n
+(1.74) (1.75) (1.76)
+(1.77) (1.78)
+￼￼￼Taking expectations19,
+􏰛1􏰜σ2 1
+􏰌
+(1.79) = 􏰳trIn −2trw+trwT w􏰵+ ∥(In −w)􏰌[y]∥2(1.80)
+n ∥y−μ􏰨∥2
+= n tr(In −wT )(In −w)+ n ∥(In −w)􏰌[y]∥2
+￼￼￼σ2 1 nn
+σ2 1
+= 􏰳n−2trw+trwTw􏰵+ ∥(In −w)􏰌[y]∥2 (1.81)
+nn
+￼￼￼￼The last term, n−1 ∥(In −w)􏰌[y]∥2, comes from the bias: it indicates the distor- tion that the smoother would impose on the regression function, even without noise. The first term, proportional to σ2, reflects the variance. Notice that it involves not only what we’ve called the degrees of freedom, trw, but also a second-order term, trwT w. For ordinary linear regression, you can show (Exercise 9) that trwT w = p, so 2 tr w − tr wT w would also equal p . For this reason, some people prefer either tr wT w or 2 tr w−tr wT w as the definition of degrees of freedom for linear smoothers, so be careful.
+1.5.3.4 Inferential Statistics
+Many of the formulas underlying things like the F test for whether a regression pre- dicts significantly better than the global mean carry over from linear regression to
+19See App. F.2 for how to find the expected value of quadratic forms like this. 00:02 Monday 18th April, 2016
+￼
+1.6. FURTHERREADING 50
+linear smoothers, if one uses the right definitions of degrees of freedom, and one be- lieves that the noise is always IID and Gaussian. However, we will see ways of doing inference on regression models which don’t rely on Gaussian assumptions at all (Ch. 6), so I won’t go over these results.
+1.6 Further Reading
+In Chapter 2, we’ll look more at the limits of linear regression and some extensions; Chapter 3 will cover some key aspects of evaluating statistical models, including re- gression models; and then Chapter 4 will come back to kernel regression, and more powerful tools than ksmooth.
+Good treatments of regression, emphasizing linear smoothers but not limited to linear regression, can be found in Wasserman (2003, 2006), Simonoff (1996), Faraway (2006) and Györfi et al. (2002). The last of these in particular provides a very thor- ough theoretical treatment of non-parametric regression methods.
+On generalizations of degrees of freedom to non-linear models, see Buja et al. (1989, §2.7.3), and Ye (1998).
+[[TODO: Historical citations for nearest-neighbor methods, e.g., Cover and Hart (1967), and kernel smoothers (Nadaraya, 1964; Watson, 1964)]]
+1.7 Exercises
+1. Suppose Y1,Y2,...Yn are random variables with the same mean μ and stan- dard deviation σ, and that they are all uncorrelated with each other, but not necessarily independent20 or identically distributed. Show the following:
+(a)􏰎􏰷􏰢n Y􏰺=nσ2. i=1 i
+(c) The standard deviation of n−1 􏰢ni=1 Yi is σ/􏰋n.
+(d) Thestandarddeviationofμ−n−1􏰢ni=1Yi isσ/􏰋n.
+Can you state the analogous results when the Yi share mean μ but each has its own standard deviation σi ? When each Yi has a distinct mean μi ? (Assume in both cases that the Yi remain uncorrelated.)
+2. Suppose we use the mean absolute error instead of the mean squared error:
+MAE(m) = 􏰌 [|Y − m|] (1.82)
+Is this also minimized by taking m = 􏰌 [Y ]? If not, what value μ ̃ minimizes the MAE? Should we use MSE or MAE to measure error?
+3. Derive Eqs. 1.42 and 1.43 by minimizing Eq. 1.41.
+20See Appendix E.4 for a refresher on the difference between “uncorrelated” and “independent”.
+00:02 Monday 18th April, 2016
+(b)􏰎􏰷n−1􏰢n Y􏰺=σ2/n. i=1 i
+￼￼￼
+51
+4.
+5. 6.
+7. 8.
+9.
+10.
+1.7. EXERCISES
+What does it mean to say that Gaussian kernel regression approaches nearest- neighbor regression as h → 0? Why does it do so? Is this true for all kinds of kernel regression?
+Prove that w from Eq. 1.60 is idempotent, i.e., that w2 = w.
+Show that for ordinary linear regression, Eq. 1.56 gives the same variance for
+fitted values as the usual formula.
+Consider the global mean as a linear smoother. Work out the influence matrix
+w, and show that it has one degree of freedom, using the definition in Eq. 1.65.
+Consider k-nearest-neighbors regression as a linear smoother. Work out the influence matrix w, and find an expression for the number of degrees of free- dom (in the sense of Eq. 1.65) in terms of k and n. Hint: Your answers should reduce to those of the previous problem when k = n.
+Suppose that Yi = μ(xi ) + εi , where the εi are uncorrelated have mean 0, with constant variance σ2. Prove that, for a linear smoother, n−1 􏰢n 􏰎􏰷Yˆ 􏰺 =
+i=1 i (σ2/n)trwwT . Show that this reduces to σ2 p/n for ordinary linear regression.
+Suppose that Yi = μ(xi ) + εi , where the εi are uncorrelated and have mean 0, but each has its own variance σi2. Consider modifying the definition of degrees
+of freedom to 􏰢n Cov􏰷Y ,Yˆ 􏰺/σ2 (which reduces to Eq. 1.66 if all the σ2 = i=1 iii i
+σ2). Show that this still equals trw for a linear smoother with influence matrix w.
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

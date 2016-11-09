@@ -1,0 +1,104 @@
+
+Chapter 24
+Graphical Causal Models
+24.1 Causation and Counterfactuals
+Take a piece of cotton, say an old rag. Apply flame to it; the cotton burns. We say the fire caused the cotton to burn. The flame is certainly correlated with the cotton burning, but, as we all know, correlation is not causation (Figure 24.1). Perhaps every time we set rags on fire we handle them with heavy protective gloves; the gloves don’t make the cotton burn, but the statistical dependence is strong. So what is causation?
+We do not have to settle 2500 years (or more) of argument among philosophers and scientists. For our purposes, it’s enough to realize that the concept has a counter- factual component: if, contrary to fact, the flame had not been applied to the rag, then the rag would not have burned1. On the other hand, the fire makes the cotton burn whether we are wearing protective gloves or not.
+To say it a somewhat different way, the distributions we observe in the world are the outcome of complicated stochastic processes. The mechanisms which set the value of one variable inter-lock with those which set other variables. When we make a probabilistic prediction by conditioning — whether we predict 􏰌 [Y | X = x ] or Pr (Y | X = x ) or something more complicated — we are just filtering the output of those mechanisms, picking out the cases where they happen to have set X to the value x, and looking at what goes along with that.
+When we make a causal prediction, we want to know what would happen if the usual mechanisms controlling X were suspended and it was set to x. How would this change propagate to the other variables? What distribution would result for Y ? This is often, perhaps even usually, what people really want to know from a data analysis, and they settle for statistical prediction either because they think it is causal prediction, or for lack of a better alternative.
+Causal inference is the undertaking of trying to answer causal questions from empirical data. Its fundamental difficulty is that we are trying to derive counter- factual conclusions with only factual premises. As a matter of habit, we come to
+1If you immediately start thinking about quibbles, like “What if we hadn’t applied the flame, but the rag was struck by lightning?”, then you may have what it takes to be a philosopher.
+573
+[[ TODO: discuss latent vari- ables and measurement either here or in the graphical mod- els chapter ]]
+￼
+24.2. CAUSALGRAPHICALMODELS 574
+FIGURE 24.1: “Correlation doesn’t imply causation, but it does waggle its eyebrows sugges- tively and gesture furtively while mouthing ‘look over there”’ (Image and text copyright by Randall Munroe, used here under a Creative Commons attribution-noncommercial license; see http://xkcd.com/552/. [[TODO: Excise from the commercial version]])
+expect cotton to burn when we apply flames. We might even say, on the basis of purely statistical evidence, that the world has this habit. But as a matter of pure logic, no amount of evidence about what did happen can compel beliefs about what would have happened under non-existent circumstances2. (For all my data shows, all the rags I burn just so happened to be on the verge of spontaneously bursting into flames anyway.) We must supply some counter-factual or causal premise, linking what we see to what we could have seen, to derive causal conclusions.
+One of our goals, then, in causal inference will be to make the causal premises as weak and general as possible, thus limiting what we take on faith.
+24.2 Causal Graphical Models
+We will need a formalism for representing causal relations. It will not surprise you by now to learn that these will be graphical models. We will in fact use DAG models from last time, with “parent” interpreted to mean “directly causes”. These will be causal graphical models, or graphical causal models.3
+We make the following assumptions.
+1. There is some directed acyclic graph G representing the relations of causation among the our variables.
+2The first person to really recognize this seems to have been the medieval Muslim theologian and anti- philosopher al Ghazali (1100/1997). (See Kogan (1985) for some of the history.) Very similar arguments were made centuries later by Hume (1739); whether there was some line of intellectual descent linking them — that is, any causal connection — I don’t know.
+3Because DAG models have joint distributions which factor according to the graph, we can always write them in the form of a set of equations, as Xi = fi (Xparents(i ) ) + εi , with the catch that the noise εi is not necessarily independent of Xi ’s parents. This is what is known, in many of the social sciences, as a
+structural equation model. So those are, strictly, a sub-class of DAG models. They are also often used to represent causal structure.
+00:02 Monday 18th April, 2016
+￼￼
+575 24.2. CAUSALGRAPHICALMODELS 2. The Causal Markov condition: The joint distribution of the variables obeys
+the Markov property on G.
+3. Faithfulness: The joint distribution has all of the conditional independence relations implied by the causal Markov property, and only those conditional independence relations.
+The point of the faithfulness condition is to rule out “conspiracies among the param- eters”, where, say, two causes of a common effect, which would typically be depen- dent conditional on that effect, have their impact on the joint effect and their own distributions matched just so exactly that they remain conditionally independent.
+24.2.1 Calculating the “effects of causes”
+Let’s fix two sub-sets of variables in the graph, Xc and Xe . (Assume they don’t over- lap, and call everything else XN .) If we want to make a probabilistic prediction for Xe ’s value when Xc takes a particular value, xc , that’s the conditional distribution, Pr 􏰑Xe | Xc = xc 􏰒, and we saw last time how to calculate that using the graph. Con- ceptually, this amounts to selecting, out of the whole population or ensemble, the sub-population or sub-ensemble where Xc = xc , and accepting whatever other behav- ior may go along with that.
+Now suppose we want to ask what the effect would be, causally, of setting Xc to a particular value xc. We represent this by “doing surgery on the graph”: we (i) eliminate any arrows coming in to nodes in Xc, (ii) fix their values to xc, and (iii) calculate the resulting distribution for Xe in the new graph. By steps (i) and (ii), we imagine suspending or switching off the mechanisms which ordinarily set Xc . The other mechanisms in the assemblage are left alone, however, and so step (iii) propagates the fixed values of Xc through them. We are not selecting a sub-population, but producing a new one.
+If setting Xc to different values, say xc and xc′ , leads to different distributions for Xe , then we say that Xc has an effect on Xe — or, slightly redundantly, has a causal effect on Xe . Sometimes4 “the effect of switching from xc to xc′ ” specifically refers to a change in the expected value of Xe , but since profoundly different distributions can havethesamemean,thisseemsneedlesslyrestrictive.5 Ifoneisinterestedinaverage effects of this sort, they are computed by the same procedure.
+It is convenient to have a short-hand notation for this procedure of causal condi- tioning. One more-or-less standard idea, introduced by Judea Pearl, is to introduce a d o operator which encloses the conditioning variable and its value. That is,
+Pr􏰑Xe |Xc =xc􏰒 (24.1) is probabilistic conditioning, or selecting a sub-ensemble from the old mechanisms;
+but
+Pr􏰑Xe | do(Xc = xc)􏰒 (24.2) 5Economists are also fond of the horribly misleading usage of talking about “an X effect” or “the effect
+￼4Especially in economics.
+of X ” when they mean the regression coefficient of X . Don’t do this.
+00:02 Monday 18th April, 2016
+24.2. CAUSALGRAPHICALMODELS 576 is causal conditioning, or producing a new ensemble. Sometimes one sees this written
+􏰑􏰒􏰑􏰒
+asPr X |X=ˆx ,orevenPr X |x􏰨 . Iamactuallyfondofthedonotationand
+will use it.
+SupposethatPr􏰑Xe |Xc =xc􏰒=Pr􏰑Xe |do(Xc =xc)􏰒.Thiswouldbeextremely
+convenient for causal inference. The conditional distribution on the right is the causal, counter-factual distribution which tells us what would happen if xc was im- posed. The distribution on the left is the ordinary probabilistic distribution we have spent years learning how to estimate from data. When do they coincide?
+One situation where they coincide is when Xc contains all the parents of Xe , and none of its descendants. Then, by the Markov property, Xe is independent of all other variables given Xc , and removing the arrows into Xc will not change that, or the conditional distribution of Xe given its parents. Doing causal inference for other choices of Xc will demand other conditional independence relations implied by the Markov property. This is the subject of Chapter 25.
+24.2.2 Back to Teeth
+Let us return to the example of Figure 20.6, and consider the relationship between exposure to asbestos and the staining of teeth. In the model depicted by that figure, the joint distribution factors as
+p(Yellow teeth,Smoking,Asbestos,Tar in lungs,Cancer)
+= p (Smoking) p (Asbestos) (24.3)
+×p(Tar in lungs|Smoking) ×p(Yellow teeth|Smoking) ×p(Cancer|Asbestos,Tar in lungs)
+As we saw, whether or not someone’s teeth are yellow (in this model) is uncondi- tionally independent of asbestos exposure, but conditionally dependent on asbestos, given whether or not they have cancer. A logistic regression of tooth color on as- bestos would show a non-zero coefficient, after “controlling for” cancer. This coeffi- cient would become significant with enough data. The usual interpretation of this co- efficient would be to say that the log-odds of yellow teeth increase by so much for each one unit increase in exposure to asbestos, “other variables being held equal”.6 But to see the actual causal effect of increasing exposure to asbestos by one unit, we’d want to compare p(Yellowteeth|do(Asbestos=a))to p(Yellowteeth|do(Asbestos=a+1)), and it’s easy to check (Exercise 1) that these two distributions have to be the same. In this case, because asbestos is exogenous, one will in fact get the same result for
+p(Yellow teeth|d o(Asbestos = a) and for p(Yellow teeth|Asbestos = a).
+For a more substantial example, consider Figure 24.27 The question of interest here is whether regular brushing and flossing actually prevents heart disease. The
+6Nothing hinges on this being a logistic regression, similar interpretations are given to all the other standard models.
+7Based on de Oliveira et al. (2010), and the discussion of this paper by Chris Blattman (http://chrisblattman.com/2010/06/01/ does- brushing- your- teeth- lower- cardiovascular- disease/).
+00:02 Monday 18th April, 2016
+ecc ec
+￼
+577 24.2. CAUSALGRAPHICALMODELS
+Health consciousness
+￼￼￼￼￼Frequency of toohbrushing
+￼￼￼Gum disease
+Frequency of exercise
+￼￼￼￼Inflammatory immune response
+￼￼FIGURE 24.2: Graphical model illustrating hypothetical pathways linking brushing your teeth to not getting heart disease.
+mechanism by which it might do so is as follows: brushing is known to make it less likely for people to get gum disease. Gum disease, in turn, means the gums suf- fer from constant, low-level inflammation. Persistent inflammation (which can be measured through various messenger chemicals of the immune system) is thought to increase the risk of heart disease. Against this, people who are generally health- conscious are likely to brush regularly, and to take other actions, like regularly ex- ercising and controlling their diets, which also make them less likely to get heart disease. In this case, if we were to manipulate whether people brush their teeth8, we would shift the graph from Figure 24.2 to Figure 24.3, and we would have
+p(Heart disease|Brushing = b) ̸= p(Heart disease|do(Brushing = b)) (24.4)
+￼8Hopefully, by ensuring that everyone brushes, rather than keeping people from brushing. 00:02 Monday 18th April, 2016
+Amount of fat and red meat in diet
+￼Heart disease
+24.2. CAUSALGRAPHICALMODELS
+578
+￼Health consciousness
+￼￼￼Frequency of toohbrushing
+￼￼￼Gum disease
+Frequency of exercise
+￼￼￼￼Inflammatory immune response
+Amount of fat and red meat in diet
+￼￼￼Heart disease
+FIGURE 24.3: The previous graphical model, “surgically” altered to reflect a manipulation (do) of brushing.
+00:02 Monday 18th April, 2016
+24.3. CONDITIONAL INDEPENDENCE AND D-SEPARATION 579 REVISITED
+24.3 Conditional Independence and d-Separation Re- visited
+We saw in §20.3 that all distributions which conform to a common DAG share a common set of conditional independence relations. Faithful distributions have no other conditional independence relations. These are vital facts for causal inference.
+The reason is that while causal influence flows one way through the graph, along the directions of arrows from parents to children, statistical information can flow in either direction. We can certainly make inferences about an effect from its causes, but we can equally make inferences about causes from their effects. It might be harder to actually do the calculations9, and we might be left with more uncertainty, but we could do it. As we saw in §20.3, when conditioning on a set of variables S blocks all channels of information flow between X and Y , X Y |S. The faithful distributions are the ones where this implication is reversed, where X Y |S implies that S blocks all paths between X and Y . In faithful graphical models, blocking information flow is exactly the same as conditional independence.
+This turns out to be the single most important fact enabling causal inference. If we want to estimate the effects of causes, within a given DAG, we need to block off all non-causal channels of information flow. If we want to check whether a given DAG is correct for the variables we have, we need to be able to compare the conditional independence relations implied by the DAG to those supported by the data. If we want to discover the possible causal structures, we have to see which ones imply the conditional independencies supported by the data.
+24.4 Further Reading
+The two foundational books on graphical causal models are Spirtes et al. (2001) and Pearl (2009b). Both are excellent and recommended in the strongest possible terms; but if you had to read just one, I would recommend Spirtes et al. (2001). If on the other hand you do not feel up to reading a book at all, then Pearl (2009a) is much shorter, and covers most of the high points. (Also, it’s free online.) The textbook by Morgan and Winship (2007, 2015) is much less demanding mathematically, which also means it is less complete conceptually, but it does explain the crucial ideas clearly, simply,andwithabundantexamples.10 Lauritzen(1996)hasamathematicallyrigor- ous treatment of d-separation (among many other things), but de-emphasizes causal- ity.
+9Janzing (2007) [[TODO: update refs]] makes the very interesting suggestion that the direction of causality can be discovered by using this — roughly speaking, that if X |Y is much harder to compute than is Y |X , we should presume that X → Y rather than the other way around.
+10That textbook also discusses an alternative formalism for counterfactuals, due mainly to Donald B. Rubin. While Rubin has done very distinguished work in causal inference, his formalism is vastly harder to manipulate than are graphical models, but has no more expressive power. (Pearl (2009a) has a convincing discussion of this point, and Richardson and Robins (2013) provides a comprehensive proof that the ev- erything expressible in the counterfactuals formalism can also be expressed with graphical models.) I have accordingly skipped the Rubin formalism here, but good accounts are available in Morgan and Winship (2007, ch. 2), in Rubin’s collected papers (Rubin, 2006), and in Imbens and Rubin (2015).
+00:02 Monday 18th April, 2016
+￼|= |=
+[[TODO: historical notes]]
+24.5. EXERCISES 580
+Many software packages for linear structural equation models and path analysis offer options to search for models; these are not, in general, reliable (Spirtes et al., 2001).
+Raginsky (2011) provides a fascinating information-theoretic account of graphi- cal causal models and do(), in terms of the notion of directed (rather than mutual) information.
+24.5 Exercises
+1. Show,forthegraphicalmodelinFigure20.6,thatp(Yellowteeth|do(Asbestos= a)) is always the same as p(Yellow teeth|d o(Asbestos = a + 1)).
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

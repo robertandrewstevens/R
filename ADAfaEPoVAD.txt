@@ -1,0 +1,13 @@
+Appendix D
+Taylor Expansions
+[[TODO: write appendix!]]
+[[What a Taylor series is]]
+A function whose Taylor series converges everywhere is analytic. [[Error of truncating a Taylor series at a given order]]
+[[Taylor series in more than one dimension]]
+[[TODO: Replace with a copyright-free picture, or get permission]]
+735
+736
+￼FIGURE D.1: Sound advice when stuck on almost any problem in statistical theory.
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

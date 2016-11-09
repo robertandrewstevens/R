@@ -1,0 +1,704 @@
+
+Chapter 18
+Nonlinear Dimensionality Reduction
+[[PCA and factor models examples of linear dimensionality reduction; they’re adapted to situations where there is low-dimensional structure, but that structure is a line or plane (or linear subspace). Non-linear dimension reduction is an obvious extension, but, since there are many ways of being non-linear, it’s nowhere near as settled a sub- ject as the linear special case. This chapter will begin with a stark example of how lin- ear methods can fail, and then go through in some detail one particular nonlinear di- mension reduction method, called “locally linear embedding”, which directly builds on what we’ve done with PCA. The further reading at the end of the chapter points towards other methods, with some indication of their virtues and drawbacks.]]
+18.1 Why We Need Nonlinear Dimensionality Reduc- tion
+Consider the points shown in Figure 18.1. Even though there are two features, a.k.a. coordinates, all of the points fall on a one-dimensional curve (as it happens, a log- arithmic spiral). This is exactly the kind of constraint which it would be good to recognize and exploit — rather than using two separate coordinates, we could just say how far along the curve a data-point is.
+PCA will do poorly with data like this. Remember that to get a one-dimensional representation out of it, we need to take the first principal component, which is the straight line along which the data’s projections have the most variance. If this works for capturing structure along the spiral, then projections on to the first PC should have the same order that the points have along the spiral.1 Since, fortuitously, the data are already in that order, we can just plot the first PC against the row index (Figure 18.2). The results are — there is really no other word for it — screwy.
+1It wouldn’t matter if the coordinate increased as we went out along the spiral or decreased, just so long as it was monotonic.
+424
+cross- [[TODO: Fix notation]]
+￼
+425 18.1. WHY WE NEED NONLINEAR DIMENSIONALITY REDUCTION
+￼￼● ●
+●
+● ●
+● ●
+● ●
+●●●
+●
+●● ●●
+●●● ●●
+● ●●
+●●
+● ● ●
+● ● ● ●
+● ● ● ●●
+●●
+● ●●●
+●
+● ●●●●●●● ●●●●●●●●●●● ●
+●
+●
+● ●
+●
+●
+●
+●
+●●●●●● ●● ●●
+●●● ●
+● ●●
+●
+●
+● ●
+●
+● ●
+●● ●●
+●● ●●●
+● ● ● ● ● ●●● ●
+● ●● ● ●
+● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼−300 −200 −100
+0 100
+x[,1]
+￼x = matrix(c(exp(-0.2 * (-(1:300)/10)) * cos(-(1:300)/10), exp(-0.2 * (-(1:300)/10)) *
+    sin(-(1:300)/10)), ncol = 2)
+plot(x)
+FIGURE 18.1: Two-dimensional data constrained to a smooth one-dimensional region, namely the logarithmic spiral, r = e−0.2θ in polar coordinates.
+00:02 Monday 18th April, 2016
+x[,2]
+−200 −100 0 100 200 300 400
+18.1. WHY WE NEED NONLINEAR DIMENSIONALITY REDUCTION 426
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0 50 100 150 200 250 300
+Index
+FIGURE 18.2: Projections of the spiral points on to their first principal component.
+00:02 Monday 18th April, 2016
+prcomp(x)$x[, 1]
+-200 -100 0 100 200 300
+427 18.1. WHY WE NEED NONLINEAR DIMENSIONALITY REDUCTION
+￼￼● ●
+●
+●
+●
+●
+●
+￼● ●
+￼￼● ●
+￼￼● ●
+●
+￼￼￼●●●●●● ●● ●●
+￼●●●
+●● ●●
+●●● ●●
+● ●●
+●●
+● ● ●
+￼￼●
+￼￼●●● ●
+● ● ● ● ● ●●● ●
+● ●● ● ●
+￼● ● ● ●
+● ● ● ●●
+●●
+● ●
+￼● ●●●
+￼● ●●●●●●● ●●●●●●●●●●● ●
+￼￼￼￼￼●
+●
+● ●
+￼￼￼● ●●
+￼●
+●
+● ●
+●
+● ●
+●● ●●
+●● ●●●
+￼￼￼￼￼￼￼￼￼￼￼￼￼−300 −200 −100
+0 100
+x1
+￼fit.all = prcomp(x)
+approx.all = fit.all$x[, 1] %*% t(fit.all$rotation[, 1])
+plot(x, xlab = expression(x[1]), ylab = expression(x[2]))
+points(approx.all, pch = 4)
+FIGURE 18.3: Spiral data (circles) replotted with their one-dimensional PCA approximations (crosses).
+00:02 Monday 18th April, 2016
+x2
+−200 −100 0 100 200 300 400
+18.2. LOCALLINEARITYANDMANIFOLDS 428
+So, PCA with one principal component fails to capture the one-dimensional structure of the spiral. We could add another principal component, but then we’ve just rotated our two-dimensional data. In fact, any linear dimensionality-reduction method is going to fail here, simply because the spiral is not even approximately a one-dimensional linear subspace.
+What then are we to do?
+1. Stick to not-too-nonlinear structures.
+2. Somehow decompose nonlinear structures into linear subspaces. 3. Generalize the eigenvalue problem of minimizing distortion.
+There’s not a great deal to be said about (1). Some curves can be approximated by linear subspaces without too much heartbreak. (For instance, see Figure 18.4.) We can use things like PCA on them, and so long as we remember that we’re just seeing an approximation, we won’t go too far wrong. But fundamentally this is weak. (2) is hoping that we can somehow build a strong method out of this weak one; as it happens we can, and it’s called locally linear embedding (and its variants). The last is diffusion maps, which we’ll cover next lecture.
+18.2 Local Linearity and Manifolds
+Let’s look again at Figure 18.4. A one-dimensional linear subspace is, in plain words, a straight line. By doing PCA on this part of the data alone, we are approximating a segment of the spiral curve by a straight line. Since the segment is not very curved, the approximation is reasonably good. (Or rather, the segment was chosen so the ap- proximation would be good, consequently it had to have low curvature.) Notice that this error is not a random scatter of points around the line, but rather a systematic mis-match between the true curve and the line — a bias which would not go away no matter how much data we had from the spiral. The size of the bias depends on how big a region we are using, and how much the tangent direction to the curve changes across that region — the average curvature. By using small regions when the curva- ture is high and big regions when the curvature is low, we can maintain any desired degree of approximation.
+If we shifted to a different part of the curve, we could do PCA on the data there, too, getting a different principal component and a different linear approximations to the data. Generally, as we move around the degree of curvature will change, so the size of the region we’d use would also need to grow or shrink.
+This suggests that we could make some progress towards learning nonlinear struc- tures in the data by patching together lots of linear structures. We could, for example, divide up the whole data space into regions, and do a separate PCA in each region. Here we’d hope that in each region we needed only a single principal component. Such hopes would generally be dashed, however, because this is a bit too simple- minded to really work.
+00:02 Monday 18th April, 2016
+429 18.2. LOCALLINEARITYANDMANIFOLDS
+￼●
+￼●
+￼￼￼●
+●
+￼￼●
+￼●
+￼●
+●
+￼￼●
+●
+●
+￼￼￼￼￼￼￼￼￼￼−250 −200
+−150 −100
+x1
+￼fit = prcomp(x[270:280, ])
+pca.approx = fit$x[, 1] %*% t(fit$rotation[, 1]) + colMeans(x[270:280, ])
+plot(rbind(x[270:280, ], pca.approx), type = "n", xlab = expression(x[1]), ylab = expression(x[2]))
+points(x[270:280, ])
+points(pca.approx, pch = 4)
+FIGURE 18.4: Portion of the spiral data (circles) together with its one-dimensional PCA approxi- mation (crosses).
+00:02 Monday 18th April, 2016
+x2
+−200 −150 −100
+18.2. LOCALLINEARITYANDMANIFOLDS 430
+1. We’d need to chose the number of regions, introducing a trade-off between having many points in each region (so as to deal with noise) and having small regions (to keep the linear approximation good).
+2. Ideally, the regions should be of different sizes, depending on average curva- ture, but we don’t know the curvature.
+3. What happens at the boundaries between regions? The principal components of adjacent regions could be pointing in totally different directions.
+Nonetheless, this is the core of a good idea. To make it work, we need to say just a little about differential geometry, specifically the idea of a manifold.2 For our purposes, a manifold is a smooth, curved subset of a Euclidean space, in which it is embedded. The spiral curve (not the isolated points I plotted) is a one-dimensional manifold in the plane, just as are lines, circles, ellipses and parabolas. The surface of a sphere or a torus is a two-dimensional manifold, like a plane. The essential fact about a q-dimensional manifold is that it can be arbitrarily well-approximated by a q-dimensional linear subspace, the tangent space, by taking a sufficiently small region about any point.3 (This generalizes the fact any sufficiently small part of a curve about any point looks very much like a straight line, the tangent line to the curve at that point.) Moreover, as we move from point to point, the local linear approximations change continuously, too. The more rapid the change in the tangent space, the bigger the curvature of the manifold. (Again, this generalizes the relation between curves and their tangent lines.) So if our data come from a manifold, we should be able to do a local linear approximation around every part of the manifold, and then smoothly interpolate them together into a single global system. To do dimensionality reduction — to learn the manifold — we want to find these global low-dimensional coordinates.4
+2Differential geometry is a very beautiful and important branch of mathematics, with its roots in the needs of geographers in the 1800s to understand the curved surface of the Earth in detail (geodesy). The theory of curved spaces they developed for this purpose generalized the ordinary vector calculus and Euclidean geometry, and turned out to provide the mathematical language for describing space, time and gravity (Einstein’s general theory of relativity; Lawrie (1990)), the other fundamental forces of na- ture (gauge field theory; Lawrie (1990)), dynamical systems Arnol’d (1973); Guckenheimer and Holmes (1983), and indeed statistical inference (information geometry; Kass and Vos (1997); Amari and Nagaoka (1993/2000)). Good introductions are Spivak (1965) and Schutz (1980) (which confines the physics to one (long) chapter on applications).
+3If it makes you happier: every point has an open neighborhood which is homeomorphic to 􏰍q , and the transition from neighborhood to neighborhood is continuous and differentiable.
+4There are technicalities here which I am going to gloss over, because this is not a class in differential geometry. (Take one, it’s good for you!) The biggest one is that most manifolds don’t admit of a truly global coordinate system, one which is good everywhere without exception. But the places where it breaks down are usually isolated point and easily identified. For instance, if you take a sphere, almost every point can be identified by latitude and longitude — except for the poles, where longitude becomes ill-defined. Handling this in a mathematically precise way is tricky, but since these are probability-zero cases, we can ignore them in a statistics class.
+00:02 Monday 18th April, 2016
+￼
+431 18.3. LOCALLYLINEAREMBEDDING(LLE)
+18.3 Locally Linear Embedding (LLE)
+Locally linear embedding (or: local linear embedding, you see both) is a clever scheme for finding low-dimensional global coordinates when the data lie on (or very near to) a manifold embedded in a high-dimensional space. The trick is to do a different linear dimensionality reduction at each point (because locally a manifold looks linear) and then combine these with minimal discrepancy. It was introduced by Roweis and Saul (2000), though Saul and Roweis (2003) has a fuller explanation. I don’t think it uses any elements which were unknown, mathematically, since the 1950s. Rather than diminishing what Roweis and Saul did, this should make the rest of us feel humble. . .
+The LLE procedure has three steps: it builds a neighborhood for each point in the data; finds the weights for linearly approximating the data in that neighborhood; and finally finds the low-dimensional coordinates best reconstructed by those weights. This low-dimensional coordinates are then returned.
+To be more precise, the LLE algorithm is given as inputs an n × p data matrix X, with rows ⃗xi ; a desired number of dimensions q < p; and an integer k for finding local neighborhoods, where k ≥ q + 1. The output is supposed to be an n × q matrix Y, with rows ⃗yi .
+1. For each ⃗xi , find the k nearest neighbors.
+2. Find the weight matrix w which minimizes the residual sum of squares for
+reconstructingeach⃗xi fromitsneighbors,
+􏰥n 􏰥 2
+RSS(w)≡ ∥⃗xi − wij⃗xj∥ (18.1) i=1 j̸=i
+where wi j = 0 unless ⃗x j is one of ⃗xi ’s k -nearest neighbors, and for each i , 􏰢j wi j = 1. (I will come back to this constraint below.)
+3. Find the coordinates Y which minimize the reconstruction error using the weights,
+􏰥n 􏰥 2
+Φ(Y)≡ ∥⃗yi − wij⃗yj∥ (18.2)
+i=1 j̸=i
+subject to the constraints that 􏰢i Yi j = 0 for each j, and that YT Y = I. (I will
+come back to those constraints below, too.)
+18.3.1 Finding Neighborhoods
+In step 1, we define local neighborhoods for each point. By defining these in terms of the k nearest neighbors, we make them physically large where the data points are widely separated, and physically small when the density of the data is high. We don’t know that the curvature of the manifold is low when the data are sparse, but we do know that, whatever is happening out there, we have very little idea what it is, so it’s safer to approximate it crudely. Conversely, if the data are dense, we can capture
+00:02 Monday 18th April, 2016
+18.3. LOCALLYLINEAREMBEDDING(LLE) 432
+both high and low curvature. If the actual curvature is low, we might have been able to expand the region without loss, but again, this is playing it safe. So, to summarize, using k-nearest neighborhoods means we take a fine-grained view where there is a lot of data, and a coarse-grained view where there is little data.
+It’s not strictly necessary to use k-nearest neighbors here; the important thing is to establish some neighborhood for each point, and to do so in a way which conforms or adapts to the data.
+18.3.2 Finding Weights
+Step 2 can be understood in a number of ways. Let’s start with the local linearity of a manifold. Suppose that the manifold was exactly linear around ⃗xi , i.e., that it and its neighbors belonged to a q -dimensional linear subspace. Since q + 1 points in generally define a q-dimensional subspace, there would be some combination of the neighbors which reconstructed ⃗xi exactly, i.e., some set of weights wi j such that
+⃗xi =􏰥wij⃗xj (18.3) j
+Conversely, if there are such weights, then ⃗xi and (some of) its neighbors do form a linear subspace. Since every manifold is locally linear, by taking a sufficiently small region around each point we get arbitrarily close to having these equations hold — n−1RSS(w) should shrink to zero as n grows.
+Vitally,thesameweightswouldworktoreconstructxi bothinthehigh-dimensional embedding space and the low-dimensional subspace. This means that it is the weights around a given point which characterize what the manifold looks like there (provided the neighborhood is small enough compared to the curvature). Finding the weights gives us the same information as finding the tangent space. This is why, in the last step, we will only need the weights, not the original vectors.
+Now, about the constraints that 􏰢j wi j = 1. This can be understood in two ways, geometrically and probabilistically. Geometrically, what it gives us is invariance un- der translation. That is, if we add any vector ⃗c to ⃗xi and all of its neighbors, nothing happens to the function we’re minimizing:
+
+⃗xi +⃗c−􏰥wij(⃗xj +⃗c) = ⃗xi +⃗c−􏰥wij⃗xj−⃗c 
+jj
+= ⃗xi −􏰥wij⃗xj j
+(18.4)
+(18.5)
+Since we are looking at the same shape of manifold no matter how we move it around in space, translational invariance is a constraint we want to impose.
+Probabilistically, forcing the weights to sum to one makes w a stochastic transi- tionmatrix.5 Thisshouldremindyouofpage-rank,wherewebuiltaMarkovchain
+5Actually, it really only does that if wi j ≥ 0. In that case we are approximating ⃗xi not just by a linear combination of its neighbors, but by a convex combination. Often one gets all positive weights anyway, but it can be helpful to impose this extra constraint.
+00:02 Monday 18th April, 2016
+￼
+433 18.3. LOCALLYLINEAREMBEDDING(LLE)
+transition matrix from the graph connecting web-pages. There is a tight connection here, which we’ll return to next time under the heading of diffusion maps; for now this is just to tantalize.
+We will see below how to actually minimize the squared error computationally; as you probably expect by now, it reduces to an eigenvalue problem. Actually it reduces to a bunch (n) of eigenvalue problems: because there are no constraints across the rows of w, we can find the optimal weights for each point separately. Naturally, this simplifies the calculation.
+18.3.2.1 k > p
+If k, the number of neighbors, is greater than p, the number of features, then (in general) the space spanned by k distinct vectors is the whole space. Then ⃗xi can be written exactly as a linear combination of its k-nearest neighbors.6 In fact, if k >
+p, then not only is there a solution to ⃗xi = 􏰢j wij⃗j, there are generally infinitely many solutions, because there are more unknowns (k) than equations (p). When this
+happens, we say that the optimization problem is ill-posed, or irregular. There are many ways of regularizing ill-posed problems. A common one, for this case, is what is called L2 or Tikhonov regularization: instead of minimizing
+∥⃗xi −􏰥wij⃗xj∥2 j
+pick an α > 0 and minimize
+∥⃗xi −􏰥wij⃗xj∥2+α􏰥w2
+This says: pick the weights which minimize a combination of reconstruction error and the sum of the squared weights. As α → 0, this gives us back the least-squares problem. To see what the second, sum-of-squared-weights term does, take the oppo- site limit, α → ∞: the squared-error term becomes negligible, and we just want to minimize the Euclidean (“L2”) norm of the weight vector wi j . Since the weights are constrained to add up to 1, we can best achieve this by making all the weights equal — so some of them can’t be vastly larger than the others, and they stabilize at a def- inite preferred value. Typically α is set to be small, but not zero, so we allow some variation in the weights if it really helps improve the fit.
+We will see how to actually implement this regularization later, when we look at the eigenvalue problems connected with LLE. The L2 term is an example of a penalty term, used to stabilize a problem where just matching the data gives irregular results, and there is an art to optimally picking λ; in practice, however, LLE results are often fairly insensitive to it, when it’s needed at all7. Remember, the whole situation only comes up when k > p, and p can easily be very large — [[6380 for the gene-expression data]], much larger for the [[Times corpus]], etc.
+6This is easiest to see when ⃗xi lies inside the body which has its neighbors as vertices, their convex hull, but is true more generally.
+7It’s no accident that the scaling factor for the penalty term is written with a Greek letter; it can also be seen as the Lagrange multiplier enforcing a constraint on the solution (§H.5.3).
+00:02 Monday 18th April, 2016
+ij jj
+(18.6)
+(18.7)
+￼
+18.3. LOCALLYLINEAREMBEDDING(LLE) 434
+18.3.3 Finding Coordinates
+As I said above, if the local neighborhoods are small compared to the curvature of the manifold, weights in the embedding space and weights on the manifold should be the same. (More precisely, the two sets of weights are exactly equal for linear subspaces, and for other manifolds they can be brought arbitrarily close to each other by shrink- ing the neighborhood sufficiently.) In the third and last step of LLE, we have just calculated the weights in the embedding space, so we take them to be approximately equal to the weights on the manifold, and solve for coordinates on the manifold.
+So, taking the weight matrix w as fixed, we ask for the Y which minimizes 􏰖 􏰖2
+That is, what should the coordinates ⃗yi be on the manifold, that these weights recon- struct them?
+As mentioned, some constraints are going to be needed. Remember that we saw above that we could add any constant vector ⃗c to ⃗xi and its neighbors without affect- ingthesumofsquares,because􏰢jwij =1.Wecoulddothesamewiththe⃗yi,so the minimization problem, as posed, has an infinity of equally-good solutions. To fix this — to “break the degeneracy” — we impose the constraint
+1􏰥⃗yi =0 (18.9) ni
+Sinceifthemeanvectorwasnotzero,wecouldjustsubtractitfromallthe⃗yi without changing the quality of the solution, this is just a book-keeping convenience.
+Similarly, we also impose the convention that
+1 YT Y = I (18.10)
+n
+i.e., that the covariance matrix of Y be the (q-dimensional) identity matrix. This is not as substantial as it looks. If we found a solution where the covariance matrix of Y was not diagonal, we could use PCA to rotate the new coordinates on the manifold so they were uncorrelated, giving a diagonal covariance matrix. The only bit of this which is not, again, a book-keeping convenience is assuming that all the coordinates have the same variance — that the diagonal covariance matrix is in fact I.
+This optimization problem is like [[multi-dimensional scaling]]: we are asking for low-dimensional vectors which preserve certain relationships (averaging weights) among high-dimensional vectors. We are also asking to do it under constraints, which we will impose through Lagrange multipliers. Once again, it turns into an eigenvalue problem, though one just a bit more subtle than what we saw with PCA in Chapter 168 .
+8One reason to suspect the appearance of eigenvalues, in addition to my very heavy-handed foreshad- owing, is that eigenvectors are automatically orthogonal to each other and normalized, so making the columns of Y be the eigenvectors of some matrix would automatically satisfy Eq. 18.10.
+00:02 Monday 18th April, 2016
+􏰖􏰖 Φ(Y)=􏰥􏰖􏰖⃗y −􏰥⃗y w 􏰖􏰖
+(18.8)
+􏰖i jij􏰖 i􏰖j̸=i 􏰖
+￼￼￼
+435 18.4. MOREFUNWITHEIGENVALUESANDEIGENVECTORS
+Unfortunately, finding the coordinates does not break up into n smaller prob- lems, the way finding the weights did, because each row of Y appears in Φ multiple times, once as the focal vector ⃗yi , and then again as one of the neighbors of other vectors.
+18.4 More Fun with Eigenvalues and Eigenvectors
+Tosumup:foreach⃗xi,wewanttofindtheweightswij whichminimize RSSi(w)=∥⃗xi −􏰥wij⃗xj∥2 (18.11)
+j
+where wi j = 0 unless ⃗x j is one of the k nearest neighbors of ⃗xi , under the constraint that 􏰢j wi j = 1. Given those weights, we want to find the q-dimensional vectors ⃗yi
+which minimize
+n
+Φ(Y)=􏰥∥⃗yi −􏰥wij⃗yj∥2
+i=1 j
+with the constraints that n−1 􏰢i ⃗yi = 0, n−1YT Y = I.
+18.4.1 Finding the Weights
+In this subsection, assume that j just runs over the neighbors of ⃗xi , so we don’t have to worry about the weights (including wi i ) which we know are zero.
+We saw that RSSi is invariant if we add an arbitrary ⃗c to all the vectors. Set ⃗c = −⃗xi , centering the vectors on the focal point ⃗xi :
+RSSi = ∥􏰥wij(⃗xj −⃗xi)∥2 (18.13) j
+= ∥􏰥wij⃗zj∥2 (18.14) j
+defining ⃗z j = ⃗x j − ⃗xi . If we correspondingly define the k × p matrix z, and set wi to be the k × 1 matrix, the vector we get from the sum is just wTi z. The squared magnitude of any vector ⃗r , considered as a row matrix r, is rrT , so
+RSSi =wTi zzTwi (18.15)
+NoticethatzzT isak×kmatrixconsistingofalltheinnerproductsoftheneighbors. This symmetric matrix is called the Gram matrix of the set of vectors, and accord- ingly abbreviated G — here I’ll say Gi to remind us that it depends on our choice of focal point ⃗xi .
+RSSi =wTi Giwi (18.16)
+Notice that the data matter only in so far as they determine the Gram matrix Gi ; the problem is invariant under any transformation which leaves all the inner products alone (translation, rotation, mirror-reversal, etc.).
+00:02 Monday 18th April, 2016
+(18.12)
+18.4. MOREFUNWITHEIGENVALUESANDEIGENVECTORS 436 We want to minimize RS Si , but we have the constraint 􏰢 j wi j = 1. We impose
+thisviaaLagrangemultiplier,λ.9 Toexpresstheconstraintinmatrixform,introduce the k × 1 matrix of all 1s, call it 1.10 Then the constraint has the form 1T wi = 1, or 1T wi − 1 = 0. Now we can write the Lagrangian:
+􏰂(wi,λ)=wTi Giwi −λ(1Tw−1) Taking derivatives, and remembering that Gi is symmetric,
+∂􏰂 ∂ wi ∂􏰂 ∂λ
+or
+If the Gram matrix is invertible,
+(18.17)
+(18.18) (18.19)
+(18.20)
+(18.21)
+w Ti G i w i + α w Ti w i
+where α > 0 determines the degree of regularization. Proceeding as before to impose
+the constraint,
+􏰂 =wTi Giwi +αwTi wi −λ(1Twi −1) (18.23) where now λ is the Lagrange multiplier. Taking the derivative with respect to wi and
+= 2Giwi−λ1=0 = 1Twi−1=0
+λ
+Giwi = 21 wi = λG−11
+￼￼￼￼2i
+where λ can be adjusted to ensure that everything sums to 1.
+18.4.1.1 k > p
+If k > p, we modify the objective function to be
+setting it to zero,
+2Giwi +2αwi (Gi +αI)wi
+= λ1 λ
+= 21
+= λ(Gi +αI)−11
+2
+9This λ should not be confused with the penalty-term λ used when k > p. See next sub-section.
+10This should not be confused with the identity matrix, I.
+00:02 Monday 18th April, 2016
+(18.22)
+￼wi
+where, again, we pick λ to properly normalize the right-hand side.
+(18.24) (18.25)
+(18.26)
+￼￼
+437 18.4. MOREFUNWITHEIGENVALUESANDEIGENVECTORS
+18.4.2 Finding the Coordinates
+As with PCA, it’s easier to think about the q = 1 case first; the general case follows similarlines.So⃗yi isjustasinglescalarnumber,yi,andYreducestoann×1column of numbers. We’ll revisit q > 1 at the end.
+The objective function is
+Φ(Y) =
+=
+= = =
+n 2 􏰥􏰥
+i=1 n
+yi − wijyj (18.27) j
+   2
+􏰥2􏰥􏰥􏰥 yi −yi  wijyj− wijyjyi +
+i=1 j j j YT Y − YT (wY) − (wY)T Y + (wY)T (wY)
+((I − w)Y)T ((I − w)Y) YT (I − w)T (I − w)Y
+wijyj(18.28) (18.29)
+(18.30) (18.31)
+(18.32)
+Define the m × m matrix M = (I − w)T (I − w). Φ(Y) = YT MY
+This looks promising — it’s the same sort of quadratic form that we maximized in doing PCA.
+Now let’s use a Lagrange multiplier μ to impose the constraint that n−1YT Y = I — but, since q = 1, that’s the 1 × 1 identity matrix, i.e., the scalar number 1.
+􏰂(Y,μ)=YT MY−μ(n−1YT Y−1)
+Note that this μ is not the same as the μ which constrained the weights!
+Proceeding as we did with PCA,
+∂􏰂 =2MY−2μn−1Y=0
+∂Y
+μ
+MY = n Y
+(18.33)
+(18.34) (18.35)
+￼or
+￼so Y must be an eigenvector of M. Because Y is defined for each point in the data set, it is a function of the data-points, and we call it an eigenfunction, to avoid confusion with things like the eigenvectors of PCA (which are p-dimensional vectors in feature space). Because we are trying to minimize YT MY, we want the eigenfunctions going with the smallest eigenvalues — the bottom eigenfunctions — unlike the case with PCA, where we wanted the top eigenvectors.
+M being an n × n matrix, it has, in general, n eigenvalues, and n mutually orthog- onal eigenfunctions. The eigenvalues are real and non-negative; the smallest of them
+00:02 Monday 18th April, 2016
+￼[[ATTN: Consider FNN package?]]
+calling
+Since this eigenfunction is constant, it doesn’t give a useful coordinate on the man- ifold. To get our first coordinate, then, we need to take the two bottom eigenfunc- tions, and discard the constant.
+Again as with PCA, if we want to use q > 1, we just need to take multiple eigenfunctions of M . To get q coordinates, we take the bottom q + 1 eigenfunc- tions, discard the constant eigenfunction with eigenvalue 0, and use the others as our coordinates on the manifold. Because the eigenfunctions are orthogonal, the no-covariance constraint is automatically satisfied. Notice that adding another coor- dinate just means taking another eigenfunction of the same matrix M — as is the case with PCA, but not with factor analysis.
+(What happened to the mean-zero constraint? Well, we can add another Lagrange multiplier ν to enforce it, but the constraint is linear in Y, it’s AY = 0 for some matrix A [EXERCISE: write out A], so when we take partial derivatives we get
+∂􏰂(Y,μ,ν) =2MY−2μY−νA=0 (18.39) ∂Y
+and this is the only equation in which ν appears. So we are actually free to pick any ν we like, and may as well set it to be zero. Geometrically, this is the translational invariance yet again. In optimization terms, the size of the Lagrange multiplier tells us about how much better the solution could be if we relaxed the constraint — when it’s zero, as here, it means that the constrained optimum is also an unconstrained optimum — but we knew that already!)
+18.5 Calculation
+Let’s break this down from the top. The nice thing about doing this is that the over-all function is four lines, one of which is just the return (Example 29).
+18.5.1 Finding the Nearest Neighbors
+The following approach is straightforward (exploiting an R utility function, order), but not recommended for “industrial strength” uses. A lot of thought has been given to efficient algorithms for finding nearest neighbors, and this isn’t even close to the state of the art [[cites]]. For large n, the difference in efficiency would be quite substantial. For the present, however, this will do.
+To find the k nearest neighbors of each point, we first need to calculate the dis- tances between all pairs of points. The neighborhoods only depend on these dis- tances, not the actual points themselves. We just need to find the k smallest entries in each row of the distance matrix (Example 30).
+11Each row of w1 is a weighted average of the other rows of 1. But all the rows of 1 are the same. 00:02 Monday 18th April, 2016
+18.5. CALCULATION
+is always zero, with eigenfunction 1. To see this, notice that w1 = 1.11 Then (I − w)1 = 0
+(I−w)T (I−w)1 = 0 M1 = 0
+438
+(18.36) (18.37) (18.38)
+￼
+439 18.5. CALCULATION
+CODE EXAMPLE 29: Locally linear embedding in R. Notice that this top-level function is very simple, and mirrors the math exactly.
+CODE EXAMPLE 30: Finding the k nearest neighbors of all the row-vectors in a data frame. As the main text says, this is a fairly slow way to do it, and shouldn’t be used on large data sets.
+Most of the work is done either by dist, a built-in function optimized for calcu- lating distance matrices, or by smallest.by.rows (Example 31), which we are about to write. The +1 and −1 in the last two lines come from simplifying that.
+smallest.by.rows uses the utility function order. Given a vector, it returns the permutation that puts the vector into increasing order, i.e., its return is a vector ofintegersaslongasitsinput.12 Thefirstlineofsmallest.by.rowsappliesorder to each row of the input matrix m. The first column of row.orders now gives the column number of the smallest entry in each row of m; the second column, the second smallest entry, and so forth. By taking the first k columns, we get the set of the smallest entries in each row. find.kNNs applies this function to the distance matrix, giving the indices of the closest points. However, every point is closest to itself, so to get k neighbors, we need the k + 1 closest points; and we want to discard the first column we get back from smallest.by.rows.
+Let’s check that we’re getting sensible results from the parts.
+12There is a lot of control over ties, but we don’t care about ties. See help(order), though, it’s a handy function.
+00:02 Monday 18th April, 2016
+￼￼lle <- function(x, q, k = q + 1, alpha = 0.01) {
+    stopifnot(q > 0, q < ncol(x), k > q, alpha > 0)
+    kNNs = find.kNNs(x, k)
+    w = reconstruction.weights(x, kNNs, alpha)
+    coords = coords.from.weights(w, q)
+    return(coords)
+}
+￼￼￼￼￼find.kNNs <- function(x, k, ...) {
+    x.distances = dist(x, ...)
+    x.distances = as.matrix(x.distances)
+    kNNs = smallest.by.rows(x.distances, k + 1)
+    return(kNNs[, -1])
+}
+￼￼￼￼(r <- matrix(c(7, 3, 2, 4), nrow = 2))
+##      [,1] [,2]
+## [1,]    7    2
+## [2,]    3    4
+smallest.by.rows(r, 1)
+## [1] 2 1
+smallest.by.rows(r, 2)
+￼
+18.5. CALCULATION 440
+CODE EXAMPLE 31: Finding which columns contain the smallest entries in each row.
+Since 7 > 2 but 3 < 4, this is correct. Now try a small distance matrix, from the first five points on the spiral:
+￼￼smallest.by.rows <- function(m, k) {
+    stopifnot(ncol(m) >= k)
+    row.orders = t(apply(m, 1, order))
+    k.smallest = row.orders[, 1:k]
+    return(k.smallest)
+}
+￼￼￼￼##      [,1] [,2]
+## [1,]    2    1
+## [2,]    1    2
+￼round(as.matrix(dist(x[1:5, ])), 2) ## 12345
+## 1 0.00 0.11 0.21 0.32 0.43
+## 2 0.11 0.00 0.11 0.22 0.33
+## 3 0.21 0.11 0.00 0.11 0.22
+## 4 0.32 0.22 0.11 0.00 0.11
+## 5 0.43 0.33 0.22 0.11 0.00
+smallest.by.rows(as.matrix(dist(x[1:5, ])), 3)
+## ##1 ##2 ##3 ##4 ##5
+[,1] [,2] [,3]
+   1    2    3
+   2    1    3
+   3    2    4
+   4    3    5
+   5    4    3
+Notice that the first column, as asserted above, is saying that every point is closest to itself. But the two nearest neighbors are right.
+Success!
+18.5.2 Calculating the Weights
+First, the slow iterative way (Example 32). Aside from sanity-checking the inputs, this just creates a square, n × n weight-matrix w, initially populated with all zeroes, and
+00:02 Monday 18th April, 2016
+￼find.kNNs(x[1:5, ], 2) ## [,1] [,2]
+##1 2 3
+##2 1 3
+##3 2 4 ##4 3 5 ##5 4 3
+441 18.5. CALCULATION
+￼￼reconstruction.weights <- function(x, neighbors, alpha) {
+    stopifnot(is.matrix(x), is.matrix(neighbors), alpha > 0)
+    n = nrow(x)
+    stopifnot(nrow(neighbors) == n)
+    w = matrix(0, nrow = n, ncol = n)
+    for (i in 1:n) {
+        i.neighbors = neighbors[i, ]
+        w[i, i.neighbors] = local.weights(x[i, ], x[i.neighbors, ], alpha)
+    }
+return(w) }
+￼￼￼CODE EXAMPLE 32: Iterative (and so not really recommended) function to find linear least- squares reconstruction weights.
+￼￼local.weights <- function(focal, neighbors, alpha) {
+    stopifnot(nrow(focal) == 1, ncol(focal) == ncol(neighbors))
+    k = nrow(neighbors)
+    neighbors = t(t(neighbors) - focal)
+    gram = neighbors %*% t(neighbors)
+    weights = try(solve(gram, rep(1, k)))
+    if (identical(class(weights), "try-error")) {
+        weights = solve(gram + alpha * diag(k), rep(1, k))
+    }
+    weights = weights/sum(weights)
+    return(weights)
+}
+￼￼￼CODE EXAMPLE 33: Find the weights for approximating a vector as a linear combination of the rows of a matrix.
+then fills each line of it by calling a to-be-written function, local.weights (Example 33).
+For testing, it would really be better to break local.weights up into two sub- parts — one which finds the Gram matrix, and another which solves for the weights — but let’s just test it altogether this once.
+matrix(mapply("*", local.weights(x[1, ], x[2:3, ], 0.01), x[2:3, ]), nrow = 2)
+##           [,1]       [,2]
+## [1,]  2.014934 -0.4084473
+## [2,] -0.989357  0.3060440
+colSums(matrix(mapply("*", local.weights(x[1, ], x[2:3, ], 0.01), x[2:3, ]),
+    nrow = 2))
+## [1]  1.0255769 -0.1024033
+colSums(matrix(mapply("*", local.weights(x[1, ], x[2:3, ], 0.01), x[2:3, ]),
+    nrow = 2)) - x[1, ]
+## [1]  0.0104723155 -0.0005531495
+00:02 Monday 18th April, 2016
+￼
+18.5. CALCULATION 442
+The mapply function is another of the lapply family of utility functions. Just as sapply sweeps a function along a vector, mapply sweeps a multi-argument function (hence the m) along multiple argument vectors, recycling as necessary. Here the func- tion is multiplication, so we’re getting the products of the reconstruction weights and the vectors. (I re-organize this into a matrix for comprehensibility.) Then I add up the weighted vectors, getting something that looks reasonably close to x[1,]. This is confirmed by actually subtract the latter from the approximation, and seeing that the differences are small for both coordinates.
+This didn’t use the regularization; let’s turn it on and see what happens.
+colSums(matrix(mapply("*", local.weights(x[1, ], x[2:4, ], 0.01), x[2:4, ]),
+    nrow = 3)) - x[1, ]
+## [1]  0.01091407 -0.06487090
+The error message alerts us that the unregularized attempt to solve for the weights failed, since the determinant of the Gram matrix was as close to zero as makes no dif- ference, hence it’s uninvertible. (The error message could be suppressed by adding a silent=TRUE option to try; see help(try).) However, with just a touch of regular- ization (α = 0.01) we get quite reasonable accuracy.
+Let’s test our iterative solution. Pick k = 2, each row of the weight matrix should have two non-zero entries, which should sum to one. (We might expect some small deviation from 1 due to finite-precision arithmetic.) First, of course, the weights should match what the local.weights function says.
+￼￼x.2NNs <- find.kNNs(x, 2)
+x.2NNs[1, ]
+## [1] 2 3
+local.weights(x[1, ], x[x.2NNs[1, ], ], 0.01)
+## [1]  1.9753018 -0.9753018
+wts <- reconstruction.weights(x, x.2NNs, 0.01)
+sum(wts[1, ] != 0)
+## [1] 2
+all(rowSums(wts != 0) == 2)
+## [1] TRUE
+all(rowSums(wts) == 1)
+## [1] FALSE
+summary(rowSums(wts))
+##    Min. 1st Qu.  Median
+##       1       1       1       1       1       1
+Mean 3rd Qu.    Max.
+Why does summary say that all the rows sum to 1, when directly testing that says otherwise? Because some rows don’t quite sum to 1, just closer-than-display tolerance to 1.
+00:02 Monday 18th April, 2016
+￼sum(wts[1, ]) == 1
+## [1] TRUE
+sum(wts[1, ])
+## [1] 1
+443 18.5. CALCULATION
+￼￼local.weights.for.index <- function(focal, x, NNs, alpha) {
+    n = nrow(x)
+    stopifnot(n > 0, 0 < focal, focal <= n, nrow(NNs) == n)
+    w = rep(0, n)
+    neighbors = NNs[focal, ]
+    wts = local.weights(x[focal, ], x[neighbors, ], alpha)
+    w[neighbors] = wts
+return(w) }
+￼￼￼CODE EXAMPLE 34: Finding the weights for the linear approximation of a point given its index, the data-frame, and the matrix of neighbors.
+So the constraint is satisfied to ±2 · 10−16, which is good enough for all practi- cal purposes. It does, however, mean that we have to be careful about testing the constraint!
+Of course, iteration is usually Not the Way We Do It in R — especially here, wherethere’snodependencebetweentherowsoftheweightmatrix.13 Whatmakes this a bit tricky is that we need to combine information from two matrices — the data frame and the matrix giving the neighborhood of each point. We could try using something like mapply or Map, but it’s cleaner to just write a function to do the calculation for each row (Example 34), and then apply it to the rows.
+As always, check the new function:
+So (at least for the first row!) it has the right values in the right positions. Now the final function is simple (Example 35), and passes the check:
+13Remember what makes loops slow in R is that every time we change an object, we actually create a new copy with the modified values and then destroy the old one. If n is large, then the weight matrix, with n2 entries, is very large, and we are wasting a lot of time creating and destroying big matrices to make small changes.
+00:02 Monday 18th April, 2016
+[[ATTN: Simplify by using all.equal function?]]
+￼sum(wts[1, ]) - 1
+## [1] 0
+summary(rowSums(wts) - 1)
+##       Min.    1st Qu.     Median       Mean    3rd Qu.       Max.
+## -2.220e-16  0.000e+00  0.000e+00 -1.184e-17  0.000e+00  2.220e-16
+￼all(abs(rowSums(wts) - 1) < 1e-07)
+## [1] TRUE
+￼w.1 = local.weights.for.index(1, x, x.2NNs, 0.01)
+w.1[w.1 != 0]
+## [1]  1.9753018 -0.9753018
+which(w.1 != 0)
+## [1] 2 3
+￼
+18.5. CALCULATION 444
+reconstruction.weights.2 <- function(x, neighbors, alpha) {
+    n = nrow(x)
+    w = sapply(1:n, local.weights.for.index, x = x, NNs = neighbors, alpha = alpha)
+    w = t(w)
+    return(w)
+}
+CODE EXAMPLE 35: Non-iterative calculation of the weight matrix.
+￼￼￼￼￼￼￼coords.from.weights <- function(w, q, tol = 1e-07) {
+    n = nrow(w)
+    stopifnot(ncol(w) == n)
+    stopifnot(all(abs(rowSums(w) - 1) < tol))
+    M = t(diag(n) - w) %*% (diag(n) - w)
+    soln = eigen(M)
+    coords = soln$vectors[, ((n - q):(n - 1))]
+    return(coords)
+}
+￼￼￼CODE EXAMPLE 36: Getting manifold coordinates from approximation weights by finding eigen- functions.
+￼wts.2 = reconstruction.weights.2(x, x.2NNs, 0.01)
+identical(wts.2, wts)
+## [1] TRUE
+18.5.3 Calculating the Coordinates
+Having gone through all the eigen-manipulation, this is a straightforward calculation (Example 36).
+Notice that w will in general be a very sparse matrix — it has only k non-zero entries per row, and typically k ≪ n. There are special techniques for rapidly solving eigenvalue problems for sparse matrices, which are not being used here — another way in which this is not an industrial-strength version.
+Let’s try this out: make the coordinate (with q = 1), plot it (Figure 18.5), and check that it really is monotonically increasing, as the figure suggests.
+00:02 Monday 18th April, 2016
+￼spiral.lle = coords.from.weights(wts, 1)
+plot(spiral.lle, ylab = "Coordinate on manifold")
+445 18.5. CALCULATION
+￼●
+● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+￼● ● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼0 50 100 150 200 250 300
+Index
+So the coordinate we got through LLE increases along the spiral, just as it should, and we have successfully recovered the underlying structure of the data. To verify this in a more visually pleasing way, Figure 18.6 plots the original data again, but now with points colored so that their color in the rainbow corresponds to their inferred coordinate on the manifold.
+Before celebrating our final victory, test that everything works when we put it together:
+￼all(diff(spiral.lle) > 0)
+## [1] TRUE
+￼all.equal(lle(x, 1, 2), spiral.lle)
+## [1] TRUE
+􏰏
+00:02 Monday 18th April, 2016
+Coordinate on manifold
+0.00 0.05 0.10 0.15 0.20
+18.5. CALCULATION 446
+￼●
+● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ● ●
+￼● ● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼0 50 100 150 200 250 300
+Index
+plot(coords.from.weights(wts, 1), ylab = "Coordinate on manifold")
+FIGURE 18.5: Coordinate on the manifold estimated by locally-linear embedding for the spiral data. Notice that it increases monotonically along the spiral, as it should.
+00:02 Monday 18th April, 2016
+￼Coordinate on manifold
+0.00 0.05 0.10 0.15 0.20
+447
+18.5. CALCULATION
+￼￼●
+●
+●
+●
+●
+●
+●
+● ● ● ●
+● ● ● ● ● ●●● ●
+● ●● ● ●
+●
+●
+●●●
+● ● ●●●
+●
+●
+●
+●
+●
+●
+●● ●●
+●●● ●●
+●
+●● ●●
+●
+●
+●
+●
+●
+●●●●●● ●● ●●
+● ● ● ●●● ●
+●
+●●
+● ● ● ●●
+● ●●●●●●● ●●●●●●●●●●● ●
+●●
+●
+●
+●
+●
+●
+●
+●
+●● ●●
+●● ●●●
+￼￼￼￼￼￼￼￼￼￼￼￼￼−300 −200 −100
+0 100
+x[,1]
+￼plot(x, col = rainbow(300, end = 5/6)[cut(spiral.lle, 300, labels = FALSE)])
+FIGURE 18.6: The original spiral data, but with color advancing smoothly along the spectrum according to the intrinsic coordinate found by LLE.
+00:02 Monday 18th April, 2016
+x[,2]
+−200 −100 0 100 200 300 400
+[[TODO: Write, insert refs.]]
+18.6. EXAMPLE 448
+18.6 Example
+[[TODO: Actual data example?]] 18.7 Further Reading
+[[SNE]]
+[[Eigenmaps: Belkin and Niyogi (2003)]]
+[[Diffusion maps: form a similarity graph for the data, and then use as coor-
+dinates projections on the eigenvectors of the graph Laplacian Lee and Wasserman (2010); distinct from LLE14]] [[Diffusion maps: see also http://www.stat.cmu. edu/~cshalizi/350/lectures/15/lecture-15.pdf]]
+[[Manifold learning]]
+[[LLE: note that, Like PCA, not really fitting a probability model (so pure data analysis, rather than statistical inference) — refs. on ideas more like factor models, with an inferential/probabilistic component]]
+18.8 Exercises
+1. Let B be any n×n matrix. Show that if v⃗ is an eigenvector of B, then it is also an eigenvector of B2, and of any power of B. Conclude that B and B2 have the same eigenvectors. (Hint: how many eigenvectors does each matrix have?) What happens to the eigenvalues?
+2. Inlocallinearembedding,weobtainann×nmatrixw,wherewij istheweight on ⃗xj we use to reconstruct ⃗xi. Each row of w sums to one. We then try to find coordinates y1,y2,...yn which minimize
+nn 2 􏰥􏰥
+Φ(Y)= yi − wijyj i=1 j=1
+where Y is the n × 1 matrix of yi values (this is the q = 1 case, for simplicity). Above [[TODO: eqref]] we showed that this is the same as minimizing
+[[TODO: Check notation, opening, as this was originally a separate assignment]]
+(a) Show that M is a symmetric matrix.
+14In fact, in some cases, it can be shown (Belkin and Niyogi, 2003, §5) that the matrix in the LLE
+minimization problem is related to the Laplacian, because (I − w)T (I − w) ≈ 1 L2. Since the powers of 2
+L have the same eigenvectors as L, when this holds the coordinates we get from the diffusion map are approximately the same as the LLE coordinates.
+00:02 Monday 18th April, 2016
+where
+Φ(Y) = YT MY
+M = ((I − w)T (I − w))
+￼￼
+449
+(b) (c)
+(d) (e)
+(f)
+18.8. EXERCISES Show that 1 is an eigenvector of M, and that its eigenvalue is zero.
+ShowthatΦ(Y)=Φ(Y+c1),wherec isanyconstantand1isthen×1 matrix whose entries are all 1s. (Hint: one way is to use the previous two parts.)
+Show that Φ(Y) is minimized by Y = 0.
+To avoid the trivial solution of setting all the yi to zero, we impose the constraint that n−1 􏰢ni=1 yi2 = 1. We use a Lagrange multiplier to enforce this constraint; write down the Lagrangian for the constrained minimiza- tion problem.
+Show that a solution Y to the constrained minimization problem must be an eigenvector of M.
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

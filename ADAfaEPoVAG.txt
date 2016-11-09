@@ -1,0 +1,70 @@
+
+Appendix G
+Propagation of Error, and Standard Errors for Derived Quantities
+A reminder about how we get approximate standard errors for func- tions of quantities which are themselves estimated with error.
+Suppose we are trying to estimate some quantity θ. We compute an estimate θ, 􏰨
+based on our data. Since our data is more or less random, so is θ. One convenient way
+of measuring the purely statistical noise or uncertainty in θ􏰨 is its standard deviation. This is the standard error of our estimate of θ.1 Standard errors are not the only way of summarizing this noise, nor a completely sufficient way, but they are often useful.
+Suppose that our estimate θ􏰨is a function of some intermediate quantities ψ􏰩,ψ􏰩,...,ψ􏰩, 12p
+which are also estimated:
+θ􏰨= f (ψ􏰩,ψ􏰩,...ψ􏰩) (G.1) 12p
+For instance, θ might be the difference in expected values between two groups, with ψ1 and ψ2 the expected values in the two groups, and f (ψ1,ψ2) = ψ1 −ψ2. If we have
+a standard error for each of the original quantities ψ􏰩, it would seem like we should i
+be able to get a standard error for the derived quantity θ. There is in fact a simple if approximate way of doing so, which is called propagation of error2.
+We start with (what else?) a Taylor expansion (App. D). We’ll write ψ∗i for the
+1It is not, of course, to be confused with the standard deviation of the data. It is not even to be confused
+with the standard error of the mean, unless θ is the expected value of the data and θ􏰨 is the sample mean. 2Or, sometimes, the delta method.
+752
+􏰨
+􏰨
+￼
+753
+true (ensemble or population) value which is estimated by ψ􏰩.
+􏰕􏰕
+􏰕􏰕 (G.2) 􏰕 ψ = ψ􏰨
+􏰕􏰕 (G.3) 􏰕 ψ = ψ􏰨
+i ∂ ψi
+whose standard error we want. I have done this manipulation because now θˆ is a lin-
+ear function (approximately!) of some random quantities whose variances we know, and some derivatives which we can calculate.
+Remember the rules for arithmetic with variances: if X and Y are random vari- ables, and a, b and c are constants,
+f (ψ∗,ψ∗,...ψ∗ ) ≈ f (ψ􏰩,ψ􏰩,...ψ􏰩)+ 12p12pii∂ψ
+(ψ∗ −ψ􏰩) f(ψ􏰩,ψ􏰩,...ψ􏰩) ≈ f(ψ∗,ψ∗,...ψ∗)+ (ψ􏰩−ψ∗)
+i ∂ f 􏰕􏰕
+12p12pii∂ψ i = 1 i
+p
+θˆ ≈ θ∗ +􏰥(ψ􏰩−ψ∗)f ′(ψ􏰨)
+(G.4) introducing f ′ as an abbreviation for ∂ f . The left-hand side is now the quantity
+iii i=1
+i
+􏰥p ∂ f
+￼i = 1 􏰥p
+￼￼􏰎[a] = 0 􏰎[a+bX] = b2􏰎[X]
+(G.5) (G.6) (G.7)
+􏰎[a+bX +cY] = b2􏰎[X]+c2􏰎[Y]+2bcCov[X,Y]
+While we don’t know f (ψ∗1,ψ∗2,...ψ∗p), it’s constant, so it has variance 0. Similarly,
+􏰎
+The standard error for θ􏰨 would then be the square root of this.
+If we follow this rule for the simple case of group differences, f (ψ1,ψ2) = ψ1−ψ2,
+wefindthat 􏰪􏰫 􏰪􏰫 􏰪􏰫 􏰪 􏰫
+􏰎 θ􏰨 =􏰎 ψ􏰩 +􏰎 ψ􏰩 −2Cov ψ􏰩,ψ􏰩 (G.9)
+􏰪􏰫􏰪􏰫
+ψ􏰩 − ψ∗ = 􏰎 ψ􏰩 . Repeatedly applying these rules to Eq. G.4,
+iii
+p p−1 p
+􏰪􏰫􏰥􏰪􏰫􏰥􏰥􏰪􏰫
+􏰎 θ􏰨 ≈ (f′(ψ􏰨))2􏰎 ψ􏰩 +2 f′(ψ􏰨)f′(ψ􏰨)Cov ψ􏰩,ψ􏰩 (G.8)
+iiijij i=1 i=1 j=i+1
+1212
+just as we would find from the basic rules for arithmetic with variances. The approx- imation in Eq. G.8 comes from the nonlinearities in f .
+If the estimates of the initial quantities are uncorrelated, Eq. G.8 simplifies to
+p
+􏰪􏰫􏰥 􏰪􏰫
+(f′(ψ􏰨))2􏰎 ψ􏰩 (G.10) ii
+i=1
+and, again, the standard error of θ􏰨 would be the square root of this. The special case of Eq. G.10 is sometimes called the propagation of error formula, but I think it’s better to use that name for the more general Eq. G.8.
+00:02 Monday 18th April, 2016
+􏰎 θ􏰨 ≈
+[[ATTN: example of calcula- tion with a nonlinear func- tion?]]
+[[ATTN: example of accuracy vs. simulation?]]
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

@@ -1,0 +1,408 @@
+Acknowledgments
+
+I am grateful to my students in 36-402 for their feedback, and for their enduring first (and second and third...) drafts. Martin Gold and Danny Yee made detailed and valuable comments on early versions. Jim Crutchfield, Chris Genovese, Clark Gly- mour, Kristina Klinkner, Valerie Ventura and Larry Wasserman all both shaped how I think about statistics, and offered vital early encouragement; John Miller offered vital early encouragement while reminding this was a bad idea. Dr. Ryota Kanai and Prof. Bruce Western kindly shared data sets from their papers. For specific com- ments and corrections, I thank Souhaib Ben Taieb, Burak Bayramli, Bob Carpenter, Kathy Chen, Joe Chi, Brad DeLong, Jeremy Drelich, Beatriz Estefania Etchegaray, Njål Foldnes, Manuel Garber, Max Grazier G’Sell, Ben Hansen, Anas Hoque, Mak- sim Horowitz, Crystal Hou, Rafael Izbicki, Xi Jin, Kent Johnson, Sidharth Kapur, Kidong “Justin” Kim, Maksim Levental, Shubao Liu, Terra Mack, Shaina Mitchell, Sinnott Murphy, Spencer Nelson, Brendan O’Connor, Nathan M. Palmer, Mark T. Patterson, Dana Peck, Ariel Polakoff, Daniel Posen, Akhil Prakash, Calvin Price, David Pugh, Bryn Raschke, Janet E. Rosenbaum, Donald Schoolmaster, Jr., Howard Seltman, Sonia Shi, Michael Stanley, Stephanie Stern, Nicholas Thieme, Ryan Tibshi- rani, Johan Ugander, Michelle Wan, Peter Windridge and Sasha Zhang; Barry Dewitt and Patrick Kane deserve particular thanks for suggesting improvements and correc- tions for almost every chapter. Remaining errors and infelicities are my fault.
+While I was working on this book, my research was supported by grants from the National Science Foundation (DMS1207759 and DMS1418124), the National In- stitutes of Health (R01 NS047493), and the Institute for New Economic Thinking (IN01100005 and INO1400020). While not intended to pay for writing a textbook, money and time are fungible, so they helped. None of those bodies, or Carnegie Mellon University, are at all responsible for what I have written.
+Package acknowledgements This book was written with LATEX and Emacs; the text is set in URW Garamond. It uses the following LATEX packages: amsmath, amssymb, caption, datetime, fancyhdr, float, graphicx, hyperref, latexsym, mathdesign, natbib and shorttoc. It also uses R (R Core Team, 2015a), and the fol- lowing R packages: faraway (Faraway, 2014), FNN (Beygelzimer et al., 2013), foreign (R Core Team, 2015b), knitr (Xie, 2015), lattice (Sarkar, 2008), MASS (Venables and Ripley, 2002), mgcv (Wood, 2004), mixtools (Benaglia et al., 2009), mvtnorm (Genz et al., 2016), np (Hayfield and Racine, 2008), numDeriv (Gilbert and Varadhan,
+829
+O.5. EXERCISES 830
+2015), pcalg (Kalisch et al., 2010, 2012), pdfetch (Reinhart, 2014), plyr (Wickham, 2011), scatterplot3d (Ligges and Mächler, 2003), SMPracticals (Davison, 2013), reldist (Handcock, 2015), Rgraphviz, tseries (Trapletti and Hornik, 2015), and tree (Ripley, 2015). The book would have been much worse without these free re- sources, if it existed at all, and I am grateful to their authors for their generosity. It is thus as a small token of reciprocity that I make this book freely accessible online.
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/
+Bibliography
+Abadie, Alberto and Guido W. Imbens (2006). “Large Sample Properties of Match- ing Estimators for Average Treatment Effects.” Econometrica, 74: 235–267. URL http://www.ksg.harvard.edu/fs/aabadie/smep.pdf. doi:10.1111/j.1468- 0262.2006.00655.x.
+Abarbanel, Henry D. I. (1996). Analysis of Observed Chaotic Data. Berlin: Springer- Verlag.
+Adler, Joseph (2009). R in a Nutshell. Sebastopol, California: O’Reilly.
+al Ghazali, Abu Hamid Muhammad ibn Muhammad at-Tusi (1100/1997). The In- coherence of the Philosophers = Tahafut al-Falasifah: A Parallel English-Arabic Text. Provo, Utah: Brigham Young University Press. Translated by Michael E. Mar- mura.
+Alford, J. R., C. L. Funk and J. R. Hibbibng (2005). “Are Political Orientations Genetically Transmitted?” American Political Science Review, 99: 153–167.
+Amari, Shun-ichi and Hiroshi Nagaoka (1993/2000). Methods of Information Geom- etry. Providence, Rhode Island: American Mathematical Society. Translated by Daishi Harada. As Joho Kika no Hoho, Tokyo: Iwanami Shoten Publishers.
+Anthony, Martin and Peter L. Bartlett (1999). Neural Network Learning: Theoretical Foundations. Cambridge, England: Cambridge University Press.
+Arceneaux, Kevin, Alan S. Gerber and Donald P. Green (2010). “A Cautionary Note on the Use of Matching to Estimate Causal Effects: An Empirical Example Com- paring Matching Estimates to an Experimental Benchmark.” Sociological Methods and Research, 39: 256–282. doi:10.1177/0049124110378098.
+Arlot, Sylvain and Alain Celisse (2010). “A survey of cross-validation procedures for model selection.” Statistics Surveys, 4: 40–79. URL http://projecteuclid.org/ euclid.ssu/1268143839.
+— (2011). “Segmentation of the mean of heteroscedastic data via cross-validation.” Statistics and Computing, 21: 613–632. URL http://arxiv.org/abs/0902. 3977.
+831
+BIBLIOGRAPHY 832
+Arnold, Barry C. (1983). Pareto Distributions. Fairland, Maryland: International Cooperative Publishing House.
+Arnol’d, V. I. (1973). Ordinary Differential Equations. Cambridge, Massachusetts: MIT Press. Trans. Richard A. Silverman from Obyknovennye differentsial’nye Uravneniya.
+Axler, Sheldon (1996). Linear Algebra Done Right. Undergraduate Texts in Mathe- matics. Berlin: Springer-Verlag.
+Bai, Jushan (2003). “Testing Parametric Conditional Distributions of Dy- namic Models.” The Review of Economics and Statistics, 85: 531–549. doi:10.1162/003465303322369704.
+Barndorff-Nielsen, O. E. (1978). Information and Exponential Families in Statistical Theory. New York: John Wiley and Sons.
+Barndorff-Nielsen, O. E. and D. R. Cox (1995). Inference and Asymptotics. London: Chapman and Hall.
+Bartholomew, David J. (1987). Latent Variable Models and Factor Analysis. New York: Oxford University Press.
+Bartholomew, David J., Ian J. Deary and Martin Lawn (2009). “A New Lease on Life for Thomson’s Bonds Model of Intelligence.” Psychological Review, 116: 567–579. doi:10.1037/a0016262.
+Bartlett, M. S. (1955). An Introduction to Stochastic Processes, with Special Reference to Methods and Applications. Cambridge, England: Cambridge University Press.
+Basharin, Gely P., Amy N. Langville and Valeriy A. Naumov (2004). “The Life and Work of A. A. Markov.” Linear Algebra and its Applications, 386: 3–26. URL http://langvillea.people.cofc.edu/MarkovReprint.pdf.
+Beaumont, Mark A. (2010). “Approximate Bayesian Computation in Evolution and Ecology.” Annual Review of Ecology, Evolution, and Systematics, 41: 379–406. doi:10.1146/annurev-ecolsys-102209-144621.
+Belkin, Mikhail and Partha Niyogi (2003). “Laplacian Eigenmaps for Dimension- ality Reduction and Data Representation.” Neural Computation, 15: 1373– 1396. URL http://www.cse.ohio-state.edu/~mbelkin/papers/LEM_NC_03. pdf. doi:10.1162/089976603321780317.
+Benaglia, Tatiana, Didier Chauveau, David R. Hunter and Derek S. Young (2009). “mixtools: An R Package for Analyzing Mixture Models.” Journal of Statistical Software, 32. URL http://www.jstatsoft.org/v32/i06.
+Bera, Anil K. and Aurobindo Ghosh (2002). “Neyman’s Smooth Test and Its Ap- plications in Econometrics.” In Handbook of Applied Econometrics and Statistical Inference (Aman Ullah and Alan T. K. Wan and Anoop Chaturvedi, eds.), pp. 177– 230. New York: Marcel Dekker. URL http://ssrn.com/abstract=272888.
+00:02 Monday 18th April, 2016
+833 BIBLIOGRAPHY
+Berk, Richard, Lawrence Brown, Andreas Buja, Kai Zhang and Linda Zhao (2013). “Valid Post-Selection Inference.” Annals of Statistics, 41: 802–837. URL http: //arxiv.org/abs/1306.1059. doi:10.1214/12-AOS1077.
+Berk, Richard A. (2004). Regression Analysis: A Constructive Critique. Thousand Oaks, California: Sage.
+— (2008). Statistical Learning from a Regression Perspective. Springer Series in Statis- tics. New York: Springer-Verlag.
+Beygelzimer, Alina, Sham Kakade, John Langford, Sunil Arya, David Mount and Shengqiao Li (2013). FNN: Fast Nearest Neighbor Search Algorithms and Applica- tions. URL http://CRAN.R-project.org/package=FNN. R package version 1.1.
+Biecek, Przemyslaw and Teresa Ledwina (2010). ddst: Data driven smooth test. URL http://CRAN.R-project.org/package=ddst. R package, version 1.02.
+Blackwell, David and M. A. Girshick (1954). Theory of Games and Statistical Deci- sions. New York: Wiley.
+Blei, David M. and John D. Lafferty (2009). “Topic Models.” In Text Min- ing: Theory and Applications (A. Srivastava and M. Sahami, eds.). London: Taylor and Francis. URL http://www.cs.princeton.edu/~blei/papers/ BleiLafferty2009.pdf.
+Blei, David M., Andrew Y. Ng and Michael I. Jordan (2003). “Latent Dirichlet Allocation.” Journal of Machine Learning Research, 3: 993–1022. URL http: //jmlr.csail.mit.edu/papers/v3/blei03a.html.
+Boas, Mary L. (1983). Mathematical Methods in the Physical Sciences. New York: Wiley, 2nd edn.
+Bonner, John Tyler (1988). The Evolution of Complexity, by Means of Natural Selection. Princeton, New Jersey: Princeton University Press.
+Borsboom, Denny (2005). Measuring the Mind: Conceptual Issues in Contemporary Psychometrics. Cambridge, England: Cambridge University Press.
+— (2006). “The Attack of the Psychometricians.” Psychometrika, 71: 425–440. URL https://sites.google.com/site/borsboomdenny/BorsboomPM2006.pdf. doi:10.1007/s11336-006-1447-6.
+Bosq, Denis (1998). Nonparametric Statistics for Stochastic Processes: Estimation and Prediction. Berlin: Springer-Verlag, 2nd edn.
+Boudon, Raymond (1998). “Social Mechanisms without Black Boxes.” In Hedström and Swedberg (1998), pp. 172–203.
+Bousquet, Olivier, Stéphane Boucheron and Gábor Lugosi (2004). “Introduction to Statistical Learning Theory.” In Advanced Lectures in Machine Learning (Olivier Bousquet and Ulrike von Luxburg and Gunnar Rätsch, eds.), pp. 169–207. Berlin: Springer-Verlag. URL http://www.econ.upf.edu/~lugosi/mlss_slt.pdf.
+00:02 Monday 18th April, 2016
+BIBLIOGRAPHY 834 Braun, W. John and Duncan J. Murdoch (2008). A First Course in Statistical Program-
+ming with R. Cambridge University Press.
+Breiman, Leo, Jerome Friedman, R. Olshen and C. Stone (1984). Classification and
+Regression Trees. Belmont, California: Wadsworth.
+Breiman, Leo and Jerome H. Friedman (1985). “Estimating Optimal Transforma- tions for Multiple Regression and Correlation.” Journal of the American Statistical Association, 80: 580–598. doi:10.1080/01621459.1985.10478157.
+Brown, Lawrence D. (1986). Fundamentals of Statistical Exponential Families: with Applications in Statistical Decision Theory. Hayward, California: Institute of Mathematical Statistics. URL http://projecteuclid.org/euclid.lnms/ 1215466757.
+Bühlmann, Peter (2002). “Bootstraps for Time Series.” Statistical Sci- ence, 17: 52–72. URL http://projecteuclid.org/euclid.ss/1023798998. doi:10.1214/ss/1023798998.
+Buja, Andreas, Richard Berk, Lawrence Brown, Edward George, Emil Pitkin, Mikhail Traskin, Linda Zhao and Kai Zhang (2014). “Models as Approximations: A Conspiracy of Random Regressors and Model Deviations Against Classical In- ference in Regression.” E-print, arxiv.org. URL http://arxiv.org/abs/1404. 1578.
+Buja, Andreas, Trevor Hastie and Robert Tibshirani (1989). “Linear Smoothers and Additive Models.” Annals of Statistics, 17: 453–555. URL http:// projecteuclid.org/euclid.aos/1176347115. doi:10.1214/aos/1176347115.
+Campbell, John Y. and Robert J. Shiller (1988). “Stock Prices, Earn- ings, and Expected Dividends.” The Journal of Finance, 43: 661– 676. URL http://cowles.yale.edu/sites/default/files/files/pub/d08/ d0858.pdf. doi:10.1111/j.1540-6261.1988.tb04598.x.
+Canty, Angelo and Brian Ripley (2013). “boot: Bootstrap R (S-Plus) Functions.” R package version 1.3-9. URL http://cran.r-project.org.
+Canty, Angelo J., Anthony C. Davison, David V. Hinkley and Valérie Ventura (2006). “Bootstrap Diagnostics and Remedies.” The Canadian Journal of Statistics, 34: 5–27. URL http://www.stat.cmu.edu/tr/tr726/tr726.html.
+Carroll, Raymond J., Aurore Delaigle and Peter Hall (2009). “Nonparametric Predic- tion in Measurement Error Models.” Journal of the American Statistical Association, 104: 993–1003. doi:10.1198/jasa.2009.tm07543.
+Casella, George and R. L. Berger (2002). Statistical Inference. Belmont, California: Duxbury Press, 2nd edn.
+Cavalli-Sforza, L. L., P. Menozzi and A. Piazza (1994). The History and Geography of Human Genes. Princeton: Princeton University Press.
+00:02 Monday 18th April, 2016
+835 BIBLIOGRAPHY
+Chaikin, Paul M. and T. C. Lubensky (1995). Principles of Condensed Matter Physics. Cambridge, England: Cambridge University Press.
+Chambers, John M. (2008). Software for Data Analysis: Programming with R. New York: Springer.
+Chenoweth, Erica and Maria J. Stephan (2011). Why Civil Resistance Works: The Strategic Logic of Nonviolent Conflict. New York: Columbia University Press.
+Chetty, Raj, Nathaniel Hendren, Patrick Kline and Emmanuel Saez (2014). “Where is the Land of Opportunity? The Geography of Intergenerational Mobility in the United States.” Quarterly Journal of Economics, 129: 1553– 1623. URL http://www.equality-of-opportunity.org/index.php/papers. doi:10.1093/qje/qju022.
+Christakis, Nicholas A. and James H. Fowler (2007). “The Spread of Obesity in a Large Social Network over 32 Years.” The New England Journal of Medicine, 357: 370–379. URL http://content.nejm.org/cgi/content/abstract/357/ 4/370.
+Chu, Tianjiao and Clark Glymour (2008). “Search for Additive Nonlinear Time Series Causal Models.” Journal of Machine Learning Research, 9: 967–991. URL http://jmlr.csail.mit.edu/papers/v9/chu08a.html.
+Chu, Tianjiao, Clark Glymour, Richard Scheines and Peter Spirtes (2003). “A Sta- tistical Problem for Inference to Regulatory Structure from Associations of Gene Expression Measurements with Microarrays.” Bioinformatics, 19: 1147–1152.
+Claeskens, Gerda and Nils Lid Hjort (2008). Model Selection and Model Averaging. Cambridge, England: Cambridge University Press.
+Clauset, Aaron and Douglas H. Erwin (2008). “The Evolution and Distribution of Species Body Size.” Science, 321: 399–401. URL http://arxiv.org/abs/0901. 0251. doi:10.1126/science.1157534.
+Clauset, Aaron, Cosma Rohilla Shalizi and M. E. J. Newman (2009). “Power-law Distributions in Empirical Data.” SIAM Review, 51: 661–703. URL http:// arxiv.org/abs/0706.1062.
+Coleman, James, Elihu Katz and Herbert Menzel (1957). “The Diffusion of an Inno- vation Among Physicians.” Sociometry, 20: 253–270. URL http://www.jstor. org/stable/2785979. doi:10.2307/2785979.
+Collier, Paul and Anke Hoeffler (2004). “Greed and Grievance in Civil War.” Ox- ford Economic Papers, 56: 563–595. URL http://economics.ouls.ox.ac.uk/ 12055/1/2002-01text.pdf.
+Colombo, Diego, Marloes H. Maathuis, Markus Kalisch and Thomas S. Richardson (2012). “Learning High-dimensional Directed Acyclic Graphs with Latent And Selection Variables.” Annals of Statistics, 40: 249–321. URL http://arxiv.org/ abs/1104.5617. doi:10.1214/11-AOS940.
+00:02 Monday 18th April, 2016
+BIBLIOGRAPHY 836
+Cormen, Thomas H., Charles E. Leiserson, Ronald L. Rivest and Clifford Stein (2001). Introduction to Algorithms. Cambridge, Massachusetts: MIT Press, 2nd edn.
+Corona, Eduardo, Terran Lane, Curtis Storlie and Joshua Neil (2008). Using Lapla- cian Methods, RKHS Smoothing Splines and Bayesian Estimation as a framework for Regression on Graph and Graph Related Domains. Tech. Rep. TR-CS-2008- 06, Department of Computer Science, University of New Mexico. URL http: //www.cs.unm.edu/~treport/tr/08-06/laplacian-rkhs.pdf.
+Cover, Thomas M. and P. E. Hart (1967). “Nearest Neighbor Pattern Classifi- cation.” IEEE Transactions on Information Theory, 13: 21–27. URL http: //www.stanford.edu/~cover/papers/transIT/0021cove.pdf.
+Cover, Thomas M. and Joy A. Thomas (2006). Elements of Information Theory. New York: John Wiley, 2nd edn.
+Cristianini, Nello and John Shawe-Taylor (2000). An Introduction to Support Vector Machines: And Other Kernel-Based Learning Methods. Cambridge, England: Cam- bridge University Press.
+Davison, A. C. (2013). SMPracticals: Practicals for use with Davison (2003) Statis- tical Models. URL https://CRAN.R-project.org/package=SMPracticals. R package version 1.4-2.
+Davison, A. C. and D. V. Hinkley (1997). Bootstrap Methods and their Applications. Cambridge, England: Cambridge University Press.
+de Oliveira, Cesar, Richard Watt and Mark Hamer (2010). “Toothbrushing, inflam- mation, and risk of cardiovascular disease: results from Scottish Health Survey.” British Medical Journal, 340: c2451. doi:10.1136/bmj.c2451.
+Deaton, Angus (2010). “Instruments, Randomization, and Learning about Development.” Journal of Economic Literature, 48: 424–455. URL http://www.princeton.edu/~deaton/downloads/deaton%20instruments% 20randomization%20learning%20about%20development%20jel%202010. pdf. doi:10.1257/jel.48.2.424.
+Deerwester, Scott, Susan T. Dumais, George W. Furnas, Thomas K. Landauer and Richard Harshman (1990). “Indexing by Latent Semantic Analysis.” Jour- nal of the American Society for Information Science, 41: 391–407. URL http: //lsa.colorado.edu/papers/JASIS.lsi.90.pdf. doi:10.1002/(SICI)1097- 4571(199009)41:6<391::AID-ASI1>3.0.CO;2-9.
+DeLanda, Manuel (2006). A New Philosophy of Society: Assemblage Theory and Social Complexity. London: Continuum.
+DeLong, J. Bradford (2014). “Long-Run Warranted Stock Valuations and Expected Returns: What Does the Shiller Data Tell Us?” We- blog post. URL http://delong.typepad.com/sdj/2014/08/
+00:02 Monday 18th April, 2016
+837 BIBLIOGRAPHY
+long-run-warranted-stock-valuations-and-expected-returns-what-does-the-shiller-data-tell-us. html.
+Devroye, Luc and Gábor Lugosi (2001). Combinatorial Methods in Density Estima- tion. Berlin: Springer-Verlag.
+Didelez, Vanessa, Sha Meng and Nuala A. Sheehan (2010). “Assumptions of IV Methods for Observational Epidemiology.” Statistical Science, 25: 22–40. URL http://arxiv.org/abs/1011.0595.
+Dinno, Alexis (2009). LoopAnalyst: A collection of tools to conduct Levins’ Loop Analy- sis. URL http://CRAN.R-project.org/package=LoopAnalyst. R package ver- sion 1.2-2.
+Douc, Randal, Eric Moulines and David S. Stoffer (2014). Nonlinear Time Series: Theory, Methods, and Applications with R Examples. Boca Raton, Florida: Chapman Hall/CRC.
+DuMouchel, William H. and Greg J. Duncan (1983). “Using Sample Survey Weights in Multiple Regression Analyses of Stratified Samples.” Journal of the Ameri- can Statistical Association, 78: 535–543. URL http://www.jstor.org/stable/ 2288115.
+Efron, Bradley (1979). “Bootstrap Methods: Another Look at the Jackknife.” Annals of Statistics, 7: 1–26. URL http://projecteuclid.org/euclid.aos/ 1176344552.
+— (1982). The Jackknife, the Bootstrap, and Other Resampling Plans. Philadelphia: SIAM Press.
+Efron, Bradley and Robert J. Tibshirani (1993). An Introduction to the Bootstrap. New York: Chapman and Hall.
+Eliade, Mircea (1971). The Forge and the Crucible: The Origin and Structure of Alchemy. New York: Harper and Row.
+Elster, Jon (1989). Nuts and Bolts for the Social Sciences. Cambridge, England: Cam- bridge University Press.
+Entner, Doris, Patrik O. Hoyer and Peter Spirtes (2013). “Data-driven Covariate Selection for Nonparametric Estimation of Causal Effects.” In Sixteenth Interna- tional Conference on Artificial Intelligence and Statistics [AIStats 2013] (Carlos M. Carvalho and Pradeep Ravikumar, eds.), pp. 256–264. URL http://jmlr.org/ proceedings/papers/v31/entner13a.html.
+Ezekiel, Mordecai (1924). “A Method of Handling Curvilinear Correlation for Any Number of Variables.” Journal of the American Statistical Association, 19: 431–453. URL http://www.jstor.org/stable/2281561.
+00:02 Monday 18th April, 2016
+BIBLIOGRAPHY 838
+Fair, Ray C. (1978). “A Theory of Extramarital Affairs.” Journal of Political Economy, 86: 45–61. URL http://fairmodel.econ.yale.edu/rayfair/pdf/1978A200. PDF.
+Fama, Eugene F. and Kenneth R. French (1993). “Common risk factors in the returns on stocks and bonds.” Journal of Financial Economics, 33: 3–56. doi:10.1016/0304- 405X(93)90023-5.
+Fan, Jianqing and Qiwei Yao (2003). Nonlinear Time Series: Nonparametric and Para- metric Methods. Berlin: Springer-Verlag.
+Fan, Jiaqing and I. Gijbels (1996). Local Polynomial Modelling and Its Applications. London: Chapman and Hall.
+Faraway, Julian J. (1992). “On the Cost of Data Analysis.” Journal of Computational and Graphical Statistics, 1: 213–229. URL http://people.bath.ac.uk/jjf23/ papers/cda.pdf. doi:10.1080/10618600.1992.10474582.
+— (2004). Linear Models with R. Boca Raton, Florida: Chapman and Hall/CRC Press.
+— (2006). Extending the Linear Model with R: Generalized Linear, Mixed Effects and Nonparametric Regression Models. Boca Raton, Florida: Chapman and Hall/CRC.
+— (2014). faraway: Functions and datasets for books by Julian Faaway. URL https: //CRAN.R-project.org/package=faraway. R package version 1.0.6.
+— (2016). “Does Data Splitting Improve Prediction?” Statistics and Computing, 26: 49–60. URL http://arxiv.org/abs/1301.2983. doi:10.1007/s11222-014-9522- 9.
+Fisher, Franklin M. (1983). Disequilibrium Foundations of Equilibrium Economics. Cambridge, England: Cambridge University Press.
+— (2010). “The Stability of General Equilibrium — What Do We Know and Why Is It Important?” In General Equilibrium Analysis: A Century after Walras (Pascal Bridel, ed.), pp. 34–45. London: Routledge. URL http://economics.mit.edu/ files/6988.
+Forster, Dieter (1975). Hydrodynamic Fluctuations, Broken Symmetry, and Correla- tion Functions. Reading, Massachusetts: Benjamin Cummings.
+Fraser, Andrew M. (2008). Hidden Markov Models and Dynamical Systems. Philadel- phia: SIAM Press. URL http://www.siam.org/books/ot107/.
+Freedman, David A. (1983). “A Note on Screening Regression Equations.” The Amer- ican Statistician, 37: 152–155. doi:10.1080/00031305.1983.10482792.
+Frisch, Uriel (1995). Turbulence: The Legacy of A. N. Kolmogorov. Cambridge, Eng- land: Cambridge University Press.
+00:02 Monday 18th April, 2016
+839 BIBLIOGRAPHY
+Galles, David and Judea Pearl (1997). “Axioms of Causal Relevance.” Artificial In- telligence, 97: 9–43. URL http://nexus.cs.usfca.edu/~galles/research/ relaxiom.ps.
+Gelman, Andrew (2003). “A Bayesian Formulation of Exploratory Data Anal- ysis and Goodness-of-fit Testing.” International Statistical Review, 71: 369– 382. URL http://www.stat.columbia.edu/~gelman/research/published/ isr.pdf. doi:10.1111/j.1751-5823.2003.tb00203.x.
+Gelman, Andrew and Iain Pardoe (2007). “Average predictive comparisons for mod- els with nonlinearity, interactions, and variance components.” Sociological Method- ology, 37: 23–51. URL http://www.stat.columbia.edu/~gelman/research/ published/ape17.pdf. doi:10.1111/j.1467-9531.2007.00181.x.
+Gelman, Andrew and Donald B. Rubin (1992). “Inference from Iterative Simulation Using Multiple Sequences.” Statistical Science, 7: 457–472. doi:10.1214/ss/1177011136.
+Gelman, Andrew and Cosma Rohilla Shalizi (2013). “Philosophy and the Prac- tice of Bayesian Statistics.” British Journal of Mathematical and Statistical Psychol- ogy, 66: 8–38. URL http://arxiv.org/abs/1006.3868. doi:10.1111/j.2044- 8317.2011.02037.x.
+Genz, Alan, Frank Bretz, Tetsuhisa Miwa, Xuefei Mi, Friedrich Leisch, Fabian Scheipl and Torsten Hothorn (2016). mvtnorm: Multivariate Normal and t Dis- tributions. URL http://CRAN.R-project.org/package=mvtnorm. R package version 1.0-5.
+Gershenfeld, Neil (1999). The Nature of Mathematical Modeling. Cambridge, England: Cambridge University Press.
+Geyer, Charles J. (1992). “Practical Markov Chain Monte Carlo.” Statistical Science, 7: 473–483. doi:10.1214/ss/1177011137.
+— (2013). “Asymptotics of Maximum Likelihood without the LLN or CLT or Sample Size Going to Infinity.” In Advances in Modern Statistical Theory and Applications: A Festschrift in honor of Morris L. Eaton (Galin Jones and Xiaotong Shen, eds.), pp. 1–24. Beachwood, Ohio: Institute of Mathematical Statistics. URL http: //arxiv.org/abs/1206.4762. doi:10.1214/12-IMSCOLL1001.
+Gilbert, Paul and Ravi Varadhan (2015). numDeriv: Accurate Numerical Derivatives. URL https://CRAN.R-project.org/package=numDeriv. R package version 2014.2-1.
+Glymour, Clark (1986). “Statistics and Metaphysics.” Journal of the American Sta- tistical Association, 81: 964–966. URL http://www.hss.cmu.edu/philosophy/ glymour/glymour1986.pdf.
+00:02 Monday 18th April, 2016
+BIBLIOGRAPHY 840
+— (1998). “What Went Wrong? Reflections on Science by Observation and The Bell Curve.” Philosophy of Science, 65: 1–32. URL http://www.hss.cmu.edu/ philosophy/glymour/glymour1998.pdf.
+— (2001). The Mind’s Arrows: Bayes Nets and Graphical Causal Models in Psychology. Cambridge, Massachusetts: MIT Press.
+Glymour, Clark and Madelyn R. Glymour (2014). “Race and Sex are Causes.” Epi- demiology, 25: 488–490. doi:10.1097/EDE.0000000000000122.
+Gnedenko, B. V. and A. N. Kolmogorov (1954). Limit Distributions for Sums of In- dependent Random Variables. Cambridge, Massachusetts: Addison-Wesley. Trans- lated from the Russian and annotated by K. L. Chung, with an Appendix by J. L. Doob.
+Godfrey, L. G. (1988). Misspecification Tests in Econometrics; The Lagrange Multi- plier Principle and Other Approaches. Cambridge, England: Cambridge University Press.
+Gouriéroux, Christian and Alain Monfort (1989/1995). Statistics and Economet- ric Models. Themes in Modern Econometrics. Cambridge, England: Cam- bridge University Press. Translated by Quang Vuong from Statistique et modèles économétriques, Paris: Économica.
+Gouriéroux, Christian, Alain Monfort and E. Renault (1993). “Indirect Inference.” Journal of Applied Econometrics, 8: S85–S118. URL http://www.jstor.org/ pss/2285076.
+Gray, Robert M. (1988). Probability, Random Processes, and Ergodic Properties. New York: Springer-Verlag. URL http://ee.stanford.edu/~gray/arp.html.
+— (2009). Probability, Random Processes, and Ergodic Properties. New York: Springer- Verlag, 2nd edn. URL http://ee.stanford.edu/~gray/arp.html.
+Gretton, Arthur, Karsten M. Borgwardt, Malte J. Rasch, Bernhard Schölkopf and Alexander Smola (2012). “A Kernel Two-Sample Test.” Journal of Machine Learn- ing Research, 13: 723–773. URL http://jmlr.csail.mit.edu/papers/v13/ gretton12a.html.
+Griffeath, David (1976). “Introduction to Markov Random Fields.” In Denumerable Markov Chains (John G. Kemeny and J. Laurie Snell and Anthony W. Knapp, eds.), pp. 425–457. Berlin: Springer-Verlag, 2nd edn.
+Grimmett, G. R. and D. R. Stirzaker (1992). Probability and Random Processes. Ox- ford: Oxford University Press, 2nd edn.
+Grünwald, Peter D. (2007). The Minimum Description Length Principle. Cambridge, Massachusetts: MIT Press.
+Guckenheimer, John and Philip Holmes (1983). Nonlinear Oscillations, Dynamical Systems and Bifurcations of Vector Fields. New York: Springer-Verlag.
+00:02 Monday 18th April, 2016
+841 BIBLIOGRAPHY
+Guttorp, Peter (1995). Stochastic Modeling of Scientific Data. London: Chapman and Hall.
+Györfi, László, Michael Kohler, Adam Krzy ̇zak and Harro Walk (2002). A Distribution-Free Theory of Nonparametric Regression. New York: Springer-Verlag.
+Hacking, Ian (1990). The Taming of Chance, vol. 17 of Ideas in Context. Cambridge, England: Cambridge University Press.
+— (2001). An Introduction to Probability and Inductive Logic. Cambridge, England: Cambridge University Press.
+Hall, Peter, Jeff Racine and Qi Li (2004). “Cross-Validation and the Estimation of Conditional Probability Densities.” Journal of the American Statistical Association, 99: 1015–1026. URL http://www.ssc.wisc.edu/~bhansen/workshop/QiLi. pdf.
+Halmos, Paul R. (1957). An Introduction to Hilbert Space and the Theory of Spectral Multiplicity. New York: Chelsea Publishing Co., 2nd edn. First edition, 1951.
+Hand, David, Heikki Mannila and Padhraic Smyth (2001). Principles of Data Mining. Cambridge, Massachusetts: MIT Press.
+Handcock, Mark S. (2015). Relative Distribution Methods. URL http://CRAN. R-project.org/package=reldist. Version 1.6-4.
+Handcock, Mark S. and Martina Morris (1998). “Relative Distribution Methods.” Sociological Methodology, 28: 53–97. URL http://www.jstor.org/pss/270964.
+— (1999). Relative Distribution Methods in the Social Sciences. Berlin: Springer-Verlag.
+Hansen, Ben B. and Stephanie Olsen Klopfer (2006). “Optimal full matching and related designs via network flows.” Journal of Computational and Graph- ical Statistics, 15: 609–627. URL http://www.stat.lsa.umich.edu/~bbh/ hansenKlopfer2006.pdf. doi:10.1198/106186006X137047.
+Hart, Jeffrey D. (1997). Nonparametric Smoothing and Lack-of-Fit Tests. Berlin: Springer-Verlag.
+Hastie, Trevor, Robert Tibshirani and Jerome Friedman (2009). The Elements of Sta- tistical Learning: Data Mining, Inference, and Prediction. Berlin: Springer, 2nd edn. URL http://www-stat.stanford.edu/~tibs/ElemStatLearn/.
+Hayfield, Tristen and Jeffrey S. Racine (2008). “Nonparametric Econometrics: The np Package.” Journal of Statistical Software, 27(5): 1–32. URL http://www. jstatsoft.org/v27/i05.
+Hedström, Peter (2005). Dissecting the Social: On the Principles of Analytical Sociology. Cambridge, England: Cambridge University Press.
+00:02 Monday 18th April, 2016
+BIBLIOGRAPHY 842
+Hedström, Peter and Richard Swedberg (eds.) (1998). Social Mechanisms: An Ana- lytical Approach to Social Theory, Studies in Rationality and Social Change, Cam- bridge, England. Cambridge University Press.
+Ho, Daniel E., Kosuke Imai, Gary King and Elizabeth A. Stuart (2011). “MatchIt: Nonparametric Preprocessing for Parametric Causal Inference.” Journal of Statisti- cal Software, 42(8): 1–28. URL http://www.jstatsoft.org/v42/i08/.
+Hoerl, Arthur E. and Robert W. Kennard (1970). “Ridge Regression: Biased Estima- tion for Nonorthogonal Problems.” Technometrics, 12. URL http://www.jstor. org/pss/1267351.
+Hofmann, Thomas (1999). “Probabilistic Latent Semantic Analysis.” In Uncer- tainty in Artificial Intelligence: Proceedings of the Fiftheenth Conference [UAI 1999] (Kathryn Laskey and Henri Prade, eds.), pp. 289–296. San Francisco: Morgan Kaufmann. URL http://uai.sis.pitt.edu/displayArticleDetails.jsp? mmnu=1&smnu=2&article_id=179&proceeding_id=15.
+Holan, Scott H., Robert Lund and Ginger Davis (2010). “The ARMA alphabet soup: A tour of ARMA model variants.” Statistics Surveys, 4: 232–274. URL http: //projecteuclid.org/euclid.ssu/1291731822. doi:10.1214/09-SS060.
+Holland, Paul W. (1986). “Statistics and Causal Inference.” Journal of the American Statistical Association, 81: 945–970.
+Honerkamp, Josef (2002). Statistical Physics: An Advanced Approach with Applica- tions. Berlin: Springer-Verlag, 2nd edn. Translated by Thomas Filk.
+Hong, Yongmiao and Halbert White (1995). “Consistent Specification Testing Via Nonparametric Series Regression.” Econometrica, 63: 1133–1159. URL http: //www.jstor.org/stable/2171724. doi:10.2307/2171724.
+Hoyer, Patrik O., Domink Janzing, Joris Mooij, Jonas Peters and Bernhard Schölkopf (2009). “Nonlinear causal discovery with additive noise models.” In Advances in Neural Information Processing Systems 21 [NIPS 2008] (Daphne Koller and D. Schuurmans and Y. Bengio and Léon Bottou, eds.), pp. 689–696. Cambridge, Massachusetts: MIT Press. URL http://books.nips.cc/papers/ files/nips21/NIPS2008_0266.pdf.
+Huber, Peter J. (1967). “The Behavior of Maximum Likelihood Estimates un- der Nonstandard Conditions.” In Proceedings of the Fifth Berkeley Symposium on Mathematical Statistics and Probability (Lucien M. Le Cam and Jerzy Ney- man, eds.), vol. 1, pp. 221–233. Berkeley: University of California Press. URL http://projecteuclid.org/euclid.bsmsp/1200512988.
+Hume, David (1739). A Treatise of Human Nature: Being an Attempt to Introduce the Experimental Method of Reasoning into Moral Subjects. London: John Noon. Reprint (Oxford: Clarendon Press, 1951) of original edition, with notes and ana- lytical index.
+00:02 Monday 18th April, 2016
+843 BIBLIOGRAPHY
+Hunter, David R., Steven M. Goodreau and Mark S. Handcock (2008). “Goodness of Fit of Social Network Models.” Journal of the American Statistical Association, 103: 248–258. URL http://www.csss.washington.edu/Papers/wp47.pdf. doi:10.1198/016214507000000446.
+Imbens, Guido W. and Donald B. Rubin (2015). Causal Inference for Statistics, So- cial, and Biomedical Sciences: An Introduction. Cambridge, England: Cambridge University Press.
+Iyigun, Murat (2008). “Luther and Suleyman.” Quarterly Journal of Economics, 123: 1465–1494. URL http://www.colorado.edu/Economics/courses/iyigun/ ottoman081506.pdf. doi:10.1162/qjec.2008.123.4.1465.
+Jacobs, Robert A. (1997). “Bias/Variance Analyses of Mixtures-of-Experts Architec- tures.” Neural Computation, 9: 369–383.
+Janzing, Dominik (2007). “On causally asymmetric versions of Occam’s Razor and their relation to thermodynamics.” E-print, arxiv.org. URL http://arxiv.org/ abs/0708.3411.
+Janzing, Dominik and Daniel Herrmann (2003). “Reliable and Efficient Inference of Bayesian Networks from Sparse Data by Statistical Learning Theory.” arxiv.org. URL http://arxiv.org/abs/cs.LG/0309015.
+Jones, Owen, Robert Maillardet and Andrew Robinson (2009). Introduction to Sci- entific Programming and Simulation Using R. Boca Raton, Florida: Chapman and Hall/CRC.
+Jordan, Michael I. (ed.) (1998). Learning in Graphical Models, Dordrecht. Kluwer Academic.
+Jordan, Michael I. and Robert A. Jacobs (1994). “Hierarchical Mix- tures of Experts and the EM Algorithm.” Neural Computation, 6: 181–214. URL ftp://publications.ai.mit.edu/ai-publications/pdf/ AIM-1440.pdf. doi:10.1162/neco.1994.6.2.181.
+Jordan, Michael I. and Terrence J. Sejnowski (eds.) (2001). Graphical Models: Foun- dations of Neural Computation, Computational Neuroscience, Cambridge, Mas- sachusetts. MIT Press.
+Kafadar, Karen (1996). “Smoothing Geographical Data, Particularly Rates of Dis- ease.” Statistics in Medicine, 15: 2539–2560. URL http://mypage.iu.edu/ ~kkafadar/publications/Kafadar_Smoothing_1996.pdf.
+Kalisch, Markus and Peter Bühlmnann (2007). “Estimating High-Dimensional Directed Acyclic Graphs with the PC-Algorithm.” Journal of Machine Learn- ing Research, 8: 616–636. URL http://jmlr.csail.mit.edu/papers/v8/ kalisch07a.html.
+00:02 Monday 18th April, 2016
+BIBLIOGRAPHY 844
+Kalisch, Markus, Martin Mächler and Diego Colombo (2010). pcalg: Estimation of CPDAG/PAG and causal inference using the IDA algorithm. URL http://CRAN. R-project.org/package=pcalg. R package version 1.1-2.
+Kalisch, Markus, Martin Mächler, Diego Colombo, Marloes H. Maathuis and Pe- ter Bühlmnann (2012). “Causal Inference Using Graphical Models with the R Package pcalg.” Journal of Statistical Software, 47(11): 1–26. URL http://www. jstatsoft.org/v47/i11.
+Kallenberg, Wilbert C. M. and Teresa Ledwina (1997). “Data-Driven Smooth Tests When the Hypothesis Is Composite.” Journal of the American Statistical Associa- tion, 92: 1094–1104. URL http://doc.utwente.nl/62408/.
+Kanai, Ryota, Tom Feilden, Colin Firth and Geraint Rees (2011). “Political Orienta- tions Are Correlated with Brain Structure in Young Adults.” Current Biology, 21: 677–680. doi:10.1016/j.cub.2011.03.017.
+Kantz, Holger and Thomas Schreiber (2004). Nonlinear Time Series Analysis. Cam- bridge, England: Cambridge University Press, 2nd edn.
+Kao, Yi-hao and Benjamin Van Roy (2013). “Learning a Factor Model via Regularized PCA.” Machine Learning, 91: 279–303. URL http://arxiv.org/abs/1111. 6201. doi:10.1007/s10994-013-5345-8.
+Kass, Robert E. and Paul W. Vos (1997). Geometrical Foundations of Asymptotic Infer- ence. New York: Wiley.
+Kearns, Michael J. and Umesh V. Vazirani (1994). An Introduction to Computational Learning Theory. Cambridge, Massachusetts: MIT Press.
+Kelly, Kevin T. (2007). “Ockham’s razor, empirical complexity, and truth-finding effi- ciency.” Theoretical Computer Science, 383: 270–289. doi:10.1016/j.tcs.2007.04.009.
+Kendall, Bruce E., Stephen P. Ellner, Edward Mccauley, Simon N. Wood, Cheryl J. Briggs, William W. Murdoch and Peter Turchin (2005). “Population Cycles in the Pine Looper Moth: Dynamical Tests of Mechanistic Hypotheses.” Ecological Monographs, 75: 259–276. URL http://www.eeb.cornell.edu/Ellner/pubs/ CPDBupalusEcolMonog05.pdf.
+Kindermann, Ross and J. Laurie Snell (1980). Markov Random Fields and their Ap- plications. Providence, Rhode Island: American Mathematical Society. URL http://www.ams.org/online_bks/conm1/.
+King, Gary and Richard Nielsen (2016). “Why Propensity Scores Should Not Be Used for Matching.” Electronic preprint. URL http://j.mp/1FQhySn.
+King, Gary and Margaret E Roberts (2015). “How Robust Standard Errors Expose Methodological Problems They Do Not Fix, and What to Do About It.” Politi-
+cal Analysis, 23: 159–179. URL http://gking.harvard.edu/publications/ how-robust-standard-errors-expose-methodological-problems-they-do-not-fix. doi:10.1093/pan/mpu015.
+00:02 Monday 18th April, 2016
+845 BIBLIOGRAPHY
+Kogan, Barry S. (1985). Averroes and the Metaphysics of Causation. Albany, New York: State University of New York Press.
+Kolmogorov, Andrei N. (1941). “Interpolation und Extrapolation von stationären Zufälligen Folgen.” Bulletin of the Academy Sciences, USSR, Math., 3: 3–14. In Russian with German summary.
+Kullback, Solomon (1968). Information Theory and Statistics. New York: Dover Books, 2nd edn.
+Künsch, Hans R. (1989). “The Jackknife and the Bootstrap for General Sta- tionary Observations.” Annals of Statistics, 17: 1217–1241. URL http:// projecteuclid.org/euclid.aos/1176347265.
+Lacerda, Gustavo, Peter Spirtes, Joseph Ramsey and Patrik Hoyer (2008). “Discover- ing Cyclic Causal Models by Independent Components Analysis.” In Proceedings of the Proceedings of the Twenty-Fourth Conference Annual Conference on Uncertainty in Artificial Intelligence (UAI-08), pp. 366–374. Corvallis, Oregon: AUAI Press. URL http://uai.sis.pitt.edu/papers/08/p366-lacerda.pdf.
+Lahiri, S. N. (2003). Resampling Methods for Dependent Data. New York: Springer- Verlag.
+Lambert, Diane and Kathryn Roeder (1995). “Overdispersion Diagnostics for Gen- eralized Linear Models.” Journal of the American Statistical Association, 90: 1225– 1236. URL http://www.jstor.org/stable/2291513.
+Landauer, Thomas K. and Susan T. Dumais (1997). “A Solution to Plato’s Prob- lem: The Latent Semantic Analysis Theory of Acquisition, Induction, and Rep- resentation of Knowledge.” Psychological Review, 104: 211–240. URL http: //lsa.colorado.edu/papers/plato/plato.annote.html.
+Lauritzen, Steffen L. (1984). “Extreme Point Models in Statistics.” Scandinavian Jour- nal of Statistics, 11: 65–91. URL http://www.jstor.org/pss/4615945. With discussion and response.
+— (1996). Graphical Models. New York: Oxford University Press.
+Lawrie, Ian D. (1990). A Unified Grand Tour of Theoretical Physics. Bristol, England:
+Adam Hilger.
+Lee, Ann B. and Larry Wasserman (2010). “Spectral Connectivity Analysis.” Journal of the American Statistical Association, 105: 1241–1255. URL http://arxiv.org/ abs/0811.0121. doi:10.1198/jasa.2010.tm09754.
+Lehmann, Erich L. (2008). “On the history and use of some standard statistical mod- els.” In Probability and Statistics; Essays in Honor of David A. Freedman (Deb- orah Nolan and Terry Speed, eds.), pp. 114–126. Brentwood, Ohio: Institute of Mathematical Statistics. URL http://projecteuclid.org/euclid.imsc/ 1207580081.
+00:02 Monday 18th April, 2016
+BIBLIOGRAPHY 846
+Leisch, Friedrich (2004). “FlexMix: A General Framework for Finite Mixture Models and Latent Class Regression in R.” Journal of Statistical Software, 11. URL http: //www.jstatsoft.org/v11/i08.
+Li, Ching Chun (1975). Path Analysis: A Primer. Pacific Grove, California: The Boxwood Press.
+Li, Ching Chun, Sati Mazumdar and B. Raja Rao (1975). “Partial Correlation in Terms of Path Coefficients.” The American Statistician, 29: 89–90. URL http: //www.jstor.org/stable/2683271.
+Li, Ming and Paul M. B. Vitányi (1997). An Introduction to Kolmogorov Complexity and Its Applications. New York: Springer-Verlag, 2nd edn.
+Li, Qi and Jeffrey Scott Racine (2007). Nonparametric Econometrics: Theory and Practice. Princeton, New Jersey: Princeton University Press.
+Ligges, Uwe and Martin Mächler (2003). “scatterplot3d: An R Package for Vi- sualizing Multivariate Data.” Journal of Statistical Software, 8(11): 1–20. URL http://www.jstatsoft.org/v8/i11/.
+Lindsey, J. K. (2004). Statistical Analysis of Stochastic Processes in Time. Cambridge, England: Cambridge University Press.
+Liu, Han, John Lafferty and Larry Wasserman (2009). “The Nonparanormal: Semi- parametric Estimation of High Dimensional Undirected Graphs.” Journal of Ma- chine Learning Research, 10: 2295–2328. URL http://jmlr.csail.mit.edu/ papers/v10/liu09a.html.
+Liu, Ka-Yuet, Marissa King and Peter S. Bearman (2010). “Social Influ- ence and the Autism Epidemic.” American Journal of Sociology, 115: 1387–1434. URL http://www.understandingautism.columbia.edu/ papers/social-influence-and-the-autism-epidemic-(2010).pdf. doi:10.1086/651448.
+Loehlin, John C. (1992). Latent Variable Models: An Introduction to Factor, Path, and Structural Analysis. Hillsdale, New Jersey: Lawrence Erlbaum Associates, 2nd edn.
+Loève, Michel (1955). Probability Theory. New York: D. Van Nostrand Company, 1st edn.
+Maathuis, Marloes H., Diego Colombo, Markus Kalisch and Peter Bühlmann (2010). “Predicting Causal Effects in Large-scale Systems from Observational Data.” Nature Methods, 7: 247–248. URL http://stat.ethz.ch/Manuscripts/ buhlmann/maathuisetal2010.pdf. doi:10.1038/nmeth0410-247. See also http: //stat.ethz.ch/Manuscripts/buhlmann/maathuisetal2010SI.pdf.
+Maathuis, Marloes H., Markus Kalisch and Peter Bühlmann (2009). “Estimat- ing High-Dimensional Intervention Effects from Observational Data.” An- nals of Statistics, 37: 3133–3164. URL http://arxiv.org/abs/0810.4214. doi:10.1214/09-AOS685.
+00:02 Monday 18th April, 2016
+847 BIBLIOGRAPHY MacCulloch, Diarmaid (2004). The Reformation: A History. New York: Penguin.
+MacKenzie, Donald (2006). An Engine, Not a Camera: How Financial Models Shape Markets. Cambridge, Massachusetts: MIT Press.
+Maguire, B. A., E. S. Pearson and A. H. A. Wynn (1952). “The Time Intervals be- tween Industrial Accidents.” Biometrika, 39: 168–180. URL http://www.jstor. org/pss/2332475.
+Mandelbrot, Benoit (1962). “The Role of Sufficiency and of Estimation in Ther- modynamics.” Annals of Mathematical Statistics, 33: 1021–1038. URL http: //projecteuclid.org/euclid.aoms/1177704470.
+Manski, Charles F. (2007). Identification for Prediction and Decision. Cambridge, Massachusetts: Harvard University Press.
+Martindale, Colin (1990). The Clockwork Muse: The Predictability of Artistic Change. New York: Basic Books.
+Matloff, Norman (2011). The Art of R Programming: A Tour of Statistical Software Design. San Francisco: No Starch Press.
+McGee, Leonard A. and Stanley F. Schmidt (1985). Discovery of the Kalman Filter as a Practical Tool for Aerospace and Industry. Tech. Rep. 86847, NASA Techni- cal Memorandum. URL http://ntrs.nasa.gov/archive/nasa/casi.ntrs. nasa.gov/19860003843_1986003843.pdf.
+Metropolis, N., A. W. Rosenbluth, M. N. Rosenbluth, A. H. Teller and E. Teller (1953). “Equations of State Calculations by Fast Computing Machines.” Journal of Chemical Physics, 21: 1087–1092. doi:10.1063/1.1699114.
+Miller, John H. (1998). “Active Nonlinear Tests (ANTs) of Complex Simulation Models.” Management Science, 44: 820–830. URL http://zia.hss.cmu.edu/ miller/papers/antabst.html.
+Mitchell, Tom M. (1997). Machine Learning. New York: McGraw-Hill.
+Mohri, Mehryar, Afshin Rostamizadeh and Ameet Talwalkar (2012). Foundations of Machine Learning. Adaptive Computation and Machine Learning. Cambridge, Massachusetts: MIT Press.
+Moran, P. A. P. (1961). “Path Coefficients Reconsidered.” Australian Journal of Statis- tics, 3: 87–93. doi:10.1111/j.1467-842X.1961.tb00314.x.
+Morgan, Stephen L. and Christopher Winship (2007). Counterfactuals and Causal Inference: Methods and Principles for Social Research. Cambridge, England: Cam- bridge University Press.
+— (2015). Counterfactuals and Causal Inference: Methods and Principles for Social Re- search. Cambridge, England: Cambridge University Press, 2nd edn.
+00:02 Monday 18th April, 2016
+BIBLIOGRAPHY 848 Nadaraya, E. A. (1964). “On Estimating Regression.” Theory of Probability and Its
+Applications, 9: 141–142. doi:10.1137/1109020.
+Neal, Radford M. and Geoffrey E. Hinton (1998). “A View of the EM Algorithm that Justifies Incremental, Sparse, and Other Variants.” In Jordan (1998), pp. 355–368. URL http://www.cs.toronto.edu/~radford/em.abstract.html.
+Newey, Whitney K. and James L. Powell (2003). “Instrumental Variable Estima- tion of Nonparametric Models.” Econometrica, 71: 1565–1578. doi:10.1111/1468- 0262.00459.
+Newman, Mark E. J. and G. T. Barkema (1999). Monte Carlo Methods in Statistical Physics. Oxford: Clarendon Press.
+Novembre, John and Matthew Stephens (2008). “Interpreting principal component analyses of spatial population genetic variation.” Nature Genetics, 40: 646–649. doi:10.1038/ng.139.
+Packard, Norman H., James P. Crutchfield, J. Doyne Farmer and Robert S. Shaw (1980). “Geometry from a Time Series.” Physical Review Letters, 45: 712–716.
+Paige, Robert L. and A. Alexandre Trindade (2010). “The Hodrick-Prescott Filter: A special case of penalized spline smoothing.” Electronic Journal of Statistics, 4: 856–874. URL http://projecteuclid.org/euclid.ejs/1284557751.
+Palomar, Daniel P. and Sergio Verdú (2008). “Lautum Information.” IEEE Transac- tions on Information Theory, 54: 964–975. URL http://www.princeton.edu/ ~verdu/lautum.info.pdf.
+Pearl, Judea (1988). Probabilistic Reasoning in Intelligent Systems. New York: Morgan Kaufmann.
+— (2000). Causality: Models, Reasoning, and Inference. Cambridge, England: Cam- bridge University Press.
+— (2009a). “Causal inference in statistics: An overview.” Statistics Surveys, 3: 96–146. URL http://projecteuclid.org/euclid.ssu/1255440554.
+— (2009b). Causality: Models, Reasoning, and Inference. Cambridge, England: Cam- bridge University Press, 2nd edn.
+Peterson, Robert A. (2000). “A Meta-Analysis of Variance Accounted for and Factor Loadings in Exploratory Factor Analysis.” Marketing Letters, 11: 261–275.
+Pitman, E. J. G. (1979). Some Basic Theory for Statistical Inference. London: Chapman and Hall.
+Pollard, David (1989). “Asymptotics via Empirical Processes.” Statistical Sci- ence, 4: 341–354. URL http://projecteuclid.org/euclid.ss/1177012394. doi:10.1214/ss/1177012394.
+00:02 Monday 18th April, 2016
+849 BIBLIOGRAPHY
+Porter, Theodore M. (1986). The Rise of Statistical Thinking, 1820–1900. Princeton, New Jersey: Princeton University Press.
+Press, William H., Saul A. Teukolsky, William T. Vetterling and Brian P. Flannery (1992). Numerical Recipes in C: The Art of Scientific Computing. Cambridge, Eng- land: Cambridge University Press, 2nd edn. URL http://www.nrbook.com/.
+Puccia, Charles J. and Richard Levins (1985). Qualitative Modeling of Complex Sys- tems: An Introduction to Loop Analysis and Time Averaging. Cambridge, Mas- sachusetts: Harvard University Press.
+Quiñonero-Candela, Joaquin, Masashi Sugiyama, Anton Schwaighofer and Neil D. Lawrence (eds.) (2009). Dataset Shift in Machine Learning. Cambridge, Mas- sachusetts: MIT Press.
+R Core Team (2015a). R: A Language and Environment for Statistical Computing. R Foundation for Statistical Computing, Vienna, Austria. URL http://www. R-project.org. ISBN 3-900051-07-0.
+— (2015b). foreign: Read Data Stored by Minitab, S, SAS, SPSS, Stata, Systat, Weka, dBase, .... URL https://CRAN.R-project.org/package=foreign. R package version 0.8-66.
+Racine, Jeffrey S. (2008). “Nonparametric Econometrics: A Primer.” Founda- tions and Trends in Econometrics, 3: 1–88. URL http://socserv.mcmaster.ca/ racine/ECO0301.pdf. doi:10.1561/0800000009.
+Raginsky, Maxim (2011). “Directed Information and Pearl’s Causal Calculus.” In
+Proceedings of the 49th Annual Allerton Conference on Communication, Control and Computing (S. Meyn and B. Hajek, eds.), pp. 958–965. IEEE. URL http: //arxiv.org/abs/1110.0718. doi:10.1109/Allerton.2011.6120270.
+Rayner, J. C. W. and D. J. Best (1989). Smooth Tests of Goodness of Fit. Oxford: Oxford University Press.
+Reichenbach, Hans (1956). The Direction of Time. Berkeley: University of California Press. Edited by Maria Reichenbach.
+Reid, Constance (1982). Neyman from Life. New York: Springer-Verlag.
+Reinhart, Abiel (2014). pdfetch: Fetch economic and financial time series data from public sources. URL https://CRAN.R-project.org/package=pdfetch. R pack- age version 0.1.6.
+Reinsch, Christian H. (1967). “Smoothing by Spline Functions.” Numerische Mathe- matik, 10: 177–183.
+Richardson, Thomas (1996). “A Discovery Algorithm for Directed Cyclic Graphs.” In Proceedings of the Proceedings of the Twelfth Conference Annual Conference on Un- certainty in Artificial Intelligence (UAI-96), pp. 454–446. San Francisco, CA: Mor- gan Kaufmann. URL ftp://ftp.andrew.cmu.edu/pub/phil/thomas/TR68. ps. URL is for expanded version.
+00:02 Monday 18th April, 2016
+BIBLIOGRAPHY 850
+Richardson, Thomas S. and James M. Robins (2013). Single World Intervention Graphs (SWIGs): A Unification of the Counterfactual and Graphical Approaches to Causality. Tech. Rep. 128, Center for Statistics and the Social Sciences, University of Washington. URL http://www.csss.washington.edu/Papers/wp128.pdf.
+Ripley, Brian D. (1996). Pattern Recognition and Neural Networks. Cambridge, Eng- land: Cambridge University Press.
+— (2015). tree: Classification and Regression Trees. URL https://CRAN. R-project.org/package=tree. R package version 1.0-36.
+Robins, James M., Richard Scheines, Peter Spirtes and Larry Wasserman (2003). “Uniform Consistency in Causal Inference.” Biometrika, 90: 491–515. URL http://www.stat.cmu.edu/tr/tr725/tr725.html.
+Rodrik, Dani (2008). “The Real Exchange Rate and Economic Growth.” Brook- ings Papers on Economic Activity, 2008(2): 365–412. URL http://www.hks. harvard.edu/fs/drodrik/Research%20papers/RER%20and%20growth.pdf. doi:10.1353/eca.0.0020.
+Rosenbaum, Paul and Donald Rubin (1983). “The Central Role of the Propensity Score in Observational Studies for Causal Effects.” Biometrika, 70: 41–55. URL http://www.jstor.org/stable/2335942.
+Rosenzweig, Mark R. and Kenneth I. Wolpin (2000). “Natural “Natural Ex- periments” in Economics.” Journal of Economic Literature, 38: 827–874. doi:10.1257/jel.38.4.827.
+Roweis, Sam T. and Laurence K. Saul (2000). “Nonlinear Dimensional- ity Reduction by Locally Linear Embedding.” Science, 290: 2323–2326. doi:10.1126/science.290.5500.2323.
+Rubin, Donald B. (2006). Matched Sampling for Causal Effects. Cambridge, England: Cambridge University Press.
+Rubin, Donald B. and Richard P. Waterman (2006). “Estimating the Causal Effects of Marketing Interventions Using Propensity Score Methodology.” Statistical Science, 21: 206–222. URL http://arxiv.org/abs/math.ST/0609201.
+Ruelle, David (1991). Chance and Chaos. Princeton, New Jersey: Princeton Univer- sity Press.
+Russell, Bertrand (1920). Introduction to Mathematical Philosophy. London: George Allen and Unwin, 2nd edn. URL http://people.umass.edu/klement/ russell-imp.html. First edition, 1919.
+— (1927). The Analysis of Matter. London: K. Paul Trench, Trubner and Co. Reprinted New York: Dover Books, 1954.
+Salmon, Wesley C. (1984). Scientific Explanation and the Causal Structure of the World. Princeton: Princeton University Press.
+00:02 Monday 18th April, 2016
+851 BIBLIOGRAPHY
+Sandhaus, Evan (2008). “The New York Times Annotated Corpus.” Elec- tronic database. URL http://www.ldc.upenn.edu/Catalog/CatalogEntry. jsp?catalogId=LDC2008T19.
+Sarkar, Deepayan (2008). Lattice: Multivariate Data Visualization with R. New York: Springer. URL http://lmdvr.r-forge.r-project.org.
+Saul, Lawrence K. and Sam T. Roweis (2003). “Think Globally, Fit Locally: Super- vised Learning of Low Dimensional Manifolds.” Journal of Machine Learning Re- search, 4: 119–155. URL http://jmlr.csail.mit.edu/papers/v4/saul03a. html.
+Schoenberg, I. J. (1964). “Spline Functions and the Problem of Graduation.” Proceed- ings of the National Academy of Sciences (USA), 52: 947–950.
+Schutz, Bernard F. (1980). Geometrical Methods of Mathematical Physics. Cambridge, England: Cambridge University Press.
+Schwarz, Gideon (1978). “Estimating the Dimension of a Model.” Annals of Statistics, 6: 461–464. URL http://projecteuclid.org/euclid.aos/1176344136.
+Scott, Clayton and Robert Nowak (2005). “A Neyman-Pearson Approach to Statis- tical Learning.” IEEE Transactions on Information Theory, 51: 3806–3819. URL http://www.ece.wisc.edu/~nowak/np.pdf. doi:10.1109/TIT.2005.856955.
+Sethna, James P. (2006). Statistical Mechanics: Entropy, Order Parameters, and Complexity. Oxford: Oxford University Press. URL http://pages.physics. cornell.edu/sethna/StatMech/.
+Shalizi, Cosma Rohilla (2007). “Maximum Likelihood Estimation and Model Testing for q-Exponential Distributions.” Physical Review E, submitted. URL http: //arxiv.org/abs/math.ST/0701854.
+Shalizi, Cosma Rohilla and Andrew C. Thomas (2011). “Homophily and Contagion Are Generically Confounded in Observational Social Network Studies.” Sociologi- cal Methods and Research, 40: 211–239. URL http://arxiv.org/abs/1004.4704. doi:10.1177/0049124111404820.
+Shannon, Claude E. (1948). “A Mathematical Theory of Communication.” Bell System Technical Journal, 27: 379–423. URL http://cm.bell-labs.com/cm/ms/ what/shannonday/paper.html. Reprinted in Shannon and Weaver (1963).
+Shannon, Claude E. and Warren Weaver (1963). The Mathematical Theory of Commu- nication. Urbana, Illinois: University of Illinois Press.
+Shields, Paul C. (1996). The Ergodic Theory of Discrete Sample Paths. Providence, Rhode Island: American Mathematical Society.
+Shpitser, Ilya and Judea Pearl (2008). “Complete Identification Methods for the Causal Hierarchy.” Journal of Machine Learning Research, 9: 1941–1979. URL http://jmlr.csail.mit.edu/papers/v9/shpitser08a.html.
+00:02 Monday 18th April, 2016
+BIBLIOGRAPHY 852 Shumway, Robert H. and David S. Stoffer (2000). Time Series Analysis and Its Appli-
+cations. New York: Springer-Verlag.
+Silverman, B. W. (1984). “Spline Smoothing: The Equivalent Variable Kernel
+Method.” Annals of Statistics, 12: 898–916. doi:10.1214/aos/1176346710.
+— (1985). “Some Aspects of the Spline Smoothing Approach to Non-Parametric Regression Curve Fitting.” Journal of the Royal Statistical Society B, 47: 1–52. URL http://www.jstor.org/stable/2345542.
+Simonoff, Jeffrey S. (1996). Smoothing Methods in Statistics. Berlin: Springer-Verlag.
+Solow, Robert M. (1970). Growth Theory: An Exposition. Radcliffe Lectures, Univer- sity of Warwick, 1969. Oxford: Oxford University Press. New edition with the 1987 Nobel lecture.
+Spain, Seth M., Kristin L. Sotak, Joey (Chou-Yu) Tsai, P. D. Harms and Sean T. Hannah (2012). “Testing the Form of Theoretical Models by Relaxing Assump- tions: Comparing Parametric and Nonparametric Models.” Electronic preprint, SSRN/2164297. URL http://ssrn.com/abstract=2164297.
+Spanos, Aris (2011). “A Frequentist Interpretation of Probability for Model- based Inductive Inference.” Synthese, 190. URL http://www.econ.vt. edu/faculty/2008vitas_research/Spanos/1Spanos-2011-Synthese.pdf. doi:10.1007/s11229-011-9892-x.
+Spearman, Charles (1904). ““General Intelligence,” Objectively Determined and Measured.” American Journal of Psychology, 15: 201–293. URL http:// psychclassics.yorku.ca/Spearman/.
+Spector, Phil (2008). Data Manipulation with R. Berlin: Springer.
+Spector, Phil, Jerome Friedman, Robert Tibshirani and Thomas Lumley (2013). acepack: ace() and avas() for selecting regression transformations. URL http://CRAN. R-project.org/package=acepack. R package version 1.3-3.3.
+Spirtes, Peter, Clark Glymour and Richard Scheines (1993). Causation, Prediction, and Search. Berlin: Springer-Verlag, 1st edn.
+— (2001). Causation, Prediction, and Search. Cambridge, Massachusetts: MIT Press, 2nd edn.
+Spivak, Michael (1965). Calculus on Manifolds: A Modern Approach to Classical Theo- rems of Advanced Calculus. Menlo Park, California: Benjamin Cummings.
+Spufford, Francis (2010). Red Plenty. London: Faber and Faber.
+Sriperumbudur, Bharath K., Arthur Gretton, Kenji Fukumizu, Bernhard Schölkopf and Gert R.G. Lanckriet (2010). “Hilbert Space Embeddings and Metrics on Prob- ability Measures.” Journal of Machine Learning Research, 11: 1517–1561. URL http://jmlr.csail.mit.edu/papers/v11/sriperumbudur10a.html.
+00:02 Monday 18th April, 2016
+853 BIBLIOGRAPHY
+Stephan, Maria J. and Erica Chenowth (2008). “Why Civil Resistance Works; The Strategic Logic of Nonviolent Conflict.” International Security, 33: 7–44. doi:10.1162/isec.2008.33.1.7.
+Stigler, Stephen M. (1986). The History of Statistics: The Measurement of Uncertainty before 1900. Cambridge, Massachusetts: Harvard University Press.
+Stone, M. (1974). “Cross-validatory choice and assessment of statistical predictions.” Journal of the Royal Statistical Society B, 36: 111–147. URL http://www.jstor. org/stable/2984809.
+Stuart, Elizabeth A. (2010). “Matching Methods for Causal Inference: A Review and a Look Forward.” Statistical Science, 25: 1–21. URL http://arxiv.org/abs/ 1010.5586. doi:10.1214/09-STS313.
+Székely, Gábor J. and Maria L. Rizzo (2009). “Brownian Distance Covariance.” Annals of Applied Statistics, 3: 1236–1265. URL http://arxiv.org/abs/1010. 0297. doi:10.1214/09-AOAS312. With discussion and reply.
+Taylor, Jonathan and Robert J. Tibshirani (2015). “Statistical Learning and Selective Inference.” Proceedings of the National Academy of Sciences (USA), 112: 7629–7634. doi:10.1073/pnas.1507583112.
+Thomson, Godfrey H. (1916). “A Hierarchy without a General Factor.” British Journal of Psychology, 8: 271–281.
+— (1939). The Factorial Analysis of Human Ability. Boston: Houghton Mifflin Company. URL http://www.archive.org/details/ factorialanalysi032965mbp.
+Thurstone, L. L. (1934). “The Vectors of Mind.” Psychological Review, 41: 1–32. URL http://psychclassics.yorku.ca/Thurstone/.
+Tibshirani, Robert (1996). “Regression Shrinkage and Selection via the Lasso.” Journal of the Royal Statistical Society B, 58: 267–288. URL http://www-stat. stanford.edu/~tibs/lasso/lasso.pdf.
+Tibshirani, Ryan J., Alessandro Rinaldo, Robert Tibshirani and Larry Wasserman (2015). Uniform Asymptotic Inference and the Bootstrap After Model Selection. Tech. rep., Statistics Department, Carnegie Mellon University. URL http://arxiv. org/abs/1506.06266.
+Tibshirani, Ryan J. and Robert Tibshirani (2009). “A Bias Correction for the Min- imum Error Rate in Cross-Validation.” Annals of Applied Statistics, 3: 822–829. URL http://arxiv.org/abs/0908.2904.
+Tilly, Charles (1984). Big Structures, Large Processes, Huge Comparisons. New York: Russell Sage Foundation.
+— (1998). Durable Inequality. Berkeley: University of California Press. 00:02 Monday 18th April, 2016
+BIBLIOGRAPHY 854 — (2008). Explaining Social Processes. Boulder, Colorado: Paradigm Publishers.
+Trapletti, Adrian and Kurt Hornik (2015). tseries: Time Series Analysis and Com- putational Finance. URL http://CRAN.R-project.org/package=tseries. R package version 0.10-34.
+Tukey, John W. (1954). “Unsolved Problems of Experimental Statistics.” Journal of the American Statistical Association, 49: 706–731. URL http://www.jstor.org/ pss/2281535.
+Tutz, Gerhard (2012). Regression for Categorical Data. Cambridge, England: Cam- bridge University Press.
+van der Vaart, A. W. (1998). Asymptotic Statistics. Cambridge, England: Cambridge University Press.
+Vapnik, Vladimir N. (2000). The Nature of Statistical Learning Theory. Berlin: Springer-Verlag, 2nd edn.
+Venables, W. N. and B. D. Ripley (2002). Modern Applied Statistics with S. Berlin: Springer-Verlag, 4th edn. URL http://www.stats.ox.ac.uk/pub/MASS4.
+Vidyasagar, Mathukumalli (2003). Learning and Generalization: With Applications to Neural Networks. Berlin: Springer-Verlag, 2nd edn.
+von Luxburg, Ulrike and Bernhard Schölkopf (2008). “Statistical Learning Theory: Models, Concepts, and Results.” E-print, arxiv.org. URL http://arxiv.org/ abs/0810.4752.
+von Plato, Jan (1994). Creating Modern Probability: Its Mathematics, Physics and Philos- ophy in Historical Perspective. Cambridge, England: Cambridge University Press.
+Vuong, Quang H. (1989). “Likelihood Ratio Tests for Model Selection and Non- Nested Hypotheses.” Econometrica, 57: 307–333. URL http://www.jstor.org/ pss/1912557.
+Wahba, Grace (1990). Spline Models for Observational Data. Philadelphia: Society for Industrial and Applied Mathematics.
+Ward, Michael D., Brian D. Greenhill and Kristin M. Bakke (2010). “The Perils of Policy by p-value: Predicting Civil Conficts.” Journal of Peace Research, 47: 363– 375. doi:10.1177/0022343309356491.
+Wasserman, Larry (2003). All of Statistics: A Concise Course in Statistical Inference. Berlin: Springer-Verlag.
+— (2006). All of Nonparametric Statistics. Berlin: Springer-Verlag.
+Watson, Geoffrey S. (1964). “Smooth Regression Analysis.” Sanhkya, 26: 359–372.
+URL http://www.jstor.org/stable/25049340. 00:02 Monday 18th April, 2016
+855 BIBLIOGRAPHY
+Weisberg, Sanford (1985). Applied Linear Regression. New York: Wiley, 2nd edn.
+Western, Bruce (1996). “Vague Theory and Model Uncertainty in Macrosociology.” Sociological Methodology, 26: 165–192. URL http://www.jstor.org/stable/ 271022. doi:10.2307/271022.
+White, Halbert (1994). Estimation, Inference and Specification Analysis. Cambridge, England: Cambridge University Press.
+Whittaker, E. T. (1922). “On a New Method of Graduation.” Proceedings of the Edinburgh Mathematical Society, 41: 63–75. doi:10.1017/S001309150000359X.
+Wickham, Hadley (2011). “The Split-Apply-Combine Strategy for Data Analysis.” Journal of Statistical Software, 40(1): 1–29. URL http://www.jstatsoft.org/ v40/i01/.
+— (2015). Advanced R. Boca Raton, Florida: CRC Press.
+Wiener, Norbert (1949). Extrapolation, Interpolation, and Smoothing of Stationary Time Series: With Engineering Applications. Cambridge, Massachusetts: The Tech- nology Press of the Massachusetts Institute of Technology. “First published dur- ing the war [1942] as a classifed report to Section D2, National Defense Research Council”.
+— (1956). “Nonlinear Prediction and Dynamics.” In Proceedings of the Third Berkeley Symposium on Mathematical Statistics and Probability (Jerzy Neyman, ed.), vol. 3, pp. 247–252. Berkeley: University of California Press. URL http: //projecteuclid.org/euclid.bsmsp/1200502197.
+— (1961). Cybernetics: Or, Control and Communication in the Animal and the Ma- chine. Cambridge, Massachusetts: MIT Press, 2nd edn. First edition New York: Wiley, 1948.
+Winkler, Gerhard (1995). Image Analysis, Random Fields and Dynamic Monte Carlo Methods: A Mathematical Introduction. Berlin: Springer-Verlag.
+Wood, Simon N. (2004). “Stable and efficient multiple smoothing parameter esti- mation for generalized additive models.” Journal of the American Statistical As- sociation, 99: 673–686. URL http://www.maths.bath.ac.uk/~sw283/simon/ papers/magic.pdf.
+— (2006). Generalized Additive Models: An Introduction with R. Boca Raton, Florida: Chapman and Hall/CRC.
+— (2010). “Statistical inference for noisy nonlinear ecological dynamic systems.” Na- ture, 466: 1102–1104. doi:10.1038/nature09319.
+Wright, Sewall (1934). “The Method of Path Coefficients.” Annals of Mathemat- ical Statistics, 5: 161–215. URL http://projecteuclid.org/euclid.aoms/ 1177732676.
+00:02 Monday 18th April, 2016
+BIBLIOGRAPHY 856 Wysocki, W. (1992). “Mathematical Foundations of Multivariate Path Analysis.” In-
+ventiones Mathematicae, 21: 387–397. URL https://eudml.org/doc/263277. Xie, Yihui (2015). Dynamic Documents with R and knitr. Boca Raton, Florida: CRC
+Press, 2nd edn. URL http://yihui.name/knitr/.
+Ye, Jianming (1998). “On Measuring and Correcting the Effects of Data Mining and Model Selection.” Journal of the American Statistical Association, 93: 120–131. doi:10.1080/01621459.1998.10474094.
+Zhang, Kun, Jonas Peters, Dominik Janzing and Bernhard Schölkopf (2011). “Kernel- based Conditional Independence Test and Application in Causal Discovery.” In Proceedings of the Twenty-Seventh Conference Annual Conference on Uncertainty in Artificial Intelligence (UAI-11) (Fabio Gagliardi Cozman and Avi Pfeffer, eds.), pp. 804–813. Corvallis, Oregon: AUAI Press. URL http://arxiv.org/abs/1202. 3775.
+Zhao, Linqiao (2010). A Model of Limit-Order Book Dynamics and a Consistent Esti- mation Procedure. Ph.D. thesis, Carnegie Mellon University.
+00:02 Monday 18th April, 2016

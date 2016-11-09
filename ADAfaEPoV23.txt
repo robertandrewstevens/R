@@ -1,0 +1,317 @@
+
+Chapter 23
+Simulation-Based Inference
+Checking whether the model’s simulation output looks like the data (§[[TODO: insert ref]]) naturally suggests the idea of adjusting the model until it does. This becomes a way of estimating the model — in the jargon, simulation-based inference. All forms of this involve tweaking parameters of the model until the simulations do look like the data, but differ in what, concretely, “looking like the data” means.
+23.1 The Method of Simulated Moments
+The most straightforward form of simulation-based inference is the method of simu- lated moments, which builds of the method of moments you’ll have seen in earlier statistics classes.
+23.1.1 The Method of Moments
+We have a model with a parameter vector θ, and pick a vector m of moments to calculate. The moments, like the expectation of any variables, are functions of the parameters,
+m = g (θ) (23.1) for some function g . If that g is invertible, then we can recover the parameters from
+the moments,
+θ = g−1(m) (23.2) The method of moments estimator takes the observed, sample moments mˆ , and plugs
+them into Eq. 23.2:
+θ􏱄= g−1(mˆ) (23.3) MM
+What if g −1 is hard to calculate — if it’s hard to explicitly solve for parameters from moments? In that case, we can use minimization:
+θ􏱄=argmin∥g(θ)−mˆ∥2 (23.4)
+θ
+560
+MM
+561 23.1. THEMETHODOFSIMULATEDMOMENTS
+For the minimization version, we just have to calculate moments from parameters g(θ), not vice versa. To see that Eqs. 23.3 and 23.4 do the same thing, notice that (i) the squared1 distance ∥g(θ)−mˆ∥2 ≥ 0, (ii) the distance is only zero when the moments are matched exactly, and (iii) there is only one θ which will match the moments.
+In either version, inversion or minimization, the method of moments works sta- tistically because the sample moments mˆ converge on their expectations g(θ) as we get more and more data. This is, generally, a consequence of the law of large numbers or ergodic theorem.
+It’s worth noting that nothing in this argument says that m has to be a vector of moments in the strict sense. They could be expectations of any functions of the ran- dom variables, so long as g (θ) is invertible, we can calculate the sample expectations of these functions from the data, and the sample expectations converge. When m isn’t just a vector of moments, then, we have the generalized method of moments.
+It is also worth noting that there’s a somewhat more general version of the same method, where we minimize
+(g(θ)−mˆ)·w(g(θ)−mˆ) (23.5) with some positive-definite weight matrix w. This can help if some of the moments
+are much more sensitive to the parameters than others.
+23.1.2 Adding in the Simulation
+All of this supposes that we know how to calculate g(θ) — that we can find the moments exactly. Even if this is too hard, however, we could always simulate to approximate these expectations, and try to match the simulated moments to the real ones. Rather than Eq. 23.4, the estimator would be
+􏰖 􏰖2
+θ􏱅 = argmin 􏰖􏰖 g ̃ (θ) − mˆ 􏰖􏰖 (23.6)
+[[ATTN: Expand?]] [[TODO: Cross-ref with estimating-by-minimizing appendix]]
+SMM s,T θ
+with s being the number of simulation paths and T being their size. Now consistency requires that g ̃ → g , either as T grows or s or both, but this is generally assured by the law of large numbers, as before. Simulated method of moments estimates like this are generally more uncertain than ones which don’t rely on simulation, since there’s an extra layer of approximation, but this can be reduced by increasing s .2
+1Why squared? Basically because it makes the function we’re minimizing smoother, and the optimiza- tion nicer.
+2A common trick is to fix T at the actual sample size n, and then to increase s as much as computa- tionally feasible. By looking at the variance of g ̃ across different runs of the model with the same θ, one gets an idea of how much uncertainty there is in mˆ itself, and so of how precisely one should expect to be able to match it. If the optimizer has gotten |g ̃(θ) − mˆ | down to 0.02, and the standard deviation of g ̃ at constant θ is 0.1, further effort at optimization is probably wasted.
+00:02 Monday 18th April, 2016
+￼
+[[TODO: Update data set, include dividend-payment ad- justments]]
+[[TODO: Cross-ref to earlier uses of this data]]
+23.1. THEMETHODOFSIMULATEDMOMENTS 562
+23.1.3 An Example: Moving Average Models and the Stock Mar- ket
+To give a concrete example, we will try fitting a time series model to the stock market: it’s a familiar subject which interests most students, and we can check the method of simulated moments here against other estimation techniques.
+Our data will consist of about ten year’s worth of daily values for the S& P 500 stock index, available on the class website:
+Professionals in finance do not care so much about the sequence of prices Pt , as the sequence of returns, Pt −Pt −1 . This is because making $1000 is a lot better when
+￼sp <- read.csv("SPhistory.short.csv")
+# We only want closing prices
+sp <- sp[,7]
+# The data are in reverse chronological order, which is weird for us
+sp <- rev(sp)
+# And in fact we only want log returns, i.e., difference in logged prices
+sp <- diff(log(sp))
+￼Pt−1
+you invested $1000 than when you invested $1,000,000, but 10% is 10%. In fact, it’s
+￼[[TODO: Reference MA(q) earlier]]
+often easier to deal with the log returns, Xt = log Pt , as we do here. Pt−1
+§on The model we will fit is a first-order moving average, or MA(1), model: Xt = Zt +θZt−1
+Zt ∼ 􏰄 (0,σ2) i.i.d.
+The Xt sequence of variables are the returns we see; the Zt variables are invisible to us. The interpretation of the model is as follows. Prices in the stock market change in response to news that affects the prospects of the companies listed, as well as news about changes in over-all economic conditions. Zt represents this flow of news, good and bad. It makes sense that Zt is uncorrelated, because the relevant part of the news is only what everyone hadn’t already worked out from older information3. However, it does take some time for the news to be assimilated, and this is why Zt −1 contributes to Xt . A negative contribution, θ < 0, would seem to indicate a “correction” to the reaction to the previous day’s news.
+Mathematically, notice that since Zt and θZt−1 are independent Gaussians, Xt is a Gaussian with mean 0 and variance σ2 + θ2σ2. The marginal distribution of Xt is therefore the same for all t. For technical reasons4, we can really only get sensible behavior from the model when −1 ≤ θ ≤ 1.
+There are two parameters, θ and σ2, so we need two moments for estimation.
+3Nobody will ever say “What? It’s snowing in Pittsburgh in February? Call my broker!”
+4Think about trying to recover Zt , if we knew θ. One might try Xt − θXt−1, which is almost right, it’sZt +θZt−1−θZt−1−θ2Zt−2 =Zt −θ2Zt−2.Similarly,Xt −θXt−1+θ2Xt−2 =Zt +θ3Zt−2,andso forth. If |θ| < 1, then this sequence of approximations will converge on Zt ; if not, then not. It turns out that models which are not “invertible” in this way are very strange — see Shumway and Stoffer (2000).
+00:02 Monday 18th April, 2016
+(23.7) (23.8)
+￼
+563 23.1. THEMETHODOFSIMULATEDMOMENTS Let’s try 􏰎􏰓Xt 􏰔 and Cov􏰓Xt ,Xt−1􏰔.
+σ2:
+This is a quadratic in θ,
+(23.15)
+(23.16) (23.17)
+􏰎􏰓Xt􏰔 = = = Cov􏰓Xt,Xt−1􏰔 =
+=
+􏰎􏰓Zt􏰔+θ2􏰎􏰓Zt−1􏰔 σ2+θ2σ2
+σ2(1+θ2)≡v(θ,σ)
+􏰌􏰓(Zt +θZt−1)(Zt−1 +θZt−2)􏰔
+θ􏰌􏰷Z2 􏰺 t−1
+(23.9) (23.10) (23.11) (23.12)
+(23.13)
+θσ2≡c(θ,σ)
+We can solve the system of equations for the parameters, starting with eliminating
+=
+c(θ,σ) = σ2θ v(θ,σ) σ2(1+θ2)
+θ = 1+θ2
+0 = θ2c−θ+c vv
+2c /v
+−1 ≤ θ ≤ 1. Having found θ, we solve for σ2,
+σ2 = c/θ (23.19)
+The method of moments estimator takes the sample values of these moments, vˆ and cˆ, and plugs them in to Eqs. 23.18 and 23.19. With the S& P returns, the sample covariance is −1.61 × 10−5, and the sample variance 1.96 × 10−4. This leads
+to θˆ = −8.28 × 10−2, and σ􏰩2 = 1.95 × 10−4. In terms of the model, then, each MM MM
+day’s news has a follow-on impact on prices which is about 8% as large as its impact the first day, but with the opposite sign.6
+If we did not know how to solve a quadratic equation, we could use the minimiza-
+tion version of the method of moments estimator:
+
+􏰨 􏰖2 􏰖2
+θMM 􏰖 σθ−cˆ 􏰖
+ 􏱄2 =argmin􏰖 σ2(1+θ2)−vˆ 􏰖 (23.20)
+σMM θ,σ2􏰖 􏰖
+5For example, plot c/v as a function of θ, and observe that any horizontal line cuts the graph at only
+(23.14)
+￼￼￼￼￼￼1±􏰯1−4c2 θ= v2
+￼(23.18) and it’s easy to confirm5 that this has only one solution in the meaningful range,
+￼one point.
+6It would be natural to wonder whether θ􏱄 is really significantly different from zero. Assuming
+MM
+Gaussian noise, one could, in principle, calculate the probability that even though θ = 0, by chance cˆ/vˆ
+was so far from zero as to give us our estimate. As you will see in the homework, however, Gaussian assumptions are very bad for this data. This sort of thing is why we have bootstrapping.
+00:02 Monday 18th April, 2016
+[[TODO: Numbers to R]]
+￼
+23.1. THEMETHODOFSIMULATEDMOMENTS 564
+￼￼ma.mm.est <- function(c,v) {
+  theta.0 <- c/v
+  sigma2.0 <- v
+  fit <- optim(par=c(theta.0,sigma2.0), fn=ma.mm.objective,
+c=c, v=v)
+  return(fit)
+}
+ma.mm.objective <- function(params,c,v) {
+  theta <- params[1]
+  sigma2 <- params[2]
+  c.pred <- theta*sigma2
+  v.pred <- sigma2*(1+theta^2)
+  return((c-c.pred)^2 + (v-v.pred)^2)
+}
+￼￼￼CODE EXAMPLE 41: Code for implementing method of moments estimation of a first-order mov- ing average model, as in Eq. 23.20. See §23.5 for “design notes”, and the online code for comments. [[TODO: move comments in here, use purl]]
+CODE EXAMPLE 42: Function which simulates s independent runs of a first-order moving aver- age model, each of length n, with given noise variance sigma2 and after-effect theta. See online for the version with comments on the code details. [[TODO: purl comments]]
+Computationally, it would go something like Code Example 41.
+The parameters estimated by minimization agree with those from direct algebra to four significant figures, which I hope is good enough to reassure you that this
+works.
+Before we can try out the method of simulated moments, we have to figure out
+how to simulate our model. Xt is a deterministic function of Zt and Zt−1, so our general strategy (§[[TODO: Cross-ref sim. chap.]]) says to first generate the Zt , and then compute Xt from that. But here the Zt are just a sequence of independent Gaussians, which is a solved problem for us. The one wrinkle is that to get our first value X1, we need a previous value Z0. Code Example 42 shows the solution.
+What we need to extract from the simulation are the variance and the covariance. It will be more convenient to have functions which calculate these call rma() them- selves (Code Example 43).
+Figure 23.1 plots the covariance, the variance, and their ratio as functions of θ with σ2 = 1, showing both the values obtained from simulation and the theoretical
+00:02 Monday 18th April, 2016
+￼￼rma <- function(n,theta,sigma2,s=1) {
+  z <- replicate(s,rnorm(n=n+1,mean=0,sd=sqrt(sigma2)))
+  x <- z[-1,] + theta*z[-(n+1),]
+  return(x)
+}
+￼￼￼
+565
+23.1. THEMETHODOFSIMULATEDMOMENTS
+￼￼● ●
+￼￼￼￼● ●
+●
+● ●
+● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼−1.0 −0.5
+0.0 0.5 1.0 −1.0 −0.5 0.0 0.5 1.0
+θθ
+￼￼￼￼￼￼￼￼￼￼−1.0 −0.5
+0.0 0.5 1.0
+θ
+￼par(mfrow=c(2,2))
+theta.grid <- seq(from=-1,to=1,length.out=300)
+cov.grid <- sapply(theta.grid,sim.cov,sigma2=1,n=length(sp),s=10)
+plot(theta.grid,cov.grid,xlab=expression(theta),ylab="Covariance")
+abline(0,1,col="grey",lwd=3)
+var.grid <- sapply(theta.grid,sim.var,sigma2=1,n=length(sp),s=10)
+plot(theta.grid,var.grid,xlab=expression(theta),ylab="Variance")
+curve((1+x^2),col="grey",lwd=3,add=TRUE)
+plot(theta.grid,cov.grid/var.grid,xlab=expression(theta),
+  ylab="Ratio of covariance to variance")
+curve(x/(1+x^2),col="grey",lwd=3,add=TRUE)
+par(mfrow=c(1,1))
+FIGURE 23.1: Plots of the covariance, the variance, and their ratio as a function of θ, with σ2 = 1. Dots show simulation values (averaging 10 realizations each as long as the data), the grey curves the exact calculations.
+00:02 Monday 18th April, 2016
+●
+● ●
+● ● ● ● ● ●
+● ● ●
+● ● ●
+● ● ●
+● ●●
+● ● ●
+● ● ●
+￼● ●●
+● ● ●
+● ● ●
+● ● ●
+● ●
+● ●
+●
+● ● ●
+● ● ●●
+● ● ●
+● ● ●
+● ● ●
+● ●
+● ●
+●
+●
+● ●●
+● ●●
+● ● ●● ●●●●
+●
+●
+￼￼￼● ●
+●
+● ● ●
+● ●
+●
+● ●
+● ●
+● ●
+●
+●
+￼￼Ratio of covariance to variance Covariance
+−0.4 0.0 0.2 0.4 −1.0 −0.5 0.0 0.5 1.0
+Variance
+1.0 1.2 1.4 1.6 1.8 2.0
+23.1. THEMETHODOFSIMULATEDMOMENTS 566
+￼￼sim.var <- function(n,theta,sigma2,s=1) {
+   vars <- apply(rma(n,theta,sigma2,s),2,var)
+   return(mean(vars))
+}
+sim.cov <- function(n,theta,sigma2,s=1) {
+  x <- rma(n,theta,sigma2,s)
+  covs <- colMeans(x[-1,]*x[-n,])
+  return(mean(covs))
+}
+￼￼￼CODE EXAMPLE 43: Functions for calculating the variance and covariance for specified parame- ter values from simulations.
+￼￼ma.msm.est <- function(c,v,n,s) {
+  theta.0 <- c/v
+  sigma2.0 <- v
+  fit <- optim(par=c(theta.0,sigma2.0),fn=ma.msm.objective,c=c,v=v,n=n,s=s)
+  return(fit)
+}
+ma.msm.objective <- function(params,c,v,n,s) {
+  theta <- params[1]
+  sigma2 <- params[2]
+  c.pred <- sim.cov(n,theta,sigma2,s)
+  v.pred <- sim.var(n,theta,sigma2,s)
+  return((c-c.pred)^2 + (v-v.pred)^2)
+}
+￼￼￼CODE EXAMPLE 44: Code for implementing the method of simulated moments estimation of a first-order moving average model.
+ones.7 The agreement is quite good, though of course not quite perfect.8 Conceptually, we could estimate θ by jut taking the observed value cˆ/vˆ, running a horizontal line across Figure 23.1c, and seeing at what θ it hit one of the simulation
+dots. Of course, there might not be one it hits exactly...
+The more practical approach is Code Example 44. The code is practically iden-
+tical to that in Code Example 41, except that the variance and covariance predicted by given parameter settings now come from simulating those settings, not an exact calculation. Also, we have to say how long a simulation to run, and how many sim- ulations to average over per parameter value.
+7I could also have varied σ2 and made 3D plots, but that would have been more work. Also, the variance and covariance are both proportional to σ2, so the shapes of the figures would all be the same.
+8If you look at those figures and think “Why not do a nonparametric regression of the simulated moments against the parameters and use the fitted values as g ̃, it’ll get rid of some of the simulation noise?”, congratulations, you’ve just discovered the smoothed method of simulated moments.
+00:02 Monday 18th April, 2016
+￼
+567 23.2. INDIRECTINFERENCE 􏰨 −2 2 −4
+WhenIrunthis,withs=100,IgetθMSM =−8.36×10 andσ􏰨MSM =1.94×10 , which is quite close to the non-simulated method of moments estimate. In fact, in this case there is actually a maximum likelihood estimator (arima(), after the more
+general class of models including MA models), which claims θ􏰨 = −9.75 × 10−2
+ML
+and σ􏰨M L = 1.94 × 10 . Since the standard error of the MLE on θ is ±0.02, this
+2 −4
+is working essentially as well as the method of moments, or even the method of simulated moments. [[TODO: Replace numbers with R]]
+In this case, because there is a very tractable maximum likelihood estimator, one generally wouldn’t use the method of simulated moments. But we can in this case check whether it works (it does), and so we can use the same technique for other models, where an MLE is unavailable.
+23.2 Indirect Inference
+Section 23.1 explained the method of simulated moments, where we try to match ex- pectations of various functions of the data. Expectations of functions are summary statistics, but they’re not the only kind of summary statistics. We could try to es- timate our model by matching any set of summary statistics, so long as (i) there’s a unique way of mapping back from summaries to parameters, and (ii) estimates of the summary statistics converge as we get more data.
+A powerful but somewhat paradoxical version of this is what’s called indirect inference, where the summary statistics are the parameters of a different model. This second or auxiliary model does not have to be correctly specified, it just has to be easily fit to the data, and satisfy (i) and (ii) above. Say the parameters of the auxiliary
+model are β, as opposed to the θ of our real model. We calculate β􏰨 on the real data. Then we simulate from different values of θ, fit the auxiliary to the simulation outputs, and try to match the auxiliary estimates. Specifically, the indirect inference estimator is
+θ􏰨 = argmin ∥β ̃(θ) − β􏰨∥2 (23.21)
+θ
+where β ̃(θ) is the value of β we estimate from a simulation of θ, of the same size as the original data. (We might average together a couple of simulation runs for each θ.) If we have a consistent estimator of β, then
+β􏰨 → β β ̃(θ) → b (θ)
+If in addition b (θ) is invertible, then
+II
+(23.22) (23.23)
+(23.24)
+II
+θ􏰨 →θ
+For this to work, the auxiliary model needs to have at least as many parameters as the real model, but we can often arrange this by, say, making the auxiliary model a linear regression with a lot of coefficients.
+00:02 Monday 18th April, 2016
+ter]]
+23.3 Further Reading
+23.3. FURTHERREADING 568
+[[TODO: nominal confidence limits by means of the information matrix]]
+A specific case, often useful for time series, is to make the auxiliary model an autoregressive model, where each observation is linearly regressed on the previous ones. A first-order autoregressive model (or “AR(1)”) is
+Xt =β0 +β1Xt−1 +εt
+[[TODO: Replace with cross- where εt ∼ 􏰄 (0,β3). (So an AR(1) has three parameters.) ref to AR in time series chap-
+(23.25)
+The best general reference on simulation-based inference I know is (despite its age) still Gouriéroux and Monfort (1989/1995); many of the examples presume some fa- miliarity with the jargon of econometrics, but the general approaches do not. It covers the simulated method of moments, simulated maximum likelihood, and (un- surprisingly: Gouriéroux et al. 1993) indirect inference.
+Kendall et al. (2005) is an excellent example of applying indirect inference to test- ing substantive scientific (not statistical!) hypotheses with real data. (I learned about indirect inference from hearing Prof. Ellner describe this paper.)
+The weakest conditions I know of under which indirect inference is consistent are given in Zhao (2010, ch. 5).
+Wood (2010) proposes an interesting variant on indirect inference; despite the title, it applies much more generally than to ecology.
+Indirect inference has a Bayesian counterpart, or even version, called “approx- imate Bayesian computation”, which originated in population genetics; Beaumont (2010) is an accessible review by one of the inventors.
+23.4 Exercises
+1. Indirect inference
+(a) Convince yourself that if Xt comes from an MA(1) process, it can’t also
+be written as an AR(1) model.
+(b) Write a function, ar1.fit, to fit an AR(1) model to a time series, using
+lm, and to return the three parameters (intercept, slope, noise variance).
+(c) Apply ar1.fit to the S&P 500 data; what are the auxiliary parameter
+estimates?
+(d) Combine ar1.fit with the simulator rma, and plot the three auxiliary parameters as functions of θ, holding σ2 fixed at 1. (This is analogous to Figure 23.1.)
+(e) Write functions, analogous to ma.msm.est and ma.msm.objective, for estimating an MA(1) model, using an AR(1) model as the auxiliary func- tion. Does this recover the right parameter values when given data simu- lated from an MA(1) model?
+00:02 Monday 18th April, 2016
+569 23.4. EXERCISES
+(f) What values does your estimator give for θ and σ2 on the S& P 500 data? How do they compare to the other estimates?
+2. Indirect inference with a mechanistic model [[TODO: Lotka-Volterra model with errors-in-variables for the lynx data?]]
+00:02 Monday 18th April, 2016
+23.5. SOMEDESIGNNOTESONTHEMETHODOFMOMENTSCODE570
+23.5 Some Design Notes on the Method of Moments Code
+Go back to Section 23.1.3 and look at the code for the method of moments. There’ve been a fair amount of questions about writing code, and this is a useful example.
+The first function, ma.mm.est, estimates the parameters taking as inputs two numbers, representing the covariance and the variance. The real work is done by the built-in optim function, which itself takes two major arguments. One, fn, is the function to optimize. Another, par, is an initial guess about the parameters at which to begin the search for the optimum.9
+The fn argument to optim must be a function, here ma.mm.objective. The first argument to that function has to be a vector, containing all the parameters to be optimized over. (Otherwise, optim will quit and complain.) There can be other arguments, not being optimized over, to that function, which optim will pass along, as you see here. optim will also accept a lot of optional arguments to control the search for the optimum — see help(optim).
+All ma.mm.objective has to do is calculate the objective function. The first two lines peel out θ and σ2 from the parameter vector, just to make it more readable. The next two lines calculate what the moments should be. The last line calculates the distance between the model predicted moments and the actual ones, and returns it. The whole thing could be turned into a one-line, like
+return(t(params-c(c,v)) %*% (params-c(c,v)))
+or perhaps even more obscure, but that is usually a bad idea.
+Notice that I could write these two functions independently of one another, at least to some degree. When writing ma.mm.est, I knew I would need the objec- tive function, but all I needed to know about it was its name, and the promise that it would take a parameter vector and give back a real number. When writing ma.mm.objective, all I had to remember about the other function was the promise this one needed to fulfill. In my experience, it is usually easiest to do any substantial coding in this “top-down” fashion10. Start with the high-level goal you are trying to achieve, break it down into a few steps, write something which will put those steps together, presuming other functions or programs can do them. Now go and write the functions to do each of those steps.
+The code for the method of simulated moments is entirely parallel to these. Writ- ing it as two separate pairs of functions is therefore somewhat wasteful. If I find a mistake in one pair, or thing of a way to improve it, I need to remember to make cor- responding changes in the other pair (and not introduce a new mistake). In the long run, when you find yourself writing parallel pieces of code over and over, it is better to try to pull together the common parts and write them once. Here, that would mean something like one pair of functions, with the inner one having an argument
+9Here par is a very rough guess based on c and v — it’ll actually be right when c=0, but otherwise it’s not much good. Fortunately, it doesn’t have to be! Anyway, let’s return to designing the code
+10What qualifies as “substantial coding” depends on how much experience you have 00:02 Monday 18th April, 2016
+￼￼
+57123.5. SOMEDESIGNNOTESONTHEMETHODOFMOMENTSCODE
+which controlled whether to calculate the predicted moments by simulation or by a formula. You may try your hand at writing this.
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/
+Part IV Causal Inference
+572
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

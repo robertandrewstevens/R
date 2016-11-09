@@ -1,0 +1,94 @@
+
+Chapter 26
+Experimental Causal Inference
+[[Chapter in progress; quoting or citing would be an extra bad idea]]
+26.1 Why Experiment?
+Before leaving the topic of causal inference, it’s worth spending a chapter on inference from experiments rather than observations. This is uniquely powerful when we can make it work, and there is a charming simplicity to the core idea of “Let’s try it, and see what happens”.
+Of course, in practice things are a bit more complicated. Just trying arbitrary things without a plan can be instructive, but is often not a very efficient way of learning what we want to know. When we want experiments to answer particular questions, it makes sense to design the experiments so as to answer them quickly and precisely.
+26.1.1 Jargon
+Before plunging in, let’s fix on some jargon. In experiments, we manipulate one or more variables; these are generally called treatments. These manipulations are ap- plied to units — some writers would say plots or subjects (drawing on traditions from agriculture and psychology, respectively). Units could be individual people or other organisms, parts of organisms, separate machines, classrooms within a school, schools, villages, batches of chemicals in a chemical processing plant, etc. Each unit gets assigned values of each of the treatment variables. Typically, the treatment vari- ables are, in the experiment, limited to a discrete set of levels, either because the treatment is naturally discrete, or as part of the design. One level of each treatment may be distinguished as the control condition, the one which would (in some sense) happen naturally.
+602
+603 26.2. BASICIDEASGUIDINGEXPERIMENTALDESIGN
+26.2 Basic Ideas Guiding Experimental Design
+1. Maximize useful variation.
+2. Eliminate unhelpful variation.
+3. Randomize what we cannot eliminate.
+[[Commentary: (1) applies even if we want to show that something has no effect; we cannot learn anything about how Y relates to X unless X varies. (2) Elimination of unhelpful variation can be through (a) precision of measurement, (b) homogeniza- tion of units, (c) limiting comparison to similar units. (a) is easy to say and often the right thing to do, but typically reaches limits. (b) bleeds into (a) — is keeping the experimental apparatus from being shaken when trucks drive past the lab reduc- ing measurement noise or homogenizing experimental conditions? — but can raise concerns about generalization to a less-homogeneous population. (c) is the principle behind doing a paired t-test rather than an unpaired, and generally of trying to elim- inate the consequences of uncontrolled variation by matching. (3) is the great trick of Fisher; it makes the distribution of uncontrolled variables the same across treatments, so they are statistically homogeneous.]]
+26.3 Randomization
+[[Randomization of treatment defined]] 26.3.1 Causal Identification
+The fundamental power of experimentation is that it solves the causal identification problem.IfweactuallycanmanipulateavariableX,thenwecanlearnPr(Y |do(X =x)) from the observed distribution of Y after our manipulation (§24.2.1). When we ran- domizeX,wemakeX exogenous,soagainPr(Y |do(X =x))=Pr(Y |X =x).One way to convince yourself of this is to see that randomizing X guarantees there are
+no back-door paths linking X to any other variable, and so the back-door criterion (§25.3.1) is met by adjusting for no variables at all.
+26.3.1.1 Randomization and Linear Models
+When the treatment variables are randomized and take only a discrete set of levels, one can model the expected causal effects using linear regression in complete gener- ality. That is, when X is randomized and discrete, 􏰌[Y|do(X = x)] can always be estimated with linear models1. When X is binary, it’s not even necessary to run a linear model; one can just collect the means 􏰌[Y|X =0] and 􏰌[Y|X =1]. Typi- cally, in such cases, one is more interested in the difference in means 􏰌 [Y |X = 1] − 􏰌 [Y |X = 0], which in a linear regression would be the coefficient on X . If X has
+1Randomizing a discrete treatment is not enough, however, to guarantee homoskedasitcity [[TODO: cross-ref to chapter on weights and variance]].
+00:02 Monday 18th April, 2016
+￼
+26.3. RANDOMIZATION 604
+more than two levels, one can still just take 􏰌[Y|X = x] for each level x. In a lin- ear regression, there will be a dummy variable for all but one level of x, say 0, and the coefficients associated with these dummies will be 􏰌 [Y |X = x ] − 􏰌 [Y |X = 0], 􏰌 [Y |X = 0] itself being the intercept.
+If there are multiple treatments (all randomized), say X and Z, then in general it will be possible to decompose the conditional mean into additive terms for X and Z, and an interaction term:
+􏰌[Y|do(X =x,Z=z)]=μ+fX(x)+fZ(z)+fXZ(x,z) (26.1)
+If X and Z, in the experiment, take only a discrete set of levels, then this can still be estimated through a linear model, but it should include interactions between X and Z (or rather between their dummies), unless there are good reasons to believe that the interaction terms fX Z are all zero to begin with.2
+26.3.1.2 Randomization and Non-Linear Models
+When the treatment variables are inherently categorical, there is no point in using non-linear models, since the conditional means can be estimated, with no distortion, by linear models with dummy variables3. However, if some of the treatment variables are really continuous and have only been discretized for purposes of the experiment, it’s generally good idea to consider fitting a non-linear model, either one suggested by prior theory, or just a smoother, like a spline or a kernel. Of course, if there are only two levels for the variable, it will be impossible to tell whether the response is really non-linear; at least three levels are needed.
+There might seem to be a contradiction between the advice to fit a non-linear regression here, and the assertion in the previous sub-section that only linear models are needed, but there really isn’t. In a randomized experiment with discrete levels, a linear model, with dummies, is perfectly adequate to estimate 􏰌[Y|do(X = x)] for the particular levels x used in the experiment. If, however, we want to generalize to any other value of x, we need to interpolate between those values (or extrapolate beyond them), and that calls for a full-fledged regression model.
+26.3.2 Modes of Randomization
+There are two main types of randomization: independent assignment of treatments to each unit, and assignment according to a fixed schedule applied independently of the units’ attributes.
+26.3.2.1 IID Assignment
+The easiest form of randomization picks the level of the treatment (or treatments) independently for each unit, according to a fixed distribution. Thus, the treatments
+2If all of this sounds like analysis of variance, that is because ANOVA is just linear regression when all the predictor variables are discrete.
+3At most, one might consider something like a kernel regression with the categorical kernels of §14.4.3 if the number of units in each combination of treatments is small. This would introduce some bias, but the reduction in variance from smoothing might more than compensate.
+00:02 Monday 18th April, 2016
+￼
+605 26.4. CHOICEOFLEVELS
+are independent and identically distributed across units. This ensure that the treat- ment variables are exogenous, and doesn’t require any prior knowledge, or decisions, about how many units will be experimented on.
+[[Easy; may lead to lack of balance, not respecting constraints on sizes of experi- mental groups]]
+26.3.2.2 Planned Assignment
+[[More combinatorics; guarantee of balance and/or other constraints]] 26.3.3 Perspectives: Units vs. Treatments
+[[Unit perspective: sitting around with some fixed covariates, then get treatment randomly imposed on me]]
+[[Treatment perspective: sitting around with some fixed levels, then get ran- domly assigned a sub-sample of units with some distribution of covariates]]
+[[While many people at first find it harder to look at problems from the treatment perspective than the unit perspective, the former is in many ways more fundamental and useful. We’re really trying to infer the consequences of treatments, and don’t really care about the individual units; planned assignment can make things more nearly homogeneous from treatment perspective]]
+26.4 Choice of Levels
+[[Choice of levels for continuous values depends on goals]] 26.4.1 Parameter Estimation or Prediction
+[[Goal: minimize standard errors (or length of confidence intervals)]]
+[[Derived goal: maximize information for parameter estimation or prediction]] [[Simple example: under linear model, information is proportional to variance in
+regressor, hence maximizie variance, hence binary, equal-probability-at-each-extreme design distribution]]
+[[More complicated examples with non-linear models]] [[TODO: Find software package for experimental design]]
+26.4.2 Maximizing Yield
+[[i.e.,findingthesettingx(or(x,z),etc.)where􏰌[Y|X =x](or􏰌[Y|X =x,Z=z]) is maximized. One route: estimate response surface, then concentrate new experi- ments near predicted maximum.]]
+26.4.3 Model Discrimination
+[[maximizing contrast between models when doing discrimination]] 00:02 Monday 18th April, 2016
+[[TODO: get full quote]]
+26.5. MULTIPLEMANIPULATEDVARIABLES 606
+26.4.4 Multiple Goals
+[[Improving power for one goal generally detracts from others; may need to compro- mise.]]
+26.5 Multiple Manipulated Variables
+[[Need to randomize combinations of treatments]] 26.5.1 Factorial Designs
+[[assignment to all combinations of all levels of all variables]]
+[[why R calls categorical variables “factors”]]
+[[advantages of factorial designs (especially power to detect all possible interac-
+tions)]]
+[[drawbacks of factorial designs (cost, possible redudancy for limited number of
+interactions]]
+[[partial or fractional factorial designs reduce cost under the hope that higher-
+order interactions are negligible, while still allowing estimation of lower-order ef- fects]]
+26.6 Blocking
+[[divide experimental units into relatively-homogeneous “blocks” and do compar- isons within-blocks, or removing block means]]
+[[why blocking leads to improved precision if treatment response is homoge- neous]]
+[[blocking compared to modeling of covariates]] 26.6.1 Within-Subject Designs
+[[within-subject designs as a form of blocking]]
+[[cross-over as a form of blocking under the assumption of no after-effects]]
+26.7 Summary on the elements of an experimental de- sign
+26.8 “What the experiment died of”
+[[failures of randomization]]
+[[un-anticipated channels of influence for treatment (placebo effect; expectations;
+Hawthorne effects) and some potential remedies (double blinding, estimation of placebo effects, careful design of control condition)]]
+00:02 Monday 18th April, 2016
+607 26.9. FURTHERREADING
+[[selection into the experiment: threat to generalization to other populations; secure for what’s going on within the experiment. E.g., education lotteries: families which apply for the lottery are going to be different than the others, so randomly assigning to one type of school / curriculum / whatnot or another isn’t fully infor- mative. ]]
+[[non-compliance]]
+[[inadequate sample size and under-powering; particularly an issue if the experi- ment aims to show that something does not matter]]
+[[interference between units.]] 26.9 Further Reading
+[[Atkinson and Donev]] 26.10 Exercises
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

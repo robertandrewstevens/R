@@ -1,0 +1,176 @@
+
+Appendix B
+Linear Algebra Reminders
+This appendix is in no way a replacement for actually learning linear algebra; it’s only intended for reminders and quick reference.
+B.1 Vector Space, Linear Subspace, Linear Indepen- dence
+Abstractly, a vector space is some set 􏰉 where we know what it means to add two vectors ⃗u , v⃗ in 􏰉 , and we also know what it means to multiply a vector v⃗ by a real number. That is, the vector space must satisfy the following properties:
+1. If v⃗ ∈ 􏰉 , then av⃗ ∈ 􏰉 (closed under scalar multiplication) 2. If v⃗, ⃗u ∈ 􏰉 , then v⃗ + ⃗u ∈ 􏰉 (closed under vector addition) 3. v⃗+⃗u=⃗u+v⃗(vectoradditioncommutes)
+4. ⃗0 ∈ 􏰉 , and v⃗ +⃗0 = v⃗ (⃗0 is the additive identity)
+5. a(v⃗+⃗u)=av⃗+a⃗u(linearity;scalarmultiplicationdistributesoveraddition) 6. 1v⃗ = v⃗ (1 is the multiplicative identity)
+7. (−1)v⃗+v⃗=0(additiveinversesexist)
+Concretely, when this book uses vectors, they’re usually just lists of real numbers (which is pretty much what R means by vector).
+A linear subspace of a vector space is a (strict) subset of a vector space 􏰉 which is also a vector space. That is, 􏰊 is a linear subspace when 􏰊 ⊂ 􏰉
+1. Ifv⃗∈􏰊,thenav⃗∈􏰊 foranyscalara 2. Ifv⃗,⃗u∈􏰊,thensois(v⃗+⃗u)∈􏰊
+724
+725 B.2. INNERPRODUCT,ORTHOGONALVECTORS
+It is a consequence of these two properties that, in particular, ⃗0 must be in 􏰊 — all linear subspaces must pass through the origin.
+A set of vectors v⃗1,v⃗2,...v⃗n are linearly independent when (non-trivial) no lin- ear combination of them equals zero, that is, when
+n
+􏰥 a i v⃗ i = ⃗0
+i=1
+only if all the scalars ai = 0. If a set of vectors is not linearly independent, then it is linearly dependent.
+The dimension of a vector space is the size of the largest set of linearly indepen- dent vectors it contains. For vectors which are just lists of p real numbers, this is always p. The dimension of a linear subspace is always less than the dimension of its parent space.
+B.2 Inner Product, Orthogonal Vectors
+The inner product of two vectors v⃗ and ⃗u is the sum of their element-wise product:
+p
+v⃗ · ⃗u = 􏰥 v i u i
+i=1
+It is also called the dot product (because it’s written with ·), and also sometimes
+written 〈v⃗, ⃗u〉. If a vector is treated as a column matrix (i.e., a p × 1 matrix), then v⃗ · ⃗u = v T u
+The (Euclidean) norm of a vector is the square root of its inner product with
+itself:
+􏰲􏰱 p
+∥ v ⃗ ∥ = 􏰮 v ⃗ · v ⃗ = 􏰱􏰰 􏰥 v i 2
+￼￼i=1
+Let θ be the angle between the vectors ⃗u and v⃗. Then
+v⃗·⃗u =∥v⃗∥∥⃗u∥cosθ
+Because of this, two vectors are called orthogonal (“at right angles”) if v⃗ · ⃗u = 0.
+B.3 Orthonormal Bases
+A collection of vectors v⃗1,...v⃗p are a basis for a vector space 􏰉 when, given any
+v⃗ ∈ 􏰉 ,
+p
+v⃗ = 􏰥 a j v⃗ j j=1
+00:02 Monday 18th April, 2016
+B.4. RANK 726
+forsomecoefficientsa1,...ap.Thebasisisorthogonalwhenv⃗i·v⃗j =0unlessi=j, and normal when each v⃗i has length 1. If it is both orthogonal and normal, the
+basis is orthonormal. The unit vectors along the different coordinate axes form an orthonormal basis, so no orthonormal basis has to have more vectors than 􏰉 has dimensions. (A non-orthogonal basis might need more.)
+If a basis is orthonormal, then the coefficients aj in the expansion are just given by inner products:
+B.4 Rank
+p
+v⃗ = 􏰥 ( v⃗ · v⃗ j ) v⃗ j
+j=1
+The column rank of a p × q matrix a is the number of linearly independent columns of a. If all the columns are linearly independent, then a has full (column) rank, otherwise it is (column) rank deficient. Column rank equsl the dimension of the (column) range space or range of a, the linear subspace of vectors p-vectors of the form av⃗. The row rank, similarly, is the number of linearly independent rows of a, and the definitions of full row rank and row rank deficiency are parallel.
+The row rank and column rank of a matrix are always equal.
+The (column) null space of a is the set of all vectors such that av⃗ = 0 (see Exercise 1). For a q-column matrix, the sum of the column rank and the dimension of the null space is always q; similarly for a p-row matrix, the sum of the row rank and the dimension of the range null space is p.
+B.5 Eigenvalues and Eigenvectors of Matrices
+A non-zero vector v⃗ is an eigenvector of a square matrix a, with eigenvalue λ, when av⃗ = λv⃗ (B.1)
+If v⃗ is an eigenvector, then b v⃗ is also an eigenvector with eigenvalue λ. It’s usual to normalize the eigenvector to have length 1, or perhaps to have its entries sum to 1.
+An p × p matrix a has at most p distinct eigenvalues. If one puts the eigenvalues in order, the largest one is the leading eigenvalue, and the corresponding eigenvector is also called the leading eigenvector. A matrix’s spectrum is its set of eigenvalues.
+Eigenvectors with distinct eigenvalues are orthogonal (Exercise 2).
+If a matrix has fewer than p distinct eigenvalues, the “repeated” ones are degen- erate. If λ is k-fold degenerate, or has multiplicity k, then there is k−-dimensional linear subspace of eigenvectors with eigenvalue λ (Exercise 5). Example: The p × p identity matrix has the unique eigenvalue 1, which is p-fold degenerate; all vectors are eigenvectors of the identity matrix.
+If a square matrix is non-degenerate, then its eigenvectors form an orthonormal basis. If a square matrix is degenerate, then there are many orthonormal bases which can be built out of eigenvectors.
+00:02 Monday 18th April, 2016
+727 B.6. SPECIALKINDSOFMATRIX
+The trace of a square matrix, tr a, is the sum of its diagonal entries; it is equal to the sum of the eigenvalues “counted with multiplicity”. It has the useful property that tr (ab) = tr (ba).
+The determinant of a matrix, det a or |a|, is the product of its eigenvalues (again, “counted with multiplicity”). A square matrix is invertible if and only if |a| ≠ 0, i.e., if and only if all of its eigenvalues are non-zero. The rank of an p × p matrix is p minus the number of eigenvalue multiplicity of 0 (Exercise 6). It follows that a matrix is invertible if and only if it is of full rank.
+The eigenvalues of ak, for positive integer k, are the powers of the eigenvalues of a, and the eigenvectors are the same. The eigenvalues of a−1 (when that matrix exists) are the reciprocals of the eigenvalues of a.
+B.6 Special Kinds of Matrix
+Asquarematrixissymmetricwhenitisequaltoitsowntranspose,aT =a.
+A square matrix is positive semi-definite when, for all non-zero vectors v⃗, v⃗ · av⃗ ≥ 0. This is often abbreviated a ≽ 0. If v⃗ · av⃗ > 0, then the matrix is positive definite, a ≻ 0. All the eigenvectors of a positive semi-definite matrix are ≥ 0; all the eigenvectors of a positive definite matrix are > 0. Negative definite matrices are
+defined similarly, and have negative eigenvalues, but few uses in statistics. Amatrixisorthogonalwhenitisinverseisthesameasitstranspose,oT =o−1.o is orthogonal if and only if its rows are a set of orthonormal vectors, which happens if and only if its columns are orthonormal as well1. All eigenvalues of an orthogonal matrix have magnitude 1. Since oT o = I, if bT b = a, then (ob)T (ob) is also equal to
+a.
+B.7 Matrix Decompositions
+B.7.1 Singular Value Decomposition
+Given an n × m matrix b has as its singular value decomposition
+b = udvT (B.2)
+where u, the n × n matrix of left singular vectors, contains the eigenvectors of bbT ; v, the m × m matrix of right singular vectors, contains the eigenvectors of bT b; and d is an n × m diagonal matrix containing the square roots of the non-zero eigenvalues ofbbT (whicharealsotheeigenvaluesofbTb).
+In the special case of a square, n × n matrix, all of the matrices in the SVD are also n × n, but don’t much simplify further. However, one can interpret the terms more easily:multiplyingbyvT rotatesavectortoanewsetofcoordinateaxes,multiplying by d stretches the vector along the axes (and possibly reflects along some of them), and then multiplying by u does a final rotation to new coordinates.
+1I have not been able to discover why these matrices are called “orthogonal” rather than “orthonor- mal”; the matrices are not orthogonal to each other.
+00:02 Monday 18th April, 2016
+￼
+B.8. ORTHOGONALPROJECTIONS,IDEMPOTENTMATRICES 728
+Ifbissymmetricaswellassquare,thenbbT =bTb,andthematricesuandvare identical. Moreover, d is simply the diagonal matrix of eigenvalues of b. In this case, one often writes λ.
+[[Singular value decomposition and low-rank approximation]]
+B.7.2 Eigen-Decomposition or Spectral Decomposition of Matrix
+[[Fill in: when it applies, form]] [[When equal to SVD, when not]]
+B.7.3 Square Root of a Matrix
+Any matrix b such that bT b = a is a square root of a symmetric matrix a. There are infinitely many of them2 but a fairly straightforward one can be defined through the spectral decomposition:
+a1/2 = λ1/2v
+where λ1/2 takes the square root of each element of λ, the diagonal matrix of eigen-
+values.
+B.8 Orthogonal Projections, Idempotent Matrices
+The projection of a vector v⃗ on to a set s is the point in the set which comes closest to v⃗. If s is a q < p dimensional linear sub-space, we can find the projection by using an orthonormal basis for that subspace:
+q
+v⃗∥ =􏰥(v⃗·⃗sj)⃗sj (B.3)
+j=1
+This is the orthogonal projection of v⃗ on to s. Any vector has a unique decomposi- tion into its projection on to the subspace and a residual v⃗ = v⃗∥ + v⃗⊥. The residual v⃗⊥ is orthogonal to the subspace, i.e., orthogonal to any vector in the subspace.
+Orthogonal projection on to s is a linear operation, so it can be expressed as a matrix Ps . This matrix is idempotent, meaning that its powers are equal to itself: Psk = Ps for all k > 1. Geometrically, this means that once a vector has been projected into a subspace, projecting into the same space again does nothing.
+All eigenvalues of an idempotent matrix are either 0 or 1, hence its rank is equal to its trace (Exercise 7). This fact is surprisingly useful for linear smoothers (§1.5.3).
+. Since the rank of a matrix equals the sum of its eigenvalues, The rank of an idempotent matrix is equal to its trace.
+2Because, for any orthogonal matrix c, bT b = bT oT ob = (ob)T (ob). 00:02 Monday 18th April, 2016
+￼
+729 B.9. RCOMMANDSFORLINEARALGEBRA
+B.9 R Commands for Linear Algebra
+For matrix multiplication, use the %*% operator; if one of its arguments is an R vector, it will (sometimes) try to convert it to an appropriate matrix, but you’re probably better off doing that explicitly yourself.
+t() transposes, det() and determinant calculate the determinant.
+If a is an existing matrix, diag(a) can be used to extract or set the entries on its diagonal. Similarly, lower.tri() and upper.tri can extract or set the lower or upper triangular parts of a matrix.
+If v is a vector, diag(v) creates the corresponding diagonal matrix. diag(k) for integer k creates a k × k identity matrix.
+There is, oddly, no built-in function for calculating a trace, but it’s easy to write one.
+For a matrix a and a vector b, solve(a,b) solves the linear system a⃗x = ⃗b . With just a matrix, a finds a−1.
+eigen(a) returns a list containing the eigenvalues and (normalized) eigenvectors of a. Similarly, svd(a) finds the singular value decomposition.
+B.10 Vector Calculus
+The gradient of a scalar-valued function is the vector-valued function of its first par-
+tial derivatives:
+∂f
+∂x1 
+∂f ∇f=∂x2 
+...∂f  ∂ xn
+￼￼￼∇f is a vector-valued function; ∇f (x) is a vector.
+At any point x, ∇f (x) is the direction in which the function f increases most
+rapidly. More exactly, the unit vector ∇f (x)/∥∇f (x)∥ gives the direction of “steepest ascent”, and ∥∇f (x)∥ is the slope in that direction. −∇f (x) likewise is the direction of steepest descent.
+[[Hessian]] [[ Jacobian]] [[Laplacian]]
+B.11 Function Spaces
+Spaces of functions can often be treated as linear vector spaces. There are several possible definitions of inner product, but the usual one is
+􏰧
+〈f,g〉= f(x)g(x)dx 00:02 Monday 18th April, 2016
+B.11. FUNCTIONSPACES
+730
+This leads to a norm for functions,
+∥f∥2= f2(x)dx
+􏰧
+Functions where ∥ f ∥2 < ∞ are square-integrable, and the space of square-integrable functions is called L2 (or sometimes L2). (Exercise: Suggest a definition of Lp, with- out looking it up.) Sometimes it is convenient to introduce a “base” or “reference” density μ, and to modify the definition of inner product to
+and
+􏰧
+〈f,g〉= f(x)g(x)μ(x)dx 􏰧
+∥f∥2= f2(x)μ(x)dx
+The space of function is then called L2(μ). The inner product is linear in both f and g , with or without the factor of μ.
+Similarly, one can define inner products and square-integrability for functions on
+a restricted domain, e.g., 􏰤1 f 2(x)dx, or combine a domain restriction with a non- 0
+uniform reference distribution.
+B.11.1 Bases
+Because 〈 f , g 〉 acts like an ordinary inner product, lots of what’s familiar from vector spaces carries over to L2. In particular, it makes sense to speak of a sequence of functions ψ1,ψ2,... being a basis, and even of its being an orthonormal basis, in which case
+∞
+f =􏰥〈f,ψj〉ψj
+j=1
+Noticethatthemononomials1,x,x2,...areabasisforL2 on[0,1]andon􏰍,but they are neither orthogonal nor normalized. Many families of orthogonal polyno- mials exist; the most straightforward begin by taking ψ1(x) = 1, and then making ψk the (k + 1)-degree polynomial which is orthogonal to all previous functions in the series.
+Another basis for L2 on [0,1] are the sines and cosines, which in this notation we may write as ψ1 = 1, ψ2k(x) = sin2kπx, ψ2k+1 = cos2kπx. This is the Fourier basis, and the coefficients in this expansion are the Fourier coefficients or Fourier transform of the original function.
+B.11.2 Eigenvalues and Eigenfunctions of Operators
+An operator 􏰅 is a a higher-order function, something which maps functions to other functions. You know two operators from calculus: Taking a derivative trans- forms one function, f , into another, d f /d x. Likewise integration transforms f into
+􏰤a f (x)dx, a function of a. x =−∞
+00:02 Monday 18th April, 2016
+731 B.12. FURTHERREADING
+Operators can have eigenvalues and eigenfunctions, just as matrices have eigen- values and eigenvectors:
+􏰅f =λf
+You know examples of this, too, from calculus: eax is an eigenfunction of both dif- ferentiation and integration. (What are the eigenvalues?)
+As the last example suggests, in general operators on function spaces have in- finitely many eigenvalues and eigenvectors.
+B.12 Further Reading
+There are many, many decent references on linear algebra, often as part of a more general reference on mathematical methods, e.g., Boas (1983). Axler (1996) is notable for presenting the whole subject “from the ground up”, but at the same time from the abstract perspective characteristic of modern mathematics (as opposed to sheer calculational procedures).
+B.13 Exercises
+1. Prove that the null space of a matrix a, i.e., the set of all vectors where av⃗ = 0,
+is in fact a linear subspace, by verifying every component of the definition.
+2. Supposethata⃗u=λ1⃗u,av⃗=λ2v⃗,andλ1̸=λ2.Showthat⃗u·v⃗=0.
+3. Show that v⃗∥, as defined in Eq. B.3, is also q
+argmin∥v⃗−􏰥cj⃗sj∥ c1 ,c2 ,...cq j =1
+4. Show that v⃗⊥ = v⃗ − v⃗∥ is orthogonal to (i.e., has inner product zero with) any vectoroftheform􏰢qj=1 bj⃗sj.
+5. Let λ be an eigenvector of a matrix a with multiplicity k. Show that the set of eigenvectors of a with eigenvalue λ forms a linear subspace of dimension k. Hints: start with the k = 1 case; use Exercise 2.
+6. Let a be an arbitrary p × p matrix. Show that its rank equal to p minus the eigenvalue multiplicity of 0. Hint: First, show that the dimension of a’s null space must be ≥ the multiplicity of 0; then (slightly harder) that the dimension of the null space must be ≤ the number of zero eigenvalues.
+7. Show the following:
+(a) All eigenvalues of an idempotent matrix are either 0 or 1. Hint: try proof by contradiction: suppose there were some other eigenvalue λ, and show that this conflicts with idempotency.
+00:02 Monday 18th April, 2016
+B.13. EXERCISES 732 (b) The rank of an idempotent matrix equals its trace.
+More challenging: Are the converses to these statements true? If yes, give proofs; if no, give counter-examples.
+8. Let a be a symmetric, positive-definite matrix. Show that all its eigenvalues are >0.
+9. Show that 〈f , g〉, as defined in §B.11, is linear in both f and g.
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

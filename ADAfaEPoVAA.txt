@@ -1,0 +1,1573 @@
+
+Appendices
+638
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/
+Appendix A
+Data-Analysis Problem Sets
+All of the following problem sets have been used in class at least once. They are arranged in an order approximately matching the order of the chapters, but many of them draw on multiple chapters. Each one is scored out of 90 points, with an extra 10 points allocated to clarity of writing, figures, code, etc.1; in a typical semester, students would do one problem set a week, 12–14 in all. A few provide much less “scaffolding” to guide students through the analysis; these were assigned as take-home exams.
+Most of these assignments are based on published papers in the scientific or sta- tistical literature; I have provided citations to the source papers, but urge students to not read them until after they have attempted the assignment.
+[[TODO: Fix so they really are scored from 90]]
+[[TODO: Add references to the source papers]]
+A.1 Your Daddy’s Rich and Your Momma’s Good Look-
+ing
+When the assignment says “make a scatterplot of A against B”, or “plot A against B”, A goes on the vertical axis and B on the horizontal axis.
+1The exact rubric used for these points ran as follows: “The text is laid out cleanly, with clear divisions between problems and sub-problems. The writing itself is well-organized, free of grammatical and other mechanical errors, and easy to follow. Figures and tables are easy to read, with informative captions, axis labels and legends, and are placed near the text of the corresponding problems. All quantitative and mathematical claims are supported by appropriate derivations, included in the text, or calculations in code. Numerical results are reported to appropriate precision. Code is either properly integrated with a tool like R Markdown or knitr, or included as a separate R file. In the former case, both the knitted and the source file are included. In the latter case, the code is clearly divided into sections referring to particular problems. In either case, the code is indented, commented, and uses meaningful names. All code is relevant to the text; there are no dangling or useless commands. All parts of all problems are answered with actual coherent sentences, and never with raw computer code or its output. For full credit, all code runs, and the Markdown file knits (if applicable).”
+639
+￼
+Source: Chetty et al. (2014)
+A.1. YOUR DADDY’S RICH AND YOUR MOMMA’S GOOD LOOKING 640
+AGENDA: Getting back into practice with regression; starting to un- learn some bad habits.
+This assignment will look at economic mobility across generations in the contem- porary USA. The data come from a large study, based on tax records, which allowed researchers to link the income of adults to the income of their parents several decades previously. For privacy reasons, we don’t have that individual-level data, but we do have aggregate statistics about economic mobility for several hundred communities, containing most of the American population, and covariate information about those communities. We are interested in predicting economic mobility from the character- istics of communities.
+The Data The data file mobility.csv has information on 741 communities2. The variable we want to predict is economic mobility; the rest are predictor variables or covariates.
+1. Mobility: The probability that a child born in 1980–1982 into the lowest quin- tile (20%) of household income will be in the top quintile at age 30. Individuals are assigned to the community they grew up in, not the one they were in as adults.
+2. Population in 2000.
+3. Is the community primarily urban or rural?
+4. Black: percentage of individuals who marked black (and nothing else) on cen- sus forms.
+5. Racial segregation: a measure of residential segregation by race.
+6. Income segregation: Similarly but for income.
+7. Segregation of poverty: Specifically a measure of residential segregation for those in the bottom quarter of the national income distribution.
+8. Segregation of affluence: Residential segregation for those in the top qarter.
+9. Commute: Fraction of workers with a commute of less than 15 minutes.
+10. Mean income: Average income per capita in 2000.
+11. Gini: A measure of income inequality, which would be 0 if all incomes were perfectly equal, and tends towards 100 as all the income is concentrated among the richest individuals (see Wikipedia, s.v. “Gini coefficient”).
+12. Share 1%: Share of the total income of a community going to its richest 1%.
+13. Gini bottom 99%: Gini coefficient among the lower 99% of that community.
+2Technically, “commuting zones”. These include cities and their suburbs and exurbs, but also many rural areas with integrated economies.
+00:02 Monday 18th April, 2016
+￼
+641 A.1. YOUR DADDY’S RICH AND YOUR MOMMA’S GOOD LOOKING
+14. Fraction middle class: Fraction of parents whose income is between the na-
+tional 25th and 75th percentiles.
+15. Local tax rate: Fraction of all income going to local taxes.
+16. Local government spending: per capita.
+17. Progressivity: Measure of how much state income tax rates increase with in- come.
+18. EITC: Measure of how much the state contributed to the Earned Income Tax Credit (a sort of negative income tax for very low-paid wage earners).
+19. School expenditures: Average spending per pupil in public schools.
+20. Student/teacher ratio: Number of students in public schools divided by num- ber of teachers.
+21. Test scores: Residuals from a linear regression of mean math and English test scores on household income per capita.
+22. Highschooldropoutrate:Also,residualsfromalinearregressionofthedropout rate on per-capita income.
+23. Colleges per capita
+24. College tuition: in-state, for full-time students
+25. College graduation rate: Again, residuals from a linear regression of the actual graduation rate on household income per capita.
+26. Labor force participation: Fraction of adults in the workforce.
+27. Manufacturing: Fraction of workers in manufacturing.
+28. Chinese imports: Growth rate in imports from China per worker between 1990 and 2000.
+29. Teenage labor: fraction of those age 14–16 who were in the labor force.
+30. Migration in: Migration into the community from elsewhere, as a fraction of 2000 population.
+31. Migration out: Ditto for migration into other communities.
+32. Foreign: fraction of residents born outside the US.
+33. Social capital: Index combining voter turnout, participation in the census, and participation in community organizations.
+34. Religious: Share of the population claiming to belong to an organized religious body.
+00:02 Monday 18th April, 2016
+A.1. YOUR DADDY’S RICH AND YOUR MOMMA’S GOOD LOOKING 642
+35. Violent crime: Arrests per person per year for violent crimes.
+36. Singlemotherhood:Numberofsinglefemalehouseholdswithchildrendivided by the total number of households with children.
+37. Divorced: Fraction of adults who are divorced.
+38. Married: Ditto.
+39. Longitude: Geographic coordinate for the center of the community
+40. Latitude: Ditto
+41. ID: A numerical code, identifying the community.
+42. Name: the name of principal city or town.
+43. State: the state of the principal city or town of the community.
+Some of these variables are missing for some communities, and this may make a difference for some questions.
+00:02 Monday 18th April, 2016
+643 A.1. YOUR DADDY’S RICH AND YOUR MOMMA’S GOOD LOOKING
+1. (5)Drawamapofmobility.Thatis,makeaplotwherethexandycoordinates are longitude and latitude, and mobility is indicated by color (possibly grey scale), by a third coordinate, or some other suitable device. Make sure your map is legible. Describe the geographic pattern in words.
+2. (15) Make scatter plots of mobility against each of the following variables. In- clude on each plot a line for the simple or univariate regression, and give a table of the regression coefficients. Carefully explain the interpretation of each coefficient. (2 pts each) Do any of the results seem odd? (1 pt)
+(a) Population
+(b) Mean household income per capita
+(c) Racial segregation
+(d) Income share of the top 1%
+(e) Mean school expenditures per pupil
+(f) Violent crime rate
+(g) Fraction of workers with short commutes.
+3. (15) Run a linear regression of mobility against all appropriate covariates.
+(a) (5) Report all regression coefficients and their standard errors to reason- able precision; you may use either a table or a figure as you prefer. Do not just paste in R’s output.
+(b) (1) Explain why the ID variable must be excluded.
+(c) (4) Explain which other variables, if any, you excluded from the regres- sion, and why. (If you think they can all be used, explain why.)
+(d) (5) Compare the coefficients you found in problem 2 to the coefficients for the same variables in this regression. Are they significantly different? Have any changed sign?
+4. (10)ThewrongsideofthetracksstartsatGiantEagleFindPittsburghinthedata set.
+(a) (1) What its actual mobility? What is its predicted mobility, according to the model?
+(b) (3) Holding all else fixed, what is the predicted mobility if the violent crime rate is doubled? If it is halved?
+(c) (3) Holding all else fixed, at what level of income segregation does the model predict that mobility will exceed 1.0?
+(d) (3)Holdingallelsefixed,whatwouldtheincomeshareofthetop1%have to be for the model to predict that mobility will fall to 0.0?
+(We will see later in the course how to avoid the embarrassment of models that predict probabilities greater than 1 or less than 0.)
+00:02 Monday 18th April, 2016
+A.1. YOUR DADDY’S RICH AND YOUR MOMMA’S GOOD LOOKING 644
+5. (10) Free as in beer
+(a) (1) The national mobility level is the average mobility across all commu-
+nities, weighted by population. What is it?
+(b) (3) Suppose college were made free for everyone. Calculate the change in the predicted mobility for each community. Report the minimum, median, mean and maximum changes.
+(c) (1) Find the change to the predicted (not actual) national mobility level from making college free for everyone. Hint: consider a weighted average, or weighted sum, of your vector of answers from Problem 5b.
+(d) (3)Givea(rough)95%confidenceintervalforthechangeinthepredicted national mobility level.
+(e) (2) Explain at least one way in which this calculation is unrealistic.
+6. (10) Distinctions vs. differences
+(a) (2) Make a table ranking the variables by the magnitude of the t statistic in the regression results (i.e., rank by |t |, not t ).
+(b) (6) For each variable in the model, find the expected change in mobility from a one standard deviation change in that variable (assuming all else is fixed). Provide a table ranking variables by the magnitude of their impact.
+(c) (2) How similar is the ranking by impact to the ranking by t statistics?
+7. (5) Make a map of the model’s predicted mobility. How does it compare, qual-
+itatively, to the map of actual mobility?
+8. (5) After making proper allowances
+(a) (1) Make a map of the model’s residuals.
+(b) (2)Whatarethefivecommunitieswiththelargestpositiveresiduals?The five with the most negative residuals? (Can you mark these on the map?)
+(c) (2) One interpretation of these residuals is that they show communities where some factor not included in the model leads to higher (or lower) mobility than in otherwise-similar communities. Suggest at least one other interpretation. Could you test these ideas with this data set?
+9. (5) Expectations and reality
+(a) (3)Makeascatterplotofactualmobilityagainstpredictedmobility.Isthe relationship linear? Should it be, if the model is right? Is the relationship flat? Should it be, if the model is right?
+(b) (2) Make a scatterplot of the model’s residuals against predicted mobil- ity. Is the relationship linear? Should it be, if the model is right? Is the relationship flat? Should it be, if the model is right?
+10. (20) Model checking will continue until morale improves 00:02 Monday 18th April, 2016
+645
+A.2. ...BUT WE MAKE IT UP IN VOLUME
+(a) (5)Foreachvariableinthemodel,makeascatterplotofthemodel’sresid- uals against the predictor variable. (You will have a lot of plots.)
+(b) (5) Explain why, if the linear model is right, all the relationships you just plotted should be flat.
+(c) (5) Explain why, if the usual assumptions for t tests and their p-values are right, each plot should have a roughly constant vertical spread of points as one moves from left to right.
+(d) (5) Which residual plots look like they’re flat with constant width? For the ones which don’t look like this, describe how they differ.
+Extra credit, 5 points: Add kernel smoothing lines to each of the residual plots. Comment.
+...But We Make It Up in Volume
+A.2
+“Gross domestic product” is a standard measure of the size of an economy; it’s the total value of all goods and services bought and solid in a country over the course of a year. It’s not a perfect measure of prosperity3, but it is a very common one, and many important questions in economics turn on what leads GDP to grow faster or slower.
+One common idea is that poorer economies, those with lower initial GDPs, should grower faster than richer ones. The reasoning behind this “catching up” is that poor economies can copy technologies and procedures from richer ones, but already-developed countries can only grow as technology advances. A second, sepa- rate idea is that countries can boost their growth rate by under-valuing their currency, making the goods and services they export cheaper.
+This week’s data set contains the following variables:
+• Country, in a three-letter code (see http://en.wikipedia.org/wiki/ISO_
+3166-1_alpha-3).
+• Year (in five-year increments).
+• Per-capita GDP, in dollars per person per year (“real” or inflation-adjusted).
+• Average percentage growth rate in GDP over the next five years.
+• Anindexofcurrencyunder-valuation4.Theindexis0ifthecurrencyisneither over- nor under- valued, positive if under-valued, negative if it is over-valued.
+Note that not all countries have data for all years. However, there are no missing values in the data table.
+3A standard example: if vandals break all the windows on a street, a town, GDP goes up by the cost of the repairs.
+4The idea is to compare the actual exchange rate with the US dollar to what’s implied by the prices of internationally traded goods in that country — the exchange rate which would ensure “purchasing power parity”. The details are in the paper this assignment is based on, which will be revealed in the solutions.
+00:02 Monday 18th April, 2016
+Source: Rodrik (2008)
+￼
+A.2. ...BUT WE MAKE IT UP IN VOLUME 646
+1. (10) Linearly regress the growth rate on the under-valuation index and the log of GDP. Report the coefficients and their standard errors (to reasonable preci- sion). Do the coefficients support the idea of “catching up”? Do they support the idea that under-valuing a currency boosts economic growth?
+2. (20)Repeatthelinearregressionbutaddascovariatesthecountry,andtheyear. Use factor(year), not year, in the regression formula.
+(a) (5) Report the coefficients for log GDP and undervaluation, and their standard errors, to reasonable precision.
+(b) (5) Explain why it is more appropriate to use factor(year) in the for- mula than just year.
+(c) (5) Plot the coefficients on year versus time.
+(d) (5) Does this expanded model support the idea of catching up? Of under- valuation boosting growth?
+3. (10) Does adding in year and country as covariates improve the predictive abil- ity of a linear model which includes log GDP and under-valuation?
+(a) (1) What are the R2 and the adjusted R2 of the two models?
+(b) (5) Use leave-one-out cross-validation to find the mean squared errors of the two models. Which one actually predicts better, and by how much? Hint: Use the code from lecture 3.
+(c) (4) Explain why using 5-fold cross-validation would be hard here. (You don’t need to figure out how to do it.)
+4. (20)KernelsmoothingUsekernelregression,asimplementedinthenppackage, to non-parametrically regress growth on log GDP, under-valuation, country, and year (treating year as a categorical variable). Hint: read chapter four care- fully. In particular, try setting tol to about 10−3 and ftol to about 10−4 in the npreg command, and allow several minutes for it to run. (If you are using R Markdown, trying caching this part of your code.)
+(a) (5) Give the coefficients of the kernel regression, or explain why you can’t.
+(b) (5)Plotthepredictedvaluesofthekernelregression,foreachcountryand year, against the predicted values of the linear model.
+(c) (5) Plot the residuals of the kernel regression against its predicted values. Should these points be scattered around a flat line, if the model is right? Are they?
+(d) (5) The npreg function reports a cross-validated estimate of the mean squared error for the model it fits. What is that? Does the kernel re- gression predict better or worse than the linear model with the same vari- ables?
+00:02 Monday 18th April, 2016
+647 5.
+A.3. PASTPERFORMANCE,FUTURERESULTS (20)TimecoursesandinteractionsInthisquestion,usethekernelregressionyou
+A.3
+6.
+(20)Averagepredictivecomparisons§[[4.5]]explainshowtocalculatethe“aver- age predictive comparison” — the typical rate of change in the response when a given variable is perturbed, even when the model is nonlinear and has inter- actions. See, in particular, Equation [[4.31]].
+Hint: at no point in this problem should you re-fit either model.
+(a) (5)CalculatetheaveragepredictivecomparisonforlogGDPinthekernel
+regression.
+(b) (5)Calculatetheaveragepredictivecomparisonforunder-valuationinthe kernel regression.
+(c) (5) Explain how to calculate the corresponding average predictive com- parisons from the linear model’s coefficients. What are the average pre- dictive comparisons for initial log GDP and for under-valuation in the linear model?
+(d) (5) Do the kernel and the linear regression agree, qualitatively, about the average effect of increasing initial GDP on growth? Do they agree, quali- tatively, about the effect of undervaluation on growth?
+Past Performance, Future Results
+AGENDA: Trying out bootstrapping for both coefficients and for curves; more practice with smoothing; more practice with cross-validation; more practice separating “the variable matters” from “the variable is sta- tistically significant”.
+WARNING: Some parts of this assignment are very computation- intensive.
+00:02 Monday 18th April, 2016
+fit in (a)
+(b) (c)
+(d) (e)
+the previous problem.
+(6)Plotthepredictedgrowthrate,asafunctionoftheyear,infiveyearin- crements from 1955 to 2000, if the initial GDP (not log GDP!) is $10,000 in each period, the under-valuation index is 0 (i.e., no under- or over- val- uation), and the country is Turkey.
+(3) Re-do the plot but change the under-valuation index to +0.5.
+(3) Re-do the plot but hold the initial GDP at $1,000 and the under-
+valuation index at 0.
+(3) Re-do the plot with the initial GDP at $1,000 and the under-valuation
+index at +0.5.
+(5) Is there evidence of an interaction between initial GDP and under-
+valuation? Explain.
+Source: Campbell and Shiller (1988) and DeLong (2014)
+A.3. PASTPERFORMANCE,FUTURERESULTS 648
+A corporation’s earnings in a given year is its income minus its expenses5. The return on an investment over a year is the fractional change in its value, (vt+1 − vt )/vt , and the average rate of return over k years is [(vt +k − vt )/vt ]1/k . Our data set this week looks at the relationship between US stock prices, the earnings of the corporations, and the returns on investment in stocks, with returns counting both changes in stock price and dividends paid to stock holders.6
+Specifically, our data contains the following variables:
+• Date, with fractions of a year indicating months
+• Price of an index of US stocks (inflation-adjusted)
+• Earnings per share (also inflation-adjusted);
+• Earnings_10MA_back, a ten-year moving average of earnings, looking back- wards from the current date;
+• Return_cumul, cumulative return of investing in the stock index, from the beginning;
+• Return_10_fwd, the average rate of return over the next 10 years from the current date.
+“Returns” will refer to Return_10_fwd throughout. 1. (5) Doing what comes naturally
+(a) (1) Run four linear regressions for the returns: on Price; on Earnings; on both Price and Earnings; and on both variables and their interaction. Report coefficients and standard errors.
+(b) (1) Find (in-sample) R2 for these four models. Can their R2’s be meaning- fully compared? If so, which model is preferred by R2?
+(c) (3)Usefive-foldcross-validationtoestimatethegeneralizationerrorofall four models. Can these be meaningfully compared? If so, which model is preferred by cross-validation?
+2. (5) Inventing a variable
+(a) (2) Add a new column, MAPE, to the data frame, which is the ratio of Price to Earnings_10MA_back. It should have the following summary statistics:
+Min. 1st Qu. Median Mean 3rd Qu. Max. NA's 4.785 11.710 15.950 16.550 19.960 44.200 120
+5Accountants get into subtle issues about whether to include in expenses taxes, interest paid on loans, and charges for depreciation of assets and amortization of investments. Those of you who go on to careers in finance or in certain kinds of start-up will grow only too familiar with these wrinkles. In our data set, earnings are very definitely after all these expenses.
+6Nothing in this assignment, or the solutions, should be taken as financial advice. 00:02 Monday 18th April, 2016
+￼
+649 A.3. PASTPERFORMANCE,FUTURERESULTS Why are there exactly 120 NAs?
+(b) (1) Linearly regress the returns on MAPE (and nothing else). What is the coefficient and its standard error? Is it significant?
+(c) (2) What is the R2 of this new model? What is its CV MSE? Are these better or worse than the models in the previous question?
+3. (5) Inverting a variable
+(a) (3) Linearly regress the returns on 1/MAPE (and nothing else). What is the coefficient and its standard error? Is it significant? (For full credit, do not add a new column to the data frame, or create a new vector.)
+(b) (2) What are the R2 and the CV MSE of this model? How do they com- pare to the previous ones?
+4. (10) For this problem, you need to only include one plot, but make sure you clearly explain which parts of your code are answers to each question. Also, in this problem, read “line” as “straight or curved line, as appropriate”. Discon- nected points in place of a line will get partial credit.
+(a) (1) Make a scatter-lot of the returns against MAPE.
+(b) (3)Addalineshowingthepredictionsfromthemodelyoufitinproblem
+2.
+(c) (3)Addalineshowingthepredictionsfromthemodelyoufitinproblem 3. (Again, disconnected points will get partial credit.)
+(d) (1) A simple-minded model7 says that returns over the next ten years should be exactly equal to 1/MAPE. Add a curve showing the predictions of this model.
+(e) (1)Explainwhythein-sampleMSEisanunbiasedestimateofthegeneral- ization error for the “simple-minded” model of the previous part. That is, why do we not need to do cross-validation to estimate its generalization error?
+(f) (1) Based on these plots and your previous results, which model fits best?
+5. (10) More fun with star-gazing
+(a) (1) Linearly regress the returns on both MAPE and 1/MAPE (without inter- action). What are the coefficients? Which ones are significant?
+(b) (1) Linearly regress the returns on MAPE, 1/MAPE, and the square of MAPE. What are the coefficients? Which ones are significant?
+(c) (8) What do you think is going on?
+7Assume that: future earnings get added to the value of an investment in the company’s stock; that nothing else adds to the value of the investment; and that earnings over the next ten years will be equal to those over the last ten years. Solve for the returns.
+00:02 Monday 18th April, 2016
+￼
+A.4. FREESOIL 650
+6. (25) Bootstrapping a parametric model In this problem, use the model you fit in problem 3.
+(a) (1) What are the conventional 90% confidence limits for the coefficient on 1/MAPE? Hint: confint().
+(b) (10) Use resampling of residuals to get 90% confidence limits for that co- efficient. What are they?
+(c) (10) Use resampling of cases to get 90% confidence limits for that coeffi- cient. What are they?
+(d) (4) Are these compatible with each other? If so, why? If not, explain which seems best.
+7. (10) More smoothing
+(a) (5) Use npreg to estimate a kernel regression of the returns on MAPE.
+What are the bandwidth and the cross-validated MSE?
+(b) (5) Add a line of the predictions of the kernel regression to the plot from problem 4. Which of the previous models does it most resemble? Is it just a slightly wiggly copy of that, or does it do something qualitatively different?
+8. (20) Bootstrapping the kernel regression
+(a) (10) Use resampling of residuals to get a 90% confidence band for the kernel regression. Advice: Re-estimating the model on a new bootstrap replicate may take several seconds. De-bug your code first, with a small number of replicates, and then go do something else while the main run happens.
+(b) (10) Add the confidence band to the previous plot. Does the band include the line for the best-fitting parametric model you’ve plotted? What does that tell you about the parametric model?
+9. (5, extra credit) Feature discovery Run a new kernel regression of returns on price and the 10-year moving average of earnings, but not on their ratio MAPE. Create a color or three-dimensional plot showing the predictions as a function of both variables. What should this look like if the relevant variable is really MAPE?
+A.4 Free Soil
+AGENDA: Practice writing, testing, and debugging simple R func- tions. Practice decomposing a big computational problem into a bunch of small, inter-locking functions. Practice estimating a categorical con- trast. Practice with weighted least squares. Practice with bootstrapping. Finally, an early observance of Lincoln’s birthday.
+00:02 Monday 18th April, 2016
+e: Chetty et al. (2014)
+651 A.4. FREESOIL
+Recall that equation for the standard error of a proportion, when we observe a binomial with n trials and success probability p:
+￼􏱁 p(1 − p) n
+Further recall the estimated standard error in an observed proportion ˆp: 􏱁 ˆp ( 1 − ˆp )
+n
+(A.1)
+(A.2)
+￼￼￼Recall, finally, that the Mobility variable from homework 1 was an observed propor- tion, the fraction of children born into the bottom fifth of the income distribution who make their way to the top fifth of the distribution by age 30.
+Load the data set from homework 1 as a data frame named mobility. We will only need three columns, Mobility, Population and State, though you may also want to keep Name for debugging purposes. Do not remove any row from the data frame which has complete values for these variables.
+1. (15)Writeafunction,se.prop,tocalculatethestandarderrorforproportions. It should take a vector of proportions, p, and a vector of trial numbers, n, and return a vector of standard errors.
+(a) (2) Construct a test case to check that se.prop gives the right answer when p=0.5,n=1.
+(b) (2) Construct a test case to check that when se.prop is given a vector of different n’s, all with the same p (not equal to 0 or 1), the answers are proportional to 1/􏰋n.
+(c) (2) Construct a test case to check that when p = 0, the returned value is always 0, for multiple n.
+(d) (2) Construct a test case to check that when p = 1, the returned value is always 0, for multiple n.
+(e) (2) Construct a test case to check that when given a vector p of mixed 0s and 1s, the returned vector has all 0s, for multiple n.
+(f) (2) Construct a test case to check that when given a vector of different, non-extreme values for p, and a constant n, the entries of the returned vector are proportional to 􏰮p(1− p).
+(g) (2)Checkthatse.propworksproperlywhenp=c(0.3,0.8)andn=c(12,72). This includes working out what the proper answers should be.
+(h) (1) Explain whether your code implements Eq. 1 or Eq. 2.
+2. (10)
+(a) (3) Use se.prop to calculate the standard error of the mobility for each community in the data from homework 1; report the summary statistics.
+00:02 Monday 18th April, 2016
+￼￼
+A.4. FREESOIL 652
+(b) (1) Plot the histogram of the standard errors.
+(c) (2) Make a scatter-plot of the standard errors vs. population.
+(d) (2) Make a scatter-plot of the standard errors vs. mobility.
+(e) (2) How reliable were the inferential statistics you calculated in home- work 1?
+3. (15)
+(a) (5) Write a function, WSE, to calculate weighted mean squared error. It should take as arguments predicted, a vector of predicted values; observed, a vector of observed values; and weights, a vector of weights. It should return a single real number, the weighted mean squared error. Mathemat- ically, that is to say, it should find
+􏰢n w􏰑y−yˆ􏰒2 i=1 i i i
+􏰢n wi′ i′=1
+Make the default value for observed the Mobility column of the data, and the default values for weights equal to one over the squares of the standard errors in Mobility from the previous problem. Hint: You could write this using a for loop, or even two of them, but there are more elegant ways.
+(b) (3) Check that WSE works properly when predicted is c(0.15,0.05), observed is c(0.14,0.07), and weights is c(0.01, 0.42). (This in- cludes working out what the right answer should be.)
+(c) (2) Create three modified versions of this test case, each changing one of the three arguments, and make sure that your function works correctly on all three.
+(d) (2)Explainwhy,formodelingmobility,theweightsshouldbetheinverse square standard errors.
+(e) (3)CheckthatWSEreturnstheMSEwhenalltheweightsareequal.(They will not be equal for those default values.)
+4. (10)
+(a) (5) Write a function, dixie, which reads in a vector of state names (in the form used in the mobility data set), and returns a binary vector, 1 if the state was part of the Confederacy during the US civil war, and 0 otherwise.
+(b) (5) Check that it gives the correct results when applied to a vector of the 50 state names and the District of Columbia.
+￼5. (10)
+with a column named State, and a vector of length two, levels. It should test, for each row, whether the state was in the Confederacy (using dixie), and
+Write a function, dixie.fit, which takes two arguments: a data frame
+00:02 Monday 18th April, 2016
+653 A.5. THEREWEREGIANTSINTHEEARTHINTHOSEDAY
+if so return the first element of levels, and if not, return the second element. Check that it works correctly when levels=c(1,0). Explain how you know that is the correct behavior.
+6. (10) Write a function, dixie.WSE, which takes as input levels, without de- fault, and a data frame, defaulting to mobility. It should predict the mobility level for each city based on whether it was in the Confederacy or not, using the function dixie.fit, and return the weighted squared error, using WSE, with the actual values of Mobility as the response and weights based on their stan- dard errors. For full credit, call, do not re-write, the functions from the earlier problems.
+Construct a test case using a data frame of four rows to check that is working properly, when levels=c(0.01,0.15).
+7. (5)Optimizetheweightedsquarederrorforthistwo-parametermodel,starting from the initial guess that the mobility level for the former Confederacy is 0.01, while that for the rest of the country is 0.15. Report the best-fitting values of levels.
+8. (10) Turn the optimization from the previous problem into a function, which takes as arguments a data frame (with default equal to mobility) and an initial guess at levels (with default equal to c(0.01,0.15)), and returns the fitted values of levels (and nothing else). Check that running it with the defaults reproduces your answer from the previous problem. Check that you get a different answer if you remove the first half of the data frame.
+9. (5) Use resampling of rows to give standard errors for levels.
+EXTRA CREDIT (10): Show, mathematically, that the optimal values for levels are always given by two weighted averages of Mobility. Show how to find them by two calls to weighted.average, without using WSE, dixie.fit, dixie.WSE, or any optimization function. For full extra credit, check that code implementing this matches the answer you obtained above.
+A.5 There Were Giants in the Earth in Those Day
+[[TODO: See if there’re any improvements over previous versions; if not, cut]]
+AGENDA: Explicitly: splines, bootstrap, simulation, comparing a simulation to data; implicitly: more practice writing, testing, and debug- ging simple functions.
+Some biologists argue that larger animals tend to have advantages over smaller members of their species, so that natural selection should tend to lead to an increase in size within an evolutionary lineage8. There is also some evidence that larger species
+8Among other things, larger animals may be harder for predators to attack, find it easier to over-come prey or other members of their species, and be more efficient metabolically. For more, see, e.g., Bonner (1988).
+00:02 Monday 18th April, 2016
+Source: Clauset and Erwin (2008)
+￼
+A.5. THEREWEREGIANTSINTHEEARTHINTHOSEDAY 654
+tend to be shorter-lived than smaller ones9. In this assignment, we will look at the evidence for an increase in species size within lineages, and how the trade-off between these two forces might lead to a stable distribution of sizes across species.
+We will use two data sets:
+• The North American Mammalian Paleofauna Database (nampd.csv) lists, for about 2000 living and extinct species, the log of the mass, in grams, of a typical member of the species; the log mass of the ancestral species (when known); and the dates of the species’ first and last appearance in the fossil record, in millions of years ago. If the last appearance date is NA, the species is still alive. This means you should not just throw away all rows containing NAs.
+• The Masses of Mammals (MoM.txt) gives, for about 4000 living species, their mass in grams, identifying codes for the species, genus, and other taxonomic groups, and an indicator for whether the species lives in the land or in the water.
+The model we will work with goes as follows: At any given time t, there is a collection of nt species, whose masses are X1,X2,...Xnt . At each time step, one cur- rent species A gets picked, uniformly at random, to evolve into two new species. The masses of a descendant species XD is related to that of its ancestor, XA, by the model
+XD =exp(r(logXA)+Z) (A.3)
+where Z ∼ 􏰄 (0,σ2), and r is a function to be learned from the data, subject to the restriction that XD has to be at least xmin and at most xmax. The ancestor XA is removed from the current list of species, and its two independent descendants are added. After this, all species currently in the list have a risk of going extinct, with the probability for a species of mass x going extinct being a function of their mass,
+pe(x)=βxρ (A.4)
+Any species become extinct are removed from the collection. We then iterate the model again.
+In all of the following questions, unless otherwise specified, you may take σ2 = 0.63 (what are the units?), xmin = 1.8 grams, xmax = 1015 grams, ρ = 0.025, and β = 1/5000.
+1. (5) Linearly regress the log of the new mass on the log of the ancestral mass. Plot this regression line, along with a scatter-plot of the data, in units of grams, not log-grams. Carefully explain the interpretation of both the slope and the intercept. A rote recitation of “a one unit change”, etc., will not receive full credit; think about the model, the transformations, and what the transformed model says about the variables.
+9This may be because larger animals need more food in total, and possibly more specialized food sources, so they are more vulnerable to shifts in their environment.
+00:02 Monday 18th April, 2016
+￼
+655 A.5. THEREWEREGIANTSINTHEEARTHINTHOSEDAY
+2. (10) Use a smoothing spline to do a nonparametric regression of log new mass on log ancestral mass. Create a plot showing the data points, the model from question 1, and the spline, making sure that the axes are in units of grams, not log-grams.
+3. (20)
+(a) (10)Usingresamplingofresiduals,calculate95%confidencebandsforthe spline curve, and add them to the plot.
+(b) (10) Using resampling of cases, calculate standard errors for the spline curve, and add bands at ±2 standard errors to the plot.
+4. (10) Write a function, rmass, which takes as inputs a single ancestral mass XA (not log XA), an estimated spline function r , and any other parameters required by the model, and returns a single random value for XD , according to Eq. A.3. Make sure the returned value is in grams, not log grams. You will probably find it easiest to keep generating candidate values for XD , until you get one which is between the limits. Hint: while
+(a) (2) What model parameters does your rmass need?
+(b) (4)Check,byrepeatedsimulation,thattheoutputisalwaysbetweenxmin
+and max, even when XA is brought near either limit.
+(c) (4) Using the spline curve you estimated in question 2, create 150 evenly spaced XA values between xmin and max, generate an XD for each of them, and fit a spline curve to the simulated values. Check that it is close to, but not identical with, the one you found from the data. (Why should it not be identical?)
+5. (10) Write a function, origin, which takes the same arguments as rmass, ex- cept that instead of one ancestral mass it can take a vector of them. origin should pick one entry from the vector to be XA, and generate two independent values of XD from it. One of these should replace the entry for XA, and the other should be added to the end of the vector.
+(a) (4) Check, by simulating with a length-one vector of ancestral masses, that neither component of the returned value matches the ancestral mass (why?), that both components have the same marginal distribution, and that the two components are uncorrelated with each other.
+(b) (2) Check, by simulating, that if the input vector of masses has length m, the output vector always has length m + 1. (Check at least two values of m.)
+(c) (4)Check,bysimulating,thatm−1entriesintheoutputmatchtheinput exactly. Check this for at least two values of m. Hint: is.element, or %in%, or match.
+6. (5) Write a function, extinct.prob, which takes as inputs a vector of species masses, and parameters ρ and β, and returns the extinction probabilities ac- cording to Eq. A.4.
+00:02 Monday 18th April, 2016
+A.5. THEREWEREGIANTSINTHEEARTHINTHOSEDAY 656
+(a) (2) Check that if the masses are c(100, 1600, 10000) grams, ρ = 1/2
+and β = 1/200, then extinct.prob returns the right values.
+(b) (1)Checkthatifρ=0,theoutputprobabilitiesareallβ,nomatterwhat
+the masses are.
+(c) (1) Check that if the input masses are all equal, so are the returned proba-
+bilities, for at least three of different combinations of mass, ρ and β.
+(d) (1) Check that if ρ ̸= 0 and β ̸= 0, and the masses are all different, then
+the returned probabilities are all distinct.
+7. (5) Write a function, extinction, which takes a vector of species masses, ρ and β, and returns a possibly-shorter vector which removes the masses of species which were probabilistically selected for extinction. Be sure to handle the (unfortunate) case where every species goes extinct. Hint: Explain what rbinom(n,size=1,prob=p) does when p is a vector of length n.
+(a) (1) Check that if β = 0, the output vector is always the same as the input vector.
+(b) (3) Create a case where the input masses are all equal, and ρ and β are set so that the extinction probability should be 1/2. Check that the output is, on average, half as long as the input.
+(c) (1) In the same test cases as the previous part, check that all the values in the new vector of masses were also in the old vector of masses.
+8. (5) Write a function, evolve_step, which takes as inputs a vector of species masses, plus all needed parameters and estimated curves; calls origin and extinction as appropriate; and returns a new vector of species masses. How do you know it works?
+9. (5)Writeafunction,mass_evolve,whichtakesthesameinputsasevolve_step, plus an additional number T; iterates evolve_step T times; and returns the fi- nal vector of species masses. How do you know it works? Hint: There will almost certainly need to be a for loop inside the function.
+10. (5) In this question, use the default parameter values, and the spline you esti- mated in question 2.
+(a) (1) Run mass_evolve starting from a single species with a mass of 120 grams for T = 2 × 105 steps. Save the output as masses.1. Plot the histogram.
+(b) (1) Re-run mass_evolve from the same conditions. Save as masses.2. Plot the histogram.
+(c) (1) Re-run from the same conditions but for T = 4 × 105 steps, saving as masses.3. Plot the histogram.
+(d) (1)Changethestartingconditiontotwospecies,oneof40gramsandone of 1000 grams. Run twice, both times with T = 2 × 105 , saving the results as masses.4 and masses.5.
+00:02 Monday 18th April, 2016
+657 A.6. THESOUNDOFGUNFIRE,OFFINTHEDISTANCE
+(e) (1) How do the distributions of the various masses compare to each other?
+11. (5)
+(a) (1)LoadtheMassesofMammalsdataset,andplotthehistogramofmasses for land species.
+(b) (2) Compare, verbally, the distribution for land species to that obtained from the simulations.
+(c) (2) Compare the distributions using QQ plots.
+12. (5) Does the output of the simulation model match the distribution of masses we actually observe? Are the differences between the model and reality bigger than those between different runs of the simulation? Are there qualitative dis- tinctions between the simulation-to-simulation differences, and the simulation- to-reality differences? Support your answers by reference to the plots you have already made, or, if need be, new ones.
+Note: more advanced techniques for comparing distributions exist (e.g., chapter 15). EXTRA CREDIT: (10) Re-write the code so that Z, rather than being drawn from a Gaussian distribution, comes from resampling the residuals of the fitted spline curve. What do you have to modify? How much do the results change? Which version fits
+the observed mass distribution better?
+A.6 The Sound of Gunfire, Off in the Distance
+AGENDA: Explicitly, logistic models, generalized additive models, and checking regression specifications. Implicitly, the perils of science by p-value.
+Our data this week, http://www.stat.cmu.edu/~cshalizi/uADA/15/hw/06/ ch.csv, comes from a study of the causes of civil wars. Every row of the data rep- resents a combination of a country and of a five year interval — the first row is Afghanistan, 1960, really meaning Afghanistan, 1960–1965. The variables are:
+• The country name;
+• The year;
+• An indicator for whether a civil war began during that period — the code of NA means an on-going civil war, while 0 denotes continuing peace;
+• Exports, really a measure of how dependent the country’s economy is on com- modity exports;
+• Secondary school enrollment rate for males, as a percentage10;
+10I have been unable to find an explanation anywhere of why this rate is greater than 100 for some data points.
+00:02 Monday 18th April, 2016
+Sources: Collier and Hoeffler (2004) and Ward et al. (2010)
+￼
+A.6. THESOUNDOFGUNFIRE,OFFINTHEDISTANCE 658
+• Annual growth rate in GDP;
+• An index of the geographic concentration of the country’s population (which would be 1 if the entire population lives in one city, and 0 if it evenly spread across the territory);
+• The number of months since the country’s last war or the end of World War II, whichever is more recent11;
+• The natural logarithm of the country’s population;
+• An index of social “fractionalization”, which tries to measure how much the
+country is divided along ethnic and/or religious lines;
+• An index of ethnic dominance, which tries to measure how much one ethnic
+group runs affairs in the country.
+Some of these variables are NA for some countries.
+1. (10) Fit logistic regression for the start of civil war on all other variables except country and year; include a quadratic term for exports. Report the coefficients and their standard errors, together with R’s p-values. Which ones does R say are significant at the 5% level?
+2. Interpretation (15) All parts of this question refer to the logistic regression model you just fit.
+(a) (5)Whatisthemodel’spredictedprobabilityforacivilwarinIndiainthe period beginning 1975? What probability would it predict for a country just like India in 1975, except that its male secondary school enrollment rate was 30 points higher? What probability would it predict for a coun- try just like India in 1975, except that the ratio of commodity exports to GDP was 0.1 higher?
+(b) (5) What is the model’s predicted probability for a civil war in Nigeria in the period beginning 1965? What probability would it predict for a country just like Nigeria in 1965, except that its male secondary school enrollment rate was 30 points higher? What probability would it predict for a country just like Nigeria in 1965, except that the ratio of commodity exports to GDP was 0.1 higher?
+(c) (5) In parts (a) and (b), you changed the same predictor variables by the same amounts. If you did your calculations properly, the changes in pre- dicted probabilities are not equal. Explain why not. (The reasons may or may not be the same for the two variables.)
+3. Confusion (10) Logistic regression predicts a probability of civil war for each country and period. Suppose we want to make a definite prediction of civil war or not, that is, to classify each data point. The probability of mis-classification is minimized by predicting war if the probability is ≥ 0.5, and peace otherwise.
+11This appears to count only civil and not foreign wars.
+00:02 Monday 18th April, 2016
+￼
+659
+A.6. THESOUNDOFGUNFIRE,OFFINTHEDISTANCE
+(a) (5) Build a 2 × 2 “confusion matrix” (a.k.a. “classification table” or “con- tigency table”) which counts: the number of outbreaks of civil war cor- rectly predicted by the logistic regression; the number of civil wars not predicted by the model; the number of false predictions of civil wars; and the number of correctly predicted absences of civil wars. (Note that some entries in the table may be zero.) Make sure the rows and columns of the table are clearly labeled.
+(b) (3)Whatfractionofthelogisticregression’spredictionsarecorrect?(Note that this is if anything too kind to the model, since it’s an in-sample eval- uation.)
+(c) (2)Considerafoolish(?)punditwhoalwayspredicts“nowar”.Whatfrac- tion of the pundit’s predictions are correct on the whole data set? What fraction are correct on data points where the logistic regression model also makes a prediction?
+4. Calibration (10) Divide the data points into groups where the predicted proba- bility of a civil war is 0–10%, those where it is 10–20%, etc. Calculate the actual proportion of civil wars for each group of data points. Give a plot where the horizontal axis is the predicted probability, and the vertical is the actual fre- quency. Does the plot go up the 45-degree diagonal? Should it, if the model is right? If it does not, do observed frequencies at least increase as the predicted probability goes up, so that civil war really is more common when the model says it has higher probability? (Again, this is if anything too kind to the logistic regression, because it’s an in-sample comparison.)
+5. (10)FitaGAMwiththesamevariablestothesamedata:smoothallthecontin- uous predictor variables; do not include an explicit quadratic term for exports. (The ethnic-dominance variable is binary, and should be included in the model with as.factor.) Provide plots of the partial response functions. Which ones are at least roughly linear, and which are not?
+6. (10) Calculate the confusion matrix for the GAM. What fraction of its predic- tions are accurate? How does that compare both to the logistic regression and the peace-always pundit?
+7. (10) Repeat the calibration checking plot for the GAM. Are its probabilities closer to tracking actual frequencies, or further, than those of the logistic re- gression?
+8. (15) Test whether the logistic regression is properly specified, using the GAM as the alternative model. (Follow the procedure in the notes.) What is the p-value? Explain, based on this test and any other results you have reported,
+which model you prefer.
+EXTRA CREDIT (15): Start with the model which predicts a constant probability of civil war for all countries and years. Evaluate its log-likelihood out of sample through five-fold cross-validation. Now consider all one-variable GAMs, using all
+00:02 Monday 18th April, 2016
+Source: Stephan Chenowth (2008); Chenoweth and Stephan (2011)
+A.7. THEBULLETORTHEBALLOT? 660
+available predictor variables except country and year. Which one variable has the highest cross-validation log-likelihood, and is it higher than the trivial, intercept-only model? Consider all two-variable GAMs which extend the one-variable GAM you just picked: report their cross-validated log-likelihoods. Are the two variables you picked the two variables with the smallest p-values in the logistic regression? Should they be?
+A.7 The Bullet or the Ballot?
+Many people assume that violence, while perhaps dangerous or evil, is more effective politically than non-violence. In this exam, we will examine whether, in fact, non- violent political movements are more or less likely to achieve their goals than violent ones. Moreover, we will look at the conditions which make non-violence more or less likely to succeed.
+Our data set, gathered by political scientists who have studied exactly these ques- tions, is navc.csv on the class website. The units of analysis here are political move- ments or campaigns. For each movement, the data records:
+• The name of the movement (campaign);
+• The country the movement was in (country);
+• The peak year of the movement’s activity (year);
+• Whether the movement fully achieved its aims (1.0), achieved partial success (0.5), or failed (0) (outcome);
+• Anindicatorvariable(nonviol),1fornon-violentmovementsand0forothers;
+• Aquantitativemeasureofhowdemocraticthegovernmentofthecountrywas, from -10 for very un-democratic governments to a possible maximum of +10 (democracy);
+• Anindicatorforthegovernmentbeingunderinternationalsanctions(sanctions);
+• Anindicatorforwhetherthegovernmentreceivedaidfromothergovernments
+to help deal with the movement (aid);
+• Anindicatorforthemovement’sreceivingaidfromforeigngovernments(support);
+• An indicator for the government’s using violence to repress the movement (viol.repress);
+• An indicator for whether substantial portions of the security (military and police) forces of the government sided with the movement (defect);
+• The duration of the movement, in days (duration). 00:02 Monday 18th April, 2016
+and
+661 A.7. THEBULLETORTHEBALLOT?
+Specific analytic issues you must address In general, are non-violent movements more likely to be successful than violent ones? Does violent repression by the govern- ment make movements more or less likely to be successful, and is there a difference in this effect between movements which are themselves violent and non-violent? Simi- larly, what is the effect of foreign aid to the government and to the movement? Do non-violent movements become more likely to succeed as the government becomes more democratic? Does the difference in probability of success between violent and non-violent movements vary with how democratic the government is? All of these should be answered with reference to the results in your model (or models).
+Models Use a generalized additive model with a logistic link function; smooth all continuous predictor variables, and include all categorical variables, except campaign and country names, as your default. (Departures from this should be carefully justi- fied.) Be sure to include the year as a predictor variable, and explain the interpreta- tion of your estimated effects for the year. Some of the analytic issues above may be most easily addressed through including interaction terms, or through fitting differ- ent models on subsets of the data; describe any such variations, and the reasons for your choices.
+Note 1: Before fitting a model with a logistic link function, you will need to re- code partial successes as either successes or failures. Explain which one you chose, and briefly justify your decision.
+Note 2: The analysis could also be done with kernel models, and doing so would receive full credit, but computations may take too long. (This could however avoid needing to re-code partial successes.)
+Inferential Statistics and Model Assessment You may not assume that R’s default standard errors or p-values on estimated regression coefficients can be trusted. Un- certainty should be assessed using suitable bootstrap or simulation procedures. (Be sure to explain why you used the procedure you did.) If you need to compare two models in terms of predictive accuracy, this should not be done through R’s default significance tests or R2’s, but through either a suitable bootstrap or cross-validation (again, explain the reasoning behind your choices). Exceptions will be made if you can successfully argue that the default calculations are reliable for this problem.
+Model checking The answers you give to the substantive analytical questions rest on your estimated model, so you need to include some assessment of the model’s goodness of fit. The exact way in which you do this is left up to your initiative; it may help to remember that the model is predicting probabilities of success. Be sure to describe your procedure and explain why you chose it, that is, why it is appropriate to answer the questions at hand.
+Format
+Your main report should be a humanly-readable document of at most 10 single-spaced pages, including figures. It should have the following sections:
+00:02 Monday 18th April, 2016
+A.7. THEBULLETORTHEBALLOT? 662
+INTRODUCTION describing the scientific problem and the data set, possibly including relevant summary statistics or exploratory graphs.
+MODELS withsubsections
+– Describing the specification of the model (or models) you estimated, and explaining why you decided to use those specifications rather than others;
+– Giving the relevant estimated coefficients and/or functions (possibly in visual form), along with suitable measures of uncertainty;
+– Checking the goodness of fit of the model, including a description of the test procedures you used, why you chose those ways of checking the model, what the results were, and what they told you about the ability of the model to describe the data set.
+RESULTS answering the analytical questions quantitatively, and with suitable measures of uncertainty, with reference to your estimated model or models.
+You may assume that the reader has a general familiarity with the contents of 401, and with the models and methods we have covered so far in the course, but will need to be reminded of any details. The reader should not be assumed to have any prior familiarity with the data set.
+Numerical results Numerical quantities should be written out to appropriate pre- cision, i.e., neither more nor fewer significant digits than appropriate.
+Code All statistical results must be supported by appropriate code, or they will receive no credit. (“Show your work.”) The ideal would be to use R Markdown, or knitr+LATEX, to embed all computations in a humanly readable document, and submit both the knitted version and the source12 As a second best, it is acceptable to submit a PDF document containing all text and figures, and a separate .R file, containing all supporting computations, clearly labeled via the comments so that it is easy to see which claims or results go with which pieces of code.
+Rubric
+As usual, this describes the ideal.
+Words (10) The text is laid out cleanly, with clear divisions and transitions between sections and sub-sections. The writing itself is well-organized, free of grammatical and other mechanical errors, divided into complete sentences logically grouped into paragraphs and sections, and easy to follow from the presumed level of knowledge.
+Numbers (5) All numerical results or summaries are reported to suitable precision, and with appropriate measures of uncertainty attached when applicable.
+12See examples at http://yihui.name/knitr/demos/, and the useful chunk options like echo at http://yihui.name/knitr/options/.
+00:02 Monday 18th April, 2016
+￼
+663 A.7. THEBULLETORTHEBALLOT?
+Pictures (5) Figures and tables are easy to read, with informative captions, axis la- bels and legends, and are placed near the relevant pieces of text.
+Code (15) The code is formatted and organized so that it is easy for others to read and understand. It is indented, commented, and uses meaningful names. It only in- cludes computations which are actually needed to answer the analytical questions, and avoids redundancy. Code borrowed from the notes, from books, or from re- sources found online is explicitly acknowledged and sourced in the comments. Func- tions or procedures not directly taken from the notes have accompanying tests which check whether the code does what it is supposed to. All code runs, and the Mark- down file knits (if applicable).
+Modeling (15) Regression model specifications are described clearly and in appro- priate detail. There are clear explanations of how estimating the model helps to an- swer the analytical questions, and rationales for all modeling choices. If multiple models are compared, they are all clearly described, along with the rationale for con- sidering multiple models, and the reasons for selecting one model over another, or for using multiple models simultaneously.
+Inference (20) The actual estimation of model parameters or estimated functions is technically correct. All calculations based on estimates are clearly explained, and also technically correct. All estimates or derived quantities are accompanied with appropriate measures of uncertainty.
+Checking (15) The goodness-of-fit of the model is actively probed by means of tests suitable to that class of model. The tests chosen are described, along with the rationale for using those tests. The execution of the tests is technically correct, and the results of the checks are clearly described. The extent to which the results of the model assessment build or undermine confidence in the conclusions is laid out clearly, with reference to the results of specific tests.
+Conclusions (15) The substantive, analytical questions are all answered as precisely as the data and the model allow. The chain of reasoning from estimation results about the model, or derived quantities, to substantive conclusions is both clear and convincing. Contingent answers (“if X, then Y, but if Z, then W”) are likewise described as warranted by the model and data. If uncertainties in the data and model mean the answers to some questions must be imprecise, this too is reflected in the conclusions.
+Extra credit (10) Up to ten points may be awarded for reports which are unusually well-written, where the code is unusually elegant, where the analytical methods are unusually insightful, or where the analysis goes beyond the required set of analytical questions.
+00:02 Monday 18th April, 2016
+Source: Classic material for fi- nance, but see especially Fama and French (1993), and, for the history, MacKenzie (2006)
+A.8. ADIVERSIFIEDPORTFOLIO 664
+A.8 A Diversified Portfolio
+WARNING: Some questions require slow computations.
+Classical financial theory suggests that the log-returns of corporate stocks should be IID Gaussian random variables, but allows for the possibility that different stocks might be correlated with each other. In fact, theory suggests that the returns to any given stock should be the sum of two components: one which is specific to that firm, and one which is common to all firms. (More specifically, the common component is one which couldn’t be eliminated even in a perfectly diversified portfolio.) This in turn implies that stock returns should match a one-factor model.
+The data file portfolio.csv consists of the log returns for the stocks of 22 selected large US corporations, centered to have mean zero and scaled to have standard devi- ation 1. Each row is labeled by the relevant date.
+1. (10)
+(a) (5) Report the weights of the first principal component. Since this is a vector of length 22, it will be better to report this visually than as a table or list of numbers. Comment on any notable patterns.
+(b) (5) Plot the projection on to the first principal component against date. Comment on any notable patterns.
+2. (10) Fit a one-factor model.
+(a) (5) Report the vector of factor loadings. (Again, this will be most easily reported visually.) Comment on any notable patterns, and compare it to the first principal component.
+(b) (5) Plot the factor score against the date. Comment on any notable pat- terns, and compare to the projection on the first principal component.
+3. (10) Use case bootstrapping to provide 90% confidence intervals for the factor loadings of the one-factor model. Report the results as a figure rather than a table.
+4. (5) What is the p-value of a goodness of fit test for the hypothesis that one factor is adequate? Explain carefully just what hypothesis is being tested, and what is entailed by rejecting or retaining it.
+5. (5) Download the function charles from the class website. Explain carefully what arguments the function takes, what the function does, and exactly what its return value is. (An acceptable answer to this question could be a thoroughly- commented version of the function.)
+6. (15) Write a function which finds the cross-validated log-likelihood of a factor model with a given number of factors. That is, it should take a data set and a number of factors as inputs, divide the data randomly into folds, calculate the log-likelihood on a test fold of a model fit on the other folds, and return
+00:02 Monday 18th April, 2016
+665 A.8. ADIVERSIFIEDPORTFOLIO
+the average log-likelihood across folds. You are encouraged to re-use existing code from the solutions and notes; charles may or may not be useful. Report the five-fold cross-validated log-likelihood of factor models with from 1 to 10 factors for this data. What is the favored number of factors?
+7. (10)UsingthemvnormalmixEMfunctionfromthemixtoolspackage,fitatwo- component Gaussian mixture model to the data.
+(a) (5) Report the parameters of the two mixture components, and their rel- ative weights. Avoid excessive precision.
+(b) (5)UseposteriorcomponentoftheobjectreturnedbymvnormalmixEM to classify each day as belonging to one mixture component or the other. Plot the mixture components over time, and comment on any patterns.
+8. (15) Write a function, loglike.mvnormalmix, which takes in a data set and a model returned by mvnormalmixEM, and returns a log-likelihood. Check that it works by seeing that it gives the correct value of the log-likelihood when a two-component mixture is fit to the whole data. (Hint: read section 21.4.4 of the notes.)
+9. (8) Write a function which calculates the log-likelihood of mixture models through cross-validation, as in problem 6. Report the five-fold cross-validated log-likelihood of mixture models with from two to four components for this data. What is the favored number of mixture components?
+Warning: five-fold CV for four mixture components on the full data might take several hours. Start early, and make sure you debug your code on small parts of the data rather than the whole thing.
+10. (2) Can you decide whether factor models or mixture models fit this data bet- ter?
+00:02 Monday 18th April, 2016
+A.9. THEMONKEY’SPAW
+Company
+Altria (formerly Philip Morris) Amazon
+Apple
+Archer Daniels Midland Automatic Data Processing Bank of America
+Corrections Corporation of America Dow Chemicals
+Equifax
+ExxonMobil
+Ford
+Halliburton
+General Electric
+Goldman Sachs
+Graham Holding Companies Microsoft
+Proctor and Gamble
+Time Warner
+United States Steel
+Walmart
+Yahoo!
+Yum! Brands
+666
+TABLE A.1: Abbreviations for the companies included in the data set. A.9 The Monkey’s Paw
+Abbreviation
+MO AMZN AAPL ADM ADP BAC CXW DOW EFX XOM F HAL GE GS GHC MSFT PG TWX X WMT YHOO YUM
+￼[[TODO: Need to handle continuous vs. discrete issue here — perhaps make addi- tional problem of constructing a Poissonian factor model? Or just too complicated?]] SCIENTIFIC BACKGROUND: Nerve cells (or “neurons”) communicate and pro-
+cess information by transmitting little electrical impulses to each other, called “spikes”13. Many neurons use “rate codes”, where the number of spikes they produce in a short period of time encodes information either about some aspect of the world the organ- ism is sensing, or about how the organism is acting or is going to act.
+For example, when very fine electrodes are inserted into certain motor-control regions of the brains of monkeys, so that neuroscientists can record from individual neurons, some cells are found to encode the direction in which the monkey intends to
+move its hand. Specifically, a neuron has a preferred direction vector ⃗b , and the when the monkey intends to move its hand with velocity v⃗, the average number of spikes
+over a short interval is a + ⃗b · v⃗, plus or minus some amount of noise. A neuron which behaves like this is said to show “directional tuning”, and ⃗b is its “preferred
+13Because of how they look in a plot of voltage against time.
+00:02 Monday 18th April, 2016
+￼
+667 A.10. SPECIFICPROBLEMS
+direction”.14
+The data set neur.csv is based on an experiment during which the neuroscien-
+tists recorded simultaneously from 96 directionally-sensitive neurons in a monkey’s motor region, each cell having a different preferred direction. That is, each neuron i
+will have its own ⃗bi and its own intercept ai . During each trial, the monkey was to move its hand in one of eight directions, spread evenly around a circle. Each row of the data frame represents 100ms, and so the entries in the data frame are the number of spikes produced by each of the 96 neurons spiked during each time interval.
+In this exam, you will both fit a model which derives from this “directional tun- ing” idea, and consider alternative multivariate models.
+A.10 Specific Problems
+1. Explain how this model for spiking is, or is related to, a factor model. Your
+explanation should indicate how a, ⃗b and v⃗ are related to the factor loadings and factor scores, and the number of factors.
+2. Fit a factor model with the number of factors you determined is appropriate from problem 1. For each neuron, report its preferred direction. (Since there are a large number of neurons, it would probably be best to report this visu- ally.)
+3. Based on your fitted factor model, report an estimate of the intended direction v⃗ at each time point. (Again, this should probably be reported visually.) The experiment had distinct breaks between trials where the monkey stopped mov- ing in one direction and started moving in another, random direction; can you work out, approximately, where these breaks occurred?
+4. Suppose that instead of recording intended velocities in the usual (x, y) coordi- nates, we used coordinate axes which were rotated 30 degrees counter-clockwise from the usual ones. Show that this would amount to multiplying the intended-
+􏰛 cosπ/6 −sinπ/6 􏰜
+velocity vector v⃗ by sin π/6 cos π/6 . Explain what effect, if any, this
+would have on the preferred-direction vector ⃗b of each neuron. Explain how this difference in coordinate systems could, or could not, be detected in your factor analysis of the data. In particular, what would this change of coordinates imply for the interpretation of your factor score estimates and factor loadings?
+5. Try fitting a three-cluster mixture model. Why might three clusters, specif- ically, be reasonable? Which model predicts better, the factor model or the three-cluster mixture model?
+Note: if using the mixtools package, you might find it easier to use the function npEM to fit a non-parametric mixture model than to use mvnormalmixEM to fit
+14For more on such models of neural coding, see, for example, §3.3 of P. Dayan and L. F. Abbott, Theoretical Neuroscience (MIT Press, 2001).
+00:02 Monday 18th April, 2016
+￼
+INTRODUCTION
+SPECIFICPROBLEMS
+CONCLUSIONS
+describing the scientific problem and the data set, possibly including relevant summary statistics or exploratory graphs. (Do not include EDA just to have EDA.)
+answeringthequestionssetabove,butavoidingthecheck-list,itemizedformat in favor of continuous text, with a logical succession of sentences and para- graphs. (Writing coherently is more important than following the order of the questions.)
+summarizingwhatyouhavelearnedfromthedataandmodelsaboutwhether the directional-tuning model is really a good description of how these neurons encode motion.
+A.11. FORMATTINGINSTRUCTIONSANDRUBRIC 668
+a Gaussian mixture model, since the observable variables are discrete counts rather than continuous. Fitting such a mixture model to the full data may take as much as a couple of minutes, so allow plenty of time for debugging and any computation-intensive procedues.
+6. Try fitting an eight-cluster mixture model. Why might eight clusters be rea- sonable? Which model predicts best? (See previous note.)
+You are welcome to consider other models for this data as well, but for full credit you must answer all these questions about these models.
+A.11 Formatting Instructions and Rubric
+Your main report should be a humanly-readable document of at most 10 single-spaced pages, including figures. It should have the following sections:
+You may assume that the reader has a general familiarity with the contents of 401, and with the models and methods we have covered so far in the course, but will need to be reminded of any details. The reader should not be assumed to have any prior familiarity with the data set.
+Numerical results Numerical quantities should be written out to appropriate pre- cision, i.e., neither more nor fewer significant digits than appropriate.
+Code All statistical results must be supported by appropriate code, or they will receive no credit. (“Show your work.”) The ideal would be to use R Markdown, or knitr+LATEX, to embed all computations in a humanly readable document, and submit both the knitted version and the source15 As a second best, it is acceptable to submit a PDF document containing all text and figures, and a separate .R file, containing all supporting computations, clearly labeled via the comments so that it is easy to see which claims or results go with which pieces of code.
+15See examples at http://yihui.name/knitr/demos/, and the useful chunk options like echo at http://yihui.name/knitr/options/; also the examples in the solutions to exam 1.
+00:02 Monday 18th April, 2016
+￼
+669 A.11. FORMATTINGINSTRUCTIONSANDRUBRIC
+Rubric
+As usual, this describes the ideal.
+Words (10) The text is laid out cleanly, with clear divisions and transitions between sections and sub-sections. The writing itself is well-organized, free of grammatical and other mechanical errors, divided into complete sentences logically grouped into paragraphs and sections, and easy to follow from the presumed level of knowledge.
+Numbers (5) All numerical results or summaries are reported to suitable precision, and with appropriate measures of uncertainty attached when applicable.
+Pictures (5) Figures and tables are easy to read, with informative captions, axis la- bels and legends, and are placed near the relevant pieces of text.
+Code (15) The code is formatted and organized so that it is easy for others to read and understand. It is indented, commented, and uses meaningful names. It only in- cludes computations which are actually needed to answer the analytical questions, and avoids redundancy. Code borrowed from the notes, from books, or from re- sources found online is explicitly acknowledged and sourced in the comments. Func- tions or procedures not directly taken from the notes have accompanying tests which check whether the code does what it is supposed to. All code runs, and the Mark- down file knits (if applicable). The main text of the report is free of intrusive blocks of code, which are used only when a specifically-computational point is being made, or when code is actually the clearest way of describing a point.
+Specific Problems (25) All specific problems posed in §A.10 receive clear, well- written and correct answers. The answers show, and convey, a real grasp of the math- ematical basis of the models being manipulated, and how quantities in the model are related to the underlying scientific questions about neural coding of movement.
+Inference and Uncertainty (15) The actual estimation of model parameters or esti- mated functions is technically correct. All calculations based on estimates are clearly explained, and also technically correct. All estimates or derived quantities are ac- companied with appropriate measures of uncertainty (such as confidence intervals or standard errors).
+Comparisons (15) All comparisons between models are done in a statistically valid way: if in-sample, they are accompanied by an explanation of why this particular in-sample comparison will not lead to over-fitting; if out-of-sample, there is a clear description of the generalization process being performed. The execution of compar- isons is technically correct, and their results clearly described. The extent to which comparisons provide either clear or ambiguous evidence about which models fit bet- ter is made plain to the reader, and is carried through to the ultimate conclusions.
+00:02 Monday 18th April, 2016
+A.12. WHAT’STHATGOTTODOWITHTHEPRICEOFCONDOSIN CALIFORNIA? 670
+Conclusions (15) The substantive questions about neural coding are all answered as precisely as the data and the model allow. The chain of reasoning from estimation results about models, or derived quantities, to substantive conclusions is both clear and convincing. Contingent answers (“if X , then Y , but if Z , then W ”) are likewise described as warranted by the model and data. If uncertainties in the data and model mean the answers to some questions must be imprecise, this too is reflected in the conclusions.
+Extra credit (10) Up to ten points may be awarded for reports which are unusually well-written, where the code is unusually elegant, where the analytical methods are unusually insightful, or where the analysis goes beyond the required set of analytical questions.
+A.12 What’s That Got to Do with the Price of Condos in California?
+AGENDA: As a warm-up and refresher in using linear regression to explore relationships between variables, we will look at a large data set on real estate prices.
+The Census Bureau divides the country up into geographic regions, smaller than counties, called “tracts” of a few thousand people each, and reports much of its data at the level of tracts. This data set, drawn from the 2011 American Community Survey, contains information on the housing stock and economic circumstances of every tract in California and Pennsylvania. For each tract, the data file records a large number of variables (not all of which will be used in this assignment):
+• A geographic ID code, a code for the state, a code for the county, and a code for the tract
+• The population, latitude and longitude of the tract
+• Its name
+• The median value of the housing units in the tract
+• The total number of units and the number of vacant units
+• The median number of rooms per unit
+• The mean number of people per household which owns its home, the mean number of people per renting household
+• The median and mean income of households (in dollars, from all sources)
+• Thepercentageofhousingunitsbuiltin2005orlater;builtin2000–2004;built in the 1990s; in the 1980s; in the 1970s; in the 1960s; in the 1950s; in the 1940s; and in 1939 or earlier
+00:02 Monday 18th April, 2016
+A.12. WHAT’STHATGOTTODOWITHTHEPRICEOFCONDOSIN 671 CALIFORNIA?
+• The percentage of housing units with 0 bedrooms; with 1 bedroom; with 2; with 3; with 4; with 5 or more bedrooms
+• Thepercentageofhouseholdswhichowntheirhome,andthepercentagewhich rent
+Remember that these are not values for individual houses or families, but summaries of all of the houses and families in the tract.
+The basic question here has to do with how the quality of the housing stock, the income of the people, and the geography of the tract relate to house values in the tract. We will look at several different linear models, and see if they have reasonable interpretations, and/or make systematic errors.
+1. (3 pts) Not all variables are available for all tracts. Remove the rows containing NA values. All subsequent problems will be done on this cleaned data set. Hint: Recipe 5.27.
+(a) (1) How many tracts are eliminated?
+(b) (1) How many people live in those tracts?
+(c) (1) What happens to the summary statistics for median house value and median income?
+2. (7) House value and income
+(a) (1) Linearly regress median house value on median household income. Report the intercept and the coefficient (to reasonable precision), and ex- plain what they mean.
+(b) (2) Regress median house value on mean household income. Report the intercept and the coefficient (to reasonable precision), and explain what they mean. Why are the coefficients for two different measure of house- hold income different?
+(c) (4) Regress median house value on both mean and median household income. Report the estimates, and interpret the coefficients, as before. Does this interpretation seem reasonable? Explain.
+3. (10) Regress median house value on median income, mean income, popula- tion, number of housing units, number of vacant units, percentage of owners, median number of rooms, mean household size of homeowners, and mean household size of renters. Report all the estimated coefficients and their stan- dard errors to reasonable precision, and explain what they mean. Why are the coefficients on income different from in the previous models?
+4. (5) Which three variables are most important, in this model, for predicting house values? Explain your reasoning for deciding on this. Hint: make sure your answers wouldn’t change if we changed the units of measurement for the predictor variables.
+5. (20) Checking residuals for the model from problem 3. 00:02 Monday 18th April, 2016
+A.12. WHAT’STHATGOTTODOWITHTHEPRICEOFCONDOSIN CALIFORNIA? 672
+(a) (5) Make a Q − Q plot of the regression residuals.
+(b) (5)Makescatter-plotsoftheregressionresidualsagainsteachofthepredic- tor variables, and add kernel smoother curves (as in Chapter 1). Describe any patterns you see. (A very rough rule of thumb is that the bandwidth should be about σn−1/5, where σ is the standard deviation of the predic- tor variable and n is the sample size.)
+(c) (5)Makescatter-plotsofthesquaredresidualsagainsteachofthepredictor variables, and add kernel smoother curves. Describe any patterns you see.
+(d) (5) Explain, using these plots, whether the residuals appear Gaussian and independent of the predictors.
+6. (12)Fitthemodelfrom3todatafromCaliforniaalone,andagaintodatafrom Pennsylvania alone.
+(a) (5)Reportthetwosetsofcoefficientsandstandarderrors.Explainwhether or not it is plausible that the true coefficients are really equally.
+(b) (2) What are the square root of the mean squared error (RMSEs) of the Pennsylvania and California coefficients, on their own data?
+(c) (5) Use the California coefficients to predict the Pennsylvania data. What is the RMSE? What is the correlation between the California coefficients’ predictions for Pennsylvania, and the Pennsylvania coefficients’ predic- tions? Hint: Recipe 11.18.
+7. (10) Make a map of median house values. The vertical coordinate should be latitude, the horizontal coordinate should be longitude, and the house value should be indicated either by the color of the points (Hint: recipe 10.23), or by using a third dimension in a perspective plot. Describe the patterns that you see.
+8. (10) Make a map of the regression residuals for the model from problem 3. Are they randomly scattered over space, or are there regions where the model systematically over- or under- predicts? Are there regions where the errors are unusually large in both directions? (You might also want to make a map of the absolute value of the residuals.) — If you cannot make a map, you can still get partial credit for scatter-plots of residuals against latitude and longitude.
+9. (8) Fit a linear regression with all the variables from problem 3, as well as lat- itude and longitude. Report the new coefficients and their standard errors. What do the coefficients on latitude and longitude mean? How important are latitude and longitude in this new model?
+10. (5) Make a map of the regression residuals for the new model from problem 9. Compare and contrast it with the map of the residuals from the previous model. Are the new residuals spatially uniform, or are there patterns?
+11. (10) Regress the log of median house value on the same variables as in problem 9. Which model more accurately predicts housing prices? How can you tell?
+00:02 Monday 18th April, 2016
+673 A.13. THEADVANTAGESOFBACKWARDNESS
+A.13 The Advantages of Backwardness
+Many theories of economic growth say that it’s easier for poor countries to grow faster than rich countries — “catching up”, or the “advantages of backwardness”. One argument for this is that poor countries can grow by copying existing, successful tech- nologies and ways of doing business from rich ones. But rich countries are already using those technologies, so they can only grow by finding new ones, and copying is faster than innovation. So, all else being equal, poor countries should grow faster than rich ones. One way to check this is to look at how growth rates are related to other economic variables.
+Our data for examining this will be taken from the “Penn World Table” (http:// pwt.econ.upenn.edu/php_site/pwt_index.php), for selected countries and years. The data file is penn-select.csv on the class website. Each row of this table gives, for a given country and a five-year period, the starting year, the initial population of the country, the initial gross domestic product (GDP)16 per capita (adjusted for inflation and local purchasing power), the average annual growth rate of GDP over that period, the average population growth rate, the average percentage of GDP de- voted to investment, and the average percentage ratio of trade (imports plus exports) to GDP17.
+We will use the np package on CRAN to do kernel regression.18 Install it, and load the data file penn-select.csv (link on the class website).
+1. (5 points) Fit a linear model of gdp.growth on log(gdp). What is the coeffi- cient? What does it suggest about catching-up?
+2. (5points)Fitalinearmodelofgdp.growthonlog(gdp),pop.growth,invest and trade. What is the coefficient on log(gdp)? What does it suggest about catching-up?
+3. (5 points) It is sometimes suggested that the catching-up effect only works for countries which are open to trade with, and learning from, more-developed economies. Add an interaction between log(gdp) and trade to the model from Problem 2. What are the relevant coefficients? What do they suggest about catching-up?
+4. (15 points) Use data-set splitting, as in Chapter 3 of the notes, to decide which of these three linear models predicts best. (You can adapt the code from that chapter or write your own.) Which one is the winner?
+5. (15 points) The npreg function in the np package does kernel regression. By default, it uses a combination of cross-validation and sophisticated but very
+16Annual gross domestic product is the total value of all goods and services produced in the country in a given year. It has some pathologies — an earthquake which breaks everyone’s windows could increase GDP by the value of the repairs — but it’s a standard measure of economic output.
+17The Penn tables call this variable “openness”. It can be bigger than 100, if, for instance, a country re-exports lots of its imports.
+18In addition to the examples in Chapter 4 of the notes, the package has good help files, and a tutorial at http://www.jstatsoft.org/v27/i05.
+00:02 Monday 18th April, 2016
+￼
+A.13. THEADVANTAGESOFBACKWARDNESS 674
+slow optimization to pick the best bandwidth. In this problem, we will force it to use fixed bandwidths, and do the cross-validation ourselves.
+     penn.0.1 <- npreg(gdp.growth~log(gdp),bws=0.1,data=penn)
+does a kernel regression of growth on log(gdp), using the default kernel (which is Gaussian) and bandwidth 0.1. (You don’t have to call the data penn.) You can run fitted, predict, etc., on the output of npreg just as you can on the output of lm. (There are more examples of using npreg in Chapter 4.)
+The code at the end of this assignment (also online) uses five-fold cross-validation to estimate the mean-squared error for the six bandwidths 0.05, 0.1, 0.2, 0.3, 0.4, 0.5. Use it to create a plot of cross-validated MSE versus bandwidth. Add to the same plot the in-sample MSEs of those six bandwidths on the whole data. What bandwidth predicts best?
+6. (10 points) Make a scatterplot of log(gdp) versus growth. Add the line for the linear model from problem 1. Add the fitted values for the kernel curve with the best bandwidth (according to the previous problem). What does this suggest about catching up?
+(There are at least two ways to get the fitted values for the kernel regression, using fitted or predict.)
+7. (5 points) npreg will also do kernel regressions with multiple input variables. This time, use the built-in bandwidth selector:
+     penn.npr <- npreg(gdp.growth ~ log(gdp) + pop.growth + invest
+       + trade, data=penn, tol=0.1, ftol=0.1)
+(The last two arguments tell the bandwidth selector not to try very hard to optimize; it may still take several minutes.) What are the selected bandwidths? (Use summary.)
+8. (5 points) Explain why we cannot add an interaction between log(gdp) and trade to the nonparametric regression from the previous problem.
+9. (15 points) Sub-divide the data into points where the initial GDP per capita is ≤ $700 and those where it is above. For each data point, use the kernel regression from problem 7 to predict the change in growth-rate from a 10% decrease in initial GDP (not a 10% decrease in log-GDP). Report the averages over the initially-poorer and the initially-richer data points. Describe what this suggests about catching up.
+Hints: use predict() with partially-modified data; do not estimate another regression with artificially-lowered initial GDPs; make sure you are changing initial GDP by 10%, and not changing the log of GDP by 10%.
+00:02 Monday 18th April, 2016
+675 A.13. THEADVANTAGESOFBACKWARDNESS
+10. (10 points) To chose between the best linear model (as picked by you in prob- lem 4) and the kernel regression from problem 7, use cross-validation again. Modify the code provided to use five-fold cross-validation to get CV MSEs for both the linear regression and for the nonparametric regression (with auto- matic bandwidth selection). Which predicts better?
+11. (10 points) Based on your analysis, does the data support the idea of catching up, undermine it, support its happening under certain conditions, or provide no evidence either way? (As always, explain your answers.)
+00:02 Monday 18th April, 2016
+A.14. IT’SNOTTHEHEATTHATGETSYOU 676
+# Compare predictive ability of different bandwidths using k-fold CV
+  # Inputs: number of folds, vector of bandwidths, dataframe
+  # Presumes: data frame contains variables called "gdp.growth" and "gdp"
+  # Output: vector of cross-validated MSEs for the different bandwidths
+  # The default bandwidths here are NOT good ones for other problems
+cv.growth.folds <- function(nfolds=5, bandwidths=c(0.05,(1:5)/10), df=penn) {
+  require(np)
+  case.folds <- rep(1:nfolds,length.out=nrow(df))
+    # divide the cases as evenly as possible
+  case.folds <- sample(case.folds) # randomly permute the order
+  fold.mses <- matrix(0,nrow=nfolds,ncol=length(bandwidths))
+  colnames(fold.mses) = as.character(bandwidths)
+# By naming the columns, we'll won't have to keep track of which bandwidth
+     # is in which position
+  for (fold in 1:nfolds) {
+    # What are the training cases and what are the test cases?
+    train <- df[case.folds!=fold,]
+    test <- df[case.folds==fold,]
+    for (bw in bandwidths) {
+      # Fit to the training set
+      # First create a "bandwidth object" with the fixed bandwidth
+      current.npr.bw <- npregbw(gdp.growth ~ log(gdp), data=train, bws=bw,
+bandwidth.compute=FALSE)
+# Now actually use it to create the kernel regression
+current.npr <- npreg(bws=current.npr.bw)
+# Predict on the test set
+predictions <- predict(current.npr, newdata=test)
+# What's the mean-squared error?
+fold.mses[fold,paste(bw)] <- mean((test$gdp.growth - predictions)^2) # Using paste() here lets us access the column with the right name...
+} }
+  # Average the MSEs
+  bandwidths.cv.mses <- colMeans(fold.mses)
+  return(bandwidths.cv.mses)
+}
+A.14 It’s Not the Heat that Gets You, It’s the Sus- tained Conjunction of Heat with Elevated Lev- els of Atmospheric Pollutants
+The data set chicago, in the package gamair, contains data on the relationship be- tween air pollution and the death rate in Chicago from 1 January 1987 to 31 Decem- ber 2000. The seven variables are: the total number of (non-accidental) deaths each
+00:02 Monday 18th April, 2016
+677 A.14. IT’SNOTTHEHEATTHATGETSYOU
+day (death); the median density over the city of large pollutant particles (pm10median); the median density of smaller pollutant particles (pm25median); the median concen- tration of ozone (O3) in the air (o3median); the median concentration of sulfur diox- ide (SO2) in the air (so2median); the time in days (time); and the mean daily temper- ature (tmpd).
+We will model how the death rate changes with pollution and temperature. Epi- demiologists tell us that risk factors usually multiply together rather than adding, so we will fit additive models to the logarithm of the number of deaths. These problems can all be done using either the gam or the mgcv packages for fitting additive models, but you will probably find it easier to use mgcv.
+Warning: The bootstrapping in Problem 7g might be time-consuming; don’t wait to the last minute.
+1. (5) Load the data set and run summary on it.
+(a) (1) Is temperature given in degrees Fahrenheit or degrees Celsius?
+(b) (2) The pollution variables are negative at least half the time. What might this mean?
+(c) (2)Wewillignorethepm25medianvariableintherestofthisproblemset. Why is this reasonable?
+2. (10)Fitasplinesmoothingoflog(death)ontime.(Youcanuseeithersmooth.spline or gam.)
+(a) (3) Plot the smoothing spline along with the actual values.
+(b) (4) There should be four large outliers, right next to each other in time. When are they? For full credit, give calendar dates, not day numbers. (Hint: day 0 was 31 December 1993.)
+(c) (3) How many degrees of freedom did your smoothing spline have? Add curves to the plot which would result from using 10, 50, 100 and 2000 degrees of freedom. (Make sure these differ in color and/or line-style.) What happens to the spline curves as you change the degrees of freedom?
+3. (15)Usegamtofitanadditivemodelforlog(death)onpm10median,o3median, so2median, tmpd and time. Use spline smoothing for each of these predictor variables.
+(a) (7) Plot the partial response functions, with partial residuals. Describe the partial response functions in words.
+(b) (4)Plotthefittedvaluesasafunctionoftime,alongwiththeactualvalues of log(death).
+(c) (4) Are the outliers still there? Are they any better?
+4. (15) It is medically implausible to supposed that deaths on day t are only due to heat or pollution on that day, and not on earlier ones.
+00:02 Monday 18th April, 2016
+A.14. IT’SNOTTHEHEATTHATGETSYOU 678
+(a) (8) Suppose that on any given day, we want to know the average value of some variable over today and the previous k days. Explain how the following code computes that.
+         lag.mean <- function(x, window) {
+           n <- length(x)
+           y <- rep(0,n-window)
+           for (t in 0:window) {
+             y <- y + x[(t+1):(n-window+t)]
+           }
+           return(y/(window+1))
+         }
+In particular, how is k related to the arguments?
+(b) (7)Createanewdataframewiththesamecolumnnamesaschicago,but where, on each day, the value of the pollution concentrations and temper- ature is the average of that day’s value with the previous three days. How many rows should this data frame have? Make sure that the time and death columns are properly aligned with the new, time-average predictor variables. How can you check that this is working properly?
+5. (10) Fit an additive model, as in problem 3, with the time-averaged pollution and temperature variables. (Do not average time or death.)
+(a) (5) Plot the partial response functions and their partial residuals.
+(b) (5) Plot the fitted values as a function of time, and the actual values. What has happened to the outliers?
+6. (15) Variable examination
+(a) (4) Find the rows in the data frame (with the time-averaged values) corre- sponding to the large-death outliers. Look at all variables for them, and for three days on either side. Now compare this to the same stretch of time a year earlier. Which two variables, aside from death, are unusually high or low around the outliers?
+(b) (7)Re-fitthemodelfromproblem5,withaninteractionbetweenthetwo variables you just picked out. Plot the partial response functions.
+(c) (4) Plot the fitted values versus time. What has happened to the outliers?
+7. (25) Using the last model you fit, we will consider the predicted impact of a 2◦ Celsius increase in temperature on log(death), taking the last full year of the data as a baseline.19.
+192◦C is in the middle range of current projections for the global average effect of climate change by the end of this century (http://www.ipcc.ch/publications_and_data/ar4/wg1/en/contents.html)q. Of course it’s unrealistic to suppose that would be an even shift throughout the year, or for that matter that Chicago would necessarily warm by the average amount. In fact, some of the models (http://www.ipcc. ch/publications_and_data/ar4/wg1/en/ch11s11-5-3.html, Figure 11.11) have 4◦C of warming in the middle of their prediction intervals for central North America.
+00:02 Monday 18th April, 2016
+￼
+679
+(a)
+(b) (c)
+(d)
+(e)
+(f)
+(g)
+A.15. NICEDEMOCITY,BUTWILLITSCALE? (1) Prepare a data frame containing only the last full year of the data.
+What is the average predicted value of log(deaths)?
+(1) Modify this data frame to increase all temperatures by 2◦C.
+(3) Find the new average change in the predicted values of log(deaths) associated with a 2◦C warming.
+(5) Find a standard error for this average predicted change, using the stan- dard errors for the prediction on each day, and assuming no correlation among them. Also give the corresponding Gaussian 95% confidence in- terval.
+(5) Find the predicted change in the number of deaths (not change in log(death) from a 2◦C warming over the course of a whole year. Hint: remember that ex ̸= ex.
+(5) Explain how you could use bootstrapping to give a 95% confidence interval for the average increase in log(death) over the year. More credit will be given for more precise, complete and clear explanations.
+(5) Implement your bootstrapping scheme and give the confidence inter- val.
+￼￼8. (5) Explain at least one reason that this estimate of what would happen if Chicago warmed by 2◦C might be systematically flawed. (Do not repeat the problems mentioned in the footnote. Doubts that such warming will happen do not count.) For full credit, suggest ways of improving the estimates.
+A.15 Nice Demo City, but Will It Scale?
+A.15.1 Version 1
+A.15.1.1 Background
+It has been known for a long time that larger cities tend to be more economically pro- ductive than smaller ones. That is, the economic output per person of a city or other settlement (Y ) tends to increase with the population (N ). Recently, there has been some controversy over the exact form of the relationship, and over its explanation.
+In particular, it has been claimed20 that urban incomes show “power-law scaling”, meaning that
+Y ≈y0Na
+for some constant y0 > 0 (the same across cities) and some scaling exponent a > 0 (the
+same across cities). Equivalently21,
+log Y ≈ c + a log N
+20By Geoffrey West and collaborators; there’s a good video online of Prof. West giving a talk about the work at a TED conference, if you’re interested.
+21Why is it equivalent, and how is c related to y0?
+00:02 Monday 18th April, 2016
+[[TODO: Integrate the two versions of this problem set, perhaps by just picking one]]
+This version was used as a take- home exam, hence less scaf- folding; flag as such in the guide to the problems
+[[TODO: Yank references from Preface to Urban Eco- nomics]]
+￼
+A.15. NICEDEMOCITY,BUTWILLITSCALE? 680
+The scientists who first postulated power law scaling for urban economies thought that the tendency for bigger cities to be more productive was largely due to what are called “increasing returns to scale”22, which would be stronger in larger cities. Additionally, having more people around, and more different sorts of people around, could lead to exchanges of ideas and so to new and better ways of doing business. According to this view, the primary determinant of a city’s economy is simply its size, and larger cities are just “scaled up” versions of smaller ones.
+An alternative explanation is that different industries have different levels of in- come per worker, and that some industries tend to be concentrated in larger cities and others in smaller towns. Large cities tend especially to be the places where one finds highly skilled providers of very specialized services, though their services are used, often indirectly, more or less everywhere23. In this view, the association between the population of cities and their economic productivity is due to the kind of indus- tries that go with being big cities, not some effect of size as such. There is no reason, according to this “urban hierarchy” view, why the relationship between per-capita in- come Y and urban population N should be a power law. In fact, the urban-hierarchy model doesn’t even specify a particular functional relationship between how much of a city’s economy comes from high-value industries and the city’s income, just that the relationship is increasing.
+Note that neither the power-law nor the urban-hierarchy model predicts Gaussian distributions.
+In this exam, you will assess the evidence for power law scaling, and whether the “urban hierarchy” idea can explain the relationship between income and population.
+Data For data-collection purposes, urban regions of the United States are divided into several hundred “Metropolitan Statistical Areas” based on patterns of residence and commuting; these cut across the boundaries of legal cities and even states. In the last decade, the U.S. Bureau of Economic Analysis has begun to estimate “gross metropolitan products” for these areas — the equivalent of gross national product, but for each metropolitan area. (See Homework 2 for the definition of “gross national product”.) Our data set contains the following variables, derived from the BEA:
+• the name of each metropolitan area;
+• its per-capita gross metropolitan product, in dollars (Y );
+• itspopulation(N);
+• the share of its economy derived from finance (as a fraction between 0 and 1); • the share of “professional and technical services”;
+22This is when the cost of producing the same item, with the same factory, employees, etc., is lower when the volume being produced is high, perhaps because the system runs more efficiently, or each sale has to recover a smaller share of the fixed cost of setting up the factory. A constant sale price minus lower costs equals higher profits.
+23There are probably few, if any, electrochemical engineers who design liquid crystal displays working in Altoona, PA, but everyone there who buys a cellphone indirectly pays for the time and training of such engineers who live elsewhere.
+00:02 Monday 18th April, 2016
+￼
+681 A.15. NICEDEMOCITY,BUTWILLITSCALE?
+• the share of “information, communication and technology” (ICT);
+• and the share of “management of firms and enterprises”.
+Note that the last four columns have some missing values (NAs), since the BEA does not release those figures when doing so would disclose sensitive information about individual companies.
+A.15.1.2 Tasks and Questions
+You are to write a report assessing the (1) whether the power-law scaling model ac- curately represents the relationship between urban population and urban per-capita income; (2) whether, as the “urban hierarchy” idea implies, the relationship can be explained away by controlling for which industries are found in which cities; and (3) whether the power-law scaling or the urban-hierarchy idea provides a better model of urban economies.
+Your report should have the following sections: an introduction, laying out the questions being investigated and the approach taken; a description of the data; de- tailed analyses; and conclusions. Your report should deal with at least the following specific points:
+• The estimation of the scaling exponent a from the data, including its uncer- tainty24 ;
+• An estimate of the out-of-sample error of the power-law-scaling model;
+• An examination of that model’s residuals;
+• Acomparisonofthatmodeltonon-parametricmodelsofthesize-incomerela- tionship (including, but not limited to, out-of-sample errors);
+• Whether larger cities tend to have higher shares of the four high-value indus- tries measured in the data set, and if so, what the size-industry relationship is;
+• Whethercitieswithhighersharesforthoseindustrieshavehigherincomes,and if so, what the industry-income relationship is;
+• Whether, and in what sense, the income-industry relationships can explain the size-income relationship;
+• How missing values were handled, and why;
+• Appropriate quantifications of uncertainty for all estimates and hypothesis tests.
+Adequately dealing with these points may, of course, lead to others. 00:02 Monday 18th April, 2016
+A.15. NICEDEMOCITY,BUTWILLITSCALE? 682
+A.15.2 Version 2
+A.15.2.1
+For data-collection purposes, urban areas of the United States are divided into several hundred “Metropolitan Statistical Areas” based on patterns of residence and commut- ing; these cut across the boundaries of legal cities and even states. In the last decade, the U.S. Bureau of Economic Analysis has begun to estimate “gross metropolitan products” for these areas — the equivalent of gross national product, but for each metropolitan area. (See Homework 2 for the definition of “gross national product”.) Even more recently, it has been claimed that these gross metropolitan products show a simple quantitative regularity, called “supra-linear power-law scaling”. If Y is the gross metropolitan product in dollars, and N is the number of people in the city, then, the claim goes,
+Y ≈cNb (A.5) where the exponent b > 1 and the scale factor c > 0. This homework will use the
+tools built so far to test this hypothesis.
+1. (15 points) A metropolitan area’s gross per capita product is y = Y /N . Show that if Eq. A.5 holds, then
+log y ≈ β0 + β1 log N How are β0 and β1 related to c and b?
+2. (15 points) The data files gmp_2006.csv and pcgmp_2006.csv on the class website contain the total gross metropolitan product (Y ) in millions of dollars, and the per capita gross metropolitan product (y) in dollars, for all metropoli- tan areas in the US in 2006. Read them in and use them to calculate the metropolitan populations (N). If it’s done correctly, then running summary on the population figures should give
+         Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
+        54980   135600   231500   680900   530900 18850000
+(Your exact results may differ very slightly because of rounding and display settings.) What is the variance of log y ?
+3. (20points)Estimatingthepower-lawscalingmodel.Uselmtolinearlyregresslog per capita product, logy, on log population, logN. How does estimating this statistical model relate to Equation A.5? What are the estimated coefficients? Are they compatible with the idea of supra-linear scaling? What is the mean squared error for log y ?
+4. (15points)PlotpercapitaproductyagainstN,alongwiththefittedpower-law relationship from problem 3. (Be careful about logs!)
+24Hint: You should get a value in the range (0,0.5).
+00:02 Monday 18th April, 2016
+[[This version was a p homework assignments, points add up to 200]]
+￼a
+683 A.15. NICEDEMOCITY,BUTWILLITSCALE?
+5. (15 points) Fit a non-parametric smoother to logy and logN. (You can use kernel regression, a spline, or any other non-parametric smoother.) What is the mean squared error for log y? Describe, in words, how this curve compares to the power-law model from problem 3.
+6. (20 points) Using the method from [[lecture 10, section 1]], test whether the power-law relationship is correctly specified. What is the p-value? What do you conclude about the validity of the power-law model, based not just on this problem but the previous ones as well?
+A.15.2.2
+We continue to investigate the relationship between how big cities are, and how eco- nomically productive they are. The scientists who first postulated power laws for urban economies thought that the tendency for bigger cities to be more productive was largely due to what are called “increasing returns to scale”25, which would be bigger in larger cities. Additionally, having more people around, and more different sorts of people around, could lead to exchanges of ideas and so to new and better ways of doing business.
+An alternative explanation is that different industries have different levels of in- come per worker, and that some industries tend to be concentrated in larger cities and others in smaller towns. Large cities tend especially to be the places where one finds highly skilled providers of very specialized services, though their services are used, often indirectly, more or less everywhere26. In this view, the association between the population of cities and their economic productivity is due to the kind of industries that go with being big cities, not some effect of size as such.
+In this exam, you will do a fairly simple test of these two explanations.
+Data A data file has been e-mailed to you at your Andrew account. It is a comma- separated text file (CSV), containing the following columns, in order, for each metropoli- tan area:
+• the name of the metropolitan area;
+• its per-capita gross metropolitan product (in dollars)
+• its population;
+• the share of its economy derived from finance (as a fraction between 0 and 1); • the share of “professional and technical services”;
+25This is when the cost of producing the same item, with the same factory, employees, etc., is lower when the volume being produced is high, perhaps because the system runs more efficiently, or each sale has to recover a smaller share of the fixed cost of setting up the factory. A constant sale price minus lower costs equals higher profits.
+26There are probably very few electrochemical engineers who design liquid crystal displays in Altoona, but everyone there who buys a cellphone indirectly pays for the time and training of such engineers who live elsewhere.
+00:02 Monday 18th April, 2016
+￼
+A.15. NICEDEMOCITY,BUTWILLITSCALE? 684
+• the share of “information, communication and technology” (ICT);
+• and the share of “management of firms and enterprises”.
+The first three columns you saw in the last homework. The last four columns came from the same source. However, those columns have some missing values (NAs), since the Bureau of Economic Analysis does not release the data when doing so would disclose sensitive information about individual companies.
+A.15.2.3 Problems
+1. More specialist service industries in bigger cities?
+(a) (2 points) For each of the four industries, create a scatter-plot of the share of that industries in the economy as a function of population. If a city is missing a value for an industry, omit it from that plot.
+(b) (5 points) Add a nonparametric smoothing curve to each plot. Use ker- nel regression, local linear regression, a smoothing spline, etc., as you wish, but make sure that you use cross-validation to adapt the amount of smoothing to the roughness of the data.
+(c) (3 points) Describe the patterns made by these plots. In particular, do larger cities have more of these industries?
+2. Higher productivity from specialist service industries?
+(a) (2points)Foreachofthefourindustries,createascatter-plotofper-capita GMP as a function of the share of that industry in the city’s economy. If a city is missing a value for an industry, omit it from the plot.
+(b) (5 points) Add a nonparametric smoothing curve to each plot. (Use the same smoothing method you did for problem 1.)
+(c) (3 points) Describe the patterns made by these plots. In particular, do cities which are more dependent on these industries have higher produc- tivity?
+3. Are bigger cities more productive, controlling for industry shares? Using the gam function from the mgcv package, fit the semi-parametric log-additive model
+4
+ln y = α0 + b ln N + 􏰥 f j ( x j ) + ε
+j=1
+where y is per-capita GMP, N is population, and x1 through x4 are the shares
+of the four industries.
+(a) (5 points) Explain how this model is related to, but different than, the power-law scaling model from the last homework. Which terms in the model are parametric, and which are non-parametric?
+(b) (2 points point) What R command did you use to fit this? 00:02 Monday 18th April, 2016
+685
+(c) (d)
+(e) (f)
+A.15. NICEDEMOCITY,BUTWILLITSCALE?
+(2 points) Report your estimated values for α0, b, and the residual stan- dard error.
+(6 points) Provide plots of each of the four partial response functions fj . Compare them to the plots from question 2 — do they suggest the same relationships between industry shares and the level of productivity, and if not, how do they differ? Hint: help(plot.gam,package="mgcv")
+(5 points) Do the residuals seem to have a Gaussian distribution? (Justify your answer.)
+(5 points) Running summary on your fitted model will produce output which includes approximate standard errors and p-values for the para- metric terms, assuming homoskedastic Gaussian noise. What standard error and p-value does it report for b? Is that term significant? Do you think you can trust those calculations in this case?
+4. Predictive comparisons
+(a) (5 points) Take the fitted power-law scaling model from the last home- work. (If you were unable to complete that homework, follow the solu- tions.) For each city, compute the predicted change in ln y from increasing that city’s population by 10%. Report the average change over all cities.
+(b) (5 points) Repeat this calculation, for the cities where complete data is available, for the model you fit in Problem 3, assuming that only popula- tion changes.
+(c) (5 points) Do the two models seem to lead to different conclusions about the effect of population on productivity? Explain
+5. Model comparisons
+(a) (3 points) What is the in-sample mean squared error, for lny, of the addi- tive model you fit in Problem 3? How much smaller is it than the linear (power law) model from the last homework? Explain why the additive model should always have a smaller in-sample error than the linear model.
+(b) (11 points) Describe, concisely and in your own words, a technique for determining whether the additive model from Problem 3 is better able to generalize than the pure power law model. Explain why this technique should be reliable here. (You are free to use a method from 36-401, if you can explain why it is applicable.)
+(c) (11 points) Implement this comparison and report your results. Which model is favored?
+6. Evaluation
+(a) (10points)Basedonwhatyouhavedonesofar,doesitseemthatcitysize directly effects productivity? Specifically, if an American city wanted to increase its per-capita economic output, should it try to increase popula- tion, or change its industries?
+00:02 Monday 18th April, 2016
+A.16. FAIR’SAFFAIRS 686
+(b) (5 points) Suggest additional data, models or comparisons which could improve your analysis.
+A.16 Fair’s Affairs
+In 1969, the magazine Psychology Today did a survey of its readers that included ques- tions about (among other things) how often the respondents had had extra-marital sex in the previous twelve months. In 1978 the economist Ray C. Fair used this data to develop a “theory of extramarital affairs” (Fair, 1978)27, with the idea that people optimize a trade-off between working, spending time with their spouse, and spending time with a “paramour”. The model and data have become very well known (there are at least a hundred later papers and books which reference it), and is available as Affairs in the package AER on CRAN.
+The variable affairs records the answer to “How often did you engage in extra- marital sexual intercourse during the past year”, with values of “once a month”, or more frequently, all coded as 12. Other variables are sex, age, how many years the respondent had been married28, whether they had children, how religious they were (on a scale of 1–5), their level of education, how much prestige their occupation had (on a scale of 1–7), and how happy they were with their marriage (on a scale of 1–5).
+1. (30 points) Two specifications
+(a) (15 points) Using logistic regression, fit a model for the number of times respondents said they had extramarital sex during the previous year. De- scribe, in words, the predictions of the model. Which variables are signif- icant predictors?
+(b) (15points)Repeat(1a),butuselogisticregressiontofitamodelforwhether respondents said they had extramarital sex at all during the previous year.
+2. (10 points) Are the same variables significant in both models in problem 1? Do they have the same signs in both models? Should the models match in this way? Explain.
+3. (20 points) Comparing predictions
+(a) (5 points) For each person in the data set, calculate the predicted proba-
+bility, under both models, that they did not have an affair.
+(b) (10 points) Plot these against each other. Describe the plot in words.
+(c) (5points)Dothemodelsagreewitheachotherintheirpredictions?Should they? Explain.
+4. (20 points) Calibration
+27This paper also used a similar survey of readers of Redbook in 1974, not part of this data set.
+28Prof. Fair removed respondents who had never married, or had married more than once. 00:02 Monday 18th April, 2016
+￼
+A.17. HOWTHENORTHAMERICANPALEOFAUNAGOTACROOKIN
+687
+(a)
+(b)
+(c) (d)
+ITS REGRESSION LINE
+(2 points) Consider all the people for whom the predicted probability of an affair, according to the model from problem (1a), is less than 10%. What fraction of them report having affairs?
+(3points)Repeatthiscalculationforpredictedprobabilitiesbetween10% and 20%, 20% and 30%, etc. Plot the actual frequencies against the pre- dicted probabilities.
+(5 points) Make a similar plot for the other model. (You can combine the plots, if the result is clear.)
+(10 points) For which model do the predictions seem to match the data best? Explain with reference to your plots.
+5. (10 points) Download Fair’s paper and read Table I (p. 53). Does it make sense to use a linear response for all of the variables (as in problem 1 above), or would it be better to treat some variables as categorical? Explain.
+6. (10 points) Evaluation
+(a) (5 points) Do either of these models seem to provide an adequate descrip-
+A.17
+tion of the data? (Explain.) If not, what else could one try?
+(b) (5 points) Is it reasonable to use this data to develop theories about con- temporary behavior? Explain.
+How the North American Paleofauna Got a Crook in Its Regression Line
+Our problem set this week concerns an important question for evolutionary biology and paleontology. It has been argued that larger organisms tend to have selective ad- vantage over smaller ones of the same species, but larger bodies demand more special- ized internal structure, more “division of labor”, than small ones, indirectly driving the evolution of increased biological complexity (Bonner, 1988). To evaluate this, it is important to know whether species tend to get larger over evolutionary time, and, if so, to characterize this accurately.
+Our data set this week is taken from the North American Mammalian Paleofau- nal Database, which contains information on the typical body mass of about 2000 living and extinct species of mammals native to North America. (You can find it on the website, http://www.stat.cmu.edu/~cshalizi/uADA/13/hw/04/nampd. csv.) Specifically, the columns of the data give: the scientific name of the species; the natural logarithm of its typical body mass (measured in grams); the natural log- arithm of the mass of its ancestor (in grams); how long ago it first appeared in the fossil record (in millions of years); and how recently it last appeared (in millions of years; an NA in this column indicates the species is still alive). We will model how the change body mass is related to the body mass of the ancestral species. In particu- lar, paleontologists have suggested that the correct model relating change in log mass to ancestral log mass should be piece-wise linear: a downward-sloping line for small
+00:02 Monday 18th April, 2016
+A.17. HOWTHENORTHAMERICANPALEOFAUNAGOTACROOKIN ITS REGRESSION LINE 688
+ancestral log masses, and flat for larger ancestral masses. In this problem set, you will fit that model, and examine its predictions.
+1. (10) Basics
+(a) (5) Load the data. Create a vector which gives each species’ change in log body mass from its ancestor, and add it to the data frame as a new column. Explain, in your own words, what it would mean for a species to have a value of +0.7 in this column. Check that this column has NA values in the correct places. Explain how you know that those are the correct places. Remove all the rows with NA values for the change in log mass, and use this cleaned version of the data for all subsequent parts of the assignment.
+(b) (5) Plot the change in log body mass versus ancestral log body mass. De- scribe the plot briefly.
+2. (10) Linear model
+(a) (2)Linearlyregressthechangeinlogbodymassontheancestrallogbody
+mass. Report the coefficients to reasonable precision.
+(b) (3) Create a new figure which is the scatter-plot from problem 1b, plus your fitted regression line.
+(c) (5) Based on the estimates 2a and the plot from 2b, does this model sup- port or undermine the idea that new species tend to be larger than their ancestors? Explain.
+3. (15) Piecewise linear model
+(a) (5) The piece-wise linear model predicts the following mean response as a
+function of the input x:
+yˆ(x) = c if x ≥ d
+􏰝a+bx ifx≤d
+Assuming that this is continuous at d , solve for a in terms of b , c and d .
+Explain why, in this application, it is reasonable to assume continuity.
+(b) (10) Write a function in R, called29 deac, that takes in a vector of numbers x, and three parameters b, c, and d, and returns the prediction of the model at each value of x.
+Check that your deac function is working properly by seeing that when b = −1, c = 0.05 and d = 2, giving x=c(1,1.5,3) outputs
+        [1] 1.05 0.55 0.05
+Plot deac, with those parameters, as x goes over the range (0, 4). Does it look right?
+Hints: ifelse for writing deac, curve for plotting.
+29From the initials of the scientists who proposed this model; they didn’t give it a name. 00:02 Monday 18th April, 2016
+￼
+A.17. HOWTHENORTHAMERICANPALEOFAUNAGOTACROOKIN 689 ITS REGRESSION LINE
+4. (15) Because deac varies nonlinearly with parameter d, we cannot estimate it by linear regression. However, we can still estimate the parameters by least squares. To do this, we need to write a function, make a starting guess about the parameters, and use the built-in optimization function optim (see recipe 13.2 in The R Cookbook).30. The following function fits the model to a data set by numerically minimizing the sum of squared errors:
+     my.start <- c(b=-1,c=0.2,d=10)
+     fit.a.deac <- function(data,start=my.start) {
+       sse <- function(par) {
+         preds <- deac(data$ln_old_mass,par[1],par[2],par[3])
+         sum((data$delta_ln_mass - preds)^2)
+       }
+       fit <- optim(par=start,fn=sse,method="Nelder-Mead")
+       coefficients <- fit$par
+       fitted <- deac(data$ln_old_mass,coefficients[1],coefficients[2],
+         coefficients[3])
+       residuals <- data$delta_ln_mass - fitted
+       mse <- mean(residuals^2)
+       return(list(coefficients=coefficients,fitted=fitted,residuals=residuals,
+         mse=mse,data=data))
+     }
+(See online for the commented version; you’ll want to source that, rather than typing this in and adding original errors.)
+(a) (7) Explain what the inner function, sse, does.
+(b) (8) What sort of output does fit.a.deac give — a vector, a list, an array, what? What do the various components of the output represent, in terms of the statistical problem?
+5. (15) Starting positions The code given above looks for a vector of initial param- eters called my.start, if no other starting point is supplied. The line before the function makes up some values for my.start; they are bad ones. We will see in a later problem set that a reasonable guess for d is about 5.
+(a) (5)Usethismore-reasonablevalueofdtogetaroughguessforcbytaking the average change in log mass over all animals whose ancestral log mass exceeds d. Explain why this is a reasonable way to guess at c.
+(b) (5) Get a rough guess for b by linearly regressing the change in log mass on ancestral log mass for animals where the ancestral log mass is less than d . Explain why this is a reasonable way to guess at b .
+30R has a built-in function, nls, for such “nonlinear least-squares” estimation, working more like lm. Unfortunately, nls can be flaky when the model doesn’t have continuous derivatives, which is the case here. Besides, writing your own code builds character.
+00:02 Monday 18th April, 2016
+￼
+A.18. HOWTHEHYRACOTHERIUMGOTITSMASS 690
+(c) (5) Re-define my.start to contain your improved guesses for b , c and d . Run fit.a.deac to get a fitted model, which you should call nampd.deac. Plot the fitted values as a function of log ancestral mass on a scatter-plot of change in log mass versus log ancestral mass.
+6. (20) Bootstrapping will continue until morale improves. Use resampling of resid- uals, not cases, in both parts. Note: You can use the same resampled data-frames for both parts of this problem, but it needs more clever programming. 1000 bootstrap replicates takes 1–2 minutes on my computer.
+(a) (10)Findbootstrapstandarderrors,and95%confidenceintervals,forthe parameters b , c and d . Report all these quantities.
+(b) (10) Find 95% bootstrap confidence bands for the fitted curve, and add them to your plot from problem 5c.
+7. (15)Linearvs.PiecewiseLinearOnewaytocomparetwomodelsistoseewhich one can predict the other’s parameter values. We will compare the simple lin- ear model from problem 2a with the piecewise linear model deac model from problem 5c.
+A.18
+How the Hyracotherium Got Its Mass AGENDA: Using nonparametric smoothing to check parametric mod-
+(a) (b) (c)
+(5) Simulate the fitted deac model, using resampling of residuals, and es- timate the linear model on the simulation. What coefficients do you esti- mate? Are they compatible with the ones you estimated from the data?
+(5) Simulate the fitted linear model, using resampling of residuals, and estimate the deac model on the simulation. What coefficients do you get? Are they compatible with the ones you estimated from the data?
+(5) Use five-fold cross-validation to compare the linear model from prob- lem to the piecewise-linear deac model. Which one predicts mass changes better?
+els; more practice with simple simulations and function-writing.
+We continue to work with the fossil data set from §A.17. As mentioned there, some paleontologists have suggested that the right curve relating change in log mass to ancestral log mass should be piece-wise linear and homoskedastic: a downward- sloping line for small ancestral log masses, flat for larger ancestral masses, and con- stant conditional variance:
+􏰝 a+bx+ε ifx≤d Y= c+εifx≥d
+E[ε|x] = 0 Var[ε|x] = σ2
+00:02 Monday 18th April, 2016
+691 A.18. HOWTHEHYRACOTHERIUMGOTITSMASS
+In the last problem set, you fit that model; in this one, you will see whether the data support non-linear corrections.
+You will first need to load the data from the other problem set, and add the col- umn of change in log mass to the data frame.
+The mgcv package is recommended for the additive model in Problem 5. Earlier problems call for spline smoothing, and can be done with either the smooth.spline function or with the gam function.
+1. (10) Plotting the Parametric Model
+(a) (5)Makeascatter-plotshowingthechangeinlogmassasafunctionofthe
+log ancestral mass.
+(b) (5)Addtheestimatedpiecewiselinearmodelfromhomework4.Youmay refer to the solutions for code and parameter estimates, but must explain, in your own words, any code you borrow from there.
+2. (25) Residual inspections
+(a) (5) Calculate the residuals of the estimated piecewise linear model and plot them against the log ancestral mass. Describe any patterns to the plot in words; you should address whether the model systematically over- or under- predicts in certain ranges of ancestral mass, but there may be other important features.
+(b) (5)Thecolumnfirst_appear_Myalistshowmanymillionsofyearsago each species first appeared. Plot the residuals against this variable; de- scribe any patterns.
+(c) (5)Plotthesquaredresidualsagainstthelogancestralmass.Addasmooth- ing spline. Explain whether the scatter-plot and the spline show evidence of heteroskedasticity.
+(d) (5) Plot the squared residuals against date of first appearance and add a smoothing spline. Explain whether the scatter-plot and the spline show evidence of heteroskedasticity.
+(e) (5) Plot the histogram of the residuals (not the squared residuals). Are they Gaussian? Should they be, under the model?
+3. (10) A nonparametric alternative
+(a) (7) Fit a spline regression of the change in log mass against log ancestral mass. Plot this spline on the same graph as the data and the estimated piece-wise linear model. Compare, in words, the shape of the spline to that of the parametric model.
+(b) (3)Findthein-sampleroot-mean-squareerrorofboththeparametricmodel and the smoothing spline. Which fits better?
+4. (20) Testing parametric forms
+00:02 Monday 18th April, 2016
+All of this is shameless ripped off from http://arxiv.org/ abs/0901.0251 but Aaron said it was OK
+A.19. HOWTHERECENTMAMMALSGOTTHEIRSIZEDISTRIBUTION692
+(a) (3) Write a function to fit the smoothing spline to a data set. Check that it works by making sure it gives the right answer on the original data.
+(b) (2) Write a function to calculate the MSE of a fitted smoothing spline. Check that it works by making sure it gives the right answer on the orig- inal data.
+(c) (5)WriteafunctiontotakeinadatasetandreturnthedifferenceinMSEs between the parametric model and the smoothing spline. Check that it works by making sure it gives the right answer on the original data.
+(d) (5)Writeafunctiontosimulatefromtheestimatedpiecewise-linearmodel by resampling the residuals. You can borrow from the solutions to home- work 4, but must explain, in your own words, how that code works. How can you check that the simulation works?
+(e) (5) Combine your functions to draw 1000 samples from the distribution of this test statistic, under the null hypothesis that the parametric model is right. What is the p-value of this test of the null hypothesis?
+5. (25) Additional Variables The piecewise linear model implicitly assumes that the relationship between ancestral mass and change in mass is the same at all times. An alternative is that this relationship has itself evolved.
+(a) (5) Estimate an additive model which regresses the change in log mass against the log ancestral mass and the date of first appearance. Plot the two partial response functions, and describe, in words, the shape of the curves. Compare the shape of the partial response function for log ances- tral mass to the spline curve from Problem 3a.
+(b) (4)Doestheestimatedadditivemodelsupportorunderminetheideathat the relationship between ancestral mass and descendant mass is invariant over time? Explain.
+(c) (1) What is the in-sample root-mean-square error of the additive model?
+(d) (10) Explain what you would have to change from your code in Problem 4 to test the piecewise-linear model against the additive model, and what pieces of code could stay the same.
+(e) (5) Write the new code called for by Problem 5d and run the test. What is the p-value?
+6. (10)Isthepiecewise-linear,homoskedasticparametricmodelanacceptablerep- resentation of the data? Justify your answer by referring to your work above.
+A.19 How the Recent Mammals Got Their Size Dis- tribution
+Problem sets A.17 and A.18 used regression to study how the typical mass of (mam- malian) species changes over evolution: on average new species are heavier than their
+00:02 Monday 18th April, 2016
+69A3.19. HOWTHERECENTMAMMALSGOTTHEIRSIZEDISTRIBUTION
+ancestors, especially if the ancestor was very small, but with a wide variation. If we combine this with the facts that new species branch off from old ones, and that sometimes species go extinct without leaving descendants, we get a model for how the distribution of body masses changes over time. It’s not feasible to say much about this model mathematically, but we can simulate it, and check the simulated distribution against the real distribution of body masses today.
+The objects in this model are species, each described by its typical mass. (We assume that this does not change over the lifespan of the species.) Each species can produce new species, who mass is related to that of its ancestor according to our previously-learned regression model, or go extinct. As time goes on, the distribution of body masses will fluctuate randomly, but should do so around a steady, character- istic distribution.
+More specifically, each species i has a mass Xi , which is required to be between xmin, the smallest possible mass for a mammal, and xmax, the largest possible mass. At each point in time, one current species A is uniformly selected to evolve into exactly two new species. Each descendant has a mass XD which depends on the mass of its ancestor, XA, according to the regression model, plus independent noise:
+􏰝 a+blogXA iflogXA≤d
+logXD =logXA+Z+ c iflogXA≥d (A.6)
+where Z ∼ 􏰄 (0,σ2). Continuity means that a = c − bd; we also need to impose the constraints that xmin ≤ XD ≤ xmax.
+Species become extinct with a probability that depends on their body mass, pe(x)=βxρ (A.7)
+Unless otherwise specified, you should use σ2 = 0.63; xmin = 1.8 grams and xmax = 1015 grams; ρ = 0.025; β = 1/5000; and the values of b, c and d from the solutions to Homework 4.
+1. (10) Write a function, rdeac.1, which takes as inputs a single ancestral mass XA (not logXA), the parametersb, c, d and σ2, and the limits xmin and xmax. It shouldgenerateacandidatevalueforXD (notlogXD)fromEq.A.6andreturn it if it is between the limits, otherwise it should discard the candidate value and try again.
+(a) (2) Set XA to 40 grams and check, by simulating many times, that the out- put is always between xmin and xmax, even when those values are brought close to 40 grams.
+(b) (8) Simulate a single XD value for 100 values of XA evenly spaced between 1 and 100 grams. Treat this as real data and re-estimate the parameters b , c and d according to the methods of Homework 4; are they reasonably close to those in the simulation?
+2. (10) Write a function, rdeac, which takes the same inputs as rdeac.1 plus an integer n, and returns a vector containing n independent draws from this
+00:02 Monday 18th April, 2016
+A.19. HOWTHERECENTMAMMALSGOTTHEIRSIZEDISTRIBUTION694
+distribution. We will test this with n = 2, but your code must be more general for full credit.
+(a) (4) Check, by simulating, that the first component of the returned vector has the same marginal distribution as the output of rdeac.1.
+(b) (4)Checkthatthesecondcomponentofthereturnedvectorhasthesame marginal distribution as the first component.
+(c) (2) Check that the two components are uncorrelated.
+3. (10) Write a function, speciate, which takes the same arguments as rdeac.1, except that XA is replaced by a vector of ancestral masses. The function should select one entry from the vector to be XA, and generate two independent values of XD from it. One of these should replace the entry for XA, and the other should be added to the end of the vector.
+(a) (2) Check, by simulating, the output always has one more entry than the input vector of masses, no matter how long the input is.
+(b) (8) If the input has length n, check that n − 1 of the entries in the output match the input.
+4. (15)Writeafunction,extinct.probs,whichtakesasinputsavectorofspecies masses, an exponent ρ, and a baseline-rate β, and returns the extinction prob- ability for each species, according to Eq. A.7.
+(a) (1) Check that if the input masses are 2 grams and 2500 grams, with the default parameters the output probabilities ≈ 2.0 × 10−4 and 2.4 × 10−4 respectively.
+(b) (2) Check that if ρ = 0, then the output probabilities are always β, no matter what the masses are.
+(c) (2) Check that if there input masses are all equal, then the output proba- bilities are all the same, no matter what ρ and β are.
+(d) (10)Writeafunction,extinction,whichtakesavectorofspeciesmasses, ρ and β, and returns a possibly-shorter vector which removes the masses of species which have been selected for extinction. Hint: What does rbinom(n,size=1,prob=p) do when p is a vector of length n?
+5. (15) Evolve!
+(a) (5) Write a function, evolve.1, which takes as inputs a vector of species masses, b, c, d, σ2, xmin, xmax, ρ and β, and first does one speciation step, then one round of extinction, and returns the resulting vector of species masses.
+(b) (5) Write a function, evolve, which takes the same inputs at evolve.1, plus an integer t , and iterates evolve.1 t times.
+(c) (5) How do you know that your functions are working properly? 00:02 Monday 18th April, 2016
+695 A.20. REDBRAIN,BLUEBRAIN 6. (15) Re-running history
+(a) (5) Run evolve starting from a single species with a mass of 40 grams for t = 2 × 105 steps. Save the output vector of species masses as y1. Plot the density of y1.
+(b) (5) Repeat the last step to get a different vector y2. Does it have the same distribution as y1? How can you tell?
+(c) (5) Change the initial mass to 1000 grams and get a vector of final masses y3. How does its distribution differ from that of y1?
+7. (25) The data file MOM_data_full.txt gives the masses of a large (and represen- tative) sample of currently-living species of mammals. The column mass gives the mass in grams; the columns species, genus, family, order and code are identifiers for the particular species, which do not matter to us. Finally, the column land is 1 for species which live on land and 0 for those which live in the water.
+A.20
+(a) (b)
+(c)
+(5) Load the data and plot the density of masses for land species.
+(10) Describe, in words, how the distribution of current species masses
+compares to that produced by the simulation model in y1.
+(10) Use the relative distribution method from Chapter 15 to compare the actual distribution to the distribution of y1. Describe the results and what they say about how the data differ from the model.
+Red Brain, Blue Brain
+The data set n90_pol.csv contains information on 90 university students who par- ticipated in a psychological experiment designed to look for relationships between the size of different regions of the brain and political views. The variables amygdala and acc indicate the volume of two particular brain regions known to be involved in emotions and decision-making, the amygdala and the anterior cingulate cortex; more exactly, these are residuals from the predicted volume, after adjusting for height, sex, and similar anatomical variables. The variable orientation gives the subjects’ loca- tions on a five-point scale from 1 (very conservative) to 5 (very liberal). orientation is an ordinal but not a metric variable, so scores of 1 and 2 are not necessarily as far apart as scores of 2 and 3.
+1. (10) Joint density of brain regions
+(a) (5) Using npudens, estimate a joint probability density for the volumes
+of the amygdala and the ACC. What are the bandwidths?
+(b) (5) Plot the joint density. Does it suggest the two volumes are statistically independent? Should they be? You you may use three dimensions, color, contours, etc., for your plot, but you will be graded, in part, on how easy to read it is.
+00:02 Monday 18th April, 2016
+A.20. REDBRAIN,BLUEBRAIN 696
+2. (15) Predicting brain sizes from political views
+(a) (1) Ignoring the fact that orientation is an ordinal variable, what is the correlation between it and the volume of the amygdala? Between orientation and the volume of the ACC?
+(b) (4) Using case resampling, give 95% bootstrap confidence intervals for these correlations.
+(c) (2) The function rank, applied to a data vector, returns the vector of
+ranks, where 1 indicates the smallest value, 2 the next-smallest, etc. What
+are the correlations between the ranks of orientation and the ranks of
+amygdala? Between orientation and acc? Hint: What does cor(x,y,method="spearman") do?
+(d) (3)Usingcaseresampling,give95%bootstrapconfidenceintervalsforthe rank correlations.
+(e) (5)Usingnpcdens,plottheconditiondensityofthevolumeoftheamyg- dala as a function of political orientation. Do the same for the volume of the ACC. Make sure that in both cases you are treating orientation as an ordinal variable.
+3. (5) Creating a binary response variable
+(a) (1)Createavector,conservative,whichis1whenthesubjecthasorientation
+≤ 2, and 0 otherwise.
+(b) (2) Explain why the cut-off was put at an orientation score of 2 (as
+opposed to some other cut-off).
+(c) (1) Check that your conservative vector has the proper values, without manually examining all 90 entries.
+(d) (1) Add conservative to your existing data frame.
+4. (10) Logistic regression
+(a) (5)Fitalogisticregressionofconservative(notorientation)onamygdala and acc. Report the coefficients and explain what they mean.
+(b) (5) Using case resampling, give bootstrap standard errors and 95% confi- dence intervals for the coefficients.
+5. (10)Generalizedadditivemodel.Fitageneralizedadditivemodelforconservative on amygdala and acc. (Be sure to smooth both the input variables.) Make sure you are using a logistic link function. Report the intercept, and plot the partial response functions, and explain what they all mean (be careful!).
+6. (10) Kernel conditional probability estimation
+(a) (4) Using npcdens, find the conditional probability of conservative given amygdala and acc. Make sure npcdens treats conservative as a categorical variable and not a continuous one. Report the bandwidths.
+00:02 Monday 18th April, 2016
+697 A.21. BROUGHTTOYOUBYTHELETTERSD,AANDG
+(b) (3) Plot the estimated conditional probability that conservative is 1, with acc set to its median value and amygdala running over the range [−0.07, 0.09]. (The plotting range for amygdala exceeds the range of val- ues found in the data.) Hint: your code will need to provide values for acc, for amygdala and for conservative (why?).
+(c) (3) Plot the estimated conditional probability that conservative is 1, with amygdala set to its median value and acc running over the range [−0.04, 0.06]. (This plotting range also requires extrapolating outside the data.)
+7. Probability surfaces (10) For each of the three models, create a plot showing the estimated probability that conservative is 1, given amygdala or acc. The range for amygdala should be [−0.07,0.09], and the range for acc should be [−0.04, 0.06]. Compare and contrast the three plots.
+Contour, wireframe and heatmap/level-plot plots are all acceptable, but all ac- cess must be clearly labeled with numerical scales, and, if you use color, there must be a color key.
+Hint: use predict; be careful that you are predicting the right thing.
+8. Calibration(10)Makecalibrationplotsforeachofthethreemodels,asinChap- ter 11. Which models (if any) seem reasonably calibrated? Explain with refer- ence to your plots.
+9. Classification(10)Themodelsfromproblems4–6predictprobabilitiesforconservative. If we have to make a point prediction of whether someone is conservative or
+not, we should predict 1 if the probability is ≥ 0.5 and 0 otherwise.
+(a) (5)Findsuchpredictionsforeachsubject,undereachofthethreemodels. What fraction of subjects are mis-classified? What fraction would be mis- classified by “predicting” that none of them are conservative?
+(b) (5)Re-calculatetheclassificationerrorratesusingleave-one-outcross-validation for each model.
+See also §15.2.2.1 for a different analysis of this data set.
+A.21 Brought to You by the Letters D, A and G
+The file sesame.csv contains data on an experiment which sought to learn whether regularly watching Sesame Street caused an increase in cognitive skills, at least on av- erage. The experiment consisted of randomly selecting some children, the treated, and encouraging them to watch the show, while others received no such encourage- ment. The children were tested before and after the experimental period on a range of cognitive skills. (Table A.2 lists the variables.)
+For questions that ask you to write code or manipulate data, include the relevant commands in the body of your answer.
+00:02 Monday 18th April, 2016
+A.21. BROUGHTTOYOUBYTHELETTERSD,AANDG 698
+1. Data manipulation (5) For each of the skills variables, find the difference be- tween pre-test and post-test scores, and add the corresponding column to the data frame. Name these columns deltabody, deltalet, etc. Describe and run a check that the values in these columns are at least approximately right (without examining them all).
+2. Naive comparison (5)
+(a) (2) Find the mean deltalet scores for children who were regular watch- ers, and for children who were not regular watchers. Provide standard errors in these means as well, and the standard error for the difference in means.
+(b) (3) What must be assumed for the difference between these means to be a sound estimate of the average causal effect of switching from not watching to regularly watching Sesame Street? Is that plausible? Suggest a way the assumption could be tested.
+3. “Holding all else constant” (15)
+(a) (5) Linearly regress the change in reading scores on regular watching, and all other variables except id, viewcat, and the post-tests.Report the coef- ficients and bootstrap standard errors to reasonable precision. (Be careful of categorical variables.)
+(b) (3) Explain why id, viewcat, and the post variables had to be left out of the regression. (The reasons need not all be the same.)
+(c) (2) What would someone who had only taken 401 report as the average effect of making a child become a regular watcher of Sesame Street?
+(d) (5) What would we have to assume for this to be a valid estimate of the average causal effect? Is that plausible?
+4. (20) Consider the graphical model in Figure A.1.
+(a) (10) Find a set of variables which satisfies the back-door criterion for esti-
+mating the effect of regular watching on deltalet.
+(b) (5) Linearly regress deltalet on regular and the variables you selected in 4a. What is the corresponding estimate of the average effect of causing a child to become a regular watcher? Give a bootstrap standard error for this average effect.
+(c) (5) Do a kernel regression for the same variables. (Be careful about which variables are categorical.) Find the corresponding estimate of the average effect of causing a child to become a regular watcher. Give a bootstrap standard error for this effect.
+5. (25) Consider the graphical model in Figure A.2. 00:02 Monday 18th April, 2016
+699
+(a)
+(b) (c)
+(d) (e)
+A.21. BROUGHTTOYOUBYTHELETTERSD,AANDG
+(5) There is at least one set of variables which meets the back-door crite- rion in Figure A.2 which did not meet it in Figure A.1. Find such a set, and explain why it meets the criterion in the new graph, but did not meet it in the old one.
+(5) Explain whether or not the set of control variables you found in 4a still works in the new graph.
+(5) Linearly regress deltalet on regular and the variables you selected in 5a. What is the corresponding estimate of the average causal effect of causing a child to become a regular watcher?
+(5) Do a kernel regression for the same variables. (Be careful about which variables are categorical.) Find the corresponding estimate of the average effect of causing a child to become a regular watcher.
+(5) Find a pair of variables which are conditionally (or marginally) inde- pendent in Figure A.1 but are not in Figure A.2, and vice versa. Explain why. Note: Both the conditioned and conditioning variables must be ob- served; the point is to find something which could be checked with the data.
+6. Instrumental encouragement (20) Some children were randomly selected for en- couragement to watch Sesame Street. This is encoded in the variable encour.
+(a) (3) Explain why encour is a valid instrument for the effect of regular watching on deltalet in Figure A.1. Do you need to control for any- thing else?
+(b) (2) Explain why encour is a valid instrument in Figure A.2. Do you need to control for anything?
+(c) (5) Describe a DAG in which encour would not be a valid instrument.
+(d) (5)Estimatetheaverageeffectondeltaletofcausingachildtobecomea regular watcher using encour and the Wald estimator (see notes). Provide a standard error using bootstrapping.
+EXTRA CREDIT (5) Test whether either of the two conditional independence relations from 5e hold in the data.
+00:02 Monday 18th April, 2016
+A.21. BROUGHTTOYOUBYTHELETTERSD,AANDG 700
+￼id site
+sex
+age
+setting
+viewcat
+regular
+encour
+peabody
+prelet, postlet prebody, postbody preform, postform prenumb, postnumb prerelat, postrelat preclasf, postclasf
+subject ID number
+categorical; social background
+1: Disadvantaged inner-city children, 3–5 yr old
+2: Advantaged suburban children, 4 yr old
+3: Advantaged rural children, various ages
+4: Disadvantaged rural children
+5: Disadvantaged Spanish-speaking children
+male=1, female=2
+in months
+categorical; whether show was watched at home (1) or school (2) categorical; frequency of viewing Sesame Street
+1: watched < 1/wk
+2: watched 1 − −2/wk
+3: watched 3 − −5/wk
+4: watched > 5/wk
+0: watched < 1/wk, 1: watched ≥ 1/wk
+encouraged to watch = 1, not encouraged=0
+mental age, according to the Peabody Picture Vocabulary test
+(to measure vocabulary knowledge)
+pre-experiment and post-experiment scores on knowledge of letters pre-test and post-test on body parts
+pre-test and post-test on geometric forms
+tests on numbers
+tests on relational terms
+pre-test and post-test on classification skills
+(“one of these things is not like the others”)
+(“one of these things just doesn’t belong”)
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼TABLE A.2: Variables in the sesame data file. The pre- and post- experiment test scores are integers, but can be treated as continuous.
+00:02 Monday 18th April, 2016
+A.22. TEACHER,LEAVETHOSEKIDSALONE!(THEY’RETHE 701 CONTROL GROUP)
+A.22 Teacher, Leave Those Kids Alone! (They’re the Control Group)
+The Tennessee STAR project was a randomized experiment which sought to de- termine whether children learn more in classrooms with fewer students. Students within participating schools were randomly assigned to small (< 18 student) class- rooms, to ordinary-sized classrooms, and to ordinary classrooms where the teacher had an aide. The study began in kindergarten and continued through third grade. Students initially assigned to the small-class condition for the most part stayed in it (there were a few unavoidable exceptions for administrative reasons); students as- signed to the two large-class conditions were re-randomized in the second year of the study, and thereafter changed only minimally. New students entering the schools in the study were randomized into the three conditions. Teachers were also randomized as to which kind of classroom they got. Learning was assessed (in the initial phase of the project) through annual standardized tests of reading and math.
+A standard version of the data set is available as STAR in the AER package, which you may need to install. See help(STAR) for the definitions of the variables named below.
+General: Whenever you are asked to give standard errors, you should either boot- strap or provide an explanation of why, in this particular situation, R’s default cal- culations of standard errors should be reliable. Unless explicitly called for, do not report R’s p-values, or any significance stars.
+1. (35) Causality? Reverse causality?
+(a) (5) Linearly regress readk and mathk on stark. Report the coeffcients and standard errors. Explain why a non-parametric regression would be redundant here.
+(b) (5) Linearly regress read3 and math3 on stark. Report the coefficients and their standard errors as above.
+(c) (5)Explainhowarandomizedtreatmentreceivedinkindergartencanpre- dict test scores three years later.
+(d) (5) Linearly regress readk and mathk on star3. Report the coefficients and their standard errors as above.
+(e) (5) Explain how a treatment received in the third grade can predict test scores in kindergarten, three years earlier.
+(f) (5)Toestimatethecausaleffectofthestarkonreadkandmathk,should we control for star3? (Explain.)
+(g) (5)Toestimatethecausaleffectofthestar3onread3andmath3,should we control for stark? (Again, explain.)
+2. (15) For each year from kindergarten through third grade, provide an estimate of the expected reading and math scores when students are assigned to a regular classroom, a small classroom, and a regular classroom with a teacher’s aide.
+00:02 Monday 18th April, 2016
+A.22. TEACHER,LEAVETHOSEKIDSALONE!(THEY’RETHE CONTROL GROUP)
+702
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼FIGURE A.1: First DAG. 00:02 Monday 18th April, 2016
+preform prelet prebody
+regular
+prerelat
+preclasf prenumb
+deltaform deltalet
+deltabody
+deltarelat
+deltaclasf deltanumb
+setting
+encour
+site
+peabody
+U
+703
+A.22. TEACHER,LEAVETHOSEKIDSALONE!(THEY’RETHE CONTROL GROUP)
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼FIGURE A.2: Second DAG. 00:02 Monday 18th April, 2016
+prerelat preclasf
+prenumb regular
+prelet
+prebody preform
+deltarelat
+deltaclasf deltanumb
+deltalet
+deltabody deltaform
+encour setting
+site
+peabody
+U
+A.23. ESTIMATINGWITHDAGS 704
+Include an estimated standard error for each of these. You may present your results either as a table or graphically; make sure it’s easy to read and compare across conditions.
+Explain how you obtained your estimates, and why that procedure is, for this data, a valid way of estimating the desired causal effect. If you have to control or adjust for any covariates to get the causal effects, explain which ones you used and why.
+3. (15) Heterogeneity of effects There is considerable interest in knowing whether the effects of smaller classes are different for different groups of students.
+(a) (10) Report estimates of the effect of the three classroom sizes on kinder- garten reading and math scores, for all six ethnic sub-groups in the data. Include standard errors.
+(b) (5) Explain why, to get such estimates from linear regression, the right models would be of the form lm(readk~stark*ethnicity), and why lm(readk~stark+ethnicity) would be uninformative.
+4. (25) Observational inference in an experimental study Students whose families are sufficiently poor qualify for free lunches at school. This is recorded in the variables lunchk through lunch3. We want to know whether being above or below this threshold level of poverty has a causal effect on student’s scores.
+A.23
+(a)
+(b) (c)
+(d)
+(5) Report the mean scores for reading and for math in each grade for stu- dents who do and do not qualify for free lunches (in that grade). Include standard errors.
+(5) If we want to estimate the effect of lunchk on kindergarten reading and math scores, does it make sense to control for stark? Explain.
+(10)Considerthefollowingvariables:gender,ethnicity,schoolk,experiencek, tethnicityk, systemk, schoolidk, lunch1. When estimating the ef-
+fect of lunchk on kindergarten test scores, which of these should be con-
+trolled for, which of them should not be controlled for, and which of
+them do you not have enough information to say? If you answer “not enough information” for any variables, what more would you have to know? (Be more specific than “the complete causal graph”.)
+(5) If we want to estimate the effect of lunchk on first-grade reading and math scores, under what assumptions should we control for readk and mathk? Under what assumptions should we not control for them?
+Estimating with DAGs
+This homework will illustrate some of the advantages of using a known DAG struc- ture. You will need to read the lectures on graphical models carefully in order to do it.
+00:02 Monday 18th April, 2016
+705 A.23. ESTIMATINGWITHDAGS
+Figure A.3 is an elaboration of the graph used in lectures. All problems refer to it, unless otherwise specified.
+The file fake-smoke.csv contains some (synthetic) data, for use in problem 5. 1. Parents and children (10 points)
+(a) (5 points) For each variable in the model, list its parents; or, if it has no parents, say so.
+(b) (5points)Foreachvariableinthemodel,listitschildren.(Somevariables have no children.)
+2. Jointdistributionsandfactorization(10points)Usingthegraph,listthesmallest collection of marginal and conditional distributions which must be estimated in order to get the joint distribution of all variables.
+3. Associations (20 points) Should there be a positive association, a negative as- sociation, or no association between the following variables? Explain with reference to the graph. (2 points each)
+(a) Yellowing of teeth and cancer?
+(b) Yellowing of teeth and cancer, controlling for smoking?
+(c) Yellowing of teeth and cancer, controlling for occupational prestige?
+(d) Yellowing of teeth and cancer, controlling for smoking and exposure to asbestos?
+(e) Smoking and cancer, controlling for the amount of tar in the lungs?
+(f) Asbestos and cancer, controlling for cellular damage?
+(g) Smoking and cancer, controlling for asbestos?
+(h) Smoking and asbestos, controlling for cellular damage?
+(i) Tar in lungs and cancer, controlling for asbestos, smoking, and yellowing of teeth?
+(j) Smoking and cancer, controlling for asbestos and occupational prestige?
+4. Using conditional independence to specify regressions (40 points)
+(a) (10 points) We wish to know the conditional risk of cancer given smok- ing. What other variables should be controlled for? Which other variables do not need to be controlled for?
+(b) (10 points) Using the fake-smoke.csv data from the class website, fit a logistic regression model for the risk of cancer given the level of smoking, controlling for any appropriate covariates.
+(c) (10 points) Using the same data set, fit another logistic regression for the risk of cancer using all the covariates. What does this say about the rela- tionship between smoking and cancer? Why is this different than what is implied by the model in 4b?
+00:02 Monday 18th April, 2016
+A.23. ESTIMATINGWITHDAGS 706
+￼Occupational Prestige
+￼￼￼--+
+￼￼￼Asbestos Exposure
+Amount of Smoking
+Access to Dental Care
+￼￼￼￼￼￼+
++
++
+Amount of Tar in Lungs
+++-
+Yellowing of Teeth
+￼￼Cellular Damage
+￼￼Cancer
+FIGURE A.3: Graphical model for use in all problems, except part of the last. Signs on arrows indicate the sign of the associations (not necessarily linear) between parents and children.
+00:02 Monday 18th April, 2016
+707 A.24. USEANDABUSEOFCONDITIONING
+(d) (5 points) A medical insurance company needs to predict the risk of can- cer among customers in order to set rates. Should it use the model from 4b or the one from 4c? Why? (Assume, for the sake of the problem, that the training data and the insurance customers are both representative samples of the general population.)
+(e) (5 points) A doctor wants to advise their patients about what actions to take to reduce their risk of cancer. Should they use the model from 4b or 4c? Why?
+5. (20 points) Consider the alternative graph in Figure A.4.
+(a) (10 points) Repeat problem 3 with the new graph. Clearly indicate in your response which associations differ for the two DAGs.
+(b) (10 points) Suggest an experiment, or an observational analysis, which could let us check which structure was right; explain, in terms of the graphs.
+6. (10 points) EXTRA CREDIT: Which DAG did the example data come from? How can you tell?
+A.24 Use and Abuse of Conditioning
+1. (30 points) Refer to figure [[1]] in Problem Set A.23.
+(a) (5 points) Using the back door criterion, describe a way to estimate the
+causal effect of smoking on cancer.
+(b) (5 points) Using the front door criterion, describe a different way to esti- mate the causal effect of smoking on cancer.
+(c) (5 points) Is there a way to use instrumental variables to estimate the causal effect of smoking on cancer in this model? Explain.
+(d) (5 points) Using your back-door identification strategy and the data file fromlasttime,estimatePr(cancer =1|do(smoking =1.5)).
+(e) (5 points) Repeat this using your front-door identification strategy.
+(f) (5 points) Do your two estimates of the casual effect match? Explain.
+2. (25 points) Take the model in Figure A.5. Suppose that X ∼ 􏰄 (0,1), Y = αX + ε and Z = β1X + β2Y + η, where ε and η are mean-zero Gaussian noise with common variance σ2. Set this up in R and regress Y twice, once on X alone and once on X and Z. Can you find any values of the parameters where the coefficient of X in the second regression is even approximately equal to α? (It’s possible to solve this problem exactly through linear algebra instead.)
+3. (25 points) Take the model in Figure A.6 and parameterize it as follows: U ∼ 􏰄 (0, 1), X = α1 U + ε, Z = βX + η, Y = γ Z + α2 U + ξ , where ε, η, ξ are
+00:02 Monday 18th April, 2016
+A.24. USEANDABUSEOFCONDITIONING 708
+￼Occupational Prestige
+￼￼￼--+
+￼￼￼Asbestos Exposure
+Amount of Smoking
+Access to Dental Care
+￼￼￼￼￼￼+
++
+Amount of Tar in Lungs
+++-
+Yellowing of Teeth
+￼Cellular Damage
+￼￼Cancer
+FIGURE A.4: An alternative DAG for the same variables.
+00:02 Monday 18th April, 2016
+709 A.25. WHATMAKESTHEUNIONSTRONG?
+￼￼X
+￼￼￼Z
+FIGURE A.5: DAG for problem 2.
+U
+FIGURE A.6: DAG for problems 3 and 4.
+independent Gaussian noises with mean zero and common variance σ2. If you regress Y on Z, what coefficient do you get, on average? If you regress Y on Z and X? If you do a back-door adjustment for X? (Approach this either analytically or through simulation, as you like.)
+4. (20 points) Continuing in the set-up of the previous problem, what coefficient do you get for X when you regress Y on Z and X? Now compare this to the front-door adjustment for the effect of X on Y .
+A.25 What Makes the Union Strong?
+Finding the factors which control the frequency and severity of strikes by organized workers is an important problem in economics, sociology and political science31.
+￼￼￼￼￼￼X
+Z
+￼￼￼31Or it used to be, anyway.
+00:02 Monday 18th April, 2016
+Y
+￼Y
+Source: Western (1996)
+A.25. WHATMAKESTHEUNIONSTRONG? 710
+Our data set, http://www.stat.cmu.edu/~cshalizi/uADA/12/hw/06/strikes. csv, kindly provided by a distinguished specialist in the field, contains information about the incidence of strikes, and several variables which are plausibly related to that, for 18 developed (OECD) countries during 1951–1985:
+• Country name
+• Year
+• Strike volume, defined as “days [of work] lost due to industrial disputes per 1000 wage salary earners”
+• Unemployment rate (percentage)
+• Inflation rate (consumer prices, percentage)
+• “parliamentaryrepresentationofsocialdemocraticandlaborparties”.(Forthe United States, this is the fraction of Congressional seats held by the Democratic Party.)
+• Ameasureofthecentralizationoftheleadershipinthatcountry’sunionmove- ment, on a scale of 0 to 132.
+• Union density, the fraction of salary earners belonging to a union (only avail- able from 1960).
+Note that some variables are missing (NA) for some cases.
+1. Estimate a linear model to predict strike volume in terms of all of the other
+variables, except country and year.
+(a) Report the coefficients, with 90% (not 95%) confidence intervals calcu-
+lated according to
+i. (2) The standard formulas
+ii. (9) Resampling of the residuals
+iii. (9) Resampling of the cases
+Do not use more digits than you can justify.
+(b) (10) Describe the meaning of the coefficients qualitatively. (I.e., do not write “A one unit change in foo produces a change of bar units in strike volume” over and over.)
+(c) (5) Rank the predictor variables from most to least important, with “im- portance” measured by the magnitude of the predicted change to strike volume in response to a 1% relative change of the predictor away from its mean value.
+32This measure really should be a constant for each country over the period, but having a variable with only 8 levels is trouble for the spline smoother used in Problem 3, so a very small amount of artificial noise (±0.005 at most) has been added to each value.
+00:02 Monday 18th April, 2016
+[[TODO: Fix ments]]
+point assign-
+￼
+711 A.25. WHATMAKESTHEUNIONSTRONG?
+(d) (5) Rank the predictor variables from most to least important in terms of predicted response to a 1 standard deviation change in the variable.
+(e) (5) Do the two rankings agree? Should they? Which one seems more reasonable for this problem?
+2. Some theories suggest that English-speaking countries have legal and political institutions which make strikes operate differently than in other industrialized countries. Figure out which countries in the data set are primarily English- speaking, create an indicator (dummy) variable for whether a case belongs to one of those countries, and add it to the data set.
+(a) (5) Fit a linear model in which the predictors from Problem 1 interact with the English-using variable. Report the new coefficients (to reason- able precision)
+(b) (5) Explain how (if at all) this model differs qualitatively from the model in Problem 1.
+(c) (5) Use five-fold cross-validation to compare this model to the model in Problem 1. Which one does better?
+3. Fitanadditivemodelforstrikevolumeasasmoothfunctionofallthevariables except country and year.
+(a) (5) Plot all the partial response functions. Do they agree qualitatively with the conclusions you drew from the model in Problem 1?
+(b) (5) Consider increasing each of the predictor variables by 1% from its mean, leaving the other variables alone. Rank the predictors according to the magnitude of this model’s predicted change in strike volume. Would the ranking be the same for a 1% decrease? Hint: use predict and a data frame with artificial data.
+(c) (5) Consider increasing each of the predictor variables by one standard deviation from its mean, leaving the other variables alone. Rank the pre- dictors according to the magnitude of this model’s predicted change in strike volume.
+(d) (5) Discuss the contrast (if any) between these rankings, and the corre- sponding ones for the linear model.
+4. (10) Use the methods of Chapter 10 to test whether the linear model from Problem 1 is well-specified against an additive alternative.
+5. Continuing past the training data
+(a) (2) What were the values of unemployment, inflation, union density, and left.parliament for the United States in 2009? Hint: You can get most of these from the last The Statistical Abstract of the United States.
+00:02 Monday 18th April, 2016
+A.25. WHATMAKESTHEUNIONSTRONG? 712
+6.
+(b) (4) Assuming the union centralization variable for the US in 2009 was 0, what strike volume was predicted by (i) the model from problem 1, (ii) the English-is-different model from problem 2, and (iii) the additive model from problem 3?
+(c) (4) The actual strike volume for the United States in 2009 was 0.8. Is this plausible under any of the models? Hint: How much do you expect actual values to differ from predicted values?
+(a) (5)Usepc()frompcalgtoobtainagraph,assumingallrelationsbetween variables are linear. Report the causal parents (if any) and children (if any) of every variable. If the algorithm is unable to orient one or more of the edges, report this, and in later parts of this problem, consider all the graphs which result from different possible orientations.
+Note: See http://bactra.org/weblog/914.html for help with installing pcalg. The most troublesome component is the Rgraphviz package. If you are unable to get Rgraphviz to work, you can still extract the in- formation from the fitted model returned by pc: if that’s pc.fit, then pc.fit@graph@edgeL is the “edge list” of the graph, listing, for each node, the nodes it has arrows to. With this information, you can make your own picture of the DAG.
+(b) (10) Linearly model each variable as a function of its parents. Report the coefficients (to reasonable precision), the standard deviation of the regression noise (ditto), and 95% confidence intervals for all of these, as determined by bootstrapping the residuals.
+(c) (10 total) You should find that strike volume and union density are not connected, but that there is at least one directed path linking them — either density is an ancestor of strike volume, or the other way around.
+i. (5) Find the expected change in the descendant from a one-standard- deviation increase in the ancestor above its mean value.
+ii. (5) Linearly regress the descendant on all the other variables, includ- ing the ancestor. According to this regression, what is the expected change in the descendant, when the ancestor increases one SD above its mean value and all other variables are at their mean values?
+(d) (15 total) Check the linearity assumption for each variable which has a parent. (Putting in interactions and/or quadratic terms is inadequate and will result in only partial credit at best.)
+i. (5) Describe your method, and why it should work.
+ii. (5) Report the p-value for each case, to reasonable precision.
+iii. (5) What is your over-all judgment about whether it is reasonable to model each endogenous variable as linearly related to its parents? If you need more information than just p-values to reach a decision, describe it.
+00:02 Monday 18th April, 2016
+713 A.26. AN INSUFFICIENTLY RANDOM WALK DOWN WALL STREET
+A.26
+(e) (10)Discusstheover-alladequacyofthemodel,onbothstatisticalgrounds (goodness-of-fit, appropriateness of modeling assumptions, etc.) and sub- stantive, scientific ones (whether it makes sense, given what is known about the processes involved).
+An Insufficiently Random Walk Down Wall Street
+In this assignment, you will work with a data set of historical values for the S&
+P 500 stock index, which also features in the notes. You will need to download
+SPhistory.short.csvfromtheclasswebsite.Thisdatasetrecordstheactualprices
+of the index, say Pt on day t, but in finance we actually care about the returns, Pt , Pt−1
+[[TODO: Brad DeLong (!) points out by e-mail that one should really define returns hereaslog((Pt+1+Dt+1)/Pt), where D is the dividend series — prices aren’t the only thing that matters with the S&P! Obtain a historical dividend series, or a dividend-adjusted price series.]]
+￼or about the logarithmic returns,
+since we care more about whether we’re making 1% on our investment than $1 per share. In this assignment, “returns” always means “logarithmic returns”.
+Problems 2 and 3 are about estimating the first percentile of the return distribu- tion, Q(0.01), under various assumptions. The returns will be larger than this 99% of the time, so Q(0.01) gives an idea of how bad the bad performance will be, which is useful for planning. Note that a calendar year contains about 250 trading days, and so should average two or three days when returns are even worse than Q(0.01). Prob- lems 4 and 5 are about predicting future returns from historical returns, and the un- certainty in this. Doing all the bootstrapping for problem 5 may be time-consuming, and should not be left to the last minute.
+1. (5) Load the data file, take the last column (containing the daily closing price), and calculate the logarithmic returns. Note that the file is in reverse chrono- logical order (newest first). When you are done, if everything worked right, running summary on the returns series should give
+          Min.   1st Qu.    Median      Mean   3rd Qu.      Max.
+     -0.094700 -0.006440  0.000467 -0.000064  0.006310  0.110000
+Hint: help(rev) and Recipe 14.8 in The R Cookbook.
+2. In finance, it is common to model daily returns as independent Gaussian vari-
+ables.
+(a) (5) Find the mean and standard deviation of the returns. What is Q(0.01)
+of the corresponding Gaussian distribution? Hint: qnorm.
+(b) (5) Write an expression which will generate a series of independent Gaus- sian values of the same length as the returns, with the mean and standard deviation you found in 2a. Check that the mean and standard deviation of the output is approximately right, and that their histogram looks like a bell-curve.
+00:02 Monday 18th April, 2016
+P Rt=log t
+Pt−1
+￼
+A.26. AN INSUFFICIENTLY RANDOM WALK DOWN WALL STREET 714
+(c) (10) Write a function which takes in a data vector, calculates its mean and standard deviation, and returns Q(0.01) according to the corresponding Gaussian distribution. Check that it works by seeing that it matches what the answer you got in 2a when run on the actual returns.
+(d) (10) Using the code you wrote in 2b and 2c, find a 95% confidence in- terval for Q(0.01) from 2a. Hint: Look at the examples in the notes of parametric bootstrapping.
+(e) (5 points) What is the first percentile of the data? Is it within the confi- dence interval you found in 2d? Hint: quantile.
+3. (a)
+(5) Use hist to plot the histogram of returns. Also plot, on the same graph, the probability density function of the Gaussian distribution you fit in problem 2a. Comment on their differences.
+(b) (5) Write a function to resample the returns; it should generate a different random vector of the sample length as the data every time it is run. Check that running summary on these vectors produces results close to those on the data. Hint: Look at the examples in the notes of resampling.
+(c) (5)WriteafunctiontocalculateQ(0.01)fromanarbitraryvector,without assuming a Gaussian distribution. Check that it works by seeing that its answer, when run on the real data, matches what you found in 2e.
+(d) (10)Usingthecodeyouwrotein3band3c,finda95%confidenceinterval for Q(0.01). Compare this to your answer in 2d. Which is more believ- able, and why? Hint: Look at the examples in the notes of non-parametric bootstrapping.
+4. (10) Using npreg, fit a kernel regression of Rt+1, tomorrow’s returns, on Rt, today’s returns. (Use the automatic bandwidth selector.) Report the selected bandwidth and the in-sample mean-squared error. Make a scatter-plot with Rt on the horizontal axis and Rt+1 on the vertical axis, and add the estimated kernel regression function. Comment on the shape of the curve. Hints: Make a data frame with Rt as one column and Rt+1 as another column. Also, see examples in the notes of plotting fitted models from npreg.
+5. (25) Uncertainty in the kernel regression
+(a) (5)Writeafunctionwhichresamples(Rt,Rt+1)pairsfromthereturnsse- ries, and produces a new data frame of the same size as the original. Check that it works by running summary on it, and seeing that both columns ap- proximately match the summaries of the data. Hint: look at the examples of resampling cases for regression in the notes.
+(b) (10) Write a function which takes a data frame with appropriately-named columns, and runs a kernel regression of Rt +1 on Rt . It should return fit- tedvaluesat30evenly-spacedvaluesofRt whichspanitsobservedrange.
+00:02 Monday 18th April, 2016
+715 A.26. AN INSUFFICIENTLY RANDOM WALK DOWN WALL STREET
+(c) (10) Using your code from 5a and 5b, add 95% confidence bands for the kernel regression to your plot from problem 4. Hint: See the examples of plotting bootstrapped nonparametric regressions in the notes.
+1. (5 points) Load the data file, take the last column (containing the daily closing price), and calculate the logarithmic returns. Note that the file is in reverse chronological order (newest first). When you are done, if everything worked right, running summary on the returns series should give
+          Min.   1st Qu.    Median      Mean   3rd Qu.      Max.
+     -0.094700 -0.006440  0.000467 -0.000064  0.006310  0.110000
+Hint: Read the notes for 1 February.
+2. In many applications in finance, it is common to model daily returns as inde-
+pendent Gaussian variables.
+(a) (5 points) Find the mean and standard deviation of the best-fitting Gaus-
+sian, and the Q (0.01) it implies.
+(b) (5 points) Write a function which simulates a data set of the same size as the real data, using the independent Gaussian model you fit in (2a), and returns a list, with components named mean and sd, containing the parameter values estimated from the simulation output.
+(c) (5 points) Write a function which takes as arguments a list with compo- nents named mean and sd, and returns the first percentile of the corre- sponding Gaussian distribution. Check that it works by verifying that when run with mean 5 and sd 2, it returns 0.347. Hint: Look at the ex- amples in the notes of parametric bootstrapping.
+(d) (10 points) Using the code you wrote in (2b) and (2c), find a 95% confi- dence interval for Q(0.01) from (2a). Hint: Look at the examples in the notes of parametric bootstrapping.
+(e) (5 points) What is the first percentile of the data? Is it within the confi- dence interval you found in (2d)?
+[[TODO: Integrate this ver- sion with the one above]]
+￼3. (a)
+(5 points) Use density(), or any other suitable non-parametric density estimator, to plot the distribution of returns. Also plot, on the same graph, the Gaussian distribution you fit in problem 2. Comment on their differences.
+(b) (10points)Writeafunctiontore-samplethereturns,andcalculateQ(0.01) on each surrogate data set. Use this to find a 95% confidence interval for Q(0.01). Hint: Look at the examples in the notes of non-parametric boot- strapping.
+4. (15 points) In an autoregressive model, the measurement at time t is regressed on the measurement at time t −1, Xt = φ0 +φ1Xt−1 +εt. Use lm to fit an
+00:02 Monday 18th April, 2016
+[[TODO: Clarify "best- fitting" means maximum likelihood. Separate into two sentences. Clarify using qnorm.]]
+[[TODO: Insisting on a list here and in the next part was a mistake, in the future just say 2 arguments]]
+[[TODO: Clarify using quan- tile here.]]
+[[TODO: Be explicit that it needs to return a vector of values, say of controllable length]]
+[[TODO: Clarify initial value should be same as that from real data. Clarify arguments and return value.]]
+A.27. PREDICTINGNINEOFTHELASTFIVERECESSIONS 716
+autoregressive model to the returns. Give the estimates of φ0, φ1 and 􏰎[ε], and try to interpret what they mean. Also give the reported standard error for
+φ􏰩. 1
+5. Hint: Look at the examples in the notes of re-sampling regression residuals.
+(a) (5 points) Write a function which re-samples the residuals of the autore- gressive model from (4). Check that the mean and standard deviation of its output are close to those of the residuals.
+(b) (15points)Writeafunctionwhichsimulatestheautoregressivemodelyou fit in (4), with noise provided by the function you wrote for (5a).
+(c) (5 points) Write a function which takes a time series, fits an autoregressive model, and returns the estimate of φ1. Check that it works by seeing that when it’s give the data, the output matches what you found in (4).
+(d) (10 points) Using the function you wrote in (5c), and the simulator you wrote in (5b), find the bootstrap standard error for φ􏰩. Does it match
+what lm reported in (4)?
+Note: If you cannot solve (5b), you can get full credit for (5d) using the built-in function arima.sim instead, but make sure that the distribution of innovations or noise comes from the function you wrote in (5a). If you cannot solve (5a), you can get full credit for (5b) and (5d) by providing suitable Gaussian noise.
+A.27 Predicting Nine of the Last Five Recessions
+The data set http://www.stat.cmu.edu/~cshalizi/uADA/13/exams/3/macro.csv on the class website contains five standard macroeconomic time series for the United States, from the beginning of 1948 to the beginning of 2010: total national income or GDP; value of goods consumed; investment spending; hours worked; and output per hour worked for all non-financial firms. (Some of these series are in inflation-adjusted dollars, some of them are in hours, and some of them are indexes where a particular date has been set as 100 and others are expressed relative to that.) All variables are measured “quarterly”, i.e., four times a year.
+Most macroeconomic forecasting models do not concern themselves directly with these values, but only with the logged fluctuations around their long-run trends.
+For full credit on the modeling questions, you must use models which go beyond those available in 401, or you must use appropriate methods to show that linear model are justified here.
+It is first necessary to remove trends; macroeconomists traditionally do this with the following function.
+hpfilter <- function(y, w=1600){
+ eye = diag(length(y))
+ d = diff(eye,d=2)
+ ybar = solve(eye + w*crossprod(d), y)
+00:02 Monday 18th April, 2016
+1
+717 A.27. PREDICTINGNINEOFTHELASTFIVERECESSIONS
+ yhat = log(y) - log(ybar)
+ return(list(fluctuation=yhat,trend=ybar))
+}
+1. (10) Create five plots, showing each of the variables and its trend (as returned by hpfilter) as functions of time. Use a logged scale for the vertical axis. Report R2, with and without logging, for each of the five trends.
+2. (10) Plot the logged fluctuations around trend (as returned by hpfilter) for each of the five variables. Does it make sense to compare these fluctuations across variables? Do the fluctuations look stationary? — After this problem, references to the variables always mean their logged fluctuations around their trends.
+3. (10) Are the variables Gaussian? (You can do better than looking at a his- togram.)
+4. (20)Forthefirstfourvariables(GDP,consumption,investment,hoursworked), fit an additive regression of each variable on the values of all four at the previous time-step. Use only data up to, but not including, 2005 (“the training period”). Report the mean squared error on the training data (to reasonable precision), and include plots of the partial response functions. Describe, in words, what the partial response functions say about the relations between these variables.
+5. (20total)Usingthecircularblockbootstrap,withblocksoflength24,generate new time series which are as long as the training data.
+(a) (4)Writeafunctiontocalculatethemeansquarederrorsofthefittedmod- els from Problem 4, on a time series. (Each of the four variables should have its own MSE.) Check that it works by making sure that it gives the right answer for the training data.
+(b) (6) Report the mean MSEs, and the standard error of these means, from enough bootstrap replicates that the standard errors are no more than 10% of the means.
+(c) (10) What do you need to assume for the numbers from 5b to be good estimates of the generalization error of this model?
+6. (20 total) “Real” (as opposed to “monetary”) business cycle theories hold that fluctuations in macroeconomic variables are ultimately caused by exogenous “real shocks”, especially changes to productivity. The productivity variable in macro.csv is a measurement of this variable, which, according to these theo- ries, should be exogenous. The other variables, in such theories, are endoge- nous.
+(a) (10)Fitanmodelforeachofthefourendogenousvariables,asanadditive function of the endogenous variables in the previous quarter, and produc- tivity for the previous four quarters. Report the MSEs and include plots of the partial response functions. Compare the plots to those in Problem 4.
+00:02 Monday 18th April, 2016
+A.28. DEBTNEEDSTIMEFORWHATITKILLSTOGROWIN 718
+(b) (4) Describe a method which could be used to decide whether including productivity in this way really improves predictive performance. Discuss the assumptions of the method, and why you think they apply here.
+(c) (6) Implement your method. For which variables does including produc- tivity actually help? How confident are you of this conclusion?
+7. (10 total) Now consider the period 2005–2010. What are the mean squared errors, on this data, of
+(a) (4) Predicting according to the additive model from Problem 4?
+(b) (4) Predicting according to the additive model from Problem 6?
+(c) (2) Predicting the mean of each variable, as estimated from the training period?
+8. (5, extra credit) Explain how what hpfilter does is related to spline smooth- ing.
+A.28 Debt Needs Time for What It Kills to Grow In
+An important and controversial question in macroeconomics and political economy is whether high levels of government debt causes the economy to grow more slowly or even shrink. There are several plausible-sounding reasons why it might33; some economists claim that there is a threshold level of debt, perhaps around 90% of GDP, above which growth rates plummet.
+Against this, there are other reasons why high levels of debt might not cause growth to slow, at least not always34. In particular, since “high levels of government debt” are defined relative to the size of the economy, as a high ratio of debt to GDP, slow growth itself might cause higher levels of government debt.
+This week’s data set contains information on GDP and government debt for a selection of countries since World War II. For each country and year, we should have the GDP (nominal, i.e., not adjusted for inflation or differences in exchange rates) and the size of government debt (also nominal). Unfortunately, one or both values may be missing for some countries in some years.
+1. (10) The data set contains a variable, growth, which is the annual growth rate in real (inflation-adjusted) GDP for each country and year. It also contains a
+33High levels of government borrowing might “crowd out” investing in the private sector, by using up available savings and/or raising the interest rates at which businesses can borrow; capitalists might anticipate that the debt will either be paid off through high taxes or discharged through inflation, and prefer to spend their money on luxuries now, rather than invest and see the investment go away later; high levels of debt might lead to lower confidence that the government generally knows what it’s doing, making investment seem too risky; etc.
+34A depressed economy has unused resources, so government employment needn’t lead to crowding out; the things government spends money on (roads, schools, hospitals, basic research, honest markets) increase the value of private investments; governments which can borrow large sums are receiving a market endorsement of their willingness and ability to pay their debts; etc.
+00:02 Monday 18th April, 2016
+￼
+719 A.29. HOWTETRACYCLINECAMETOPEORIA
+variable, ratio which is the ratio of government debt to GDP. Make a scatter- plot with growth on the vertical axis and ratio on the horizontal. Describe the patterns you see, if any.
+2. (15) Run a nonparametric regression of growth on ratio, and plot the result- ing curve. Describe and interpret the curve. Does it suggest an abrupt slowing of growth above some threshold level of debt?
+3. (10) Since changes in government debt levels might take some time to affect economic growth, we would like to compare growth in year t + 1 to ratio in year t. Create a new variable, growth.lead1, which records for each coun- try/year the next year’s GDP growth, with NAs in the right places when it is not available. Describe, in words, how your code works. Add growth.lead1 to the data frame.
+Hints: Make sure that you do not confuse growth rates from different countries (so that, e.g., the last year for Austria gets a growth rate from Belgium). You may find Recipes 14.7 (and 6.6) from The R Cookbook helpful.
+4. (10) Plot growth.lead1 against ratio, and do a nonparametric regression of the former on the latter. Describe the results, and compare them to those of Problem 2.
+5. (15)Economicgrowthratestendtoberatherpersistentovertimewithincoun- tries. Estimate an additive model where growth.lead1 is predicted from growth and ratio. Is the partial response to the previous year’s growth nearly linear? Should it be? Compare the partial response function for debt to the curves from problems 2 and 4.
+6. (10) Create a new variable, growth.lag1, which represents the previous year’s growth rate (with NAs in appropriate places), and add it to the data set. Plot it against ratio and fit a nonparametric regression. Does ratio do a better job of predicting growth or growth.lag1?
+7. (15) Estimate an additive model in which the current year’s ratio is predicted by last year’s ratio, last year’s growth, and the current year’s growth. (You may have to create a new column.) Describe the partial response functions, and whether any predictor variables could be dropped.
+8. (15) Explain what we would have to assume for the model in Problem 5 to give us an unconfounded estimate of the causal effect of government debt on future economic growth; be as specific as possible. (You may want to draw some DAGs, and include them in your write-up.) Comment on how plausible those assumptions are, and on what might go wrong if the assumptions fail.
+A.29 How Tetracycline Came to Peoria
+Now-common ideas like “early adopters” and “viral marketing” grew from sociolog- ical studies of the diffusion of innovations. One of the most famous of these studies
+00:02 Monday 18th April, 2016
+[[TODO: Better URLs]]
+A.29. HOWTETRACYCLINECAMETOPEORIA 720
+tracked how a then-new antibiotic, tetracycline, spread among doctors in four towns in Illionis in the 1950s (Coleman et al., 1957). In this exam, we will go back to that data to look at one of the crucial ideas, that of the innovation (prescribing tetracy- cline) spreading from person to person.
+For this assignment, you will need two data files, ckm_nodes.csv and ckm_network.dat.35 The former has information about each individual doctor in the four towns. adoption_date records the month in which the doctor began prescribing tetracycline, counting from November 1953. If the doctor did not begin prescribing it by month 17, i.e., Febru-
+ary 1955, when the study ended, this is recorded as Inf. If it’s not known when or if
+a doctor adopted tetracycline, their value is NA. (Apparently no doctors gave up tetra- cycline after adopting it.) Other columns record when the doctor attended medical school, whether they attend medical conferences (and if so, what kind), how many medical journals they read, and other information about the individual doctors. Note
+that the covariates in this file are a mix of ordinal variables, categorical variables, and numerical variables.
+The ckm_network.dat file contains a binary matrix, which records the social network among the doctors. There is one row and one column for each doctor; the i, j entry is 1 if doctor number i and doctor number j knew each other, and 0 if they did not.
+1. (5) Create a plot of the number of doctors who began prescribing tetracycline each month versus time. (It is OK for the numbers on the horizontal axis to just be integers rather than formatted dates.) Produce another plot of the total number of doctors prescribing tetracycline in each month. (The curve for total adoptions should first rise rapidly and then level out around month 6.)
+2. Estimate the probability that a doctor who had not yet adopted the drug will begin to do so in a given month t , as a function of the total number of doctors Nt who had adopted before t. (You may assume that these probabilities are the same for all t.) You may estimate this function however you like, but be sure to explain how you are estimating these probabilities, and how you know that method is reliable in this particular case. (This may involve model checking.)
+(a) (5) Report these probabilities as a curve, with N ranging from 0 to 125. If you do not think you can estimate the whole range, plot as much as you can, and explain why you cannot go further. For full credit, your plot must have more than 17 points. Also for full credit, your curve should be accompanied by some measure of its error.
+(b) (5) Averaging over doctors and months, how much does the predicted probability of adoption change N increases by 1? Give a standard error to this change in predicted probabilities.
+Hint: You may find it useful to create a new data frame which records, for each month, the number of doctors who adopted tetracycline that month, and the number who had previously adopted tetracycline.
+35Slightly modified from http://moreno.ss.uci.edu/data.html to fit R conventions, and collaps- ing three distinct, directed social relationships into one undirected social network.
+00:02 Monday 18th April, 2016
+[[TODO: Re-work points and instructions for this not to be an exam?]]
+￼
+721 3.
+A.29. HOWTETRACYCLINECAMETOPEORIA
+Estimate the probability that a doctor i who had not yet adopted the drug will begintodosoinmontht,asafunctionofthenumberCit ofdoctorslinkedto i who had adopted before t. (Again, you may assume that these probabilities are the same for all t .)
+(a) (8) Make a plot of these probabilities, with Ci t ranging from 0 to 30. If you do not think you can estimate the whole range, plot as much as you can, and explain why you cannot go further. For full credit, your plot must include at least 29 points, and include a measure of uncertainty in your estimates. Does your curve support the idea that the use of tetra- cycline is transmitted from one doctor to another through the social net- work? Explain, including a description of what curves which did not sup- port this idea would look like, or why the shape of this curve is actually irrelevant to this issue.
+(b) (7) Averaging over doctors and months, how much does the predicted probabilityofadoptionchangewhenCit increasesbyone?Whatisyour standard error for this change in predicted probabilities?
+Hint: You may find it useful to create a data frame recording, for every com- bination of doctor and month, whether that doctor began prescribing tetracy- cline that month, the number of their contacts who began prescribing before that month. Such a data frame should have 2125 rows.
+(a) (1) Are your estimates from problem 2b and 3b consistent with one an- other? Explain.
+(b) (4) What would you have to assume for either of these to be estimates of the causal effect on adoption by other doctors of making one extra doctor adopt the drug? Be as specific as you can, rather than just repeating definitions from the notes. Drawing graphs is encouraged.
+Estimate a model which predicts the probability that a doctor i who had not yet adopted the drug by month t will begin to do so in month t, as a function of Cit and of the covariates which indicate when i went to medical school, whether they attended medical-society meetings (and if so what kind), and how many medical journals they read.
+(a) (5) Plot the estimated probability of adoption as a function of Cit for doctors who read the minimal number of journals, do not attend confer- ences, and graduated from medical school (i) in 1919 or earlier, (ii) in the 1920s, and (iii) in 1940 or after. For full credit, have all three lines on the same plot (clearly visually distinct from each other), and some measure of uncertainty for each line.
+(b) (5)Averagingoverdoctorsandmonths,howmuchdoesincreasingCit by one change the probability of doctor i adopting tetracycline in month t ? Include a standard error for this change in predicted probabilities.
+(c) (5) Under what assumptions does this give a valid estimate of the average causaleffectofincreasingCit byone?
+00:02 Monday 18th April, 2016
+4.
+5.
+INTRODUCTION
+SPECIFICPROBLEMS
+CONCLUSIONS
+describing the scientific problem and the data set, possibly including relevant summary statistics or exploratory graphs. (Do not include EDA just to have EDA.)
+answeringthequestionssetabove,butavoidingthecheck-list,itemizedformat in favor of continuous text, with a logical succession of sentences and para- graphs. (Writing coherently is more important than following the order of the questions.)
+summarizingwhatyouhavelearnedfromthedataandmodelsaboutwhether the transmission of an innovation from person to person is really a good de- scription of how these doctors came to use tetracycline.
+A.30. FORMATTINGINSTRUCTIONSANDRUBRIC 722
+Note If you want to display the social network, the R package igraph is designed for such things.
+A.30 Formatting Instructions and Rubric
+Your main report should be a humanly-readable document of at most 10 single-spaced pages, including figures. It should have the following sections:
+You may assume that the reader has a general familiarity with the contents of 401, and with the models and methods we have covered so far in the course, but will need to be reminded of any details. The reader should not be assumed to have any prior familiarity with the data set.
+Code All statistical results must be supported by appropriate code, or they will receive no credit. (“Show your work.”) Code should only appear in the text of the report when it is the best way of conveying some point. The ideal would be to use R Markdown, or knitr+LATEX, to embed all computations in a humanly readable document, and submit both the knitted version and the source36 As a second best, it is acceptable to submit a PDF document containing all text and figures, and a separate .R file, containing all supporting computations, clearly labeled via the comments so that it is easy to see which claims or results go with which pieces of code.
+Rubric
+As usual, this describes the ideal.
+Words (5) The text is laid out cleanly, with clear divisions and transitions between sections and sub-sections. The writing itself is well-organized, free of grammatical and other mechanical errors, divided into complete sentences logically grouped into paragraphs and sections, and easy to follow from the presumed level of knowledge.
+36See examples at http://yihui.name/knitr/demos/, and the useful chunk options like echo at http://yihui.name/knitr/options/; also the examples in the solutions to exam 1.
+00:02 Monday 18th April, 2016
+￼
+723 A.30. FORMATTINGINSTRUCTIONSANDRUBRIC
+Numbers (5) All numerical results or summaries are reported to suitable precision, and with appropriate measures of uncertainty attached when applicable.
+Pictures (5) Figures and tables are easy to read, with informative captions, axis la- bels and legends, and are placed near the relevant pieces of text.
+Code (15) The code is formatted and organized so that it is easy for others to read and understand. It is indented, commented, and uses meaningful names. It only in- cludes computations which are actually needed to answer the analytical questions, and avoids redundancy. Code borrowed from the notes, from books, or from re- sources found online is explicitly acknowledged and sourced in the comments. Func- tions or procedures not directly taken from the notes have accompanying tests which check whether the code does what it is supposed to. All code runs, and the Mark- down file knits (if applicable). The main text of the report is free of intrusive blocks of code, which are used only when a specifically-computational point is being made, or when code is actually the clearest way of describing a point.
+Inference and Uncertainty (10) The actual estimation of model parameters or esti- mated functions is technically correct. All calculations based on estimates are clearly explained, and also technically correct. All estimates or derived quantities are ac- companied with appropriate measures of uncertainty (such as confidence intervals or standard errors).
+Conclusions (10) The substantive questions about diffusion of innovations are all answered as precisely as the data and the model allow. The chain of reasoning from estimation results about models, or derived quantities, to substantive conclusions is both clear and convincing. Contingent answers (“if X , then Y , but if Z , then W ”) are likewise described as warranted by the model and data. If uncertainties in the data and model mean the answers to some questions must be imprecise, this too is reflected in the conclusions.
+Extra credit (10) Up to ten points may be awarded for reports which are unusually well-written, where the code is unusually elegant, where the analytical methods are unusually insightful, or where the analysis goes beyond the required set of analytical questions. Example: Simulating the model estimated in problem 5, taking the set of doctors who have adopted in month 1 for the initial conditions and continuing for another 16 months, with a detailed and quantitative comparison of multiple simula- tion runs to the actual data, and an informative assessment of what the comparison says about the strengths and weaknesses of the model.
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

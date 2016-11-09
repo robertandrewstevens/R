@@ -1,0 +1,184 @@
+
+Chapter 22
+Spatial and Network Data
+Linear smoothing of spatial or spatio-temporal data rejoices in the name of “kriging”, after the mining engineer D. G. Krige, who first realized that the problem could be tackled by the method of least squares. In this chapter, I will try to explain what krig- ing is, how it works, and why it works well (when it does). My aim here is to combine a somewhat abstract mathematical approach with a minimum of modeling assump- tions. I therefore begin with a general treatment of optimal linear prediction with dependent variables, after which the specialization to spatial or spatio-temporal pre- diction is basically trivial. The symmetry assumptions about covariance functions, beloved of geostatisticians, are treated as ways of trading increased bias for reduced variance of estimation.
+22.1 Least-Squares Optimal Linear Prediction
+Suppose we have a scalar variable Y , and we wish to predict it from a vector of co- variates Z. The covariates may be observations of the same physical quantity at other times or places, or variables of a different sort altogether.
+We make three debatable assumptions.
+1. We want a point prediction of Y , so our prediction m(Z) will be real-valued.
+2. We will measure the quality of the point prediction by expected squared error, 􏰌􏰓(Y −m(Z))2􏰔.
+3. We will limit ourselves to affine functions of Z, so m(Z) = a + b · Z for some scalar a and vector of coefficients b .
+I shall return to these assumptions later.
+We seek the optimal vector of coefficients β.
+(α,β)=argmin􏰌􏰷(Y −(a+b ·Z))2􏰺 a,b
+550
+(22.1)
+551 22.1. LEAST-SQUARESOPTIMALLINEARPREDICTION
+As usual, we find this by doing some algebra on the expected squared error, and then some calculus.
+􏰌􏰷(Y −(b ·Z))2􏰺 = 􏰌􏰷Y2􏰺+a2 +􏰌􏰷(b ·Z)2􏰺 (22.2) −2􏰌[Y(b ·Z)]−2􏰌[Ya]+2􏰌[ab ·Z]
+= 􏰌􏰷Y2􏰺+a2+b·􏰌[Z⊗Z]b (22.3) −2a􏰌[Y]−2b ·􏰌[YZ]+2ab ·􏰌[Z]
+Taking the gradients with respect to a and b , and setting it to zero at the optimum,
+−2􏰌[Y]+2β􏰌[Z]+2α −2􏰌[YZ]+2􏰌[Z ⊗Z]β+2α􏰌[Z] α 􏰌[YZ]−α􏰌[Z] 􏰌[YZ]−(􏰌[Y]−β·􏰌[Z])􏰌[Z] Cov[Y,Z] β
+= 0
+= 0
+= 􏰌[Y]−β·􏰌[Z]
+= 􏰌[Z⊗Z]β
+= 􏰌[Z⊗Z]β
+= 􏰎[Z]β
+= (􏰎[Z])−1Cov[Y,Z] (22.10)
+Let me repeat the key results from that.
+β = (􏰎[Z])−1Cov[Y,Z] (22.11)
+α = 􏰌[Y]−β·􏰌[Z] (22.12)
+The coefficients β depend on the covariance between Y and the different com- ponents of Z, “discounted” by the covariances between those components of Z. The intercept α is a nuisance to make sure the expectation value comes out right.
+How bad is this optimal linear model? Let’s first ask for the bias, i.e., the expected prediction error:
+􏰌[Y −(α+β·Z)] = 􏰌[Y −􏰌[Y]+β·􏰌[Z]−β·Z] = 􏰌[Y −􏰌[Y]]−β·􏰌[Z −􏰌[Z]]
+= 0
+(22.13) (22.14) (22.15)
+It does not, of course, follow that 􏰌 [Y |Z ] = α + β · Z ; just that the deviations from this linear model average out to zero, as Z varies randomly.
+With this in hand, the expected squared error is just the variance of the error:
+􏰎[Y −(α+β·Z)]
+= 􏰎[Y −β·Z]
+= 􏰎[Y]+􏰎[β·Z]−2Cov[Y,β·Z]
+= 􏰎[Y]+β·􏰎[Z]β−2β·Cov[Y,Z] = 􏰎[Y]+Cov[Y,Z]·􏰎[Z]−1Cov[Y,Z]
+−2Cov[Y,Z]·􏰎[Z]−1Cov[Y,Z]
+= 􏰎[Y]−Cov[Y,Z]·􏰎[Z]−1Cov[Y,Z]
+(22.16) (22.17) (22.18) (22.19)
+(22.20)
+00:02 Monday 18th April, 2016
+(22.4) (22.5) (22.6) (22.7) (22.8) (22.9)
+22.1. LEAST-SQUARESOPTIMALLINEARPREDICTION 552
+22.1.1 Extension to Vectors
+If Y is a vector, α must also be a vector, and β must be a matrix. Fortunately, if we use the squared (L2) error measure, we may simply find the optimal linear predictor of each coordinate of Y separately.
+Note that it may not be altogether reasonable to use the L2 error. If some coordi- nates of Y are known (or believed) to have larger variance, we should, perhaps, not expend so much effort in trying to predict them. Similarly, if some are correlated, this should be discounted when adding up our prediction error. A reasonable loss function might be
+􏰌[(Y −m(Z))·Ω(Y −m(Z))] (22.21) where Ω might be the inverse covariance matrix of Y . This gives a generalized least
+squares problem, which also has an analytical solution (Exercise 4).
+22.1.2 Estimation
+Given consistent estimators of 􏰌[Y], 􏰌[Z], 􏰎[Z] and Cov[Y,Z], consistent esti- mators of α and β follow by the plug-in principle.
+If multiple observations are available, one can also employ the method of least squares, which leads to plugging in the sample versions of all the expectations and covariances. If observations are uncorrelated with each other, the sample versions are consistent estimators.
+22.1.3 Stronger Probabilistic Assumptions
+The three main assumptions — point predictions, squared error, and linear predictors — are really more design choices than assumptions. We are always free to make them; the results might be undesirable in other respects. The only probabilistic assumptions were that all the first and second moments invoked in the argument did, in fact, exist.
+Some people are unhappy with making these design choices without further jus- tification. They prefer to add the probabilistic assumption that Y and Z are jointly Gaussian, and to estimate by maximum likelihood. These assumptions buy a number of things:
+• Rather than just point predictions, we can predict conditional distributions.
+• The least-squares estimate becomes efficient.
+• The linear model is correct, so the bias conditional on Z is zero.
+• The variance conditional on Z becomes calculable (by the law of total variance and the correctness of the linear model).
+• There are straightforward sampling distributions for all estimators, with con- sequent inferential statistics.
+The price, of course, is that the Gaussian assumption has to be correct in its entirety. Note that the correctness of the linear model is a strictly weaker assumption than
+Gaussianity.
+00:02 Monday 18th April, 2016
+553 22.2. APPLICATIONTOSPATIALANDSPATIO-TEMPORALDATA
+22.1.4 Nonlinearity?
+As you recall from Chapter 1, if we do not limit ourselves to linear functions, the optimal predictor of Y from Z is
+r(z)=􏰌[Y|Z = z]
+or, at least, this minimizes the expected squared error. Again, no assumptions of Gaussian distributions, additive and homoskedastic noise, etc., are needed to derive this, just the existence of all the (conditional) moments invoked. To the extent that r(z) ̸= α + β · z, the optimal linear predictor will be biased, though (by Eq. 22.15) this bias must average out to 0 over z.
+If we observe many (Y,Z) pairs, this may be estimated by any of the usual non- parametric approaches. If we do not, estimation becomes substantially trickier.
+22.2 Application to Spatial and Spatio-Temporal Data
+Consider some field, or fields, spread out over space and time. Pick the value of one field at one point1 This will play the role of Y . We observe the value of some fields — the same one, or others — at various other points; the vector of all our observations plays the role of Z.
+Kriging is simply the linear prediction of Y , the value of one field at one point, from Z, the value of various fields at various points. The optimal coefficients thus de- pendon􏰌[Y],􏰌[Z],􏰎[Z]andCov[Y,Z]. Oncetheyarefound,wemaycalculate both the optimal prediction, and the expected squared error around it.
+If we need to predict a field at many points at once, we turn Y into a vector, as above, with one coordinate for each point at which we want a prediction. The same trick will work for predicting multiple fields, too.
+22.2.1 Special Case: One Scalar Field
+We consider a single, scalar-valued random field Y(x), where the coordinate vec- tor x may range over space or time or both. We have observations at coordinates x1,x2,...xn, and desire a prediction at the point x0. Thus
+Y :Z :: Y(x0):(Y(x1),Y(x2),...Y(xn)) (22.22) What about the covariances? We define the covariance function
+γ(x,x′)=Cov􏰓Y(x),Y(x′)􏰔 (22.23)
+At this level of generality, this is an almost-arbitrary function of two arguments; there is absolutely no need to presume that γ(x,x′) = γ(x − x′,0) (stationarity), or γ(x,x′) = γ(∥x − x′∥) (isotropy), or any separation along the different coordinates of x, etc. This function does, however, have to be symmetric between its two argu- ments, and any matrix of the form γ(xi , xj ) does need to be non-negative-definite.
+1I will use “point” indifferently to refer to a point in space, or to a point in space and time. 00:02 Monday 18th April, 2016
+[[ATTN: Say more about po- tential estimation strategies]]
+￼
+[[TODO: Describe the sym- metry assumptions]]
+(See also Exercise 5.)
+Given such a covariance function, we are not quite ready to calculate the kriging
+coefficients; we also need 􏰌[Z] and 􏰌[Y]. We thus require a mean function μ(x), so that 􏰌[Y] = μ(x0) and 􏰌[Z] = (μ(x1),...μ(xn)).
+Once we have those functions, everything is a matter of conceptually-trivial cal- culation.
+22.2.2 Role of Symmetry Assumptions
+It is common, in applications, to make various symmetry assumptions, such as sta- tionarity (of the covariance function), isotropy (ditto), separability (ditto), or station- arity (of the mean function), linear trends (ditto), etc. The point of these assumptions is not that kriging is somehow ill-defined or impossible without them. If we have some reliable source of knowledge about the covariance and mean functions, we’re fine.
+One possible source of reliable knowledge would be multiple replications of the same situation. If we had many independent replicas of the (Y,Z) pair, we could cal- culate everything we needed from sample moments. (Indeed, independence is more than is really needed; lack of correlation across replicates would suffice.) However, we often have only a single realization of the process, so we cannot calculate any useful sample moments.
+The point of the symmetry assumptions is that they say certain moments are all equal, so we can pool data, within a single realization of the process, to estimate them. If the covariance is isotropic,
+γ(x,x′)=γ(∥x−x′∥) (22.26)
+then we can pool all pairs of observations which are separated by a distance h in order to estimate γ(h); similarly for all the other symmetry assumptions.
+Imposing a parametric form on γ or μ, in addition to or instead of symmetries, isalsoaboutdatapooling. Ifγ(x,x′)=γ0e−∥x−x′∥/λ thenwedonotneedtoestimate γ(h) separately for every separation h; we can just estimate the (assumed-constant) variance γ0 and the correlation length λ. If those can be consistently estimated, then, by the plug-in principle, we get covariances between the field at our observation points and the field at our prediction point, from which the coefficients follow.
+Notice that if we have a parametric form for the functions γ and μ, we can esti- mate the parameters even when we don’t also assume symmetries.
+There are some situations, primarily in physics when dealing with homogeneous substances, where there are genuine scientific reasons for symmetry assumptions; maybe a somewhat wider range of situations where one might justify specific para- metric functional forms. Otherwise, their use is really about bias-variance trade-offs:
+00:02 Monday 18th April, 2016
+22.2. APPLICATIONTOSPATIALANDSPATIO-TEMPORALDATA With this function, we may say that
+554
+(22.24)
+(22.25)
+while
+􏰎[Z]ij =γ(xi,xj) Cov[Y,Z]i =γ(x0,xi)
+555 22.3. SPATIALSMOOTHINGWITHSPLINES
+by allowing for more data pooling, stronger assumptions lead to less variance in the estimates, at the cost of more bias when the assumptions are false. (Note that it is senseless to try to assess the bias from mis-specification from within a parametric model; from the premise that the model is completely right, one concludes that the model is completely right.)
+22.2.3 A Worked Example
+Pretend we’re working with a single scalar field on the plane. Take μ(x) = 0, and γ(x,x′) = e−∥x−x′∥, so that we are working in units (for the field Y) where the vari-
+ance is 1, and in units (for the coordinates x) where the correlation length is also 1. We wish to predict the value of the field at the origin, and have observations on a square grid, where the grid spacing is (by coincidence) also 1. What are the coefficients?
+First off, α = 0. (See Exercise 1.)
+To find β, we will need to evaluate e−∥x−x′∥ for every pair of points involved — distances between the origin and the measurement points, and between all the measurement points. This means we will need the matrix of inter-point distances, and so we might as well start with a matrix of coordinates.
+￼coords <- expand.grid(x = c(-1, 0, 1), y = c(-1, 0, 1))
+predict.pt <- which(coords$x == 0 & coords$y == 0)
+distances <- dist(coords)
+distances <- as.matrix(distances)
+covars <- exp(-distances)
+Cov.YZ <- covars[predict.pt, -predict.pt]
+Var.Z <- covars[-predict.pt, -predict.pt]
+beta <- solve(Var.Z) %*% Cov.YZ
+signif(data.frame(coords[-predict.pt, ], coef = beta), 3)
+## x y coef ## 1 -1 -1 0.0358 ##2 0-10.2060 ##3 1-10.0358 ## 4 -1 0 0.2060 ## 6 1 0 0.2060 ## 7 -1 1 0.0358 ## 8 0 1 0.2060 ## 9 1 1 0.0358
+Figure 22.1 shows this visually. See Exercise 3 for more.
+22.3 Spatial Smoothing with Splines
+After Kafadar (1996)
+00:02 Monday 18th April, 2016
+22.3. SPATIALSMOOTHINGWITHSPLINES 556
+￼￼●●
+●
+●●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼−1.0 −0.5 0.0 0.5 1.0
+longitude
+FIGURE 22.1: Kriging coefficients for prediction at the origin (red) from eight points in a square box around it; the assumed covariance function is exponential, and the distance from the origin to the sides of the box is exactly the correlation length. The area (not radius) of each point is proportional to its coefficient.
+00:02 Monday 18th April, 2016
+￼plot(coords, xlab = "longitude", ylab = "latitude", type = "n")
+points(coords[predict.pt, ], col = "red")
+points(coords[-predict.pt, ], cex = 10 * sqrt(beta))
+latitude
+−1.0 −0.5 0.0 0.5 1.0
+557
+22.4
+22.4. DATAONNETWORKS
+Data on Networks
+22.4.1
+22.4.2
+(Corona et al., 2008)
+Adapting Spatial Techniques Laplacian Smoothing
+00:02 Monday 18th April, 2016
+22.5. FURTHERREADING 558
+22.5 Further Reading
+The viewpoint on optimal linear prediction taken in §22.1 is, or ought to be, a stan- dard one, though I think I find it more commonly in writings on stochastic processes than in statistics proper. Certainly I learned it from Wiener (1949, 1961) and Grim- mett and Stirzaker (1992) (also see Bartlett 1955). Wiener, along with the independent parallel work of Kolmogorov (1941), was the first to give a rigorous mathematical formulation of the general problem for dependent random variables; thus with time series, the equivalent of the kriging predictor is called the “Wiener filter” (or predic- tor).
+As far as I can work out from the secondary literature — I admit I haven’t gone back to the original papers for the history on this one — Krige, in the 1950s, came up with the idea of applying least squares over space, and this was later properly math-ed up by others in the 1960s.
+As Wiener (1949) emphasized, under stationarity assumptions, the covariance function γ can be deduced from the power spectrum, and vice versa. (This equiv- alence is basically the “Wiener-Khinchin theorem”.) This is important, because the power spectrum may be an easier object to estimate than the covariance function itself, and because it can sometimes simplify the calculation of the optimal linear predictor. Many readers find Wiener (1949) notoriously hard to follow; a more user- friendly presentation may be found in (among many other places) Bartlett (1955). For an especially thorough treatment of the connection between stationarity and Fourier representations, see Loève (1955).
+On covariance functions in physics, see Chaikin and Lubensky (1995) or Forster (1975); note (again) that these books treat homogeneous systems, which are either carefully contrived or quite small. Symmetry in large systems with heterogeneous parts usually requires the heterogeneity to be (in some sense) sufficiently random, and then holds only approximately, on scales of length or time large compared to the heterogeneities.
+Exercises
+1. Suppose that 􏰌[Y] = 􏰌[Z] =⃗0. Show that α = 0. Suppose that 􏰌[Y] = a, 􏰌[Z] = a⃗1, for some scalar a ̸= 0. Is α still zero? If not, what is it?
+2. Can you re-write Eq. 22.20 to eliminate all appearances of Cov[Y,Z] in favor of β?
+3. Repeat the calculations from §22.2.3 under the following circumstances:
+(a) Remove each prediction point in turn, and see how the coefficients of the remaining seven points vary. Add a ninth prediction point mid-way between each pair of the original eight, and see how the coefficients vary.
+(b) Repeat the whole calculation for prediction at the origin, with eight pre- dictor points in a diamond shape around the origin, each two steps away along a square grid.
+00:02 Monday 18th April, 2016
+559 22.5. FURTHERREADING
+(c) Predictionattheoriginwitheightpredictorpointsinasquarearoundthe origin, the sides of the square two distance units away from the origin.
+(d) Predictionattheorigin,withsixteenpredictorpoints,eachoneunitaway from its neighbor, forming the boundary of a 4 × 4 square around the origin.
+(e) Thesamegeometryasin3d,butshrinkallthedisancestowardstheorigin by a factor of 1/2.
+(f) Prediction at the origin with six predictor points equally spaced around the unit circle.
+(g) Prediction at the origin with six predictor points on the unit circle, at angles 0◦, 5◦, 90◦, 180◦, 270◦, 359◦ from the horizontal axis.
+(h) Prediction at the origin with six predictor points equally spaced around a circle of radius 1/3.
+(i) Prediction at (0.3,0.4), with the eight predictor points as in the worked example.
+(j) Prediction at (0.3,0.4), with the six predictor points as in 3g.
+(k) Prediction at the origin from four points uniformly distributed over the
+rectangle [−2, 2] × [−2, 2]; with six points; with eight; with 100.
+In every case, you should create a visualization (or, if that works better for you, a table) which lets you see at a glance the coefficients associated with each predictor point, and describe, in words, how they vary from one condition to another.
+4. Find the function m(Z) = α + β · Z which minimizes Eq. 22.21. Express the argmin in terms of Ω, 􏰌[Y], 􏰌[Z], 􏰎[Z] andCov[Y,Z].
+5. Modifytheset-upof§22.2.1slightly.Supposethatatx1,...xn,weobserveZi =
+Y(xi)+εi, where the noise process (ε) has 􏰌􏰓εi|Z􏰔=0 andCov􏰷εi,εj|Z􏰺=
+σi2δij. Show that instead of Eq. 22.24, 􏰎[Z]ij = γ(xi,xj)+δijσi2, but Eq.
+22.25 doesn’t change. What happens if the εi are themselves correlated across points?
+You may not assume that ε is jointly or even marginally Gaussian.
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

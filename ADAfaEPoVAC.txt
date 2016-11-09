@@ -1,0 +1,35 @@
+
+Appendix C
+Big O and Little o Notation
+It is often useful to talk about the rate at which some function changes as its argument grows (or shrinks), without worrying to much about the detailed form. This is what the O(·) and o(·) notation lets us do.
+A function f (n) is “of constant order”, or “of order 1” when there exists some
+non-zero constant c such that
+as n → ∞; equivalently, since c is a constant, f (n) → c as n → ∞. It doesn’t matter
+f (n) → 1 (C.1) c
+￼how big or how small c is, just so long as there is some such constant. We then write
+f (n) = O(1) (C.2)
+and say that “the proportionality constant c gets absorbed into the big O”. For example,if f(n)=37,then f(n)=O(1). Butif g(n)=37(1− 2),then g(n)=O(1)
+￼also.
+The other orders are defined recursively. Saying
+n
+means or
+g(n) = O(f (n)) g(n) =O(1)
+f (n)
+g(n) → c
+f (n)
+(C.3)
+(C.4)
+(C.5)
+￼￼as n → ∞ — that is to say, g(n) is “of the same order” as f(n), and they “grow at the same rate”, or “shrink at the same rate”. For example, a quadratic function a1n2 + a2n + a3 = O(n2), no matter what the coefficients are. On the other hand, b1n−2 + b2n−1 is O(n−1).
+Big-O means “is of the same order as”. The corresponding little-o means “is ul- 733
+[[ATTN: Get in to “of same order as” vs. “is at most the or- der of”?]]
+734
+timately smaller than”: f (n) = o(1) means that f (n)/c → 0 for any constant c. Re- cursively, g(n) = o(f (n)) means g(n)/f (n) = o(1), or g(n)/f (n) → 0. We also read g(n) = o(f (n)) as “g(n) is ultimately negligible compared to f (n)”.
+There are some rules for arithmetic with big-O symbols:
+• If g(n) = O(f (n)), then c g(n) = O(f (n)) for any constant c.
+• If g1(n) and g2(n) are both O(f (n)), then so is g1(n)+ g2(n).
+• If g1(n)=O(f(n))but g2(n)=o(f(n)),then g1(n)+g2(n)=O(f(n)). • If g(n) = O(f (n)), and f (n) = o(h(n)), then g(n) = o(h(n)).
+These are not all of the rules, but they’re enough for most purposes.
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

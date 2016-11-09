@@ -1,0 +1,492 @@
+
+Appendix H Optimization
+[[TODO: Multiple sections either need to be written from the be- ginning, or seriously re-written]]
+Many statistical problems are conveniently cast as optimization problems. This is particularly true of finding point estimates. This appendix therefore reviews some ba- sic ideas of optimization (§H.1), the asymptotics of optimizing noisy objective func- tions (§H.4) and its implications for maximum likelihood (§H.4.1), and the theory of constrained and penalized optimization (§§H.5.1–H.5.3), including constrained linear regression (ridge regression and the lasso) as an application (§H.5.4).
+H.1 Basic Concepts of Optimization
+We start with some real-valued function λ on a domain Θ, called the objective1 func- tion. A point θ ∈ Θ is a global minimum if λ(θ) ≤ λ(θ′) for all θ′ ̸= θ, and a global maximum if λ(θ) ≥ λ(θ′). A local minimum is a point θ where λ(θ) ≤ λ(θ′) for all θ which are both in Θ and sufficiently close to θ; similarly for local maxima. All global minima are thus also local minima, and similarly for maxima. The minima and maxima together form the set of extrema or extremes, local or global.
+We minimize a function by making it as small as possible, i.e., by finding the global minima, or coming close to (at least) one, and similarly maximizing means finding the global maxima. Generalically, minimizing and maximizing are both in- stances of optimizing, of finding the “best” values of the function.
+An interior extremum is one which is not on the boundary of the domain Θ. (If Θ has no boundaries, all extrema are interior extrema.) If θ is an interior local minimum, then sufficiently small movements away from θ in any direction must increase the function. For smooth functions, therefore, it follows2 that the gradient is zero, and the matrix of second derivatives is positive-definite. That is, ∇λ(θ) = 0 and ∇2λ ≽ 0, where the latter statement means, more precisely, that for any vector v,
+1“Objective” here means “goal”, not “factual”. 2Consult Appendix D if this doesn’t seem reasonable.
+754
+￼
+755 H.1. BASICCONCEPTSOFOPTIMIZATION
+〈v,∇2 f v〉 ≥ 0. Similar statements apply to local interior maxima, but with the signs reversed.
+The solution of an equation λ(θ) = c is the value (or values) of θ which make the two sides of the equation balance. Similarly, the solution to an optimization problem
+max λ(θ) θ∈Θ
+is the value of θ which maximizes the objective function λ; we also write this solu- tion, or solutions, as
+argmax λ(θ) , θ∈Θ
+i.e., the argument that maximizes the function. The definitions for a minimization problem and the argmin are parallel. It is common to add equality or inequality constraints to an optimization problem, e.g.,
+max λ(θ) θ∈Θ
+such that g (θ) = c r(θ)≤d
+Inprinciple,suchconstraintscutdownthedomainfromΘtoΘ∩g−1(c)∩{θ : r(θ)≤d}; this is not always the best way of solving such problems (§H.5).
+Transforming the Objective Function If q is a monotonic-increasing function, then
+argmaxλ(θ)=argmaxq(λ(θ)) while if q is monotonic-decreasing
+argmaxλ(θ)=argminq(λ(θ))
+Thus for instance maximizing λ(θ) is the same as minimizing − log λ(θ).
+Transforming the Domain If r is an invertible function from Θ to Θ′, we can define a new objective function by λ′ = λ ◦ r −1 . Optimization problems for λ and λ′ are equivalent, in the sense that min λ = min λ′ and argmin λ = r (argmin λ′ ) (and similarly for maxima). If r is continuous, even local minima and maxima are equiva- lent.
+Iterative improvement Suppose we can come up with a sequence of values θ1 , θ2 , . . . where λ(θn) ≤ λ(θn−1), and we know that f ≥ c. Then the sequence of θn must con- verge to a local minimum (which may or may not be a global minimum); the same applies, with signs reversed, for an increasing sequence.
+00:02 Monday 18th April, 2016
+H.2. NEWTON’SMETHOD 756
+H.2 Newton’s Method
+There are a huge number of methods for numerical optimization, because there is no magical method which always works better than anything else. However, there are some methods which work very well on an awful lot of practical problems which keep coming up, and acquiring some knowledge of them is very useful when doing practical data analysis. Because of its close connection with generalized linear mod- els, we’ll look at one of the most ancient and important of them, namely Newton’s method (alias “Newton-Raphson”).
+Let’s start with the simplest case of minimizing a function of one scalar variable, say λ(θ). We want to find the location of the global minimum, θ∗. We suppose that f is smooth, and that θ∗ is a regular interior minimum, meaning that the derivative at θ∗ is zero and the second derivative is positive. Near the minimum we could make
+a Taylor expansion (App. D) around θ∗:
+λ(θ)≈λ(θ∗)+1(θ−θ∗)2 d2f 􏰕􏰕􏰕􏰕 (H.1)
+(We can see here that the second derivative has to be positive to ensure that λ(θ) > λ(θ∗).) In words, λ(θ) is close to quadratic near the minimum.
+Newton’s method uses this fact, and minimizes a quadratic approximation to the function we are really interested in. (In other words, Newton’s method is to replace the problem we want to solve, with a problem which we can solve.) Guess an ini- tial point θ(0). If this is close to the minimum, we can take a second order Taylor expansion around θ(0) and it will still be accurate:
+￼￼2 dθ2 􏰕θ=θ∗
+1 􏰳 ( 0 ) 􏰵 2 d 2 f 􏰕􏰕
++2 θ−θ dw2􏰕􏰕 (H.2)
+􏰕θ=θ(0)
+Now it’s easy to minimize the right-hand side of equation H.2. Let’s abbreviate
+( 0 ) ( 0 ) d f 􏰕􏰕 λ(θ)≈λ(θ )+(θ−θ )dw􏰕􏰕
+􏰕θ=θ(0)
+￼￼￼the derivatives, because they get tiresome to keep writing out: d f 􏰕􏰕􏰕
+dw (0)
+= f ′(θ(0)), d f 􏰕􏰕 = f ′′(θ(0)). We just take the derivative with respect to θ, and set it equal to
+￼2􏰕 θ=θ dw2 θ=θ(0)
+￼zero at a point we’ll call θ(1): 0 = θ(1) =
+f ′(θ(0)) + 1 f ′′(θ(0))2(θ(1) − θ(0)) 2
+θ(0) − f ′(θ(0)) f ′′(θ(0))
+(H.3)
+(H.4)
+￼￼The value θ(1) should be a better guess at the minimum θ∗ than the initial one θ(0) was. So if we use it to make a quadratic approximation to f , we’ll get a better ap- proximation, and so we can iterate this procedure, minimizing one approximation and then using that to get a new approximation:
+θ(n+1) = θ(n) − f ′(θ(n)) (H.5) f ′′(θ(n))
+00:02 Monday 18th April, 2016
+￼
+757 H.2. NEWTON’SMETHOD
+Notice that the true minimum θ∗ is a fixed point of equation H.5: if we happen to land on it, we’ll stay there (since f ′(θ∗) = 0). We won’t show it, but it can be proved that if θ(0) is close enough to θ∗, then θ(n) → θ∗, and that in general |θ(n) − θ∗| = O(n−2), a very rapid rate of convergence. (Doubling the number of iterations we use doesn’t reduce the error by a factor of two, but by a factor of four.)
+Let’s put this together in an algorithm.
+￼my.newton = function(f,f.prime,f.prime2,beta0,tolerance=1e-3,max.iter=50) {
+  beta = beta0
+  old.f = f(beta)
+  iterations = 0
+  made.changes = TRUE
+  while(made.changes & (iterations < max.iter)) {
+   iterations <- iterations +1
+   made.changes <- FALSE
+   new.beta = beta - f.prime(beta)/f.prime2(beta)
+   new.f = f(new.beta)
+   relative.change = abs(new.f - old.f)/old.f -1
+   made.changes = (relative.changes > tolerance)
+   beta = new.beta
+   old.f = new.f
+  }
+  if (made.changes) {
+warning("Newton's method terminated before convergence") }
+  return(list(minimum=beta,value=f(beta),deriv=f.prime(beta),
+              deriv2=f.prime2(beta),iterations=iterations,
+}
+converged=!made.changes))
+The first three arguments here have to all be functions. The fourth argument is our initial guess for the minimum, θ(0). The last arguments keep Newton’s method from cycling forever: tolerance tells it to stop when the function stops changing very much (the relative difference between f (θ(n)) and f (θ(n+1)) is small), and max.iter tells it to never do more than a certain number of steps no matter what. The return value includes the estmated minimum, the value of the function there, and some diagnostics — the derivative should be very small, the second derivative should be positive, etc.
+You may have noticed some potential problems — what if we land on a point where f ′′ is zero? What if f (θ(n+1)) > f (θ(n))? Etc. There are ways of handling these issues, and more, which are incorporated into real optimization algorithms from numerical analysis — such as the optim function in R; I strongly recommend you use that, or something like that, rather than trying to roll your own optimization code (§H.3).
+Newton’s Method in More than One Dimension Suppose that the objective f is a function of multiple arguments, f (θ1,θ2,...θp). Let’s bundle the parameters into
+00:02 Monday 18th April, 2016
+[[TODO: Very rough draft, re-work for notational consis- tency, tone, etc.]]
+H.3. OPTIMIZATIONINR 758
+a single vector, w. Then the Newton update is
+θ(n+1) =θ(n)−h−1(θ(n))∇f(θ(n)) (H.6)
+where∇f isthegradientoff,itsvectorofpartialderivatives[∂ f/∂θ1,∂ f/∂θ2,...∂ f/∂θp], andhistheHessianoff,itsmatrixofsecondpartialderivatives,hij =∂2f/∂θi∂θj.
+Calculating h and ∇f isn’t usually very time-consuming, but taking the inverse of h is, unless it happens to be a diagonal matrix. This leads to various quasi-Newton methods, which either approximate h by a diagonal matrix, or take a proper inverse of h only rarely (maybe just once), and then try to update an estimate of h−1(θ(n)) as θ(n) changes.
+H.3 Optimization in R
+[[optim actually is a wrapper for several different optimization methods; method=BFGS selects a Newtonian method; BFGS is an acronym for the names of the algorithm’s inventors.]]
+H.4 Small-Noise Asymptotics for Optimization
+The basic ideas underlying asymptotic estimation theory are very simple; most pre- sentations rather cloud the basics, because they include lots of detailed conditions needed to show rigorously that everything works.
+We have a statistical model, which tells us, for each sample size n, the probability that the observations X1,X2,...Xn ≡ X1:n will take on any particular value x1:n, or the probability density if the observables are continuous. This model contains some unknown parameters, bundled up into a single object θ, which we need to calculate those probabilities. That is, the model’s probabilities are m(x1:n ; θ), not just m(x1:n ). Because this is the elementary setting, we’ll say that there are only a finite number of unknown parameters, which don’t change with n, so θ ∈ Θ. Finally, we have a loss function, which tells us how badly the model’s predictions fail to align with the data:
+λn (x1:n , m(·; θ)) (H.7) Forinstance,eachXi mightreallybea(Ui,Vi)pair,andwetrytopredictVi from
+Ui , with loss being mean-weighted-squared error:
+1􏰥n 􏰑vi−􏰌θ􏰓Vi|Ui=ui􏰔􏰒2
+λn = n i=1 􏰎θ􏰓Vi|Ui =ui􏰔 (H.8)
+(If I don’t subscript expectations 􏰌 [·] and variances 􏰎 [·] with θ, I mean that they should be taken under the true, data-generating distribution, whatever that might be. With the subscript, calculate assuming that the m(·;θ) distribution is right.)
+￼￼Or we might look at the negative mean log likelihood,
+1 􏰥n
+logm(xi|x1:i−1;θ) 00:02 Monday 18th April, 2016
+λn =−n
+(H.9)
+￼i=1
+759
+H.4. SMALL-NOISEASYMPTOTICSFOROPTIMIZATION Being simple folk, we try to estimate θ by minimizing the loss:
+θ􏰨 =argminλ (H.10) nn
+θ
+We would like to know what happens to this estimate as n grows. To do this, we will make two (fallible) assumptions.
+The first assumption is about what happens to the loss functions. λn depends both on the parameter we plug in and on the data we happen to see. The later is random, so the loss at any one θ is really a random quantity, Λn(θ) = λn(X1:n,θ). Our first assumption is that these random losses tend towards non-random limits: for each θ,
+Λn (θ) → l(θ) (H.11)
+where l is a deterministic function of θ (and nothing else). It doesn’t particularly matter to the argument why this is happening, though we might have our suspicions3, just that it is. This is an appeal to the gods of stochastic convergence.
+Our second assumption is that we always have a unique interior minimum with a positive-definite Hessian: with probability 1,
+∇Λ(θ􏰨) = 0 (H.12) nn
+∇∇Λ(θ􏰨) > 0 (H.13) nn
+(All gradients and other derviatives will be with respect to θ; the dimensionality of x is irrelevant.)
+Moreover, we assume that the limiting loss function l also has a nice, unique interior minimum at some point θ∗, the minimizer of the limiting, noise-free loss:
+θ∗ = argmin l θ
+∇l(θ∗) = 0 ∇∇l(θ∗) > 0
+Since the Hessians will be important, I will abbreviate ∇∇Λ (θ􏰨 ) by H nnn
+(H.14)
+(H.15) (H.16)
+(notice the capital letter, because it’s a random variable), and ∇∇l(θ∗) by j (notice that it’s not
+random).
+These assumptions about the minima, and the derivatives at the minima, are not
+always true. To see that they are sometimes true, here’s an example.
+Suppose that our models are Pareto distributions for x ≥ 1, m(x;θ) = (θ−1)x−θ.
+Thenλn(θ)=θlogxn−log(θ−1),wherelogxn =n−1􏰢ni=1logxi,thesamplemean of the log values. From the law of large numbers, l(θ) = θ􏰌 [log X ] − log (θ − 1).
+Toshowtheconvergence,FigureH.1plotsλ10,λ1000andλ105 foraparticularrandom sample, and the corresponding l. I chose this example in part because the Pareto distribution is heavy tailed, and I actually generated data from a parameter value where the variance of X is infinite4. The objective functions, however, converge just
+3“In fact, all epistemologic value of the theory of the probability is based on this: that large-scale random phenomena in their collective action create strict, nonrandom regularity” — Gnedenko and Kol- mogorov (1954, p. 1).
+[[TODO: cross-refs to Pareto distributions]]
+￼￼￼4For purists: undefined.
+00:02 Monday 18th April, 2016
+H.4. SMALL-NOISEASYMPTOTICSFOROPTIMIZATION 760
+￼￼source("~/things-to-work-on/pli-R/pareto.R")
+  # for pareto.R, which includes rpareto() and pareto.loglike(), see
+  # http://www.santafe.edu/~aaronc/powerlaws/pli-R-v0.0.3-2007-07-25.tgz
+# Generate 10^6 samples from a Pareto distribution with exponent 1.5
+  # Note that Var(X) = infinity because exponent < 2
+x <- rpareto(1e6,threshold=1,exponent=1.5)
+# Define the negative mean log-likelihood function on the first n samples
+lambda.once <- function(n,theta) {
+  -(1/n)*pareto.loglike(x[1:n],threshold=1,exponent=theta)
+}
+# Vectorize over theta for plotting
+lambda <- Vectorize(lambda.once)
+# Start with curve based on first ten samples
+curve(lambda(n=10,theta=x),from=1,to=10,xlab=expression(theta),ylab="")
+# Add curved based on first 10^3
+curve(lambda(n=1000,theta=x),add=TRUE,lty="dashed")
+# Add curved based on first 10^5
+curve(lambda(n=1e5,theta=x),add=TRUE,lty="dotted")
+# Add curve for the infinite-sample limit
+  # Uses E[log(X)]=2 from knowledge of the Pareto
+curve(x*2 - log(x-1),add=TRUE,col="blue")
+# Decorate with a legend
+legend("bottomright",legend=c("n=1e1","n=1e3","n=1e5","limit"),
+  lty=c("solid","dashed","dotted","solid"),
+  col=c("black","black","black","blue"))
+￼￼￼CODE EXAMPLE 45: Code for Figure H.1.
+fine.
+Having made assumptions H.12 and H.14, we want to see how the minimizers
+of Λn converge on the minimizers of l. To do so, we use (all together now) a Taylor expansion. Specifically, we expand the gradient ∇Λn around θ∗:
+∇Λ(θ􏰨) = 0 nn
+≈ ∇Λ (θ∗)+H (θ􏰨 −θ∗) nnn
+θ􏰨 = θ∗−H−1∇Λ (θ∗) nnn
+(H.17) (H.18) (H.19)
+The first term on the right hand side, θ∗, is the population/ensemble/true mini-
+mizer of the loss. If we had l rather than just Λn , we’d get that for the location of the
+minimum. But since we see l corrupted by noise, we need to include the extra term
+−H−1∇Λn(θ∗). The Hessian Hn tells us how sharply curved Λn is near its minimum; n
+the bigger this is, the easier, all else being equal, to find the location of the minimum. The other factor, ∇Λn(θ∗), indicates how much noise there is — not so much in the function being minimized, as in its gradient, since after all ∇l(θ∗) = 0. We would like
+θ􏰨 → θ∗, so we have to convince ourselves that the rest is asymptotically negligible, n
+that H−1∇Λn(θ∗) = o(1). n
+00:02 Monday 18th April, 2016
+761 H.4. SMALL-NOISEASYMPTOTICSFOROPTIMIZATION
+￼￼￼n=1e1 n=1e3 n=1e5 limit
+￼￼￼￼￼￼￼￼￼￼￼￼￼2 4 6 8 10
+θ
+FIGURE H.1: Convergence of objective functions, here, negative average log-likelihoods. Note that the limiting, n = ∞ objective function (solid blue line) is extremely close to what we see at n = 105 already. See Code Example 45 for code.
+00:02 Monday 18th April, 2016
+10 15 20 25 30 35
+H.4. SMALL-NOISEASYMPTOTICSFOROPTIMIZATION 762
+Start with the Hessian. Hn is the matrix of second derivatives of a random func- tion:
+H (θ􏰨 ) = ∇∇Λ (θ􏰨 ) nn nn
+Since Λn → l, we may hope that
+H (θ􏰨 )→∇∇l(θ􏰨 )=j(θ􏰨 )
+(H.20)
+ferentiation and limits” in this way. Since H (θ􏰨 ) is tending to j(θ􏰨 ), it follows that nnn
+Hn = O(1), and consequently H−1 = O(1) by continuity. With more words: since n
+Λn is tending towards l, the curvature of the former is tending towards the curvature of the latter. But this means that the inverse curvature is also stabilizing.
+Our hope then has to be the noise-in-the-gradient factor, ∇Λn(θ∗). Remember
+(H.21) We’ll assume that everything is nice (“regular”) enough to let us “exchange dif-
+nnnn
+again that
+and that Λn → l. So if, again, we can exchange taking derivatives and taking limits,
+we do indeed have
+and we’re done. More precisely, we’ve established consistency:
+∇l(θ∗) = 0 (H.22) ∇Λn(θ∗)→0 (H.23)
+θ􏰨 →θ∗ (H.24) n
+Of course it’s not enough just to know that an estimate will converge, one also wants to know something about the uncertainty in the estimate. Here things are mostly driven by the fluctuations in the noise-in-the-gradient term. We’ve said that
+∇Λ (θ∗) = o(1); to say anything more about the uncertainty in θ􏰨 , we need to posit nn
+more. 􏰋 It is very common to be able to establish that ∇Λn(θ∗) = O(1/
+￼n), often because Λn is some sort of sample- or time- average, as in my example above, and so an ergodic
+theorem [[TODO: cross-ref]] applies. In that case, because H−1 = O(1), we have n
+θ􏰨 − θ ∗ = O ( 1 / 􏰋 n ) n
+If we can go further, and find
+􏰎􏰓∇Λn(θ∗)􏰔=kn
+then we can get a variance for θ􏰨 , using propagation of error (G):
+(H.25)
+(H.26)
+(H.27)
+(H.28) (H.29) (H.30)
+￼n
+􏰪􏰫􏰪􏰫 􏰎θ􏰨 =􏰎θ􏰨−θ∗
+nn
+= 􏰎􏰷−H−1∇Λn(θ∗)􏰺 n
+≈ j−1(θ∗)􏰎􏰓∇Λn(θ∗)􏰔j−1(θ∗) = j−1knj−1
+00:02 Monday 18th April, 2016
+763 H.4. SMALL-NOISEASYMPTOTICSFOROPTIMIZATION the infamous sandwich covariance matrix. If ∇Λn(θ∗) = O(1/􏰋n), then we should
+￼􏰪􏰫
+have nk → k, for a limiting variance k. Then n􏰎 θ􏰨 → j−1kj−1.
+nn
+Of course we don’t know j(θ∗), because that involves the parameter we’re trying to find, but we can estimate it by j(θ􏰨 ), or even by H−1(θ􏰨 ). That still leaves getting
+nnn
+an estimate of kn . If Λn is an average over the xi , as in my initial examples, then we
+can often use the variance of the gradients at each data point as an estimate of kn . In other circumstances, we might actually have to think.
+Finally, if ∇Λn(θ∗) is asymptotically Gaussian, because it’s governed by a cen- tral limit theorem, then so is θ􏰨 , and we can use Gaussians for hypothesis testing,
+confidence regions, etc.
+Now, there are a lot of steps here where I am being very loose. (To begin with: In
+what sense is the random function Λn converging on l, and does it have to converge everywhere, or just in a neighborhood of θ∗?) Turning this sketch into a rigorous argument is the burden of good books on asymptotic statistics. But this is the core. It does not require the use of likelihood, or correctly specified models, or independent data, just that the loss function we minimize be converging, in a well-behaved way, to a function which is nicely behaved around its minimum.
+[[Further reading: Barndorff-Nielsen and Cox (1995); Geyer (2013); Huber (1967); van der Vaart (1998)]]
+H.4.1 Application to Maximum Likelihood
+A case where we can short-circuit a lot of thinking is when the model is correctly specified, so that the data-generating distribution is m(·;θ∗), and the loss function is the negative mean log-likelihood. (That is, we are maximizing the likelihood.) Then the negative of the limiting Hessian j is the Fisher information. More impor- tantly, under reasonable conditions, one can show that j = k, that the variance of the gradient is exactly the limiting negative Hessian. Then the variance of the estimate simplifies to just j−1. This turns out to actually be the best variance you can hope for, at least with unbiased estimators (the Cramér-Rao inequality). But the bulk of the analysis doesn’t depend on the fact that we’re estimating by maximum likelihood; it goes the same way for minimizing any well-behaved objective function.
+[[TODO: smooth over break, following text taken from old multivariate chap- ter]]
+The approach which has generally replaced the method of moments is simply the method of maximum likelihood. The likelihood is defined in exactly the same way for multivariate distributions as for univariate ones. If the observations ⃗xi are assumed to be independent, and θ stands for all the parameters bundled together, then
+n
+L(θ) = 􏰦 p (⃗xi ; θ) i=1
+and the maximum likelihood estimate (MLE) is
+θ􏰨 = argmax L(θ)
+θ
+00:02 Monday 18th April, 2016
+(H.31)
+(H.32)
+n
+MLE
+H.4. SMALL-NOISEASYMPTOTICSFOROPTIMIZATION It is usually simpler and more stable to use the log-likelihood:
+n
+l(θ) = 􏰥 log p (⃗xi ; θ)
+i=1
+since
+Of course, for inference, we generally need more than just a point estimate like
+θ􏰨 , we need some idea of uncertainty. We can get that pretty generically from MLE
+maximum likelihood. Very informally, since we are maximizing the log-likelihood, the precision with which we estimate the parameter depends on how sharp that max- imum is — the bigger the second derivative, the more precise our estimate. In fact, one can show (Wasserman, 2003, §9.7 and 9.10) that
+θ􏰨 􏰐􏰃􏰉􏰄(θ ,−H−1(θ )) (H.35) MLE 0 0
+where θ0 is the true parameter value, and H is the Hessian of the log-likelihood, its matrix of second partial derivatives,
+In turn,
+argmax L(θ) = argmax l(θ) θθ
+(H.34)
+∂2l 􏰕􏰕 Cjk(θ)=∂θ∂θ 􏰕􏰕
+j k􏰕θ 1 ∂ 2 log p(X;θ0)
+nHjk(θ0)→􏰌 ∂θ ∂θ ≡−Jjk(θ0) jk
+(H.36)
+764
+(H.33)
+￼(H.37) which defines the Fisher information matrix J. One can therefore get (approximate)
+￼￼confidence regions by assuming that θ􏰨 has a Gaussian distribution with covari-
+MLE
+􏰪􏰫
+ance matrix n−1J−1(θ􏰨 ) or −H−1(θ􏰨 ). We thus get that 􏰎 θ􏰨 = O(n−1),
+MLE MLE MLE andθ􏰨 −θ =O(n−1/2).
+MLE 0
+Note that Eq. H.35 is only valid as n → ∞, and further assumes that (i) the model
+is well-specified, (ii) the true parameter value θ0 is in the interior of the parameter space, and (iii) the Hessian matrix is strictly positive. If these conditions fail, then the distribution of the MLE need not be Gaussian, or controlled by the Fisher informa- tion matrix, etc.
+An alternative to the asymptotic formula, Eq. H.35, is simply parametric or non- parametric bootstrapping.
+H.4.2 The Akaike Information Criterion
+[[TODO: take from networks notes]]
+[[TODO: explain connection to leave-one-out CV]] [[TODO: explain how it’sin- consistent for model selection]]
+00:02 Monday 18th April, 2016
+765
+H.5 H.5.1
+H.5. CONSTRAINEDANDPENALIZEDOPTIMIZATION
+Constrained and Penalized Optimization Constrained Optimization
+Suppose we want to minimize a function L(u,v) of two variables u and v. (It could be more, but this will illustrate the pattern.) Ordinarily, we know exactly what to do: we take the derivatives of L with respect to u and to v, and solve for the u∗,v∗ which makes the derivatives equal to zero, i.e., solve the system of equations
+∂L ∂u
+∂L ∂v
+= 0
+= 0
+(H.38)
+(H.39)
+￼￼If necessary, we take the second derivative matrix of L and check that it is positive. Suppose however that we want to impose a constraint on u and v, to demand that they satisfy some condition which we can express as an equation, g(u,v) = c. The old, unconstrained minimum u∗,v∗ generally will not satisfy the constraint, so
+there will be a different, constrained minimum, say uˆ, vˆ. How do we find it?
+We could attempt to use the constraint to eliminate either u or v — take the equation g(u,v) = c and solve for u as a function of v, say u = h(v,c). Then
+L(u, v) = L(h(v, c), v), and we can minimize this over v, using the chain rule: dL=∂L+∂L∂h (H.40)
+dv ∂v ∂u∂v
+which we then set to zero and solve for v. Except in quite rare cases, this is messy.
+H.5.2 Lagrange Multipliers
+A superior alternative is the method of Lagrange multipliers. We introduce a new
+variable λ, the Lagrange multiplier, and a new objective function, the Lagrangian, 􏰂(u,v,λ)=L(u,v)+λ(g(u,v)−c) (H.41)
+￼￼￼￼which we minimize with respect to u and v and λ. That is, we solve
+∂􏰂 ∂λ
+∂􏰂 ∂u
+∂􏰂 ∂v
+= 0 = 0 = 0
+(H.42) (H.43) (H.44)
+￼￼￼Notice that minimize 􏰂 with respect to λ always gives us back the constraint equa- tion,because∂􏰂 =g(u,v)−c.Moreover,whentheconstraintissatisfied,􏰂(u,v,λ)=
+∂λ
+L(u, v). Taken together, these facts mean that the uˆ, vˆ we get from the unconstrained 00:02 Monday 18th April, 2016
+￼
+H.5. CONSTRAINEDANDPENALIZEDOPTIMIZATION 766
+minimization of 􏰂 is equal to what we would find from the constrained minimiza- tion of L. We have encoded the constraint into the Lagrangian.
+Practically, the value of this is that we know how to solve unconstrained opti- mization problems. The derivative with respect to λ yields, as I said, the constraint equation. The other derivatives are however yields
+∂􏰂 = ∂L+λ∂g (H.45) ∂u∂u∂u
+∂􏰂 = ∂L+λ∂g (H.46) ∂v∂v∂v
+Together with the constraint, this gives us as many equations as unknowns, so a solution exists.
+If λ = 0, then the constraint doesn’t matter — we could just as well have ignored it. When λ ̸= 0, the size (and sign) of the constraint tells us about how it affects the value of the objective function at the minimum. The value of the objective function L at the constrained minimum is bigger than at the unconstrained minimum, L(uˆ, vˆ) > L(u∗,v∗). Changing the level of constraint c changes how big this gap is. As we saw, 􏰂 (uˆ, vˆ) = L(uˆ, vˆ), so we can see how much influence the level of the constraint on the value of the objective function by taking the derivative of 􏰂 with respect to c,
+∂ L = −λ (H.47) ∂c
+That is, at the constrained minimum, increasing the constraint level from c to c + δ , with δ very small, would change the value of the objective function by −λδ. (Note that λ might be negative.) This makes λ the “price”, in units of L, which we would be willing to pay for a marginal increase in c — what economists would call the shadow price5 .
+If there is more than one constraint equation, then we just introduce more mul- tipliers, and more terms, into the Lagrangian. Each multiplier corresponds to a dif- ferent constraint. The size of each multiplier indicates how much lower the objective function L could be if we relaxed that constraint — the set of shadow prices.
+What about inequality constraints, g(u,v) ≤ c? Well, either the unconstrained minimum exists in that set, in which case we don’t need to worry about it, or it does not, in which case the constraint is “binding”, and we can treat this as an equality constraint6 .
+H.5.3 Penalized Optimization
+So much for constrained optimization; how does this relate to penalties? Well, once we fix λ, the (u, v) which minimizes the full Lagrangian
+L(u,v)+λg(u,v)+λc (H.48)
+5Shadow prices are internal to each decision maker, and depend on their values and resources; they are distinct from market prices, which depend on exchange and are common to all decision makers.
+6A full and precise statement of this idea is the Karush-Kuhn-Tucker theorem of optimization, which you can look up.
+00:02 Monday 18th April, 2016
+￼￼￼￼￼￼￼￼
+767 H.5. CONSTRAINEDANDPENALIZEDOPTIMIZATION
+has to be the same as the one which minimizes
+L(u,v)+λg(u,v) (H.49)
+This is a penalized optimization problem. Changing the magnitude of the penalty λ corresponds to changing the level c of the constraint. Conversely, if we start with a penalized problem, it implicitly corresponds to a constraint on the value of the penalty function g(u,v). So, generally speaking, constrained optimization corre- sponds to penalized optimization, and vice versa.
+H.5.4 Constrained Linear Regression
+To make this more concrete, let’s tackle a simple one-variable statistical optimization problem, namely univariate regression through the origin, with a constraint on the slope. That is, we have the statistical model
+Y =βX +ε (H.50)
+where ε is noise, and X and Y are both scalars. We want to estimate the optimal value of the slope β, but subject to the constraint that it not be too large, say β2 < c. The unconstrained optimization problem is just least squares, i.e.,
+L(β)= n Call the unconstrained optimum βˆ:
+(H.51)
+1 􏰥n
+􏰂(β,λ)= n
+(yi −βxi)2 +λ(β2 −c)
+(H.53)
+(H.54)
+(H.55) (H.56)
+(H.57)
+1 􏰥n
+(yi −bxi)2 βˆ = argmin L(β)
+￼i=1
+(H.52) As was said above in §H.5.3, there are really only two cases. Either the uncon-
+strained optimum is inside the constraint set, i.e.„ βˆ2 < c, or it isn’t, in which case we can treat the inequality constraint like an equality. So we write out the Lagrangian
+β
+￼and we optimize:
+i=1
+∂􏰂 ∂λ
+∂􏰂 ∂β
+=0 =0
+￼￼The first of these just gives us the constraint back again, β ̃ 2 = c
+00:02 Monday 18th April, 2016
+H.5. CONSTRAINEDANDPENALIZEDOPTIMIZATION 768 writing β ̃ for the constrained optimum. The second equation is
+1􏰥n  ̃  ̃
+2(yi −βxi)(−xi)+2λβ=0 (H.58) (If it weren’t for the λ term, we’d just solve for the slope and get, as usual, βˆ =
+￼n
+􏰢 ni = 1 x i y i  ̃
+i=1
+􏰢ni=1 xi2 .) Now we have two unknowns, β and λ, and two equations. Let’s solve for λ. The equation β ̃2 = c can also be written β ̃ = 􏰋c sgn β ̃, so, plugging in to Eq.
+￼￼H.58,
+2n􏰋2n􏰋
+0 = 􏰥xiyi− csgnβ ̃ 􏰥xi2+λ csgnβ ̃
+(H.59)
+(H.60)
+￼￼￼￼n i=1 2 􏰢n
+n i=1
+xiyi −csgnβ ̃2 􏰢n x2
+c sgn β ̃
+￼￼λ = n i=1 􏰋
+n i=1 i
+￼￼The only thing left to figure out then is sgnβ ̃, but this just has to be the same as sgnβˆ. (Why?)
+To illustrate, I generate 100 observations from the model in Eq. H.50, with the true β = 4, X uniformly distributed on [−1,1], and ε having a t distribution with 2 degrees of freedom (Figure H.2. Figure H.3 shows the MSE as a function of β,
+i.e., the L(β) of Eq. H.51. If 􏰋c is smaller than βˆ ≈ 3.95, then the constraint is active and λ is non-zero. Figure H.4 plots λ against c from Eq. H.60. Notice how, as the constraint comes closer and closer to including the unconstrained optimum, the
+￼Lagrange multiplier λ becomes closer and closer to 0, finally crossing when c = βˆ2 ≈ 15.6.
+Turned around, we could fix λ and try to solve the penalized optimization prob- lem
+β ̃ =
+= argmin n (yi −βxi)2 +λβ2
+argmin 􏰂 (β, λ) β
+(H.61) (H.62)
+(H.63) (H.64)
+(H.65)
+1 􏰥n β i=1
+￼Taking the derivative with respect to β,
+∂􏰂
+0=∂β
+1􏰥n  ̃  ̃
+￼0 = n
+2(yi −βxi)(−xi)+2λβ 1 􏰢n xiyi
+￼i=1
+￼β ̃ = n i=1
+λ+ 1 􏰢n x2
+￼￼n i=1 i
+00:02 Monday 18th April, 2016
+769 H.5. CONSTRAINEDANDPENALIZEDOPTIMIZATION
+￼￼●●●
+●
+●● ● ● ● ● ● ● ● ●
+●●●●●● ●
+●
+●
+●
+● ●● ●●
+●●● ●
+● ●
+●● ●●
+●
+● ●●
+●● ●●●●●
+●●● ●●
+●
+●
+●
+● ●●
+● ●●●●
+●●● ●●
+● ●●
+●
+●
+●●●●
+● ● ● ●●
+● ●●●●
+●● ●
+●
+● ●●●
+￼￼￼￼￼￼￼￼￼￼￼−1.0 −0.5 0.0 0.5 1.0
+x
+FIGURE H.2: Example for constrained regression. Dots are data points, the grey line is the true regression line, and the dashed line is the ordinary least squares fit through the origin, without a constraint on the slope.
+00:02 Monday 18th April, 2016
+￼x <- runif(n=100,min=-1,max=1)
+beta.true <- 4
+y <- beta.true*x + rt(n=100,df=2)
+plot(y~x)
+abline(0,beta.true,col="grey")
+abline(lm(y~x),lty=2)
+y
+−10 −5 0 5 10
+H.5. CONSTRAINEDANDPENALIZEDOPTIMIZATION 770
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0 2 4 6 8 10
+β
+FIGURE H.3: Mean squared error as a function of β. The grey tick marks the true β = 4; the minimum of the curve is at βˆ = 3.95.
+which is of course just Eq. H.58 again. Figure H.5 shows how β ̃ and β ̃2 change with λ. The fact that the latter plot shows the same curve as Figure H.4 only turned on its side reflects the general correspondence between penalized and constrained optimization.
+H.5.5 Statistical Remark: “Ridge Regression” and “The Lasso”
+The idea of penalizing or constraining the coefficients of a linear regression model can be extended to having more than one coefficient. The general case, with p covariates, is that one penalizes the sum of the squared coefficients, β21 + . . . + β2p , which of
+course is just the squared length of the coefficient vector, ∥β∥2. This is called ridge regression (Hoerl and Kennard, 1970), and yields the estimates
+β ̃ = (xT x + λI)−1xT y (H.66)
+where I is the p × p identity matrix. Instead of penalizing or constraining the sum of squared coefficients, we could penalized or constrain the sum of the absolute val- ues of the coefficients, |β1|+|β2|+...+|βp|, abbreviated ∥β∥1. This is called the lasso (Tibshirani, 1996). It doesn’t have a nice formula like Eq. H.66, but it can be computed efficiently.
+Examining Eq. H.66 should convince you that β ̃ is generally smaller than the unpenalized estimate βˆ. (This may be easier to see from Eq. H.65.) The same is true
+00:02 Monday 18th April, 2016
+￼demo.mse <- function(b) { return(mean((y-b*x)^2)) }
+curve(Vectorize(demo.mse)(x),from=0,to=10,xlab=expression(beta),ylab="MSE")
+rug(x=beta.true,side=1,col="grey")
+MSE
+5 10 15 20
+771 H.5. CONSTRAINEDANDPENALIZEDOPTIMIZATION
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼0 5 10 15
+c
+lambda.from.c <- function(c) { (2*mean(x*y) - sqrt(c)*2*mean(x^2))/sqrt(c) }
+curve(lambda.from.c(x),from=0,to=15.7,xlab="c",ylab=expression(lambda))
+FIGURE H.4: λ as a function of the constraint level c, according to Eq. H.60 and the data in Figure H.2.
+00:02 Monday 18th April, 2016
+￼012345
+λ
+H.6. FURTHERREADING 772
+for the lasso penalty. Both are examples of shrinkage estimators, called that because the usual estimate is “shrunk” towards the null model of an all-0 parameter vector. This introduces a bias, but it also reduces the variance. Shrinkage estimators are rarely very helpful in situations like the simulation example above, where the number of observations n (here = 100) is large compared to the number of parameters to estimate p (here = 1), but they can be very handy when n is close to p, and p > n, ordinary least squares is useless, but shrinkage estimators can still work. (Ridge regression in particular can be handy in the face of collinearity, even when p ≪ n.) While the lasso is a bit harder to deal with mathematically and computationally than is ridge regression, it has the nice property of shrinking small coefficients to zero exactly, so that they drop out of the problem; this is especially helpful when there are really only a few predictor variables that matter, but you don’t know which.
+For much more on the lasso, ridge regression, shrinkage, etc., see Hastie et al. (2009).
+H.6 Further Reading
+[[Numerical recipes]]; [[Lange?]]; [[Boyd]], Spufford (2010)
+00:02 Monday 18th April, 2016
+773 H.6. FURTHERREADING
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0123456
+λ
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0123456
+λ
+￼par(mfrow=c(2,1))
+beta.from.lambda <- function(l) { return(mean(x*y)/(l+mean(x^2))) }
+curve(beta.from.lambda(x),from=0,to=6,
+  xlab=expression(lambda),ylab=expression(tilde(beta)))
+curve(beta.from.lambda(x)^2,from=0,to=6,
+  xlab=expression(lambda),ylab=expression(tilde(beta)^2))
+par(mfrow=c(1,1))
+FIGURE H.5: Left: The penalized estimation of the regression slope, as a function of the strength of the penalty λ. Right: Square of the penalized regression slope.
+00:02 Monday 18th April, 2016
+~β2 ~β 02468 12 0.5 1.5 2.5 3.5
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

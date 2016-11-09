@@ -1,0 +1,1457 @@
+
+Chapter 9 Additive Models
+9.1 Additive Models
+The additive model for regression is that the conditional expectation function is a
+sum of partial response functions, one for each predictor variable. Formally, when the vector X⃗ of predictor variables has p dimensions, x1 , . . . x p , the model says that
+p
+􏰌􏰷Y|X⃗ =⃗x􏰺=α+􏰥fj(xj) (9.1)
+j=1
+This includes the linear model as a special case, where fj (xj ) = βj xj , but it’s clearly more general, because the fj s can be arbitrary nonlinear functions. The idea is still
+that each input feature makes a separate contribution to the response, and these just add up (hence “partial response function”), but these contributions don’t have to be strictly proportional to the inputs. We do need to add a restriction to make it identifiable; without loss of generality, say that 􏰌 [Y ] = α and 􏰌 􏰷 f j (X j )􏰺 = 0.1
+Additive models keep a lot of the nice properties of linear models, but are more flexible. One of the nice things about linear models is that they are fairly straightfor- ward to interpret: if you want to know how the prediction changes as you change xj , you just need to know βj . The partial response function fj plays the same role in an additive model: of course the change in prediction from changing xj will generally depend on the level xj had before perturbation, but since that’s also true of reality that’s really a feature rather than a bug. It’s true that a set of plots for fj s takes more room than a table of βj s, but it’s also nicer to look at, conveys more information, and imposes fewer systematic distortions on the data.
+1To see why we need to do this, imagine the simple case where p = 2. If we add constants c1 to f1 and c2 to f2, but subtract c1 + c2 from α, then nothing observable has changed about the model. This degeneracy or lack of identifiability is a little like the way collinearity keeps us from defining true slopes in linear regression. But it’s less harmful than collinearity because we can fix it with this convention.
+210
+￼
+211 9.2. PARTIALRESIDUALSANDBACK-FITTING
+Of course, none of this would be of any use if we couldn’t actually estimate these models, but we can, through a clever computational trick which is worth knowing for its own sake. The use of the trick is also something they share with linear models, so we’ll start there.
+9.2 Partial Residuals and Back-fitting 9.2.1 Back-fitting for Linear Models
+The general form of a linear regression model is
+􏰌􏰷Y|X⃗ =⃗x􏰺=β0+β⃗·⃗x=􏰥βjxj
+where x0 is always the constant 1. (Adding this fictitious constant variable lets us handle the intercept just like any other regression coefficient.)
+Suppose we don’t condition on all of X⃗ but just one component of it, say Xk . What is the conditional expectation of Y ?
+􏰌􏰓Y|X = x 􏰔 = 􏰌􏰷􏰌􏰷Y|X ,X ,...X ,...X 􏰺|X = x 􏰺 kk 12kpkk
+p
+􏰥
+= 􏰌
+= βkxk+􏰌 βjXj|Xk=xk
+(9.3) (9.4)
+(9.5)
+βjXj|Xk =xk
+j=0
+
+j̸=k
+where the first line uses the law of total expectation2, and the second line uses Eq.
+9.2. Turned around,
+􏰥
+ 􏰓􏰔􏰥
+βkxk = 􏰌 Y|Xk =xk −􏰌 βjXj|Xk =xk
+j̸=k 
+􏰥
+= 􏰌Y−
+(9.6) (9.7)
+j̸=k
+βjXj|Xk =xk
+The expression in the expectation is the kth partial residual — the (total) residual is the difference between Y and its expectation, the partial residual is the difference between Y and what we expect it to be ignoring the contribution from Xk. Let’s introduce a symbol for this, say Y (k).
+β x =􏰌􏰷Y(k)|X =x 􏰺 (9.8) kkkk
+2 As you learned in baby prob., this is the fact that 􏰌 [Y |X ] = 􏰌 [􏰌 [Y |X , Z ] |X ] — that we can always condition more variables, provided we then average over those extra variables when we’re done.
+00:02 Monday 18th April, 2016
+p j=0
+(9.2)
+￼
+9.2. PARTIALRESIDUALSANDBACK-FITTING 212
+￼￼￼Given:n×(p+1)inputsx(0th columnall1s) n × 1 responses y
+small tolerance δ > 0 center y and each column of x
+β􏰨j ← 0 for j ∈ 1 : p
+until(all|β􏰨j −γj|≤δ){ for k ∈ 1 : p {
+y ( k ) = y i − 􏰢 j ̸ = k β􏰨 j x i j i
+γk ← regression coefficient of y(k) on x·k β􏰨 k ← γ k
+} }
+β􏰨←􏰳n−1􏰢n y􏰵−􏰢p β􏰨n−1􏰢n x 0 i=1 i j=1 j i=1 ij
+Return: (β􏰨0,β􏰨1,...β􏰨p)
+￼“One man’s vicious circle is another’s iterative improve- ment”
+CODE EXAMPLE 18: Pseudocode for back-fitting linear models. Assume we make at least one pass through the until loop. Recall from Chapter 1 that centering the data does not change the βj s; this way the intercept only has to be calculated once, at the end. [[ATTN: Fix horizontal lines]]
+In words, if the over-all model is linear, then the partial residuals are linear. And notice that Xk is the only input feature appearing here — if we could somehow get hold of the partial residuals, then we can find βk by doing a simple regression, rather than a multiple regression. Of course to get the partial residual we need to know all the other β j s. . .
+This suggests the following estimation scheme for linear models, known as the Gauss-Seidel algorithm, or more commonly and transparently as back-fitting; the pseudo-code is in Example 18.
+This is an iterative approximation algorithm. Initially, we look at how far each point is from the global mean, and do a simple regression of those deviations on the first input variable. This then gives us a better idea of what the regression surface really is, and we use the deviations from that surface in a simple regression on the next variable; this should catch relations between Y and X2 that weren’t already caught by regressing on X1. We then go on to the next variable in turn. At each step, each coefficient is adjusted to fit in with what we have already guessed about the other coefficients — that’s why it’s called “back-fitting”. It is not obvious3 that this will ever converge, but it (generally) does, and the fixed point on which it converges is the usual least-squares estimate of β.
+Back-fitting is rarely used to fit linear models these days, because with modern computers and numerical linear algebra it’s faster to just calculate (xT x)−1xT y. But the cute thing about back-fitting is that it doesn’t actually rely on linearity.
+3Unless, I suppose, you’re Gauss.
+00:02 Monday 18th April, 2016
+￼
+213 9.3. THECURSEOFDIMENSIONALITY
+9.2.2 Backfitting Additive Models
+Defining the partial residuals by analogy with the linear case, as
+ Y(k) =Y −α+􏰥fj(xj)
+j̸=k a little algebra along the lines of §9.2.1 shows that
+􏰌􏰷Y(k)|X =x􏰺=f(x) kkkk
+(9.9)
+(9.10)
+If we knew how to estimate arbitrary one-dimensional regressions, we could now use back-fitting to estimate additive models. But we have spent a lot of time learn- ing how to use smoothers to fit one-dimensional regressions! We could use nearest neighbors, or splines, or kernels, or local-linear regression, or anything else we feel like substituting here.
+Our new, improved back-fitting algorithm in Example 19. Once again, while it’s not obvious that this converges, it does. Also, the back-fitting procedure works well with some complications or refinements of the additive model. If we know the function form of one or another of the fj , we can fit those parametrically (rather than with the smoother) at the appropriate points in the loop. (This would be a semiparametric model.) If we think that there is an interaction between xj and xk, rather than their making separate additive contributions for each variable, we can smooth them together; etc.
+There are actually two packages standard packages for fitting additive models in R: gam and mgcv. Both have commands called gam, which fit generalized additive models — the generalization is to use the additive model for things like the probabil- ities of categorical responses, rather than the response variable itself. If that sounds obscure right now, don’t worry — we’ll come back to this in Chapters 11–12 after we’ve looked at generalized linear models. §9.4 below illustrates using one of these packages to fit an additive model.
+9.3 The Curse of Dimensionality
+Before illustrating how additive models work in practice, let’s talk about why we’d want to use them. So far, we have looked at two extremes for regression models; additive models are somewhere in between.
+On the one hand, we had linear regression, which is a parametric method (with p + 1 parameters). Its weakness is that the true regression function μ is hardly ever linear, so even with infinite data linear regression will always make systematic mis- takes in its predictions — there’s always some approximation bias, bigger or smaller depending on how non-linear μ is. The strength of linear regression is that it con-
+verges very quickly as we get more data. Generally speaking,
+MSElinear =σ2 +alinear +O(n−1) (9.11)
+00:02 Monday 18th April, 2016
+9.3. THECURSEOFDIMENSIONALITY 214
+￼￼￼Given: n × p inputs x
+n × 1 responses y
+small tolerance δ > 0
+one-dimensional smoother 􏰆 α􏰨 ← n − 1 􏰢 ni = 1 y i
+f􏰨 ← 0 for j ∈ 1 : p j
+until(all|f􏰨−g |≤δ){ jj
+} }
+kk
+for k ∈ 1 : p {
+y ( k ) = y − 􏰢
+f􏰨 ( x ) i j̸=kjij
+g k ← g k − n − 1 􏰢 ni = 1 g k ( x i k ) f􏰨 ← g
+Return: (α􏰨, f􏰨,... f􏰨) 1p
+i
+gk ←􏰆(y(k)∼x·k)
+￼CODE EXAMPLE 19: Pseudo-code for back-fitting additive models. Notice the extra step, as com- pared to back-fitting linear models, which keeps each partial response function centered.
+where the first term is the intrinsic noise around the true regression function, the second term is the (squared) approximation bias, and the last term is the estimation variance. Notice that the rate at which the estimation variance shrinks doesn’t de- pend on p — factors like that are all absorbed into the big O.4 Other parametric models generally converge at the same rate.
+At the other extreme, we’ve seen a number of completely nonparametric regres- sion methods, such as kernel regression, local polynomials, k-nearest neighbors, etc. Here the limiting approximation bias is actually zero, at least for any reasonable re- gression function μ. The problem is that they converge more slowly, because we need to use the data not just to figure out the coefficients of a parametric model, but the sheer shape of the regression function. We saw in Chapter 4 that the mean-squared error of kernel regression in one dimension is σ2 + O(n−4/5). Splines, k-nearest- neighbors (with growing k), etc., all attain the same rate. But in p dimensions, this becomes (Wasserman, 2006, §5.12)
+MSEnonpara −σ2 =O(n−4/(p+4)) (9.12)
+There’s no ultimate approximation bias term here. Why does the rate depend on p? Well, to hand-wave a bit, think of kernel smoothing, where μ􏰨(⃗x) is an average over yi for ⃗xi near ⃗x. In a p dimensional space, the volume within ε of ⃗x is O(εp), so the probability that a training point ⃗xi falls in the averaging region around ⃗x gets exponentially smaller as p grows. Turned around, to get the same number of training points per ⃗x, we need exponentially larger sample sizes. The appearance of the 4s is
+4See Appendix C you are not familiar with “big O” notation. 00:02 Monday 18th April, 2016
+￼
+215 9.3. THECURSEOFDIMENSIONALITY
+a little more mysterious, but can be resolved from an error analysis of the kind we did for kernel regression in Chapter 45. This slow rate isn’t just a weakness of kernel smoothers, but turns out to be the best any nonparametric estimator can do.
+For p = 1, the nonparametric rate is O(n−4/5), which is of course slower than O(n−1), but not all that much, and the improved bias usually more than makes up for it. But as p grows, the nonparametric rate gets slower and slower, and the fully nonparametric estimate more and more imprecise, yielding the infamous curse of dimensionality. For p = 100, say, we get a rate of O(n−1/26), which is not very good at all. (See Figure 9.1.) Said another way, to get the same precision with p inputs that n data points gives us with one input takes n(4+p)/5 data points. For p = 100, this is n20.8, which tells us that matching the error of n = 100 one-dimensional observations requires O(4 × 1041) hundred-dimensional observations.
+So completely unstructured nonparametric regressions won’t work very well in high dimensions, at least not with plausible amounts of data. The trouble is that there are just too many possible high-dimensional functions, and seeing only a trillion points from the function doesn’t pin down its shape very well at all.
+This is where additive models come in. Not every regression function is additive, so they have, even asymptotically, some approximation bias. But we can estimate each fj by a simple one-dimensional smoothing, which converges at O(n−4/5), almost as good as the parametric rate. So overall
+MSEadditive −σ2 =aadditive +O(n−4/5) (9.13)
+Since linear models are a sub-class of additive models, aadditive ≤ alm. From a purely predictive point of view, the only time to prefer linear models to additive models is when n is so small that O(n−4/5) − O(n−1) exceeds this difference in approximation biases; eventually the additive model will be more accurate.6
+5Remember that in one dimension, the bias of a kernel smoother with bandwidth h is O(h2), and the variance is O(1/nh), because only samples falling in an interval about h across contribute to the prediction at any one point, and when h is small, the number of such samples is proportional to nh. Adding bias squared to variance gives an error of O(h4)+O((nh)−1), solving for the best bandwidth gives hopt = O(n−1/5), and the total error is then O(n−4/5). Suppose for the moment that in p dimensions we use the same bandwidth along each dimension. (We get the same end result with more work if we let each dimension have its own bandwidth.) The bias is still O(h2), because the Taylor expansion still goes through. But now only samples falling into a region of volume O(hd ) around x contribute to the prediction at x, so the variance is O((nhd )−1). The best bandwidth is now hopt = O(n−1/(p+4)), yielding
+an error of O(n−4/(p+4)) as promised.
+6Unless the best additive approximation to μ is linear; then the linear model has no more bias and less
+[[ATTN: More mathematical explanation in appendix?]]
+￼variance.
+00:02 Monday 18th April, 2016
+9.3. THECURSEOFDIMENSIONALITY 216
+￼￼−1 n
+−4 5 n
+−1 26 n
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼1 10 100 1000 10000
+n
+curve(x^(-1), from = 1, to = 10000, log = "x", xlab = "n", ylab = "Excess MSE")
+curve(x^(-4/5), add = TRUE, lty = "dashed")
+curve(x^(-1/26), add = TRUE, lty = "dotted")
+legend("topright", legend = c(expression(n^{
+    -1
+}), expression(n^{
+    -4/5
+}), expression(n^{
+    -1/26
+})), lty = c("solid", "dashed", "dotted"))
+FIGURE 9.1: Schematic of rates of convergence of MSEs for parametric models (O(n−1)), one- dimensional nonparametric regressions or additive models (O(n−4/5)), and a 100-dimensional nonparametric regression (O(n−1/26)). Note that the horizontal but not the vertical axis is on a logarithmic scale.
+00:02 Monday 18th April, 2016
+￼Excess MSE
+0.0 0.2 0.4 0.6 0.8 1.0
+217 9.4. EXAMPLE:CALIFORNIAHOUSEPRICESREVISITED
+9.4 Example: California House Prices Revisited
+As an example, we’ll look at data on median house prices across Census tracts from the data-analysis assignment in §A.12. This has both California and Pennsylvania, but it’s hard to visually see patterns with both states; I’ll do California, and let you replicate this all on Pennsylvania, and even on the combined data.
+Start with getting the data:
+[[TODO: better URL]]
+￼housing <- read.csv("http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/data/calif_penn_2011.csv")
+housing <- na.omit(housing)
+calif <- housing[housing$STATEFP == 6, ]
+(How do I know that the STATEFP code of 6 corresponds to California?)
+We’ll fit a linear model for the log price, on the thought that it makes some sense for the factors which raise or lower house values to multiply together, rather than just adding.
+calif.lm <- lm(log(Median_house_value) ~ Median_household_income + Mean_household_income +
+    POPULATION + Total_units + Vacant_units + Owners + Median_rooms + Mean_household_size_owners +
+    Mean_household_size_renters + LATITUDE + LONGITUDE, data = calif)
+This is very fast — about a fifth of a second on my laptop. Here are the summary statistics7:
+print(summary(calif.lm), signif.stars = FALSE, digits = 3)
+##
+## Call:
+## lm(formula = log(Median_house_value) ~ Median_household_income +
+##     Mean_household_income + POPULATION + Total_units + Vacant_units +
+##     Owners + Median_rooms + Mean_household_size_owners + Mean_household_size_renters +
+##     LATITUDE + LONGITUDE, data = calif)
+￼￼##
+## Residuals:
+##    Min     1Q Median     3Q    Max
+## -3.855 -0.153  0.034  0.189  1.214
+##
+## Coefficients:
+##
+## (Intercept)
+## Median_household_income
+## Mean_household_income
+## POPULATION
+## Total_units
+## Vacant_units
+## Owners
+ Estimate Std. Error t value Pr(>|t|)
+-5.74e+00   5.28e-01  -10.86  < 2e-16
+ 1.34e-06   4.63e-07    2.90   0.0038
+ 1.07e-05   3.88e-07   27.71  < 2e-16
+-4.15e-05   5.03e-06   -8.27  < 2e-16
+ 8.37e-05   1.55e-05    5.41  6.4e-08
+ 8.37e-07   2.37e-05    0.04   0.9719
+-3.98e-03   3.21e-04  -12.41  < 2e-16
+￼7I have suppressed the usual stars on “significant” regression coefficients, because, as discussed in Chap- ter 2, those aren’t really the most important variables, and I have reined in R’s tendency to use far too many decimal places.
+00:02 Monday 18th April, 2016
+9.4. EXAMPLE:CALIFORNIAHOUSEPRICESREVISITED 218
+CODE EXAMPLE 20: Calculating quick-and-dirty prediction limits from a prediction object ( preds) containing fitted values and their standard errors, plus an estimate of the noise level. Be- cause those are two (presumably uncorrelated) sources of noise, we combine the standard deviations by “adding in quadrature”.
+￼￼predlims <- function(preds, sigma) {
+    prediction.sd <- sqrt(preds$se.fit^2 + sigma^2)
+    upper <- preds$fit + 2 * prediction.sd
+    lower <- preds$fit - 2 * prediction.sd
+    lims <- cbind(lower = lower, upper = upper)
+    return(lims)
+}
+￼￼￼￼## Median_rooms                -1.62e-02   8.37e-03   -1.94   0.0525
+## Mean_household_size_owners   5.60e-02   7.16e-03    7.83  5.8e-15
+## Mean_household_size_renters -7.47e-02   6.38e-03  -11.71  < 2e-16
+## LATITUDE                    -2.14e-01   5.66e-03  -37.76  < 2e-16
+## LONGITUDE                   -2.15e-01   5.94e-03  -36.15  < 2e-16
+##
+## Residual standard error: 0.317 on 7469 degrees of freedom
+## Multiple R-squared:  0.639,Adjusted R-squared:  0.638
+## F-statistic: 1.2e+03 on 11 and 7469 DF,  p-value: <2e-16
+Figure 9.2 plots the predicted prices, ±2 standard errors, against the actual prices. The predictions are not all that accurate — the RMS residual is 0.317 on the log scale (i.e., 37% on the original scale), but they do have pretty reasonable coverage; about 96% of actual prices fall within the prediction limits8. On the other hand, the predic- tions are quite precise, with the median of the calculated standard errors being 0.011 on the log scale (i.e., 1.1% in dollars). This linear model thinks it knows what’s going on.
+Next, we’ll fit an additive model, using the gam function from the mgcv package; this automatically sets the bandwidths using a fast approximation to leave-one-out CV called generalized cross-validation, or GCV (§3.4.3).
+system.time(calif.gam <- gam(log(Median_house_value) ~ s(Median_household_income) +
+    s(Mean_household_income) + s(POPULATION) + s(Total_units) + s(Vacant_units) +
+    s(Owners) + s(Median_rooms) + s(Mean_household_size_owners) + s(Mean_household_size_renters) +
+8Remember from your linear regression class that there are two kinds of confidence intervals we might want to use for prediction. One is a confidence interval for the conditional mean at a given value of x; the other is a confidence interval for the realized values of Y at a given x. Earlier examples have emphasized the former, but since we don’t know the true conditional means here, we need to use the latter sort of intervals, prediction intervals proper, to evaluate coverage. The predlims function in Code Example 20 calculates a rough prediction interval by taking the standard error of the conditional mean, combining it with the estimated standard deviation, and multiplying by 2. Strictly speaking, we ought to worry about using a t-distribution rather than a Gaussian here, but with 7469 residual degrees of freedom, this isn’t going to matter much. (Assuming Gaussian noise is likely to be more of a concern, but this is only meant to be a rough cut anyway.)
+00:02 Monday 18th April, 2016
+￼￼
+￼219
+9.4. EXAMPLE:CALIFORNIAHOUSEPRICESREVISITED
+0e+00
+4e+05
+6e+05
+8e+05
+1e+06
+●
+●
+●
+● ● ●● ● ● ●●●●
+● ● ● ●● ● ●
+●
+●
+●
+● ●● ●● ●●●●●●●●●●● ●●●● ● ●●● ● ●●●●●●●●●●● ●● ●●●●●●●●●●●●●●●●●●
+●
+● ●
+●
+●
+● ●
+●●● ●
+●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●●●●●●●●●●●●●● ●● ●●●●●●● ●●●●●● ●●● ●●
+●
+● ● ● ●● ● ●
+●
+●●
+●●
+●
+●
+●●
+●● ●
+●●
+●
+●
+●
+●
+●●
+●
+●
+●● ● ●●●●●●●●●
+● ● ●
+●
+●● ●●
+●
+●
+● ●
+●
+●
+●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●●● ●●● ●●●●●●●●●●●●●●● ● ●● ● ● ●● ●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●
+●
+2e+05
+● ●●●
+●● ●
+●● ●● ●
+●
+●
+● ● ●● ●● ● ●
+● ● ●●●●●●
+● ● ● ●●●●●● ● ●
+●
+● ● ●● ●●
+● ● ●
+●
+●
+● ● ● ● ●
+●●●
+●
+●● ●●●● ●●●
+●
+●
+● ●
+●
+●●
+●
+●
+●●
+● ●●●● ●
+●●● ● ●● ●●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●● ● ● ●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
+●● ●●● ●●
+●
+●
+●
+●
+●● ●●
+●
+●
+●
+●
+●
+● ●
+●
+● ●
+●
+●
+●
+●●● ● ●●●●●● ●● ●●●●● ●●●●● ●●●●●●●●●●●●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●● ●●● ● ●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●● ●●●●●●●●●●●●●●●●●●●●●●● ●●● ●●● ●
+● ●●●● ●
+●● ●
+●
+●
+●● ●● ●● ●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ● ● ●●●●●● ● ●●●● ●● ● ●●●●●●●●●●●● ● ● ●● ●
+●
+●●●●●●●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
+●●●●●
+●●●● ●
+●
+● ●●● ● ●
+●
+●
+● ●● ●
+●
+●●
+●
+●
+●
+● ● ●●●●● ●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●● ●●●●●●●●●● ●
+●
+●●
+●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●●●●●●● ●●●●● ● ●●●● ● ● ●●●●●●
+●
+●
+●
+●
+Linear model
+Predicted ($)
+0e+00 1e+06 2e+06 3e+06 4e+06
+●
+●
+●
+●● ●●● ●●●●●● ●● ●●● ●
+●●●●●●●●●● ● ● ● ●●●● ●● ●● ● ●●●●●● ● ●● ● ● ● ●●●●●
+● ●●● ●●●
+●
+●
+●
+●
+●
+●●
+●●
+● ● ●
+●● ●●●●●
+●
+Actual price ($)
+●
+●
+●
+● ●
+●●● ●
+●● ●●
+●● ● ●
+●
+plot(calif$Median_house_value, exp(preds.lm$fit), type = "n", xlab = "Actual price ($)",
+    ylab = "Predicted ($)", main = "Linear model", ylim = c(0, exp(max(predlims.lm))))
+segments(calif$Median_house_value, exp(predlims.lm[, "lower"]), calif$Median_house_value,
+    exp(predlims.lm[, "upper"]), col = "grey")
+abline(a = 0, b = 1, lty = "dashed")
+points(calif$Median_house_value, exp(preds.lm$fit), pch = 16, cex = 0.1)
+FIGURE 9.2: Actual median house values (horizontal axis) versus those predicted by the linear model (black dots), plus or minus two predictive standard errors (grey bars). The dashed line shows where actual and predicted prices are equal. Here predict gives both a fitted value for each point, and a standard error for that prediction. (Without a newdata argument, predict defaults to the data used to estimate calif.lm, which here is what we want.) Predictions are exponentiated so they’re comparable to the original values (and because it’s easier to grasp dollars than log-dollars).
+00:02 Monday 18th April, 2016
+●
+● ● ●● ●● ●● ● ●●
+●●● ●●●●●
+● ●● ●●●●●● ●●●●●● ●● ●●●●●●●●●●●●●●
+●
+●
+●● ●●● ●● ●● ●●●
+●●●●●● ●●●●●●●●●
+●●●
+●● ● ●● ●●● ●●●●● ●●●● ●●● ●●● ●●●●● ● ●
+●●● ●●● ● ●●● ●● ● ●●● ● ●● ●●●
+●
+●● ●
+●
+●●●●●
+●● ●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●● ●●
+●●● ● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●
+●
+●
+●● ●●
+●● ●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●● ● ●
+●
+●●●●●● ●●●
+●●●●●●●● ●●●● ●●●●●●●●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●●●●●●●●●●●● ●●
+● ●
+●●●●●●● ●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●● ● ●●●●●●●●●●●●●
+● ●
+●
+●●●●●●● ●● ● ●●● ●
+●● ●
+●
+●
+●
+●
+●
+●
+●● ●●
+●●●●
+●● ●●●
+●
+●
+●
+●
+9.4. EXAMPLE:CALIFORNIAHOUSEPRICESREVISITED 220
+(That is, it took about five seconds total to run this.) The s() terms in the gam formula indicate which terms are to be smoothed — if we wanted particular paramet- ric forms for some variables, we could do that as well. (Unfortunately we can’t just writeMedianHouseValue ∼ s(.),wehavetolistallthevariablesontheright-hand side.9) The smoothing here is done by splines (hence s()), and there are lots of op- tions for controlling the splines, or replacing them by other smoothers, if you know what you’re doing.
+Figure 9.3 compares the predicted to the actual responses. The RMS error has improved (0.27 on the log scale, or 130%, with 96% of observations falling with ±2 standard errors of their fitted values), at only a fairly modest cost in the claimed precision (the median standard error of prediction is 0.02, or 2.1%). Figure 9.4 shows the partial response functions.
+It makes little sense to have latitude and longitude make separate additive contri- butions here; presumably they interact. We can just smooth them together10:
+calif.gam2 <- gam(log(Median_house_value) ~ s(Median_household_income) + s(Mean_household_income) +
+    s(POPULATION) + s(Total_units) + s(Vacant_units) + s(Owners) + s(Median_rooms) +
+    s(Mean_household_size_owners) + s(Mean_household_size_renters) + s(LONGITUDE,
+    LATITUDE), data = calif)
+This gives an RMS error of ±0.25 (log-scale) and 96% coverage, with a median standard error of 0.021, so accuracy is improving (at least in sample), with little loss of precision.
+Figures 9.6 and 9.7 show two different views of the joint smoothing of longitude and latitude. In the perspective plot, it’s quite clear that price increases specifically towards the coast, and even more specifically towards the great coastal cities. In the contour plot, one sees more clearly an inward bulge of a negative, but not too very negative, contour line (between -122 and -120 longitude) which embraces Napa, Sacra- mento, and some related areas, which are comparatively more developed and more expensive than the rest of central California, and so more expensive than one would expect based on their distance from the coast and San Francisco.
+If you worked through problem set A.12, you will recall that one of the big things wrong with the linear model is that its errors (the residuals) are highly structured and very far from random. In essence, it totally missed the existence of cities, and the fact that houses cost more in cities (because land costs more there). It’s a good idea, therefore, to make some maps, showing the actual values, and then, by way of contrast, the residuals of the models. Rather than do the plotting by hand over and over, let’s write a function (Code Example 21).
+9Alternately, we could use Kevin Gilbert’s formulaTools functions — see https://gist.github. com/kgilbert- cmu.
+10If the two variables which interact have very different magnitudes, it’s better to smooth them with a te() term than an s() term, but here they are comparable. See §9.5 for more, and help(gam.models).
+00:02 Monday 18th April, 2016
+￼    s(LATITUDE) + s(LONGITUDE), data = calif))
+##    user  system elapsed
+##   3.806   0.170   4.199
+￼￼
+￼221
+9.4. EXAMPLE:CALIFORNIAHOUSEPRICESREVISITED
+●
+●
+●
+●
+● ●
+● ●
+● ●● ● ●
+● ●
+●
+● ● ● ● ● ●● ●
+●●
+●● ●●●●● ●
+●
+● ● ● ●●●●●● ●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●● ●● ●● ● ●●●●●● ●●●
+●
+● ● ●
+●
+●
+●
+●● ●
+● ●●
+●● ●
+● ●●●● ●●●
+●
+●●●
+●
+●
+●
+●
+●
+●
+●
+●● ●
+● ● ●●
+●
+● ●
+●
+●
+●
+●
+●●●
+●
+●● ● ●
+●
+●
+●
+●
+●
+●
+●
+●
+● ●
+●●
+●●
+●●●● ●● ●
+●●●●
+●●●● ●●●●
+●
+●●
+●
+●●
+●●
+● ●
+●
+●
+● ●●
+●● ●●● ●● ● ●
+●●● ●●●●● ● ●●
+●●●
+●
+●
+●●● ● ● ●●
+●
+●●●● ●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●
+●●
+●●●●●●● ●
+● ●
+●
+●
+● ● ● ●●
+●●
+●
+●
+● ●
+● ●●● ●
+● ●
+●
+●
+●●
+●●● ●
+●●
+●
+●
+●●●●● ●● ●●
+●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
+●
+●●● ● ●●●
+●
+●● ●
+● ●● ●●● ● ●
+●
+●
+● ● ●
+●● ●
+●
+● ●
+●
+●● ●● ●●●● ●●●●●●● ●● ●●● ● ●● ●●●●●●●●●●●●●● ●● ●●
+●
+● ●●● ●● ●
+● ●● ●
+●
+●
+●
+● ●● ●
+●
+● ● ● ●●● ● ● ●●●● ●● ●●●● ●● ●●●●● ●● ● ● ● ● ●● ● ●●●●● ●●● ● ● ● ● ●
+●
+●● ●●
+0e+00 2e+05
+4e+05
+1e+06
+●
+●
+● ● ● ● ● ●●●●
+● ● ●
+● ●● ● ● ● ●● ●●● ●●●● ●● ●●●●●●●● ●●●●●●● ●●●●●●●●●●●●●●●●●● ●●●●●●●●●●● ●●● ●●●●●●●●●●●● ●●● ● ●● ●●●● ●● ●●● ●●● ●●●●● ●●●●●● ●●●●●●●● ●●●●●●●●●●● ●●●●●●●●●●●● ●●● ●●●●●●●●●●● ●●●● ●●●●●●●●●●●●●●●●●●●●●● ● ●●●●● ●●●●●●● ●●●●
+●●
+●● ●
+●
+● ● ●● ● ● ●●
+●
+●●
+●
+●
+●
+●
+●
+●
+● ● ●●
+●● ●●●●●●●●●●●●●●●●● ●●● ●●●●●●●●●●●●●●●●●●●●●● ●●● ●●●●●●●●● ●●●● ●●●
+●●
+●
+●●
+●
+●●●● ●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●
+● ●●●● ● ●●● ●
+●●
+● ●●
+●
+●
+●
+● ●●●●● ●
+●
+● ●●●●●●●●●● ● ●●
+●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●●●●●●● ●● ●●●● ●●●●●●●●●●● ●●●●●●●
+●●●●● ● ● ●●●●●
+●
+●
+●●●●●●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●● ●●●●● ●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●● ●●●●●●● ●●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●● ●●●●●●●●●● ● ●●●●● ●● ●● ● ● ●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●● ●●●●●● ●
+●
+●
+●
+●●●
+●
+●● ●●● ●●●●●●●●●●
+●
+●●●●●●●
+●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●● ●●● ●●●●●●● ●●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+● ● ●●●●●● ● ●●●●●● ● ● ●●●●●● ● ●●●●● ●●●●● ●●●●●●●● ●●●● ●●●● ●● ● ● ● ● ● ●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●
+●●● ●
+●
+●
+●
+●
+● ●
+●● ●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●● ●●●●
+●
+●
+●
+●
+●
+●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
+●
+●
+●
+●
+●
+●●
+●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●●●●●● ●●●
+First additive model
+●● ●●●●
+●
+●●● ●● ●●
+●●●● ●
+●●
+●
+●
+●●
+● ●●●● ●● ●
+● ●
+●
+●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
+●●●●● ●
+●●●●●●●●●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ● ●●●●●●●● ●● ●●●●● ●● ● ● ●●●●● ● ●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●● ●●●●●● ●● ●●●●●●●●● ● ● ● ● ● ●●
+● ● ● ● ●●●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●●
+●
+●●●
+●
+●
+●● ●●●● ●● ●
+●
+●
+●
+●
+●●● ●●
+● ●● ●
+●●● ● ●●●●● ●●●●● ●●
+● ● ●●●●● ● ●
+●
+●
+●
+●
+●
+●
+●
+●●
+●
+●
+●
+●
+●●●●●●●●●●● ●●●●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●● ●● ●●● ●●● ●●● ●●●●●● ●●●●●●●●●●●●●● ●● ●● ●●●●●●●●●●●● ●●●●●●●●● ●●●●●●● ●●●●●●●●●● ●●● ●●●●●●●●●●●●●●●●●●● ● ●●●● ●●●●
+●●
+●
+●
+●
+●●●●
+●●●●●● ●●●●●
+●
+● ●●●●
+●
+●
+●
+●●
+●● ●● ● ●●●●●●●●● ●●●●● ●●●●●●●●●●●●●● ●●●●●●●●●● ●●● ●●
+● ●● ●●
+●
+●
+●
+● ●●●● ●●●●●●● ●●● ●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●● ●●●●●●
+●
+●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●● ●●●●●●●●●●●●●●●●●●● ●● ● ●●
+●
+●●●
+●
+●● ● ●
+●●● ●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
+●
+●
+●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●●●●●●●●●● ●● ●●●●
+●
+●
+●●●●● ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●● ●
+● ●●● ●●
+●
+●
+●●
+●
+●
+●
+● ●●●●●
+●
+Actual price ($)
+●●
+●
+●● ● ●●● ●●● ● ●●●●●●●●●● ●●●● ●● ●● ●●●●● ● ●● ●● ●●●● ●●● ● ● ● ● ●●●●●● ●●●●●●● ●●● ● ● ●●●●●●●●
+●
+●
+●
+●●●●
+●
+●
+6e+05
+●
+●
+●
+●
+●●
+●
+●
+●
+●●●●●●●●● ●●●●●●●●●●●● ●●●●●●●
+● ●●●●●●●●●●●●●●● ●●● ●●● ●●●●●●●●●●●●●●●
+●
+● ● ● ● ● ●● ● ● ● ● ● ● ●●●●●●●● ●●● ●● ●● ● ●● ●● ● ● ●●●●●●●●●●●●●●●●●●●●●
+● ●● ●●● ● ●● ●●●●●●● ●● ●●●● ●●●●●●●● ●●●●●●●●●●●●● ●● ●● ● ●●●●●● ●● ● ● ●●●●●●●● ●●●● ●●●●●●●●●● ●● ●●●● ●
+●●●
+● ●●●●●●●●●●●●●● ●●●●●●●●● ●●●●●●●●●●●●●●●●
+●●●●●● ●●● ●●
+●●●● ●●
+●
+●
+plot(calif$Median_house_value, exp(preds.gam$fit), type = "n", xlab = "Actual price ($)",
+    ylab = "Predicted ($)", main = "First additive model", ylim = c(0, exp(max(predlims.gam))))
+segments(calif$Median_house_value, exp(predlims.gam[, "lower"]), calif$Median_house_value,
+    exp(predlims.gam[, "upper"]), col = "grey")
+abline(a = 0, b = 1, lty = "dashed")
+points(calif$Median_house_value, exp(preds.gam$fit), pch = 16, cex = 0.1)
+FIGURE 9.3: Actual versus predicted prices for the additive model, as in Figure 9.2. Note that the sig2 attribute of a model returned by gam() is the estimate of the noise variance around the regression surface (σ2).
+00:02 Monday 18th April, 2016
+●
+●
+●
+●●
+●
+●
+●
+● ●●●
+●
+●
+8e+05
+●●
+●
+●
+●
+●
+●
+●
+●
+Predicted ($)
+0 500000 1000000 1500000 2000000
+￼9.4. EXAMPLE:CALIFORNIAHOUSEPRICESREVISITED 222
+s(Mean_household_size_renters,3.11) s(Vacant_units,5.85) s(Median_household_income,5.03)
+−0.6 −0.2 0.2 0.0 1.0 2.0 −0.1 0.1 0.3
+s(LATITUDE,8.81) s(Owners,3.88) s(Mean_household_income,6.52)
+−1.0 0.0 0.5
+−0.2 0.2 0.4
+−1.0 0.0 1.0
+s(LONGITUDE,8.85)
+s(Median_rooms,7.39) s(POPULATION,2.27)
+−1.5 −0.5 0.5
+−0.2 0.0 0.2
+−0.6 −0.2 0.2
+s(Mean_household_size_owners,7.82)
+s(Total_units,5.37)
+−0.5 0.0 0.5
+−0.8 −0.4 0.0
+50000 150000 50000 200000 0 20000 0 4000 8000
+Median_household_income Mean_household_income POPULATION Total_units
+0 2000 5000 0 40 80
+Vacant_units Owners
+2 4 6 8 10 34 38
+Mean_household_size_renters LATITUDE
+42
+2 4 6 8 2 4 6 8 10
+Median_rooms Mean_household_size_owners
+−124 −120 −116
+LONGITUDE
+FIGURE 9.4: The estimated partial response functions for the additive model, with a shaded region showing ±2 standard errors. The tick marks along the horizontal axis show the observed values of the input variables (a rug plot); note that the error bars are wider where there are fewer observa- tions. Setting pages=0 (the default) would produce eight separate plots, with the user prompted to cycle through them. Setting scale=0 gives each plot its own vertical scale; the default is to force them to share the same one. Finally, note that here the vertical scales are logarithmic.
+00:02 Monday 18th April, 2016
+￼223 9.4. EXAMPLE:CALIFORNIAHOUSEPRICESREVISITED
+50000 150000 50000 200000 0 20000 0 4000 8000
+Median_household_income Mean_household_income POPULATION Total_units
+0 2000 5000
+Vacant_units
+2 4 6 8 10 −124
+Mean_household_size_renters
+0 40 80
+Owners
+2 4 6 8
+Median_rooms
+2 4 6 8 10
+Mean_household_size_owners
+−1se
+s(LONGITUDE,LATITUDE,28.48)
+−0.2
+−0.4
+−120 −118
+LONGITUDE
++1se
+−0.6
+−0.4
+0.2
+0
+0.6
+0
+0.2
+0
+0
+−0.4
+−0.2
+−0.2
+−0.8
+0.8
+0.8
+−0.8
+0.6
+−0.8
+−0.6
+0.6
+−0.6
+−0.2
+−0.2
+−0.2
+−0.6
+0.6
+−0.4
+−0.4
+−0.4
+0.6
+0.2
+−0.6
+−0.8
+0.4
+0.6
+0.2
+0.2
+00.4.4
+−0.8
+0
+0
+−122
+−116
+−114
+−0.4
+s(Mean_household_size_renters,3.08)
+s(Vacant_units,4.58)
+s(Median_household_income,6.61)
+−3
+−1 0 1
+−3 −1 0 1
+−4 −2 0 1
+34 36
+38 40 42
+−3 −1 0 1
+−3 −2 −1 0 1
+LATITUDE
+s(Owners,6.14)
+s(Mean_household_income,6.16)
+s(Median_rooms,7.88)
+s(POPULATION,1)
+−4 −2 0 1
+−3 −1 0 1
+s(Mean_household_size_owners,7.96)
+s(Total_units,2.94)
+−3 −1 0 1
+−3 −1 0 1
+plot(calif.gam2, scale = 0, se = 2, shade = TRUE, resid = TRUE, pages = 1)
+FIGURE 9.5: Partial response functions and partial residuals for addfit2, as in Figure 9.4. See subsequent figures for the joint smoothing of longitude and latitude, which here is an illegible mess. See help(plot.gam) for the plotting options used here.
+00:02 Monday 18th April, 2016
+9.4. EXAMPLE:CALIFORNIAHOUSEPRICESREVISITED 224
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0.5
+￼0.0
+￼￼−0.5
+40
+38
+36
+￼−124
+￼−122
+￼￼−120
+￼￼−118
+34
+￼−116
+￼plot(calif.gam2, select = 10, phi = 60, pers = TRUE, ticktype = "detailed",
+    cex.axis = 0.5)
+FIGURE 9.6: The result of the joint smoothing of longitude and latitude.
+00:02 Monday 18th April, 2016
+s(LONGITUDE,LATITUDE,28.48)
+LONGITUDE
+LATITUDE
+￼225 9.4. EXAMPLE:CALIFORNIAHOUSEPRICESREVISITED
+s(LONGITUDE,LATITUDE,28.48)
+0
+−0.4
+0
+0.6
+−0.4
+−0.2
+0.8
+−0.8
+−0.6
+−0.2
+−0.4
+0.2
+0.6
+LATITUDE
+34 36 38 40 42
+0.4
+−0.8
+−124 −122 −120 −118 −116 −114
+LONGITUDE
+plot(calif.gam2, select = 10, se = FALSE)
+FIGURE 9.7: The result of the joint smoothing of longitude and latitude. Setting se=TRUE, the default, adds standard errors for the contour lines in multiple colors. Again, note that these are log units.
+00:02 Monday 18th April, 2016
+9.4. EXAMPLE:CALIFORNIAHOUSEPRICESREVISITED 226
+￼￼￼￼graymapper <- function(z, x = calif$LONGITUDE, y = calif$LATITUDE, n.levels = 10,
+    breaks = NULL, break.by = "length", legend.loc = "topright", digits = 3,
+    ...) {
+    my.greys = grey(((n.levels - 1):0)/n.levels)
+    if (!is.null(breaks)) {
+        stopifnot(length(breaks) == (n.levels + 1))
+}
+else {
+        if (identical(break.by, "length")) {
+            breaks = seq(from = min(z), to = max(z), length.out = n.levels +
+1) }
+        else {
+            breaks = quantile(z, probs = seq(0, 1, length.out = n.levels + 1))
+} }
+    z = cut(z, breaks, include.lowest = TRUE)
+    colors = my.greys[z]
+    plot(x, y, col = colors, bg = colors, ...)
+    if (!is.null(legend.loc)) {
+        breaks.printable <- signif(breaks[1:n.levels], digits)
+        legend(legend.loc, legend = breaks.printable, fill = my.greys)
+    }
+    invisible(breaks)
+}
+CODE EXAMPLE 21: Map-making code. In its basic use, this takes vectors for x and y coordinates, and draws gray points whose color depends on a third vector for z, with darker points indicating higher values of z. Options allow for the control of the number of gray levels, setting the breaks between levels automatically, and using a legend. Returning the break-points makes it easier to use the same scale in multiple maps. See online for commented code.
+00:02 Monday 18th April, 2016
+￼
+227 9.5. INTERACTIONTERMSANDEXPANSIONS
+Figures 9.8 and 9.9 show that allowing for the interaction of latitude and longitude (the smoothing term plotted in Figures 9.6–9.7) leads to a much more random and less systematic clumping of residuals. This is desirable in itself, even if it does little to improve the mean prediction error. Essentially, what that smoothing term is doing is picking out the existence of California’s urban regions, and their distinction from the rural background. Examining the plots of the interaction term should suggest to you how inadequate it would be to just put in a LONGITUDE×LATITUDE term in a linear model.
+Including an interaction between latitude and longitude in a spatial problem is pretty obvious. There are other potential interactions which might be important here — for instance, between the two measures of income, or between the total num- ber of housing units available and the number of vacant units. We could, of course, just use a completely unrestricted nonparametric regression — going to the opposite extreme from the linear model. In addition to the possible curse-of-dimensionality is- sues, however, getting something like npreg to run with 7000 data points and 11 pre- dictor variables requires a lot of patience. Other techniques, like nearest neighbor re- gression (§1.5.1) or regression trees (Ch. 13), may run faster, though cross-validation can be demanding even there.
+9.5 Interaction Terms and Expansions
+One way to think about additive models, and about (possibly) including interaction terms, is to imagine doing a sort of Taylor series or power series expansion of the true regression function. The zero-th order expansion would be a constant:
+μ(x) ≈ α (9.14) The best constant to use here would just be 􏰌 [Y ]. (“Best” here is in the mean-square
+sense, as usual.) A purely additive model would correspond to a first-order expansion:
+p
+μ(x) ≈ α + 􏰥 fj (xj )
+j=1
+Two-way interactions come in when we go to a second-order expansion:
+ppp μ(x)≈α+􏰥fj(xj)+􏰥 􏰥 fjk(xj,xk)
+j=1 j=1 k=j+1
+(9.15)
+(9.16)
+(WhydoIlimitktorunfromj+1top?,ratherthanfrom1top?) Wewill,of course,insistthat􏰌􏰷fjk(Xj,Xk)􏰺=0forall j,k. Ifwewanttoestimatetheseterms
+in R, using mgcv, we use the syntax s(xj, xk) or te(xj, xk). The former fits a thin-plate spline over the (xj , xk ) plane, and is appropriate when those variables are measured on similar scales, so that curvatures along each direction are comparable.
+00:02 Monday 18th April, 2016
+9.5. INTERACTIONTERMSANDEXPANSIONS 228
+Data
+Linear model
+￼￼￼￼￼￼￼● ● ● ● ●
+● ●● ●●●
+●●● ● ● ●●● ● ● ●● ●●●
+● ●●●●●● ● ●●●●● ●● ●●●●
+16200 181000 243000 296000 342000 382000 431000 493000
+● ●
+● ●●●●●
+● ●
+●
+●
+●
+￼￼●● ● ●
+●●
+●●●●● ● ● ●● ●●● ● ● ●● ●●● ● ● ●● ● ●● ●●
+● ●
+●●●● ●●●● ●●● ● ● ● ● ●● ●
+● ●
+￼￼●● ● ● ● ●●● ● ● ●● ●
+● ● ●● ● ●●●
+● ●●
+●● ●●●
+● ●●
+● ●●●●●●●
+￼￼●●● ●● ● ●
+●
+●●
+● ● ● ● ●
+●
+●
+●● ● ●
+● ●●●
+● ● ● ●●● ● ●
+59100●0 ●●●●●●●●
+●● ●● ●●● ●●●●●
+● ●● ● ● ● ●7050●00 ●●● ● ●
+￼￼● ●
+● ●● ● ●
+● ● ● ●● ● ● ● ●
+● ● ●
+● ● ● ● ●
+● ●● ●●●
+●●● ●
+● ●●● ● ● ● ●● ●●●
+● ●●●●●● ● ●●●●●
+￼￼￼￼￼￼￼￼￼￼￼￼￼−124 −122 −120 −118 −116 −114
+Longitude
+First additive model
+−124 −122 −120 −118 −116 −114
+Longitude
+Second additive model
+￼￼￼￼● ●
+●
+● ●●
+￼￼●●●●● ● ● ●● ●●● ● ● ●● ●●● ● ● ●● ● ●● ●●
+● ●
+●● ●●●● ● ●●●●
+￼￼●●●● ●●● ● ● ● ● ●● ●
+●● ● ● ● ●●● ● ● ●● ●
+●● ●●●
+● ● ●● ● ●●●
+● ●●
+● ●●●●●●●
+￼￼● ●●
+●
+●●
+● ● ● ● ●
+●●● ●● ● ●
+●
+● ●
+●● ● ●
+● ●●●
+● ● ● ●●● ● ●
+●
+● ● ●
+●● ●● ●●● ●●●●●
+●●●●●●●● ● ●● ●
+￼￼● ●●● ●
+●
+● ●
+● ●● ● ●
+● ● ● ●● ● ● ● ●
+● ● ●
+● ●
+● ●●●●●
+● ●
+●
+● ●●
+●●
+●●●●● ● ● ●● ●●● ● ● ●● ●●● ● ● ●● ● ●● ●●
+● ●
+● ● ● ● ●
+● ●● ●●●
+●●● ●
+● ●●● ● ● ● ●● ●●●
+● ●●●●●● ● ●●●●●
+● ●
+● ●●●●●
+● ●
+●
+● ●●
+●●
+●●●●● ● ● ●● ●●● ● ● ●● ●●● ● ● ●● ● ●● ●●
+● ●
+● ●
+●● ●●●● ● ●●●●
+●●● ●●● ●● ●● ● ● ●● ●
+●● ●
+●● ● ● ● ●●● ● ● ●● ●
+●
+●● ●●●
+● ●● ● ● ●●●●●●
+● ●
+●● ●●●● ● ●●●●
+● ●●
+●
+●●● ●● ● ●
+●● ● ●
+●●
+●●●● ●●● ● ● ● ● ●● ●
+●● ● ● ● ●●● ● ● ●● ●
+●●
+● ● ● ● ●
+●● ●● ●●● ●●●●●
+● ●●●
+● ● ● ●●● ● ●
+● ●
+● ●
+●● ●●●
+● ● ●● ● ●●●
+● ●●
+● ●●●●●●●
+● ●●
+●
+●●
+● ● ● ● ●
+●●● ●● ● ●
+●●●●●●●● ● ●● ●
+●
+● ●
+●● ● ●
+● ●●● ●
+●
+● ●●●
+● ● ● ●●● ● ●
+●
+● ● ●
+●● ●● ●●● ●●●●●
+● ●
+● ●● ● ●
+●●●●●●●● ● ●● ●
+● ● ● ●● ● ● ● ●
+● ● ●
+￼￼￼● ● ● ● ●
+● ●● ●●●
+●●● ●
+● ●●● ● ● ● ●● ●●●
+● ●●●●●● ● ●●●●●
+● ●
+● ●●●●●
+●●
+● ●
+● ●●● ●
+●
+● ●
+● ●● ● ●
+● ● ● ●● ● ● ● ●
+● ● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼−124 −122 −120 −118 −116 −114
+Longitude
+−124 −122 −120 −118 −116 −114
+Longitude
+￼par(mfrow = c(2, 2))
+calif.breaks <- graymapper(calif$Median_house_value, pch = 16, xlab = "Longitude",
+    ylab = "Latitude", main = "Data", break.by = "quantiles")
+graymapper(exp(preds.lm$fit), breaks = calif.breaks, pch = 16, xlab = "Longitude",
+    ylab = "Latitude", legend.loc = NULL, main = "Linear model")
+graymapper(exp(preds.gam$fit), breaks = calif.breaks, legend.loc = NULL, pch = 16,
+    xlab = "Longitude", ylab = "Latitude", main = "First additive model")
+graymapper(exp(preds.gam2$fit), breaks = calif.breaks, legend.loc = NULL, pch = 16,
+    xlab = "Longitude", ylab = "Latitude", main = "Second additive model")
+par(mfrow = c(1, 1))
+FIGURE 9.8: Maps of real prices (top left), and those predicted by the linear model (top right), the purely additive model (bottom left), and the additive model with interaction between latitude and longitude (bottom right). Categories are deciles of the actual prices.
+00:02 Monday 18th April, 2016
+Latitude
+Latitude
+34 36 38 40 42
+34 36 38 40 42
+Latitude
+Latitude
+34 36 38 40 42
+34 36 38 40 42
+229
+9.5. INTERACTIONTERMSANDEXPANSIONS
+Residuals of linear model
+Data
+￼￼￼￼￼￼￼￼● ● ● ● ●
+● ●● ●●●
+●●● ● ● ●●● ● ● ●● ●●●
+● ●●●●●● ● ●●●●● ●● ●●●●
+16200 181000 243000 296000 342000 382000 431000 493000
+● ●
+● ●●●●●
+● ●
+●
+●
+●
+￼￼●● ● ●
+●●
+●●●●● ● ● ●● ●●● ● ● ●● ●●● ● ● ●● ● ●● ●●
+● ●
+●●●● ●●●● ●●● ● ● ● ● ●● ●
+● ●
+￼￼●● ● ● ● ●●● ● ● ●● ●
+● ● ●● ● ●●●
+● ●●
+●● ●●●
+● ●●
+● ●●●●●●●
+￼￼●●● ●● ● ●
+●
+●●
+● ● ● ● ●
+●
+●
+●● ● ●
+● ●●●
+● ● ● ●●● ● ●
+59100●0 ●●●●●●●●
+●● ●● ●●● ●●●●●
+● ●● ● ● ● ●7050●00 ●●● ● ●
+￼￼● ●
+● ●● ● ●
+● ● ● ●● ● ● ● ●
+● ● ●
+● ● ● ● ●
+● ●● ●●●
+●●● ● ● ●●● ● ● ●● ●●●
+● ●●●●●● ● ●●●●● ●● ●●●●
+−3.85 −0.352 −0.205 −0.11 −0.0337 0.0337 0.0952 0.156
+￼￼￼￼￼￼￼￼￼￼￼￼￼−124 −122 −120 −118 −116 −114
+Longitude
+Residuals errors of first additive model
+−124 −122 −120 −118 −116 −114
+Longitude
+Residuals of second additive model
+￼￼￼￼● ●
+●
+● ●●
+￼￼●●●●● ● ● ●● ●●● ● ● ●● ●●● ● ● ●● ● ●● ●●
+● ●
+● ●
+●● ●●●● ● ●●●●
+￼￼●●●● ●●● ● ● ● ● ●● ●
+● ●
+●● ● ● ● ●●● ● ● ●● ●
+●
+●
+●●
+●● ●●●
+● ● ●● ● ●●●
+● ●●
+● ●●●●●●●
+￼￼●●● ●● ● ●
+●● ● ●
+●
+●●
+● ● ● ● ●
+● ●●●
+● ● ● ●●● ● ●
+●
+●
+●
+●
+●
+●● ●● ●●● ●●●●●
+●●●●●●●● ● ●● ●
+￼￼● ●●● ●
+● ●
+● ●● ● ●
+● ● ● ●● ● ● ● ●
+● ● ●
+● ●
+● ●●●●●
+● ●
+●
+●
+●
+●● ● ●
+●●
+●●●●● ● ● ●● ●●● ● ● ●● ●●● ● ● ●● ● ●● ●●
+● ● ● ● ●
+● ●● ●●●
+●●● ●
+● ●●● ● ● ● ●● ●●●
+● ●●●●●● ● ●●●●●
+● ●
+● ●●●●●
+● ●
+●
+● ●●
+●●
+●●●●● ● ● ●● ●●● ● ● ●● ●●● ● ● ●● ● ●● ●●
+● ●
+● ●
+●●●● ●●●● ●●● ● ● ● ● ●● ●
+● ●
+●● ● ● ● ●●● ● ● ●● ●
+● ● ●● ● ●●●
+● ●●
+●● ●●●
+●
+●●
+● ●●●●●●●
+●●● ●● ● ●
+● ●
+●● ●●●● ● ●●●●
+●●●● ●●● ● ● ● ● ●● ●
+●● ● ● ● ●●● ● ● ●● ●
+●● ●●●
+● ● ●● ● ●●●
+● ●●
+●
+●●
+● ● ● ● ●
+● ●●●●●●●
+● ●●
+●
+●●
+● ● ● ● ●
+●●● ●● ● ●
+●
+●
+●● ● ●
+● ●●●
+● ● ● ●●● ● ●
+●● ●● ●●● 0.226 ● ●●●●●
+●●●●●●●● ● ●● ●
+● ●
+●
+●● ● ●
+● ●
+●0●.329● ●●● ●
+● ●●●
+● ● ● ●●● ● ●
+● ●
+●
+●
+●
+●● ●● ●●● ●●●●●
+●●●●●●●● ● ●● ●
+●
+● ● ●
+● ●
+● ●● ● ●
+● ● ● ●● ● ● ● ●
+￼￼￼● ● ● ● ●
+● ●● ●●●
+●●● ●
+● ●●● ● ● ● ●● ●●●
+● ●●●●●● ● ●●●●●
+● ●
+● ●●●●●
+●●
+● ●●● ●
+● ●
+● ●● ● ●
+● ● ● ●● ● ● ● ●
+● ● ●
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼−124 −122 −120 −118 −116 −114
+Longitude
+−124 −122 −120 −118 −116 −114
+Longitude
+FIGURE 9.9: Actual housing values (top left), and the residuals of the three models. (The residuals are all plotted with the same color codes.) Notice that both the linear model and the additive model without spatial interaction systematically mis-price urban areas. The model with spatial interaction does much better at having randomly-scattered errors, though hardly perfect. — How would you make a map of the magnitude of regression errors?
+00:02 Monday 18th April, 2016
+Latitude
+Latitude
+34 36 38 40 42
+34 36 38 40 42
+Latitude
+Latitude
+34 36 38 40 42
+34 36 38 40 42
+9.5. INTERACTIONTERMSANDEXPANSIONS 230
+The latter uses a tensor product of smoothing splines along each coordinate, and is more appropriate when the measurement scales are very different11.
+There is an important ambiguity here: for any j, with additive partial-response function fj,Icouldtakeanyofitsinteractions,set f′ (xj,xk)= fjk(xj,xk)+fj(xj)
+jk
+and f ′(xj ) = 0, and get exactly the same predictions under all circumstances. This is j
+the parallel to being able to add and subtract constants from the first-order functions, provided we made corresponding changes to the intercept term. We therefore need to similarly fix the two-way interaction functions.
+A natural way to do this is to insist that the second-order fjk function should be uncorrelated with (“orthogonal to”) the first-order functions fj and fk; this is the analog to insisting that the first-order functions all have expectation zero. The
+fjks then represent purely interactive contributions to the response, which could not be captured by additive terms. If this is what we want to do, the best syntax
+to use in mgcv is ti, which specifically separates the first- and higher- order terms, e.g.,ti(xj) + ti(xk) + ti(xj, xk)willestimatethreefunctions,fortheadditive contributions and their interaction.
+An alternative is to just pick a particular fjk, and absorb fj into it. The model
+then looks like
+pp
+μ(x)≈α+􏰥 􏰥 fjk(xj,xk) (9.17)
+j=1 k=j+1
+We can also mix these two approaches, if we specifically do not want additive or interactive terms for certain predictor variables. This is what I did above, where I estimated a single second-order smoothing term for both latitude and longitude, with no additive components for either.
+Of course, there is nothing special about two-way interactions. If you’re curious about what a three-way term would be like, and you’re lucky enough to have data which amenable to fitting it, you could certainly try
+ppp
+μ≈α+􏰥fj(xj)+􏰥 􏰥 fjk(xj,xk)+􏰥fjkl(xj,xk,xl) (9.18)
+j=1 j=1 k=j+1 j,k,l
+(How should the indices for the last term go?) More ambitious combinations are cer-
+tainly possible, though they tend to become a confused mass of algebra and indices.
+Geometric interpretation It’s often convenient to think of the regression function as living in a big (infinite-dimensional) vector space of functions. Within this space, the constant functions form a linear sub-space12, and we can ask for the projection of the true regression function on to that sub-space; this would be the best approxi- mation13 to μ as a constant. This is, of course, the expectation value. The additive
+11For the distinction between thin-plate and tensor-product splines, see §8.4. If we want to interact a continuousvariablexj withacategoricalxk,mgcv’ssyntaxiss(xj, by=xk)orte(xj, by=xk).
+12 Because if f and g are two constant functions, a f + b g is also a constant, for any real numbers a and b.
+13Remember that projecting a vector on to a linear sub-space finds the point in the sub-space closest to the original vector. This is equivalent to minimizing the (squared) bias.
+00:02 Monday 18th April, 2016
+￼
+231 9.6. CLOSINGMODELINGADVICE
+functions of all p variables also form a linear sub-space14, so the right-hand side of Eq. 9.15 is just the projection of μ on to that space, and so forth and so on. When we insist on having the higher-order interaction functions be uncorrelated with the additive functions, we’re taking the projection of μ on to the space of all functions orthogonal to the additive functions.
+Selecting interactions There are two issues with interaction terms. First, the curse
+of dimensionality returns: an order-q interaction term will converge at the rate O(n−4/(4+q)),
+so they can dominate the over-all uncertainty. Second, there are lots of possible in-
+teractions (􏰑p􏰒, in fact), which can make it very demanding in time and data to fit q
+them all, and hard to interpret. Just as with linear models, therefore, it can make a lot of sense to selective examine interactions based on subject-matter knowledge, or residuals of additive models.
+Varying-coefficient models
+form
+In some contexts, people like to use models of the
+p
+μ(x)=α+􏰥xj fj(x−j) (9.19)
+j=1
+where f j is a function of the non- j predictor variables, or some subset of them. These varying-coefficient functions are obviously a subset of the usual class of additive
+models, but there are occasions where they have some scientific justification15. These are conveniently estimated in mgcv through the by option, e.g., s(xk, by=xj) will estimate a term of the form xj f (xk).16
+9.6 Closing Modeling Advice
+With modern computing power, there are very few situations in which it is actually better to do linear regression than to fit an additive model. In fact, there seem to be only two good reasons to prefer linear models.
+1. Our data analysis is guided by a credible scientific theory which asserts linear relationships among the variables we measure (not others, for which our observ- ables serve as imperfect proxies).
+2. Our data set is so massive that either the extra processing time, or the extra computer memory, needed to fit and store an additive rather than a linear model is prohibitive.
+Even when the first reason applies, and we have good reasons to believe a linear the- ory, the truly scientific thing to do would be to check linearity, by fitting a flexible non-linear model and seeing if it looks close to linear. (We will see formal tests based
+14By parallel reasoning to the previous footnote.
+15They can also serve as a “transitional object” when giving up the use of purely linear models.
+16As we saw above, by does something slightly different when given a categorical variable. How are
+￼these two uses related?
+00:02 Monday 18th April, 2016
+9.7. FURTHERREADING 232
+on this idea in Chapter 10.) Even when the second reason applies, we would like to know how much bias we’re introducing by using linear predictors, which we could do by randomly selecting a subset of the data which is small enough for us to manage, and fitting an additive model.
+In the vast majority of cases when users of statistical software fit linear models, neither of these justifications applies: theory doesn’t tell us to expect linearity, and our machines don’t compel us to use it. Linear regression is then employed for no better reason than that users know how to type lm but not gam. You now know better, and can spread the word.
+9.7 Further Reading
+Simon Wood, who wrote the mgcv package, has a nice book about additive models and their generalizations, Wood (2006); at this level it’s your best source for further information. Buja et al. (1989) is a thorough theoretical treatment.
+The expansions of §9.5 are sometimes called “functional analysis of variance” or “functional ANOVA”. Making those ideas precise requires exploring some of the geometry of infinite-dimensional spaces of functions (“Hilbert space”). See Wahba (1990) for a treatment of the statistical topic, and Halmos (1957) for a classic intro- duction to Hilbert spaces.
+Historical notes Ezekiel (1924) seems to be the first publication advocating the use of additive models as a general method, which he called “curvilinear multiple cor- relation”. His paper was complete with worked examples on simulated data (with known answers) and real data (from economics)17. He was explicit that any rea- sonable smoothing or regression technique could be used to find what we’d call the partial response functions. He also gave a successive-approximation algorithm for es- timate the over-all model: start with an initial guess about all the partial responses; plot all the partial residuals; refine the partial responses simultaneously; repeat. This differs from back-fitting in that the partial response functions are updating in parallel within each cycle, not one after the other. This is a subtle difference, and Ezekiel’s method will often work, but can run into trouble with correlated predictor variables, when back-fitting will not.
+The Gauss-Seidel or backfitting algorithm was invented by Gauss in the early 1800s during his work on least squares estimation in linear models; he mentioned it in letters to students, but never published it. (Apparently he described it as something one could do “while half asleep”.) Seidel gave the first published version in 1874. (See https://www.siam.org/meetings/la09/talks/benzi.pdf.) I am not sure when the connection was made between additive statistical models and back-fitting.
+17“Each of these curves illustrates and substantiates conclusions reached by theoretical economic analy- sis. Equally important, they provide definite quantitative statements of the relationships. The method of . . . curvilinear multiple correlation enable[s] us to use the favorite tool of the economist, caeteris paribus, in the analysis of actual happenings equally as well as in the intricacies of theoretical reasoning” (p. 453).
+00:02 Monday 18th April, 2016
+￼
+233 9.8. EXERCISES
+9.8 Exercises
+1. Repeat the analyses of California housing prices with Pennsylvania housing prices. Which partial response functions might one reasonably hope would stay the same? Do they? (How can you tell?)
+2. Additive? For general p, let ∥⃗x∥ be the (ordinary, Euclidean) length of the vector ⃗x. Is this an additive function of the (ordinary, Cartesian) coordinates? Is ∥⃗x∥2 an additive function? ∥⃗x −⃗x0∥ for a fixed ⃗x0? ∥⃗x −⃗x0∥2?
+3. Additivity vs. parallelism
+(a) Take any additive function f of p arguments x1,x2,...xp. Fix a coor- dinate index i and a real number c. Prove that f(x1,x2,...xi,...xp)− f(x1,x2,...xi +c,...xp)dependsonlyonxi andc,andnotontheother
+coordinates.
+(b) Suppose p = 2, and continue to assume f is additive. Consider the curve formed by plotting f (x1, x2) against x1 for a fixed value of x2, and the curved formed by plotting f (x1, x2) against x1 with x2 fixed at a different value, say x2′. Prove that the curves are parallel, i.e., that the vertical distance between them is constant.
+(c) For general p and additive f , consider the surfaces formed by the f by varying all but one of the coordinates. Prove that these surfaces are always parallel to each other.
+(d) Is the converse true? That is, do parallel regression surfaces imply an additive model?
+[[TODO: write some more exercises — turn footnotes into problems?]]
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

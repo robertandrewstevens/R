@@ -1,0 +1,65 @@
+
+Appendix I
+Where the χ 2 Null Distribution for the Likelihood-Ratio Test Comes From
+Here is a very hand-wavy explanation for Eq. 2.35. We’re assuming that the true parameter value, call it θ, lies in the restricted class of models ω. So there are q components to θ which matter, and the other p − q are fixed by the constraints defining ω. To simplify the book-keeping, let’s say those constraints are all that the extraparametersarezero,soθ=(θ1,θ2,...θq,0,...0),with p−q zeroesattheend.
+The restricted MLE θ􏰨 obeys the constraints, so
+θ􏰨= (θ􏰨 ,θ􏰨 ,...θ􏰨 ,0,...0) (I.1)
+12q
+The unrestricted MLE does not have to obey the constraints, so it’s
+Θ􏰨 =(Θ􏰨1,Θ􏰨2,...Θ􏰨q,Θ􏰨q+1,...Θ􏰨p) (I.2) BecausebothMLEsareconsistent,weknowthatθ􏰨 →θ ,Θ􏰨 →θ if1≤i ≤q,and
+iiii
+Very roughly speaking, it’s the last extra terms which end up making L(Θ􏰨) larger
+thatΘ􏰨i →0ifq+1≤i≤p. 􏰨
+than L(θ). Each of them tends towards a mean-zero Gaussian whose variance is O(1/n), but their impact on the log-likelihood depends on the square of their sizes, and the square of a mean-zero Gaussian has a χ 2 distribution with one degree of free- dom. A whole bunch of factors cancel out, leaving us with a sum of p−q independent χ 2 variables, which has a χ 2 distribution.
+1 p−q
+In slightly more detail, we know that L(Θ) ≥ L(θ), because the former is a maxi-
+mum over a larger space than the latter. Let’s try to see how big the difference is by 774
+􏰨􏰨
+775
+doing a Taylor expansion around Θ􏰨 , which we’ll take out to second order.
+p 􏰟∂L􏰕􏰕􏰠1p p 􏰟∂2L􏰕􏰕􏰠 􏰨􏰨􏰨􏰨􏰨􏰨􏰨􏰨
+L(θ) ≈ L(Θ)+􏰥(Θ−θ) ￼ 􏰕􏰕 + 􏰥􏰥(Θ−θ) ￼ 􏰕􏰕 (Θ−θ) ii∂θ 2 ii∂θ∂θ jj
+￼i = 1 i 􏰕 Θ􏰨 i = 1 j = 1 i j 􏰕 Θ􏰨
+1p p 􏰟∂2L􏰕􏰕􏰠
+=L(Θ􏰨)+􏰥􏰥(Θ􏰨−θ􏰨) 􏰕􏰕 (Θ􏰨−θ􏰨) 2ii∂θ∂θjj
+i = 1 j = 1 i j 􏰕 Θ􏰨
+All the first-order terms go away, because Θ􏰨 is a maximum of the likelihood, and so the first derivatves are all zero there. Now we’re left with the second-order terms. Writing all the partials out repeatedly gets tiresome, so abbreviate ∂ 2L/∂ θi∂ θj as
+L,ij.
+To simplify the book-keeping, suppose that the second-derivative matrix, or Hes-
+sian, is diagonal. (This should seem like a swindle, but we get the same conclusion without this supposition, only we need to use a lot more algebra — we diagonalize the Hessian by an orthogonal transformation.) That is, suppose L,i j = 0 unless i = j . Now we can write
+￼￼1 􏰥p 􏰨􏰨􏰨􏰨2
+(I.3)
+[[TODO: Write out the less- swindly version]]
+(I.4)
+(I.5)
+L(Θ)−L(θ) ≈ −2
+(Θi −θi) L,ii qp
+􏰨􏰨􏰨􏰨2􏰨2
+2 L(Θ)−L(θ) ≈ − (Θi −θi) L,ii − (Θi) L,ii
+￼􏰪􏰫
+i=1 􏰥􏰥
+i=1
+i=q+1
+At this point, we need a fact about the asymptotic distribution of maximum likeli- hood estimates: they’re generally Gaussian, centered around the true value, and with a shrinking variance that depends on the Hessian evaluated at the true parameter value; this is called the Fisher information, F or I . (Call it F .) If the Hessian is diagonal, then we can say that
+(I.6) (I.7) (I.8)
+Θ􏰨i 􏰐 􏰄 (θi,−1/nFii)
+θ􏰨 􏰐 􏰄(θ,−1/nF )1≤i≤q
+i 1 ii θ􏰨 = 0q+1≤i≤p
+i
+Also,(1/n)L,ii →−Fii.
+Putting all this together, we see that each term in the second summation in Eq.
+I.5 is (to abuse notation a little)
+−1 (􏰄(0,1))2L,ii →χ12 (I.9)
+nFii
+so the whole second summation has a χ 2 distribution1 . The first summation, p−q
+meanwhile, goes to zero because Θ􏰨 and θ􏰨 are actually strongly correlated, so their ii
+1Thanks to Xiaoran Yan for catching a typo in a previous version here. 00:02 Monday 18th April, 2016
+￼￼
+776
+difference is O(1/n), and their difference squared is O(1/n2). Since L,ii is only O(n), that summation drops out.
+A somewhat less hand-wavy version of the argument uses the fact that the MLE is really a vector, with a multivariate normal distribution which depends on the inverse of the Fisher information matrix:
+Θ􏰨 􏰐􏰄 (θ,(1/n)F−1) (I.10)
+Then, at the cost of more linear algebra, we don’t have to assume that the Hessian is diagonal.
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

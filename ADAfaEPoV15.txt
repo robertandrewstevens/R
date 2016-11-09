@@ -1,0 +1,562 @@
+
+Chapter 15
+Relative Distributions and Smooth Tests of Goodness-of-Fit
+In §5.2.2.3, we saw how to use the quantile function to turn uniformly-distributed random numbers into random numbers with basically arbitrary distributions. In this chapter, we will look at two closely-related data-analysis tools which go the other way, trying to turn data into uniformly-distributed numbers. One of these, the smooth test, turns a lot of problems into ones of testing a uniform distribution. Another, the relative distribution, gives us a way of comparing whole distributions, rather than specific statistics (like the expectation or the variance).
+15.1 Smooth Tests of Goodness of Fit
+15.1.1 From Continuous CDFs to Uniform Distributions
+Suppose that X has probability density function f , and that f is continuous. The corresponding cumulative distribution function F is then continuous and strictly increasing (on the support of f ). Since F is a fixed function, we can ask what the probability distribution of F (X ) is. Clearly,
+Pr(F(X)≤0) = 0 (15.1) Pr(F(X)≤1) = 1 (15.2)
+Since F is continuous and strictly increasing, it has an inverse, the quantile function Q, which is also continuous and strictly increasing. Then, for 0 ≤ a ≤ 1,
+Pr(F(X)≤a) = Pr(Q(F(X))≤Q(a)) = Pr(X ≤Q(a))
+= F (Q(a)) = a 339
+(15.3) (15.4) (15.5)
+15.1. SMOOTHTESTSOFGOODNESSOFFIT 340
+Thus, when F is continuous and strictly-increasing, F (X ) is uniformly distributed on the unit interval,
+F (X ) ∼ Unif(0, 1) (15.6)
+If the distribution of X is F , but we guess that it has some other distribution, with CDF F0, then this trick will not work. F0(X) will still be in the unit interval, but it won’t be uniformly distributed:
+This only works if X really is distributed according to F . If instead X were distributed according, say, F0, then F (X ) will still be in the unit interval, but it will not be uniformly distributed:
+Pr(F0(X)≤a) = Pr(X ≤Q0(a)) (15.7) = F (Q0(a)) ̸= a (15.8)
+because F0 ̸= Q−1.
+Putting this together, we see that when X has a continuous distribution, F (X ) ∼
+Unif(0, 1) if and only if F is the cumulative distribution function for X . This means that we can reduce the problem of testing whether X ∼ F to that of testing whether F (X ) is uniform. We need to work out one testing problem, rather than many differ- ent testing problems for many different distributions.
+15.1.2 Testing Uniformity
+Now we have a random variable, say Y, which lives on the unit interval [0,1], and we want to test whether it is uniformly distributed. There are several different ways we could do this. One frequently-used strategy is to use the Kolmogorov-Smirnov test: calculate the K-S distance,
+􏰕􏰕
+d =max􏰕􏰕F􏰨 (a)−a􏰕􏰕 (15.9)
+K S a∈[0,1] n,Y
+where F􏰨 (a) is the empirical CDF of Y , and look up the appropriate p-value for the
+n,Y
+K-S test. One could use any other one-sample non-parametric test here, like Cramér-
+von Mises or Anderson-Darling1 All of these tests can work quite well in the right circumstances, and they have the advantage of requiring little additional work over and above typing ks.test or the like.
+15.1.3 Neyman’s Smooth Test
+There are however two disadvantages of just applying off-the-shelf tests to check uni- formity. One is that it turns out that they often do not have very high power. The other, which is in some ways even more serious, is that rejecting the null hypothesis of uniformity doesn’t tell you how uniformity fails — it doesn’t suggest any sort of natural alternative.
+1 You could even use a χ 2 test, but this would be dumb. Because the χ 2 test requires discrete data, using it means binning continuous values, thereby destroying information, to no good purpose.
+00:02 Monday 18th April, 2016
+￼
+341 15.1. SMOOTHTESTSOFGOODNESSOFFIT
+As you can guess from my having brought up these points, there is a test which avoids both difficulties, called Neyman’s smooth test. It works by embedding the uniform distribution on the unit interval in a larger class of alternatives, and then testing the null of uniformity against those alternatives.
+The alternatives all have pdfs of the form
+g(y;θ) ≡
+􏰢d θj hj (y) z(θ)
+0≤y≤1 elsewhere
+hj(y)dy = 0 hj(y)hk(y)dy = 0
+and normalized in magnitude,
+􏰧1
+0
+(15.12) (15.13)
+(15.14)
+
+ e j=1
+(15.10) where the hj are carefully chosen functions (see below), and the normalizing factor
+￼
+0
+or partition function z(θ) just makes sure the density integrates to 1: 􏰧1􏰢d θh(y)
+z(θ)≡ e j=1 j j dy (15.11) 0
+No matter what functions we pick for the hj , uniformity corresponds to the choice θ = 0, since then the density is just 1. As we move θ slightly away from 0, the density departs smoothly from uniformity; hence the name of the test.
+To ensure that everything works out, we need to put some requirements on the functions hj : they need to be orthogonal to each other and to the constant function,
+􏰧1 0
+􏰧1 0
+h2j (y)dy =1
+Further details, while practically important, do not matter for the general idea of the test, so I’ll put them off to §15.1.3.1.
+We can estimate θ by maximum likelihood. Because uniformity corresponds to θ = 0, we can test the hypothesis that θ = 0 against the alternative that θ ̸= 0 with a
+likelihood ratio test. Writing l(θˆ) for the log-likelihood under the MLE, and l(0) for the log-likelihood under the null, by general results on the likelihood-ratio (Appendix I), under the null, as n → ∞,
+2(l(θˆ) − l(0)) 􏰐 χd2 (15.15) In fact, l(0) = 0 (why?), so we only need to calculate the log-likelihood under the
+alternative, and reject uniformity when, and only when, that log-likelihood is large. 00:02 Monday 18th April, 2016
+15.1. SMOOTHTESTSOFGOODNESSOFFIT 342
+Alternatively, and this was Neyman’s original recommendation and what is usu- ally meant by his “smooth test”, we can calculate the sample mean of each of the
+hj,
+and form the test statistic
+1 􏰥n
+hj(yi) (15.16) 2 􏰥d 2
+hj (15.17)
+￼before it,
+􏰧1
+hj = n Ψ =n
+￼hj (y)hk(y)dy = 0 ∀k < j
+including the constant “polynomial” h0(y) = 1, and normalized to size 1,
+􏰧1 0
+(15.18)
+(15.19)
+0
+i=1
+j=1
+￼which also has a χd2 distribution under the null.2
+It can be shown that Neyman’s smooth test has, in a certain sense, optimal power against smooth alternatives like this — see Rayner and Best (1989) or Bera and Ghosh (2002) for the gory details. More importantly, for data analysis, when we reject the null hypothesis of uniformity, we have a ready-made alternative to fall back on,
+namely g(y;θˆ).
+To make all this work, we have to pick some “basis functions” h j , and we need to
+decide how many of them we want to use, d . 15.1.3.1 Choice of Function Basis
+Neyman’s original proposal was to use orthonormal polynomials for basis func- tions: hj would be a polynomial of degree j, which was orthogonal to all the ones
+h2j (y)dy =1
+Since there are j + 1 coefficients in a polynomial of degree j , and this gives j + 1 equa- tions, the polynomial is uniquely determined. In fact, there are recursively formulas whichletyoufindthecoefficientsofhj fromthoseofthepreviouspolynomials3.Fig- ure 15.1 shows the first few of these polynomials, and their exponentiated versions (which are what appear in Eq. 15.10).
+2Toappreciatewhat’sgoingon,noticethathj →0underthenull,bythelawoflargenumbers.(Thisis
+2
+where being orthogonal to the constant function h0(y) = 1 comes in.) Multiplying hj
+looking at 􏰋nhj , which should, by the central limit theorem, be a Gaussian; the variance of this Gaussian is 1. (This is where normalizing each hj comes in.) Finally, 􏰋nhj and 􏰋nhk are uncorrelated. (This is where the mutual orthogonality of the hj comes in.) Thus, the Ψ2 statistic is a sum of d uncorrelated
+standard Gaussians, which has a χd2 distribution.
+3In fact, the polynomials Neyman proposed to use are, as he knew, the “Legendre polynomials”,
+though many math books (and Wikipedia) give the version of those defined on [−1,1], rather than on [0,1].Iflj isthepolynomialon[−1,1],thenhj(y)=lj(2(y−0.5)).
+00:02 Monday 18th April, 2016
+￼￼￼by n corresponds to
+￼￼￼￼￼￼
+343 15.1. SMOOTHTESTSOFGOODNESSOFFIT Experience has shown that the specific choice of basis functions doesn’t matter as
+much as ensuring that they are orthonormal. One could, for instance, use hj (y) = cj cos2πjy, where cj is a normalizing constant4.
+15.1.3.2 Choice of Number of Basis Functions
+As we make d in Eq. 15.10, we include more and more distributions in the alternative to the null hypothesis of uniformity. In fact, since any smooth function on [0, 1] can be approximated arbitrarily closely by sufficiently-high order polynomials5, as we let d → ∞ we eventually get all continuous distributions, other than uniformity, as part of the alternative. However, using a large value of d means estimating a lot of parameters, which means we are at risk of over-fitting. What to do?
+Neyman’s original advice was to guess a particular value of d before looking at the data and stick to it. (He thought d = 4 would usually be enough.) More modern approaches try to adaptively pick a good value of d. We could attempt this through cross-validation based on the log-likelihood, but what’s usually done, in implemented software, is to pick d to maximize Schwarz’s information criterion:
+1 d logn d∗=argmaxnl(θ􏰨(d))−2 n (15.20)
+d
+which imposes an extra penalty for each parameter (d), with the size of the penalty depending on how much data we have, and getting relatively harsher as n grows6. So in a data-driven smooth test (Kallenberg and Ledwina, 1997), we pick d ∗ using Eq. 15.20, and then compute the test statistic using d∗.
+Unfortunately, since d ∗ is random (through the data), the nice asymptotic theory which says that the test statistic is χd2 under the null hypothesis no longer applies. However, this is why we have bootstrapping: by simulating from the null hypothesis, which remember is just Unif(0,1), and treating the simulation output like real data we can work out the sampling distribution as accurately as we need. This sampling distribution then gives us our p-values.
+15.1.3.3 Application: Combining p-Values
+One useful property of p-values is that they are always uniformly distributed on [0,1] under the null hypothesis7. Suppose we have conducted a bunch of tests of the same null hypothesis — these might be different clinical trials of the same drug, or
+4If this makes you think of Fourier analysis, you’re right.
+5This may be obvious, but making it precise (what do we mean by “smooth” and “arbitrarily close”?) is the “Stone-Weierstrauss theorem”. There is nothing magic about polynomials here; we could also use sines and cosines, or many other function bases.
+6It is common in the literature to see the criterion written out multiplied through by n, or even by 2n. Also, it is often called the “Bayesian information criterion”, or BIC. This is an unfortunate name, because, despite what Schwarz (1978) thought, it really has nothing at all to do with Bayes’s rule or even Bayesian statistics. It’s best thought of as a fast, but very crude and not always very accurate, approximation to cross-validation. If you want to know more, Claeskens and Hjort (2008) is probably the best reference.
+7Unless someone has messed up a calculation, that is.
+00:02 Monday 18th April, 2016
+￼￼￼￼
+15.1. SMOOTHTESTSOFGOODNESSOFFIT
+344
+￼￼￼h1 h2 h3
+￼￼￼￼￼￼0.0 0.2 0.4
+0.6 0.8
+1.0
+y
+￼￼￼h1 h2 h3
+￼￼￼￼￼￼￼￼￼￼￼￼0.0 0.2 0.4
+par(mfrow = c(2, 1))
+h1 <- function(y) {
+    sqrt(12) * (y - 0.5)
+}
+0.6 0.8
+1.0
+h2 <- function(y) {
+    sqrt(5) * (6 * (y - 0.5)^2 - 0.5)
+}
+h3 <- function(y) {
+    sqrt(7) * (20 * (y - 0.5)^3 - 3 * (y - 0.5))
+}
+y
+￼curve(h1(x), ylab = expression(h[j](y)), xlab = "y")
+curve(h2(x), add = TRUE, lty = "dashed")
+curve(h3(x), add = TRUE, lty = "dotted")
+legend(legend = c(expression(h[1]), expression(h[2]), expression(h[3])), lty = c("solid",
+    "dashed", "dotted"), x = "bottomright")
+curve(exp(h1(x)), ylab = expression(e^h[j](y)), xlab = "y")
+curve(exp(h2(x)), add = TRUE, lty = "dashed")
+curve(exp(h3(x)), add = TRUE, lty = "dotted")
+legend(legend = c(expression(h[1]), expression(h[2]), expression(h[3])), lty = c("solid",
+    "dashed", "dotted"), x = "bottomright")
+par(mfrow = c(1, 1))
+00:02 Monday 18th April, 2016
+FIGURE 15.1: Left panel: the first three of the basis functions for Neyman’s smooth tests, h1, h2 and h3. Each hj is a polynomial of order j which is orthogonal to the others, in the sense that
+􏰤1 h (y)h (y)dy = 0 when j ̸= k, but normalized in size, 􏰤1 h2(y)dy = 1. The right panel shows 0jk 0j
+ehj(y) hj(y)
+0 1 2 3 4 5 −1.5 0.0 1.0
+ehj (y), to give an indication of how the functions contribute to the probability density in Eq. 15.10.
+345 15.1. SMOOTHTESTSOFGOODNESSOFFIT
+￼￼￼￼￼￼￼￼￼￼￼0.0 0.2 0.4
+0.6 0.8 1.0
+y
+￼x <- (1:1e+06)/1e+06
+z <- sum(exp(h1(x) + h2(x) - h3(x)))/1e+06
+curve(exp(h1(x) + h2(x) - h3(x))/z, xlab = "y", ylab = expression(g(y, theta)))
+abline(h = 1, col = "grey")
+FIGURE 15.2: Illustration of a smooth alternative density: using the same basis functions as before, with θ1 = 1, θ2 = 1, θ3 = −1. The first two lines of the R calculate the normalizing constant z(θ) by a simple numerical integral. The grey line shows the uniform density.
+00:02 Monday 18th April, 2016
+g(y, θ) 0246
+15.1. SMOOTHTESTSOFGOODNESSOFFIT 346
+attempts to replicate some surprising effect in separate laboratories8. If the tests are independent, then the p-values should be IID and uniform. It would seem like we should be able to combine these into some over-all p-value. This is precisely what Neyman’s smooth test of uniformity lets us do.
+15.1.3.4 Density Estimation by Series Expansion
+As an aside, notice what we have done. By using a large enough d , as I said, densities which look like Eq. 15.10 can come as close as we like to any smooth density on [0,1]. And now we have at least two ways of picking d: by cross-validation, or by the Schwarz information criterion (Eq. 15.20). If we let d → ∞ as n → ∞, then we have a way of approximating any density on the unit interval, without knowing what it was to start with, or assuming a particular parametric form for it. That is, we have a way of doing non-parametric density estimation, at least on [0,1], without using kernels.
+If you want to estimate a density on (−∞, ∞) instead of on [0, 1], you can do so by using a transformation, e.g., the inverse logit. This is the opposite of what you did in the homework, where you used a transformation to take [0, 1] to (−∞, ∞) so you could use kernel density estimation.
+15.1.4 Smooth Tests of Non-Uniform Parametric Families
+Remember that we went into all these details about testing uniformity because we want to test whether X is distributed according to some continuous distribution with CDF F. From §15.1.1, if we define Y = F(X), then X ∼ F is equivalent to Y ∼ Unif(0, 1), so we have a two-step procedure for testing whether X ∼ F :
+1. UsetheCDFF totransformthedata,yi =F(xi) 2. Test whether the transformed data yi are uniform
+Let’s think about what the alternatives considered in the test look like. For y, the alternative densities are (to repeat Eq. 15.10)
+g(y;θ) ≡
+Since X = F −1(Y ), this implies a density for X :
+(15.21)
+(15.22) (15.23)
+
+ e j=1
+􏰢d θj hj (y) z(θ)
+0≤y≤1 elsewhere
+￼
+0
+e􏰢dj=1θjhj(F(x)) dF gX(x;θ) = z(θ) dx
+e􏰢dj=1 θj hj (F(x))
+= z(θ) f (x)
+￼￼￼￼8These are typical examples of meta-analysis, trying to combine the results of many different data analyses (without just going back to the original data).
+00:02 Monday 18th April, 2016
+347 15.1. SMOOTHTESTSOFGOODNESSOFFIT
+where f is the pdf corresponding to the CDF F . (Why do we not have to worry about setting this to zero outside some range?) Just like g(·;θ) is a modulation or distortion of the uniform density, gX (·; θ) is a modulation or distortion of f (·). If and when we reject the density f , gX (·; θ) is available to us as an alternative.
+Even if hj (y) is a polynomial in y, hj (F (x)) will not (in general) be a polynomial in x, but it remains true that
+􏰧∞
+hj(F(x))hk(F(x))f (x)dx =δjk (15.24) −∞
+Figure 15.3 illustrates what happens to the basis functions, and to particular alterna- tives.
+When it comes to the actual smooth test, we can either use the likelihood ratio,
+or we can calculate
+1 􏰥n
+hj = n
+i=1
+1 􏰥n
+hj(yi)= n
+2 􏰥d 2
+￼hj(F(xi))
+(15.25)
+(15.26)
+￼￼leading as before to the test statistic
+i=1
+hj
+￼Ψ =n
+The distribution of the test statistics is unchanged under the null hypothesis, i.e., still χd2 if d is fixed. (There are still d degrees of freedom, because we are still fixing d parameters from distributions of the form Eq. 15.23.) If d is chosen from the data, we still need to bootstrap, but can do so just as before.
+15.1.4.1 Estimated Parameters
+So far, the discussion has assumed that F is fixed and won’t change with the data. This is often not very realistic. Rather, F comes from some parametrized family of distributions, with parameter (say) β, i.e., F (·; β) is a different CDF for each value of β. For Gaussians, for instance, β is a vector consisting of the mean and variance (or mean and standard deviation). Let’s assume that there are always corresponding densities, f (·; β), and these are always continuous.
+We don’t know β so we have to estimate it. After estimating, we’d like to test whether the model really matches the data. It would be convenient if we could do the following:
+1. Getestimateβ􏰨fromx1,x2,...xn
+2. Calculateyi =F(xi;β􏰨)
+3. Apply a smooth test of uniformity to y1,y2,...yn
+That is, it would be convenient if we could just ignore the fact that we had to estimate β.
+00:02 Monday 18th April, 2016
+j=1
+15.1. SMOOTHTESTSOFGOODNESSOFFIT 348
+￼￼￼h1 h2 h3
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼−4 −2 0 2 4
+x
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼−4 −2 0 2 4
+x
+par(mfrow = c(2, 1))
+curve(h1(pnorm(x)), xlab = "x", ylab = expression(h[j](F(x))), from = -5, to = 5,
+    ylim = c(-3, 3))
+curve(h2(pnorm(x)), add = TRUE, lty = "dashed")
+curve(h3(pnorm(x)), add = TRUE, lty = "dotted")
+legend(legend = c(expression(h[1]), expression(h[2]), expression(h[3])), lty = c("solid",
+    "dashed", "dotted"), x = "bottomright")
+curve(dnorm(x) * exp(h1(pnorm(x)) + h2(pnorm(x)) - h3(pnorm(x)))/z, xlab = "x",
+    ylab = expression(g[X](x, theta)), from = -5, to = 5)
+curve(dnorm(x), add = TRUE, col = "grey")
+par(mfrow = c(1, 1))
+FIGURE 15.3: Left panel: the basis functions from Figure 15.1 composed with the standard Gaus- sian CDF. Right panel: the alternative to the standard Gaussian corresponding to the alternative to the uniform distribution plotted in Figure 15.2, i.e., θ1 = θ2 = 1, θ3 = −1. The grey curve is the standard Gaussian density, corresponding to the flat line in Figure 15.2.
+00:02 Monday 18th April, 2016
+￼gX(x, θ) hj(F(x))
+0.0 0.2 0.4 0.6 −3 −1 1 2 3
+349 15.1. SMOOTHTESTSOFGOODNESSOFFIT
+We can do this if β􏰨 is the maximum likelihood estimate. To understand this, think about the family of alternative distributions we’re now considering in the test. Substituting into Eq. 15.23, they are
+e􏰢dj=1 θj hj (F(x;β))
+gX (x;β,θ) = z(θ) f (x;β) (15.27)
+The null hypothesis that X ∼ F (·; β) for some β is thus corresponds to X ∼ GX (·; β, 0) — we are still fixing d parameters in the larger family. And, generally speaking, when we fix d parameters in a parametric model, we get a χd2 distribution in the log- likelihood ratio test (Appendix I). If d is not fixed but data-driven, then, again, we need to bootstrap.
+15.1.5 Implementation in R
+The main implementation of smooth tests available in R is the ddst package (Biecek
+and Ledwina, 2010), standing for “data-driven smooth tests”. It provides a ddst.uniform.test, which we could use for any family where we can calculate the CDF. But it also pro-
+vides functions for directly testing several families of distributions, notably Gaussians (ddst.norm.test) and exponentials (ddst.exp.test).
+15.1.5.1 Some Examples
+Let’s give ddst.norm.test some Gaussian data and see what happens.
+This reminds us what the data was, tells us that the test used Legendre polynomi- als (as opposed to cosines), that d was selected to be 1, and that the value of the test statistic was 0.6183. (The c setting has to do with the order-selection penalty, and is basically ignorable for most users.) These numbers are all attributes of the returned object.
+What is missing is the p-value, because this is computationally expensive to cal- culate. (You can control how many bootstraps it uses, but the default is 1000.)
+00:02 Monday 18th April, 2016
+￼￼r <- rnorm(100)
+ddst.norm.test(r)
+##
+##  Data Driven Smooth Test for Normality
+##
+## data:  r,   base: ddst.base.legendre,   c: 100
+## WT* = 0.10497, n. coord = 1
+￼ddst.norm.test(r, compute.p = TRUE)
+##
+##  Data Driven Smooth Test for Normality
+##
+## data:  r,   base: ddst.base.legendre,   c: 100
+## WT* = 0.10497, n. coord = 1, p-value = 0.755
+￼[[TODO: with R]]
+Replce
+numbers
+15.1. SMOOTHTESTSOFGOODNESSOFFIT 350
+So the p-value is 0.476, giving us no reason to reject a Gaussian distribution when we’re looking at numbers from the standard Gaussian. If we ignored the fact that d was selected from the data and plugged into the corresponding chid2 distribution,
+we’d get a p-value of
+which to say a relative error of about 10%.
+What if we give the procedure some non-Gaussian data? Say, the same amount of data from a t distribution with 5 degrees of freedom?
+Of course, it won’t always reject, because the we’re only looking at 100 samples, and the t distribution isn’t that different from a Gaussian. Still, when I repeat this experiment many times, we get quite respectable power at the standard 5% size:
+mean(replicate(100, ddst.norm.test(rt(100, df = 5), compute.p = TRUE)$p.value) <
+    0.05)
+## [1] 0.6
+See Exercise 3 for a small project of ddst.exp.test to check a Pareto distribu- tion.
+pchisq(0.6183, df = 1, lower.tail = FALSE)
+## [1] 0.4316797
+￼ng <- rt(100, df = 5)
+ddst.norm.test(ng, compute.p = TRUE)
+##
+##  Data Driven Smooth Test for Normality
+##
+## data:  ng,   base: ddst.base.legendre,   c: 100
+## WT* = 32.541, n. coord = 5, p-value = 0.001
+￼00:02 Monday 18th April, 2016
+351 15.1. SMOOTHTESTSOFGOODNESSOFFIT
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼−3 −2 −1 0 1 2
+r
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0.0 0.2 0.4
+0.6 0.8 1.0
+rF
+￼par(mfrow = c(2, 1))
+plot(hist(r, plot = FALSE), freq = FALSE, main = "")
+rug(r)
+curve(dnorm(x), add = TRUE, col = "grey")
+rF <- pnorm(r, mean = mean(r), sd = sd(r))
+plot(hist(rF, plot = FALSE), freq = FALSE, main = "")
+rug(rF)
+abline(h = 1, col = "grey")
+par(mfrow = c(1, 1))
+FIGURE 15.4: Left panel: histogram of the 100 random values from the standard Gaussian used in the text (exact values marked along the horizontal axis), plus the true density in grey. Right panel: transforming the data according to the Gaussian fitted to the data by maximum likelihood.
+00:02 Monday 18th April, 2016
+Density Density
+0.0 0.5 1.0 1.5 0.0 0.2 0.4 0.6
+15.1. SMOOTHTESTSOFGOODNESSOFFIT 352
+theight−6 −4 −2ng0 2 4 theight0.0 0.2 0.4 ngF 0.6 0.8 1.0
+FIGURE 15.5: Treating the draw from the t distribution discussed in the text the same as the Gaussian sample in Figure 15.4.
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼plot(hist(ng, plot = FALSE), freq = FALSE, main = "")
+rug(ng)
+curve(dnorm(x, mean = mean(ng), sd = sd(ng)), add = TRUE, col = "grey")
+ngF <- pnorm(r, mean = mean(ng), sd = sd(ng))
+plot(hist(ngF, plot = FALSE), freq = FALSE, main = "")
+rug(ngF)
+abline(h = 1, col = "grey")
+00:02 Monday 18th April, 2016
+Density Density
+0.00.51.01.52.0 0.0 0.1 0.2 0.3
+353 15.1. SMOOTHTESTSOFGOODNESSOFFIT
+15.1.6 Conditional Distributions and Calibration
+Suppose that we are not interested in the marginal distribution of X , but rather its conditional distribution given some other variable or variables C (for “covariates”). If the conditional density f (x|C = c) is continuous in x for every c, then it is easy to argue, in parallel with §15.1.1, that F(X|C = c), the conditional CDF, should ∼ Unif(0,1). So, as long as we use the conditional CDF to transform X, we can apply smooth tests as before.
+One important use of this is regression residuals. Suppose X is the target variable of a regression, with C being the predictor variables9, and we have some parametric distribution in mind for the noise (Gaussian, say), with the noise ε being independent of C. Then the model is X = r(C)+ε, so looking at the conditional CDF of X given Z is equivalent to looking at the at unconditional CDF of the residuals. We can then actually test whether the residuals are Gaussian, rather than just squinting at a Q-Q plot. We could also do this by applying a K-S test to the transformed residuals, but everything that was said above in favor of smooth tests would still apply.
+Notice, by the way, that by applying the CDF transformation to the residuals, we are checking whether the model is properly calibrated, i.e., whether events it says happen with probability p actually have a frequency close to p. We do need to impose assumptions about the distribution of the noise to check calibration for a regression model, since if we just predict expected values, we say nothing about how often any particular range of values should happen.
+Later, when we look at graphical models and at time series, we will see several other important situations where a statistical model is really about conditional dis- tributions, and so can be checked by looking at conditional CDF transformations. It seems to be somewhat more common to apply K-S tests than smooth tests after the conditional CDF transformation (e.g., Bai 2003), but I think this is just because smooth tests are not as widely known and used as they should be.
+￼9I know you’re used to X being the predictor and Y being the target. 00:02 Monday 18th April, 2016
+15.2. RELATIVEDISTRIBUTIONS 354
+15.2 Relative Distributions
+So far, I have been talking about how we can test whether our data follows some hypothesized distribution, or family of distributions, by using the fact that F (X ) is uniform if and only if X has CDF F . If the values of F (xi ) are close enough to being uniform, the true CDF has to be pretty close to F (with high confidence); if they are far from uniform, the true CDF has to be far from F (again with high confidence).
+In many situations, however, we already know (or are at least pretty sure) that X doesn’t have some distribution, say F0, and what we are interested in is how X fails to follow it; we want, in other words, to compare the distribution of X to some reference distribution F0. For instance:
+1. We are trying a new medical procedure, and we want to compare the distribu- tion of outcomes for patients who got the treatment to those who did not.
+2. We want to compare the distribution of some social outcome across two cate- gories at the same time. (For instance, we might compare income, or lifespan, for men and for women.)
+3. We might want to compare members of the same category at different times, or in different locations. (We might compare the income distribution of Amer- ican men in 1980 to that of 2010, or the lifespans of American men in 2010 to those of Canadian men.)
+4. We might compare our actual population to the distribution predicted by a model we know to be too simple (or just approximate) to try to learn what it is missing.
+You learned how to do comparisons of simple summaries of distributions in baby stats. (For instance, you learned how to compare group means by doing t-tests.) While these certainly have their places, they can miss an awful lot. For example, a few years ago now an anesthesiologist came to the CMU statistics department for help evaluating a new pain-management procedure, which was supposed to reduce how many pain-killers patients recovering from surgery needed. Under both the old procedure and the new one, the distribution was strongly bimodal, with some patients needing very little by way of pain-killers, many needing much more, and a few needing an awful lot of drugs. Simply looking at the change in the mean amount of drugs taken, or even the changes in the mean and the variance, would have told us very little about whether things were any better10.
+In this example, the reference distribution, F0, is given by the distribution of drug demand for patients on the old pain-management protocol. The new or com- parison sample, x1,...xn, are realizations of a random variable X, representing the demand for pain-killers under the new protocol. X follows the comparison distri- bution F , which is presumably not the same as F0; how does it differ?
+10I am omitting some details, and not providing a reference because the study is still, so far as I know, unpublished.
+00:02 Monday 18th April, 2016
+￼
+355 15.2. RELATIVEDISTRIBUTIONS
+The idea of the relative distribution is to characterize the change in distributions by using F0 to transform X into [0,1], and then looking at how it departs from uniformity. The relative data, or grades, are
+ri =F0(xi) (15.28)
+Simply put, we take the comparison data points and see where they fall in the refer- ence distribution.
+What is the cumulative distribution function of the relative data? Let’s look at this first at the population level, where we have F0 (the reference distribution) and F (the comparison distribution), rather than just samples. Let’s call the CDF of the relative data G:
+G(a) ≡ Pr (R ≤ a)
+= Pr(F0(X)≤a)
+= Pr(X ≤ Q0(a))
+= F (Q0(a))
+(15.29) (15.30) (15.31) (15.32)
+where remember Q = F −1 is the quantile function of the reference distribution. 00
+This in turn implies a probability density function of the relative data:
+d G 􏰕􏰕 g(y) ≡ da􏰕􏰕
+􏰕a=y
+d F 􏰕􏰕 d F − 1 􏰕􏰕
+􏰕0􏰕 = du􏰕 da􏰕
+􏰕u=Q0(y) 􏰕a=y
+(15.33) (15.34) (15.35)
+￼￼￼= f (Q0(y))
+1 = f (Q0(y)) f0(Q0(y)) f0(Q0(y))
+￼￼This only applies when y ∈ [0,1]; elsewhere, g(y) is straightforwardly 0.
+When g(y) > 1, we have f (Q0(y)) > f0(Q0(y)) — that is, values around Q0(y) are relatively more probable in the comparison distribution than in the reference distri- bution. Likewise, when g(y) < 1, the comparison distribution puts less weight on values around Q0(y) than does the reference distribution. If the comparison distri- bution was exactly the same as the reference distribution, we would, of course, get
+g(y) = 1 everywhere.
+One very important property of the relative distribution is that it is invariant un-
+der monotone transformations. That is, suppose instead of looking at X , we looked at h(X) for some monotonic function h. (An obvious example would be change of units, but we might also take logs or powers.) Summary statistics like differences in means are generally not even equi-variant11. But it is easy to check (Exercise 4) that
+11Remember that a statistic, say δ, is a function of the data, δ(x1,x2,...xn). The statistic is in- variant under a transformation h if δ(h(x1),h(x2),...h(xn)) = δ(x1,x2,...xn) — the transformation does not change the statistic. The statistic is equivariant if it “changes along with” the transformation, δ(h(x1),h(x2),...h(xn)) = h(δ(x1,x2,...xn)). Maximum likelihood estimates are equivariant. Statistics like the mean are equivariant under linear and affine transformations (but not others).
+00:02 Monday 18th April, 2016
+￼
+15.2. RELATIVEDISTRIBUTIONS 356
+the relative distribution of h(X) is the same as the relative distribution of X. This expresses the idea that the difference between the reference and comparison distribu- tions is independent of our choice of a coordinate system for X .
+15.2.1 Estimating the Relative Distribution
+In some situations, the reference distribution can come from a theoretical model, but the comparison distribution is unknown, though we have samples. Estimating the relative density g is then extremely similar to what we had to do in the last section for hypothesis testing. Non-parametric estimation of g can thus proceed either through fitting series expansions like Eq. 15.10 (with a data-driven choice of d, as above), or through using a fixed, data-independent transformation to map [0, 1] to (−∞, ∞) and using kernel density estimation12.
+If, on the other hand, neither the reference nor the comparison distribution is fully known, but we have samples from both, estimating the relative distribution involves estimating Q0, the quantile function of the reference distribution. This is typically estimated as just the empirical quantile function, but in principle one could use, say, kernel smoothing to get at Q0. Once we have an estimate for it, though, we have reduced the problem of estimating g to the case considered in the previous paragraph.
+Uncertainty in the estimate of the relative density g is, as usual, most easily as- sessed through the bootstrap. Be careful to include the uncertainty in estimates of Q0 as well, if the reference quantiles have to be estimated. One can, however, also use asymptotic approximations (Handcock and Morris, 1999, §9.6).
+15.2.2 R Implementation and Examples
+Relative distribution methods were introduced by Handcock and Morris (1998, 1999), who also wrote an R package, reldist, which is by far the easiest way to work with relative distributions. Rather than explain abstractly how this works, we’ll turn im- mediately to examples.
+15.2.2.1 Example: Conservative versus Liberal Brains
+Data analysis problem set A.20 looks at the data from Kanai et al. (2011), which record the volumes of two parts of the brain, the amygdala and the anterior cingulate cortex (ACC), adjusted for body size, sex, etc., and political orientation on a five- point ordinal scale, with 1 being the most conservative and 5 the most liberal13. The subjects being British university students, the lowest score for political orientation recorded was 2, and so we will look at relative distributions between those students and the rest of the sample. That is, we take the conservatives as the comparison sample, and the rest as the reference sample14.
+12We saw how to do this in the homework
+13I am grateful to Dr. Kanai for graciously sharing the data.
+14This implies no value judgment about conservatives being “weird”, but rather reflects the fact that
+there are many fewer of them than of non-conservatives in this data. 00:02 Monday 18th April, 2016
+￼
+357 15.2. RELATIVEDISTRIBUTIONS
+Having loaded the data into the data frame n90, we can look at simple density estimates for the two classes and the two variables (Figure 15.6). This indicates that conservative subjects tend to have relatively larger amygdalas and relatively smaller ACCs, though with very considerable overlap. (We are not looking at the uncertainty here at all.)
+Enough preliminaries; let’s find the relative distribution (Figure 15.7).
+acc.rel <- reldist(y = n90$acc[n90$orientation < 3], yo = n90$acc[n90$orientation >
+    2], ci = TRUE, yolabs = pretty(n90$acc[n90$orientation > 2]), main = "Relative density of adjusted ACC vol
+The first argument is the comparison sample; the second is the reference sam- ple. The labeling of the horizontal axis is in terms of the quantiles of the reference distribution; I convert this back to the original units with the optional yolabs argu- ment15. The dots show a pointwise 95%-confidence band, but based on asymptotic approximations which should not be taken seriously when there are only 77 reference samples and just 13 comparison samples.
+￼￼15The function pretty() is a built-in routine for coming up with reasonable axis tick-marks from a vector. See help(pretty).
+00:02 Monday 18th April, 2016
+u
+15.2. RELATIVEDISTRIBUTIONS 358
+￼￼￼Density Density
+0 10 20 30 0 2 4 6 8 12
+￼￼￼−0.10 −0.05 0.00 0.05 0.10
+Adjusted amygdala volume
+￼￼￼￼￼￼−0.04 −0.02 0.00 0.02
+Adjusted ACC volume
+0.04
+￼par(mfrow = c(2, 1))
+plot(density(n90$amygdala[n90$orientation > 2]), main = "", xlab = "Adjusted amygdala volume")
+lines(density(n90$amygdala[n90$orientation < 3]), lty = "dashed")
+plot(density(n90$acc[n90$orientation < 3]), lty = "dashed", main = "", xlab = "Adjusted ACC volume"
+lines(density(n90$acc[n90$orientation > 2]))
+par(mfrow = c(1, 1))
+FIGURE 15.6: Estimated densities for the (adjusted) volume of the amygdala (upper panel) and ACC (lower panel) in non-conservative (solid lines) and conservative (dashed) students.
+00:02 Monday 18th April, 2016
+359
+15.2. RELATIVEDISTRIBUTIONS
+Relative density of adjusted amygdala volume
+−0.1 −0.05 0
+0.0 0.2 0.4
+0.05
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼−0.04
+0.0
+0.2 0.4
+0 0.02
+0.6 0.8
+Reference proportion
+Relative density of adjusted ACC volume
+0.6 0.8
+1.0
+0.04
+1.0
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼Reference proportion
+￼par(mfrow = c(2, 1))
+reldist(y = n90$amygdala[n90$orientation < 3], yo = n90$amygdala[n90$orientation >
+    2], ci = TRUE, yolabs = pretty(n90$amygdala[n90$orientation > 2]), main = "Relative density of adjusted am
+reldist(y = n90$acc[n90$orientation < 3], yo = n90$acc[n90$orientation > 2],
+    ci = TRUE, yolabs = pretty(n90$acc[n90$orientation > 2]), main = "Relative density of adjusted ACC volume"
+par(mfrow = c(1, 1))
+FIGURE 15.7: Relative distribution of adjusted brain-region volumes, contrasting conservative subjects (comparison samples) to non-conservative subjects (reference samples). Dots indicate 95% confidence limits, but these are based on asymptotic approximations which don’t apply here. (The supposed lower limit for the relative density of the amygdala is almost always negative!) The dashed lines mark a relative density of 1, which would be
+00:02 Monday 18th April, 2016
+Relative Density Relative Density
+0123456 0.6 1.0 1.4
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼y )
+15.2. RELATIVEDISTRIBUTIONS 360
+15.2.2.2 Example: Economic Growth Rates
+For a second example, let’s return to the OECD data on economic growth featured in Chapter 14. We want to know how the economic growth rates of countries which are already economically developed compares to the growth rates of developing and undeveloped countries. I approximate “is a developed country” by “is a membership of the OECD”, as in §14.5.1. I will take the non-developed countries as the reference distribution and the OECD members as the comparison group, mostly because there are more of the former and they are more diverse.
+The basic commands now go as before (aside from loading the data from a differ- ent library):
+Examining the resulting plot (Figure 15.8), the relative distribution is unimodal, peaking around the 60th percentile of the reference distribution, a growth rate of about 2.5% per year. The relative distribution drops below 1 at both low (negative) or high (> 0.05%) growth rates — developed countries, at least over the period of this data, tend to grow steadily and within a fairly narrow band, without so much of both the positive and negative extremes of non-developed countries16
+It’s also worth illustrating how to use reldist for comparison to a theoretical CDF. A very primitive, or better yet nihilistic, model of economic growth would say that the factors causing economies to grow or shrink are so many, and so various, and so complicated that there is no hope of tracking them systematic, but rather that we should regard them as effectively random. As we know from introductory probabil- ity, the average of many small independent terms has a nearly Gaussian distribution; so we’ll just assume that each country grows (or shrinks) by some independent Gaus- sian amount every year.
+Doing this just means applying the cumulative distribution function of the model’s distribution to the values from our comparison sample, as in Figure 15.9. The result does not look too different from Figure 15.8. (This does not mean that the nihilistic model of economic growth is right.)
+15.2.3 Adjusting for Covariates
+Another nice use of relative distributions is in adjusting for covariates or predictors more flexibly than is easy to do with regression. Suppose that we have measurements of two variables, X and Z. In general, when we move from the reference population to the comparison population, both variables will change their marginal distribu- tions. If the marginal distribution of Z changes, and the conditional distribution of X given Z did not, then the marginal distribution of X would change. It is often in- formative to know how the change in the distribution of X compares to what would be anticipated just from the change in Z:
+16It’s easy to tell a story for why the distribution of growth rates for poor countries is so wide. Some poor countries grow very slowly or even shrink because they suffer from poor institutions, corruption, war, lack of resources, technological backwardness, etc.; some poor countries grow very quickly if they over-come or escape these obstacles and can quickly make use of technologies developed elsewhere. No- body has a particular good story for why the growth rates of all developed countries are so similar.
+00:02 Monday 18th April, 2016
+￼
+361
+15.2. RELATIVEDISTRIBUTIONS
+0.05 0.1
+−0.15
+0
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0.0
+0.2
+0.4
+0.6 0.8 1.0
+Reference proportion
+￼reldist(y = oecdpanel$growth[in.oecd], yo = oecdpanel$growth[!in.oecd], yolabs = pretty(oecdpanel$growth[!in.o
+    ci = TRUE, ylim = c(0, 3))
+FIGURE 15.8: Relative distribution of the per-capita GDP growth rates of OECD-member coun- tries compared to those of non-OECD countries.
+00:02 Monday 18th April, 2016
+Relative Density
+0.0 0.5 1.0 1.5 2.0 2.5 3.0
+e
+15.2. RELATIVEDISTRIBUTIONS
+362
+−0.025 0.00047 0.018
+0.035
+0.06
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0.0
+0.2 0.4
+0.6
+0.8
+1.0
+Reference proportion
+￼growth.mean <- mean(oecdpanel$growth[!in.oecd])
+growth.sd <- sd(oecdpanel$growth[!in.oecd])
+r = pnorm(oecdpanel$growth[in.oecd], growth.mean, growth.sd)
+reldist(y = r, ci = TRUE, ylim = c(0, 3))
+top.ticks <- (1:9)/10
+top.tick.values <- signif(qnorm(top.ticks, growth.mean, growth.sd), 2)
+axis(side = 3, at = top.ticks, labels = top.tick.values)
+FIGURE 15.9: Distribution of the growth rates of developed countries, relative to a Gaussian fitted to all growth rates.
+00:02 Monday 18th April, 2016
+Relative Density
+0.0 0.5 1.0 1.5 2.0 2.5 3.0
+363 15.2. RELATIVEDISTRIBUTIONS • The two populations might be male and female workers in the same industry,
+with X income and Z (say) education, or some measure of qualifications.
+• The two populations might be students at two different schools, or taught in two different ways, with X their test scores at the end of the year, and Z some measure of prior knowledge.
+Write the conditional density of X given Z in the reference population as f0(x|z). Then, just from the definitions of conditional and marginal probability,
+􏰧
+f0(x)= f0(x|z)f0(z)dz (15.36)
+If the distribution of the covariate Z is instead taken from the comparison popula- tion, we get a different distribution for x,
+􏰧
+f0C(x)= f0(x|z)f(z)dz (15.37)
+with the C standing for “covariate” or “compensated”, depending on who you talk to. This is the distribution we would have seen for X if the distribution of X shifted but the relation between X and Z did not.
+Before, we looked at the relative distribution of the comparison distribution F to
+the reference distribution F0, which had the density (Eq. 15.35) g(y) = f (Q0(y))/f0(Q0(y)).
+Notice that
+f (Q0(y)) = f0C (Q0(y)) f (Q0(y)) (15.38)
+f0(Q0(y)) f0(Q0(y)) f0C(Q0(y))
+￼￼￼The first ratio on the right-hand side the relative density of F0C compared to f0; the second ratio is the relative density of F compared to F0C .
+I have written everything as though Z were just a scalar, but it could be a vector, so we can adjust for multiple covariates at once. Also, it is important to emphasize that there is no implication that Z is in any sense the cause of X here (though such adjustments are often more interesting when that’s true).
+15.2.3.1 Example: Adjusting Growth Rates
+It will be easier to see how this works with an example. The oecdpanel data set also includes a variable called humancap, which is the log of the average number of years of education of people over the age of fifteen17. How do the growth rates of developed countries compare to those of undeveloped countries once we adjust for education?
+As Figure 15.10 shows, after adjusting for education levels, the relative density shifts somewhat to the left, with its peak peaked closer to the median of the reference
+17If you look at help(oecdpanel), it calls this variable “average secondary school enrollment rate”, but that’s clearly wrong, and examining the original papers referenced there shows the correct meaning of the variable. I am not sure why it was logged. (Incidentally, humancap stands for “human capital”. Whether education is best thought of in this way, or indeed whether years of schooling are a good measure of human capital, are hard questions which we fortunately do not have to answer.)
+00:02 Monday 18th April, 2016
+￼
+15.2. RELATIVEDISTRIBUTIONS 364
+distribution. That is, some of the higher-than-usual growth of the developed coun- tries can be explained away by their (unusually high: Figure 15.11) levels of education. But the relative density is now even more sharply peaked than it was before.
+Again, it would be rash to read too much causality into this. It could be that education promotes economic growth18, or it could be that education is a luxury of rich societies, which grow faster than average for other reasons.
+￼18Certainly it’s convenient for a teacher to think so.
+00:02 Monday 18th April, 2016
+365
+15.2. RELATIVEDISTRIBUTIONS
+0.05 0.1
+−0.15
+0
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0.0
+0.2
+0.4
+0.6 0.8 1.0
+Reference proportion
+￼reldist(y = oecdpanel$growth[in.oecd], yo = oecdpanel$growth[!in.oecd], yolabs = pretty(oecdpanel$growth[!in.o
+    z = oecdpanel$humancap[in.oecd], zo = oecdpanel$humancap[!in.oecd], decomp = "covariate",
+    ci = TRUE, ylim = c(0, 4))
+FIGURE 15.10: Relative distribution of per-capita GDP growth rates after adjusting for education ( humancap).
+00:02 Monday 18th April, 2016
+Relative Density
+01234
+￼￼e
+15.2. RELATIVEDISTRIBUTIONS 366
+02468
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼0.0 0.2 0.4 0.6 0.8 1.0
+Reference proportion
+reldist(y = exp(oecdpanel$humancap[in.oecd]), yo = exp(oecdpanel$humancap[!in.oecd]),
+    yolabs = pretty(exp(oecdpanel$humancap[!in.oecd])))
+FIGURE 15.11: Relative distribution of years of education, comparing OECD countries to non- OECD countries.
+00:02 Monday 18th April, 2016
+￼Relative Density
+0 5 10 15
+367 15.3. FURTHERREADING
+15.3 Further Reading
+On smooth tests of goodness of fit, see Bera and Ghosh (2002) (a pleasantly enthu- siastic paper) and Rayner and Best (1989). The ddst package is ultimately based on Kallenberg and Ledwina (1997). On relative distributions, see Handcock and Mor- ris (1998) (an expository paper aimed at social scientists) and Handcock and Morris (1999) (a more comprehensive book with technical details).
+15.4 Exercises
+1. §15.1.3.1 asserts that one could use cosines orthonormal basis functions in a Neymantest,withhj(x)=cj cos2πjx.Findanexpressionforthenormalizing constantcj suchthatthesefunctionssatisfyEq.15.18andEq.15.19.
+2. Prove Eq. 15.24. Hint: change of variables. Also, prove that 􏰧 ∞ 􏰢d θ h (F(x)) 􏰧 1 􏰢d θ h (y)
+f (x)exp j=1 j j dx = exp j=1 j j dy = z(θ) (15.39) −∞ 0
+3. If X ∼ Pareto(α,x0), then logX/x0 ∼ Exp(α) — the log of a power-law dis- tributed variable has an exponential distribution. Using the wealth.dat data from Chapter 6 and ddst.exp.test, test whether net worths over $3 × 108 follow a Pareto distribution.
+4. Let T = h(X) for some fixed and strictly monotonic function h. Prove that the relative density of T is the same as the relative density of X . Hint: find the density of T under both the reference and comparison distribution in terms of
+f0, f and h.
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

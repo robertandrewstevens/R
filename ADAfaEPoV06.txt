@@ -1,0 +1,552 @@
+
+Chapter 6
+The Bootstrap
+We are now several chapters into a statistics class and have said basically nothing about uncertainty. This should seem odd, and may even be disturbing if you are very attached to your p-values and saying variables have “significant effects”. It is time to remedy this, and talk about how we can quantify uncertainty for complex models. The key technique here is what’s called bootstrapping, or the bootstrap.
+6.1 Stochastic Models, Uncertainty, Sampling Distri- butions
+Statistics is the branch of mathematical engineering which studies ways of drawing inferences from limited and imperfect data. We want to know how a neuron in a rat’s brain responds when one of its whiskers gets tweaked, or how many rats live in Pittsburgh, or how high the water will get under the 16th Street bridge during May, or the typical course of daily temperatures in the city over the year, or the relationship between the number of birds of prey in Schenley Park in the spring and the number of rats the previous fall. We have some data on all of these things. But we know that our data is incomplete, and experience tells us that repeating our experiments or observations, even taking great care to replicate the conditions, gives more or less different answers every time. It is foolish to treat any inference from the data in hand as certain.
+If all data sources were totally capricious, there’d be nothing to do beyond piously qualifying every conclusion with “but we could be wrong about this”. A mathemat- ical discipline of statistics is possible because while repeating an experiment gives different results, some kinds of results are more common than others; their relative frequencies are reasonably stable. We thus model the data-generating mechanism through probability distributions and stochastic processes. When and why we can use stochastic models are very deep questions, but ones for another time. If we can use them in our problem, quantities like the ones I mentioned above are represented as functions of the stochastic model, i.e., of the underlying probability distribution.
+140
+6.1. STOCHASTICMODELS,UNCERTAINTY,SAMPLING 141 DISTRIBUTIONS
+Since a function of a function is a “functional”, and these quantities are functions of the true probability distribution function, we’ll call these functionals or statistical functionals1. Functionals could be single numbers (like the total rat population), or vectors, or even whole curves (like the expected time-course of temperature over the year, or the regression of hawks now on rats earlier). Statistical inference becomes estimating those functionals, or testing hypotheses about them.
+These estimates and other inferences are functions of the data values, which means that they inherit variability from the underlying stochastic process. If we “re-ran the tape” (as the late, great Stephen Jay Gould used to say), we would get different data, with a certain characteristic distribution, and applying a fixed procedure would yield different inferences, again with a certain distribution. Statisticians want to use this distribution to quantify the uncertainty of the inferences. For instance, the stan- dard error is an answer to the question “By how much would our estimate of this functional vary, typically, from one replication of the experiment to another?” (It presumes a particular meaning for “typically vary”, as the root-mean-square devia- tion around the mean.) A confidence region on a parameter, likewise, is the answer to “What are all the values of the parameter which could have produced this data with at least some specified probability?”, i.e., all the parameter values under which our data are not low-probability outliers. The confidence region is a promise that either the true parameter point lies in that region, or something very unlikely under any circumstances happened — or that our stochastic model is wrong.
+To get things like standard errors or confidence intervals, we need to know the distribution of our estimates around the true values of our functionals. These sam- pling distributions follow, remember, from the distribution of the data, since our estimates are functions of the data. Mathematically the problem is well-defined, but actually computing anything is another story. Estimates are typically complicated functions of the data, and mathematically-convenient distributions may all be poor approximations to the data source. Saying anything in closed form about the distribu- tion of estimates can be simply hopeless. The two classical responses of statisticians were to focus on tractable special cases, and to appeal to asymptotics.
+Your introductory statistics courses mostly drilled you in the special cases. From one side, limit the kind of estimator we use to those with a simple mathematical form — say, means and other linear functions of the data. From the other, assume that the probability distributions featured in the stochastic model take one of a few forms for which exact calculation is possible, analytically or via tabulated special functions. Most such distributions have origin myths: the Gaussian arises from averaging many independent variables of equal size (say, the many genes which contribute to height in humans); the Poisson distribution comes from counting how many of a large num- ber of independent and individually-improbable events have occurred (say, radioac- tive nuclei decaying in a given second), etc. Squeezed from both ends, the sampling distribution of estimators and other functions of the data becomes exactly calculable in terms of the aforementioned special functions.
+That these origin myths invoke various limits is no accident. The great results
+1Most writers in theoretical statistics just call them “parameters” in a generalized sense, but I will try to restrict that word to actual parameters specifying statistical models, to minimize confusion. I may slip up.
+00:02 Monday 18th April, 2016
+[[Cross-ref hypothesis testing appendix, when it’s written]]
+￼
+6.2. THEBOOTSTRAPPRINCIPLE 142
+of probability theory — the laws of large numbers, the ergodic theorem, the central limit theorem, etc. — describe limits in which all stochastic processes in broad classes of models display the same asymptotic behavior. The central limit theorem, for in- stance, says that if we average more and more independent random quantities with a common distribution, and that common distribution isn’t too pathological, then the average becomes closer and closer to a Gaussian2. Typically, as in the CLT, the limits involve taking more and more data from the source, so statisticians use the theorems to find the asymptotic, large-sample distributions of their estimates. We have been especially devoted to re-writing our estimates as averages of independent quantities, so that we can use the CLT to get Gaussian asymptotics.
+Up through about the 1960s, statistics was split between developing general ideas about how to draw and evaluate inferences with stochastic models, and working out the properties of inferential procedures in tractable special cases (especially the linear- and-Gaussian case), or under asymptotic approximations. This yoked a very broad and abstract theory of inference to very narrow and concrete practical formulas, an uneasy combination often preserved in basic statistics classes.
+The arrival of (comparatively) cheap and fast computers made it feasible for sci- entists and statisticians to record lots of data and to fit models to it, so they did. Sometimes the models were conventional ones, including the special-case assump- tions, which often enough turned out to be detectably, and consequentially, wrong. At other times, scientists wanted more complicated or flexible models, some of which had been proposed long before, but now moved from being theoretical curiosities to stuff that could run overnight3. In principle, asymptotics might handle either kind of problem, but convergence to the limit could be unacceptably slow, especially for more complex models.
+By the 1970s, then, statistics faced the problem of quantifying the uncertainty of inferences without using either implausibly-helpful assumptions or asymptotics; all of the solutions turned out to demand even more computation. Here we will exam- ine what may be the most successful solution, Bradley Efron’s proposal to combine estimation with simulation, which he gave the less-than-clear but persistent name of “the bootstrap” (Efron, 1979).
+6.2 The Bootstrap Principle
+Remember (from baby stats.) that the key to dealing with uncertainty in parameters and functionals is the sampling distribution of estimators. Knowing what distribu- tion we’d get for our estimates on repeating the experiment would give us things like standard errors. Efron’s insight was that we can simulate replication. After all, we have already fitted a model to the data, which is a guess at the mechanism which gen- erated the data. Running that mechanism generates simulated data which, by hypoth- esis, has the same distribution as the real data. Feeding the simulated data through
+2The reason is that the non-Gaussian parts of the distribution wash away under averaging, but the average of two Gaussians is another Gaussian.
+3Kernel regression (§1.5.2), kernel density estimation (Ch. 14), and nearest-neighbors prediction (§1.5.1) were all proposed in the 1950s or 1960s, but didn’t begin to be widely used until about 1980.
+00:02 Monday 18th April, 2016
+￼
+143 6.2. THEBOOTSTRAPPRINCIPLE
+￼data
+simulated data
+￼.00183
+-0.00378
+0.00754
+-0.00587
+-0.00673
+￼.00168
+-0.00249
+0.0183
+-0.00587
+0.0139
+￼￼￼￼￼fitted model
+￼￼parameter calculation q0.01 = -0.0326
+re-estimate q0.01 = -0.0323
+FIGURE 6.1: Schematic for model-based bootstrapping: simulated values are generated from the fitted model, then treated like the original data, yielding a new estimate of the functional of interest, here called q0.01.
+our estimator gives us one draw from the sampling distribution; repeating this many times yields the sampling distribution. Since we are using the model to give us its own uncertainty, Efron called this “bootstrapping”; unlike the Baron Munchhausen’s plan for getting himself out of a swamp by pulling on his own bootstraps, it works.
+Figure 6.1 sketches the over-all process: fit a model to data, use the model to cal- culate the functional, then get the sampling distribution by generating new, synthetic data from the model and repeating the estimation on the simulation output.
+To fix notation, we’ll say that the original data is x. (In general this is a whole data
+frame, not a single number.) Our parameter estimate from the data is θˆ. Surrogate
+data sets simulated from the fitted model will be X ̃1,X ̃2,...X ̃B. The corresponding
+re-estimates of the parameters on the surrogate data are θ ̃ , θ ̃ , . . . θ ̃ . The functional 12B
+of interest is estimated by the statistic4 T , with sample value tˆ = T (x), and values of the surrogates of t ̃ = T(X ̃ ), t ̃ = T(X ̃ ), ...t ̃ = T(X ̃ ). (The statistic T may
+1122BB
+be a direct function of the estimated parameters, and only indirectly a function of
+x.) Everything which follows applies without modification when the functional of interest is the parameter, or some component of the parameter.
+4T is a common symbol in the literature on the bootstrap for a generic function of the data. It may or may not have anything to do with Student’s t test for difference in means.
+00:02 Monday 18th April, 2016
+￼estimator
+estimator
+simulation
+6.2. THEBOOTSTRAPPRINCIPLE 144
+In this section, we will assume that the model is correct for some value of θ, which we will call θ0. This means that we are employing a parametric model-based bootstrap. The true (population or ensemble) values of the functional is likewise t0.
+6.2.1 Variances and Standard Errors
+The simplest thing to do is to get the variance or standard error:
+􏱂
+Var 􏰓tˆ􏰔 = 􏰎 􏰓t ̃􏰔 (6.1)
+s􏰨e(tˆ) = sd(t ̃) (6.2)
+That is, we approximate the variance of our estimate of t0 under the true but un- known distribution θ0 by the variance of re-estimates t ̃ on surrogate data from the
+fitted model θ. Similarly we approximate the true standard error by the standard de- viation of the re-estimates. The logic here is that the simulated X ̃ has about the same
+distribution as the real X that our data, x, was drawn from, so applying the same estimation procedure to the surrogate data gives us the sampling distribution. This
+assumes, of course, that our model is right, and that θˆis not too far from θ0.
+A code sketch is provided in Code Example 6. Note that this may not work exactly as given in some circumstances, depending on the syntax details of, say, just
+what kind of data structure is needed to store tˆ. 6.2.2 Bias Correction
+We can use bootstrapping to correct for a biased estimator. Since the sampling distri- bution of t ̃is close to that of 􏰨t, and 􏰨t itself is close to t0,
+􏰌􏰓􏰨t􏰔−t0 ≈􏰌􏰓t ̃􏰔−􏰨t (6.3)
+The left hand side is the bias that we want to know, and the right-hand side the was what we can calculate with the bootstrap.
+In fact, Eq. 6.3 remains valid so long as the sampling distribution of 􏰨t − t0 is close to that of t ̃ − 􏰨t . This is a weaker requirement than asking for 􏰨t and t ̃ themselves to have similar distributions, or asking for 􏰨t to be close to t0. In statistical theory, a random variable whose distribution does not depend on the parameters is called a pivot. (The metaphor is that it stays in one place while the parameters turn around it.) A sufficient (but not necessary) condition for Eq. 6.3 to hold is that 􏰨t − t0 be a pivot, or approximately pivotal.
+6.2.3 Confidence Intervals
+A confidence interval is a random interval which contains the truth with high proba- bility (the confidence level). If the confidence interval for g is C , and the confidence level is 1 − α, then we want
+Pr(t0 ∈C)=1−α (6.4) 00:02 Monday 18th April, 2016
+􏰨
+145 6.2. THEBOOTSTRAPPRINCIPLE
+￼￼rboot <- function(statistic, simulator, B) {
+    tboots <- replicate(B, statistic(simulator()))
+    if (is.null(dim(tboots))) {
+        tboots <- array(tboots, dim = c(1, B))
+    }
+    return(tboots)
+}
+bootstrap <- function(tboots, summarizer, ...) {
+    summaries <- apply(tboots, 1, summarizer, ...)
+    return(t(summaries))
+}
+bootstrap.se <- function(statistic, simulator, B) {
+    bootstrap(rboot(statistic, simulator, B), summarizer = sd)
+}
+￼￼￼CODE EXAMPLE 6: Code for calculating bootstrap standard errors. The function rboot generates B bootstrap samples (using the simulator function) and calculates the statistic on them (using statistic). simulator needs to be a function which returns a surrogate data set in a form suitable for statistic. (How would you modify the code to pass arguments to simulator and/or statistic?) Because every use of bootstrapping is going to need to do this, it makes sense to break it out as a separate function, rather than writing the same code many times (with many chances of getting it wrong). The bootstrap function takes the output of rboot and applies a summarizing function. bootstrap.se just calls rboot and makes the summarizing function sd, which takes a standard deviation. IMPORTANT NOTE: This is just a code sketch, because depending on the data structure which the statistic returns, it may not (e.g.) be feasible to just run sd on it, and so it might need some modification. See detailed examples below.
+￼￼bootstrap.bias <- function(simulator, statistic, B, t.hat) {
+    expect <- bootstrap(rboot(statistic, simulator, B), summarizer = mean)
+    return(expect - t.hat)
+}
+￼￼￼CODE EXAMPLE 7: Sketch of code for bootstrap bias correction. Arguments are as in Code Ex- ample 6, except that t.hat is the estimate on the original data. IMPORTANT NOTE: As with Code Example 6, this is just a code sketch, because it won’t work with all data types that might be returned by statistic, and so might require modification.
+00:02 Monday 18th April, 2016
+[[ATTN: Add subsection specifically on confidence bands?]]
+The interval C = [2Tˆ − qα/2,2Tˆ − q1−α/2] is random, because Tˆ is a random quan- tity, so it makes sense to talk about the probability that it contains the true value
+t0. Also, notice that the upper and lower quantiles of T ̃ have, as it were, swapped roles in determining the upper and lower confidence limits. Finally, notice that we do not actually know those quantiles exactly, but they’re what we approximate by bootstrapping.
+This is the basic bootstrap confidence interval, or the pivotal CI. It is simple and reasonably accurate, and makes a very good default choice for finding confidence intervals.
+6.2.3.1 Other Bootstrap Confidence Intervals
+The basic bootstrap CI relies on the distribution of t ̃ − tˆ being approximately the same as that of tˆ− t0. Even when this is false, however, it can be that the distribution of
+τ = tˆ− t0 (6.10) s􏰨e(tˆ)
+5You might wonder why we’d be unhappy if the coverage level was greater than 1−α. This is certainly better than if it’s less than the nominal confidence level, but it usually means we could have used a smaller set, and so been more precise about t0, without any more real risk. Confidence intervals whose coverage is greater than the nominal level are called conservative; those with less than nominal coverage are anti- conservative (and not, say, “liberal”).
+00:02 Monday 18th April, 2016
+6.2. THEBOOTSTRAPPRINCIPLE 146
+no matter what the true value of t0. When we calculate a confidence interval, our inability to deal with distributions exactly means that the true confidence level, or coverage of the interval, is not quite the desired confidence level 1 − α; the closer it is, the better the approximation, and the more accurate the confidence interval.5
+When we simulate, we get samples of t ̃, but what we really care about is the distribution of tˆ. When we have enough data to start with, those two distributions will be approximately the same. But at any given amount of data, the distribution of t ̃ − tˆ will usually be closer to that of tˆ − t0 than the distribution of t ̃ is to that of tˆ. That is, the distribution of fluctuations around the true value usually converges quickly. (Think of the central limit theorem.) We can use this to turn information about the distribution of t ̃ into accurate confidence intervals for t0, essentially by re-centering t ̃ around tˆ.
+(6.5) (6.6) (6.7) (6.8) (6.9)
+Specifically, let qα/2 and q1−α/2 be the α/2 and 1 − α/2 quantiles of t ̃. Then 1−α = Pr􏰳q ≤T ̃≤q 􏰵
+α/2 1−α/2
+= Pr􏰳qα/2−Tˆ≤T ̃−Tˆ≤q1−α/2−Tˆ􏰵
+≈ Pr􏰳qα/2−Tˆ≤Tˆ−t0≤q1−α/2−Tˆ􏰵
+= Pr􏰳qα/2−2Tˆ≤−t0≤q1−α/2−2Tˆ􏰵
+= Pr􏰳2Tˆ−q ≤t ≤2Tˆ−q 􏰵 1−α/2 0 α/2
+￼￼
+147 6.2. THEBOOTSTRAPPRINCIPLE
+￼￼equitails <- function(x, alpha) {
+    lower <- quantile(x, alpha/2)
+    upper <- quantile(x, 1 - alpha/2)
+    return(c(lower, upper))
+}
+bootstrap.ci <- function(statistic = NULL, simulator = NULL, tboots = NULL,
+    B = if (!is.null(tboots)) {
+        ncol(tboots)
+    }, t.hat, level) {
+    if (is.null(tboots)) {
+        stopifnot(!is.null(statistic))
+        stopifnot(!is.null(simulator))
+        stopifnot(!is.null(B))
+        tboots <- rboot(statistic, simulator, B)
+    }
+    alpha <- 1 - level
+    intervals <- bootstrap(tboots, summarizer = equitails, alpha = alpha)
+    upper <- t.hat + (t.hat - intervals[, 1])
+    lower <- t.hat + (t.hat - intervals[, 2])
+    CIs <- cbind(lower = lower, upper = upper)
+    return(CIs)
+}
+￼￼￼CODE EXAMPLE 8: Sketch of code for calculating the basic bootstrap confidence interval. See Code Example 6 for rboot and bootstrap, and cautions about blindly applying this to arbitrary data-types. See online for comments.
+00:02 Monday 18th April, 2016
+6.2. THEBOOTSTRAPPRINCIPLE 148 is close to that of
+τ ̃= t ̃−tˆ (6.11) se(t ̃)
+This is like what we calculate in a t-test, and since the t-test was invented by “Stu- dent”, these are called studentized quantities. If τ and τ ̃ have the same distribution, then we can reason as above and get a confidence interval
+􏰑ˆ􏰨ˆ ˆ􏰨ˆ 􏰒
+t −se(t)Qτ ̃(1−α/2),t −se(t)Qτ ̃(α/2) (6.12)
+This is the same as the basic interval when s􏰨e(tˆ) = se(t ̃), but different otherwise. To find se(t ̃), we need to actually do a second level of bootstrapping, as follows.
+1. Fit the model with θˆ, find tˆ. 2. Fori∈1:B1
+￼(a) Generate X ̃i from θˆ (b) Estimate θ ̃ , t ̃
+ii (c) For j ∈1:B2
+i. GenerateX† fromθ ̃i ij
+ii. Calculate t† ij
+(d) Set σ ̃i = standard deviation of the t † ij
+t † − t ̃ (e)Setτ ̃ =ij i forallj
+￼ij σ ̃i
+3. Set s􏰨e(tˆ) = standard deviation of the t ̃
+4. Find the α/2 and 1 − α/2 quantiles of the distribution of the τ ̃ 5. Plug into Eq. 6.12.
+The advantage of the studentized intervals is that they are more accurate than the basic ones; the disadvantage is that they are more work! At the other extreme, the percentile method simply sets the confidence interval to
+􏰑Qt ̃(α/2), Qt ̃(1 − α/2)􏰒 (6.13)
+This is definitely easier to calculate, but not as accurate as the basic, pivotal CI.
+All of these methods have many variations, described in the monographs referred
+to at the end of this chapter (§6.8).
+00:02 Monday 18th April, 2016
+i
+149 6.2. THEBOOTSTRAPPRINCIPLE
+CODE EXAMPLE 9: Bootstrap p-value calculation. testhat should be the value of the test statis- tic on the actual data. test is a function which takes in a data set and calculates the test statistic, presuming that large values indicate departure from the null hypothesis. Note the +1 in the numer- ator and denominator of the p-value — it would be more straightforward to leave them off, but this is a little more stable when B is comparatively small. (Also, it keeps us from ever reporting a
+p-value of exactly 0.)
+6.2.4 Hypothesis Testing
+For hypothesis tests, we may want to calculate two sets of sampling distributions: the distribution of the test statistic under the null tells us about the size of the test and significance levels, and the distribution under the alternative tells us about power and realized power. We can find either with bootstrapping, by simulating from either the null or the alternative. In such cases, the statistic of interest, which I’ve been calling T , is the test statistic. Code Example 9 illustrates how to find a p-value by simulating under the null hypothesis. The same procedure would work to calculate power, only we’d need to simulate from the alternative hypothesis, and testhat would be set to the critical value of T separating acceptance from rejection, not the observed value.
+6.2.4.1 Double bootstrap hypothesis testing
+When the hypothesis we are testing involves estimated parameters, we may need to correct for this. Suppose, for instance, that we are doing a goodness-of-fit test. If we estimate our parameters on the data set, we adjust our distribution so that it matches the data. It is thus not surprising if it seems to fit the data well! (Essentially, it’s the problem of evaluating performance by looking at in-sample fit, which gave us so much trouble in Chapter 3.)
+Some test statistics have distributions which are not affected by estimating pa- rameters, at least not asymptotically. In other cases, one can analytically come up with correction terms. When these routes are blocked, one uses a double bootstrap, where a second level of bootstrapping checks how much estimation improves the ap- parent fit of the model. This is perhaps most easily explained in pseudo-code (Code Example 10).
+00:02 Monday 18th April, 2016
+￼￼boot.pvalue <- function(test, simulator, B, testhat) {
+    testboot <- rboot(B = B, statistic = test, simulator = simulator)
+    p <- (sum(testboot >= testhat) + 1)/(B + 1)
+    return(p)
+}
+￼￼￼
+6.2. THEBOOTSTRAPPRINCIPLE 150
+￼￼doubleboot.pvalue <- function(test, simulator, B1, B2, estimator, thetahat,
+    testhat, ...) {
+    for (i in 1:B1) {
+        xboot <- simulator(theta = thetahat, ...)
+        thetaboot <- estimator(xboot)
+        testboot[i] <- test(xboot)
+        pboot[i] <- boot.pvalue(test, simulator, B2, testhat = testboot[i],
+            theta = thetaboot)
+    }
+    p <- (sum(testboot >= testhat) + 1)/(B1 + 1)
+    p.adj <- (sum(pboot <= p) + 1)/(B1 + 1)
+    return(p.adj)
+}
+￼￼￼CODE EXAMPLE 10: Code sketch for “double bootstrap” significance testing. The inner or second bootstrap is used to calculate the distribution of nominal bootstrap p-values. For this to work, we need to draw our second-level bootstrap samples from θ ̃, the bootstrap re-estimate, not from θˆ, the data estimate. The code presumes the simulator function takes a theta argument allowing this. Exercise: replace the for loop with replicate.
+6.2.5 Model-Based Bootstrapping Example: Pareto’s Law of Wealth Inequality
+The Pareto or power-law distribution6, is a popular model for data with “heavy tails”, i.e. where the probability density f (x) goes to zero only very slowly as x → ∞. The probability density is
+θ−1􏰴 x 􏰶−θ
+f (x) = x x (6.14)
+00
+where x0 is the minimum scale of the distribution, and θ is the scaling exponent (exercise 1). The Pareto is highly right-skewed, with the mean being much larger than the median.
+If we know x0, one can show that the maximum likelihood estimator of the ex-
+￼￼ponent θ is
+ˆn
+θ=1+􏰢n logxi (6.15)
+i=1 x0
+￼￼and that this is consistent (Exercise 3), and efficient. Picking x0 is a harder problem (see Clauset et al. 2009) — for the present purposes, pretend that the Oracle tells us. The file pareto.R, on the book website, contains a number of functions related to the Pareto distribution, including a function pareto.fit for estimating it. (There’s an example of its use below.)
+Pareto came up with this density when he attempted to model the distribution of personal wealth. Approximately, but quite robustly across countries and time-
+6Named after Vilfredo Pareto (1848–1923), the highly influential economist, political scientist, and proto-Fascist.
+00:02 Monday 18th April, 2016
+￼
+151 6.2. THEBOOTSTRAPPRINCIPLE
+sim.wealth <- function() {
+    rpareto(n = n.tail, threshold = wealth.pareto$xmin, exponent = wealth.pareto$exponent)
+￼￼￼￼}
+est.pareto <- function(data) {
+    pareto.fit(data, threshold = x0)$exponent
+}
+CODE EXAMPLE 11: Simulator and estimator for model-based bootstrapping of the Pareto distri- bution.
+periods, the upper tail of the distribution of income and wealth follows a power law, with the exponent varying as money is more or less concentrated among the very richest individuals and households7. Figure 6.2 shows the distribution of net worth for the 400 richest Americans in 2003.
+[[TODO: Permanent URL]]
+￼￼source("http://www.stat.cmu.edu/~cshalizi/uADA/16/lectures/pareto.R")
+wealth <- scan("http://www.stat.cmu.edu/~cshalizi/uADA/16/lectures/wealth.dat")
+x0 <- 9e+08
+n.tail <- sum(wealth >= x0)
+wealth.pareto <- pareto.fit(wealth, threshold = x0)
+Taking x0 = 9 × 108 (again, see Clauset et al. 2009), the number of individuals in
+the tail is 302, and the estimated exponent is θˆ = 2.34.
+How much uncertainty is there in this estimate of the exponent? Naturally, we’ll
+bootstrap. We need a function to generate Pareto-distributed random variables; this, along with some related functions, is part of the file pareto.R on the course website. With that tool, model-based bootstrapping proceeds as in Code Example 11.
+Using these functions, we can now calculate the bootstrap standard error, bias and 95% confidence interval for θˆ, setting B = 104:
+pareto.se <- bootstrap.se(statistic = est.pareto, simulator = sim.wealth, B = 10000)
+pareto.bias <- bootstrap.bias(statistic = est.pareto, simulator = sim.wealth,
+    t.hat = wealth.pareto$exponent, B = 10000)
+pareto.ci <- bootstrap.ci(statistic = est.pareto, simulator = sim.wealth, B = 10000,
+    t.hat = wealth.pareto$exponent, level = 0.95)
+This gives a standard error of ±0.077, matching the asymptotic approximation reasonably well8, but not needing asymptotic assumptions.
+7Most of the distribution, for ordinary people, roughly conforms to a log-normal.
+8“In Asymptopia”, the variance of the MLE should be (θˆ−1)2 , in this case 0.076. The intuition is
+n
+that this variance depends on how sharp the maximum of the likelihood function is — if it’s sharply peaked, we can find the maximum very precisely, but a broad maximum is hard to pin down. Variance is thus inversely proportional to the second derivative of the negative log-likelihood. (The minus sign is because the second derivative has to be negative at a maximum, while variance has to be positive.) For one sample, the expected second derivative of the negative log-likelihood is (θ − 1)−2 . (This is called the Fisher information of the model.) Log-likelihood adds across independent samples, giving us an over-all factor
+00:02 Monday 18th April, 2016
+￼￼￼
+6.2. THEBOOTSTRAPPRINCIPLE 152
+￼￼￼￼￼Fraction of top 400 above that worth
+0.002 0.005 0.020 0.050 0.200 0.500
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼1e+09 2e+09 5e+09 1e+10 2e+10 5e+10
+Net worth (dollars)
+plot.survival.loglog(wealth, xlab = "Net worth (dollars)", ylab = "Fraction of top 400 above that w
+rug(wealth, side = 1, col = "grey")
+curve((n.tail/400) * ppareto(x, threshold = x0, exponent = wealth.pareto$exponent,
+    lower.tail = FALSE), add = TRUE, lty = "dashed", from = x0, to = 2 * max(wealth))
+FIGURE 6.2: Upper cumulative distribution function (or “survival function”) of net worth for the 400 richest individuals in the US (2000 data). The solid line shows the fraction of the 400 individ- uals whose net worth W equaled or exceeded a given value w, Pr(W ≥ w). (Note the logarithmic scale for both axes.) The dashed line is a maximum-likelihood estimate of the Pareto distribution, taking x0 = $9 × 108. (This threshold was picked using the method of Clauset et al. 2009.) Since there are 302 individuals at or above the threshold, the cumulative distribution function of the Pareto has to be reduced by a factor of (302/400).
+00:02 Monday 18th April, 2016
+￼
+153 6.2. THEBOOTSTRAPPRINCIPLE
+￼￼ks.stat.pareto <- function(x, exponent, x0) {
+    x <- x[x >= x0]
+    ks <- ks.test(x, ppareto, exponent = exponent, threshold = x0)
+    return(ks$statistic)
+}
+ks.pvalue.pareto <- function(B, x, exponent, x0) {
+    testhat <- ks.stat.pareto(x, exponent, x0)
+    testboot <- vector(length = B)
+    for (i in 1:B) {
+        xboot <- rpareto(length(x), exponent = exponent, threshold = x0)
+        exp.boot <- pareto.fit(xboot, threshold = x0)$exponent
+        testboot[i] <- ks.stat.pareto(xboot, exp.boot, x0)
+    }
+    p <- (sum(testboot >= testhat) + 1)/(B + 1)
+    return(p)
+}
+￼￼￼CODE EXAMPLE 12: Calculating a p-value for the Pareto distribution, using the Kolmogorov- Smirnov test and adjusting for the way estimating the scaling exponent moves the fitted distribution closer to the data.
+Asymptotically, the bias is known to go to zero; at this size, bootstrapping gives a bias of 0.0045, which is effectively negligible.
+We can also get the confidence interval; with the same 104 replications, the 95% CI is 2.18,2.48. In theory, the confidence interval could be calculated exactly, but it involves the inverse gamma distribution (Arnold, 1983), and it is quite literally faster to write and do the bootstrap than go to look it up.
+A more challenging problem is goodness-of-fit; we’ll use the Kolmogorov-Smirnov statistic.9 Code Example 12 calculates the p-value. With ten thousand bootstrap replications,
+Ten thousand replicates is enough that we should be able to accurately estimate probabilities of around 0.01 (since the binomial standard error will be 􏰯 (0.01)(0.99) ≈
+104
+9.9 × 10−4 ); if it weren’t, we might want to increase B .
+Simply plugging in to the standard formulas, and thereby ignoring the effects of
+estimating the scaling exponent, gives a p-value of 0.171, which is not outstanding but not awful either. Properly accounting for the flexibility of the model, however, the
+of n. In the large-sample limit, the actual log-likelihood will converge on the expected log-likelihood, so this gives us the asymptotic variance. (See also §H.4.1.)
+9The pareto.R file contains a function, pareto.tail.ks.test, which does a goodness-of-fit test for fitting a power-law to the tail of the distribution. That differs somewhat from what follows, because it takes into account the extra uncertainty which comes from having to estimate x0. Here, I am pretending that an Oracle told us x0 = 9 × 108 .
+00:02 Monday 18th April, 2016
+￼signif(ks.pvalue.pareto(10000, wealth, wealth.pareto$exponent, x0), 4)
+## [1] 0.012
+￼￼￼
+[[TODO: Revisit this exam- ple in that chapter, cross-ref]]
+6.3. RESAMPLING 154
+discrepancy between what it predicts and what the data shows is so large that it would take a big (one-in-a-hundred) coincidence to produce it. We have, therefore, detected that the Pareto distribution makes systematic errors for this data, but we don’t know much about what they are. In Chapter 15, we’ll look at techniques which can begin to tell us something about how it fails.
+6.3 Bootstrapping by Resampling
+The bootstrap approximates the sampling distribution, with three sources of approx- imation error. First, simulation error: using finitely many replications to stand for the full sampling distribution. Clever simulation design can shrink this, but brute force — just using enough replicates — can also make it arbitrarily small. Second, sta- tistical error: the sampling distribution of the bootstrap re-estimates under our esti- mated model is not exactly the same as the sampling distribution of estimates under the true data-generating process. The sampling distribution changes with the param- eters, and our initial estimate is not completely accurate. But it often turns out that distribution of estimates around the truth is more nearly invariant than the distribu- tion of estimates themselves, so subtracting the initial estimate from the bootstrapped values helps reduce the statistical error; there are many subtler tricks to the same end. Third, specification error: the data source doesn’t exactly follow our model at all. Simulating the model then never quite matches the actual sampling distribution.
+Efron had a second brilliant idea, which is to address specification error by re- placing simulation from the model with re-sampling from the data. After all, our initial collection of data gives us a lot of information about the relative probabilities of different values. In a sense the empirical distribution is the least prejudiced esti- mate possible of the underlying distribution — anything else imposes biases or pre- conceptions, possibly accurate but also potentially misleading10. Lots of quantities can be estimated directly from the empirical distribution, without the mediation of a model. Efron’s resampling bootstrap (a.k.a. the non-parametric bootstrap) treats the original data set as a complete population and draws a new, simulated sample from it, picking each observation with equal probability (allowing repeated values) and then re-running the estimation (Figure 6.3, Code Example 13). In fact, this is usu- ally what people mean when they talk about “the bootstrap” without any modifier.
+Everything we did with model-based bootstrapping can also be done with resam- pling bootstrapping — the only thing that’s changing is the distribution the surrogate data is coming from.
+The resampling bootstrap should remind you of k-fold cross-validation. The ana- log of leave-one-out CV is a procedure called the jack-knife, where we repeat the estimate n times on n − 1 of the data points, holding each one out in turn. It’s his- torically important (it dates back to the 1940s), but generally doesn’t work as well as resampling.
+An important variant is the smoothed bootstrap, where we re-sample the data points and then perturb each by a small amount of noise, generally Gaussian11.
+10See §14.6 in Chapter 14.
+11We will see in Chapter 14 that this corresponds to sampling from a kernel density estimate.
+00:02 Monday 18th April, 2016
+￼
+155 6.3. RESAMPLING
+￼data
+simulated data
+￼0.00183
+0.00183
+-0.00249
+-0.00249
+-0.00587
+￼0.00168
+-0.00249
+0.0183
+-0.00587
+0.0139
+￼re-sampling
+empirical distribution
+￼￼￼￼￼￼parameter calculation q0.01 = -0.0392
+re-estimate q0.01 = -0.0354
+FIGURE 6.3: Schematic for the resampling bootstrapping. New data is simulated by re-sampling from the original data (with replacement), and functionals are calculated either directly from the empirical distribution, or by estimating a model on this surrogate data.
+￼￼resample <- function(x) {
+    sample(x, size = length(x), replace = TRUE)
+}
+resample.data.frame <- function(data) {
+    sample.rows <- resample(1:nrow(data))
+    return(data[sample.rows, ])
+}
+￼￼￼CODE EXAMPLE 13: A utility function to resample from a vector, and another which resamples from a data frame. Can you write a single function which determines whether its argument is a vector or a data frame, and does the right thing in each case/
+00:02 Monday 18th April, 2016
+estimator
+estimator
+6.4. BOOTSTRAPPINGREGRESSIONMODELS 156
+Back to the Pareto example Let’s see how to use re-sampling to get a 95% confi- dence interval for the Pareto exponent12.
+wealth.resample <- function() {
+    resample(wealth[wealth >= x0])
+}
+pareto.CI.resamp <- bootstrap.ci(statistic = est.pareto, simulator = wealth.resample,
+    t.hat = wealth.pareto$exponent, level = 0.95, B = 10000)
+The interval is 2.16, 2.48; this is very close to the interval we got from the model- based bootstrap, which should actually reassure us about the latter’s validity.
+6.3.1 Model-Based vs. Resampling Bootstraps
+When we have a properly specified model, simulating from the model gives more accurate results (at the same n) than does re-sampling the empirical distribution — parametric estimates of the distribution converge faster than the empirical distribu- tion does. If on the other hand the model is mis-specified, then it is rapidly converging to the wrong distribution. This is of course just another bias-variance trade-off, like those we’ve seen in regression.
+Since I am suspicious of most parametric modeling assumptions, I prefer re-sampling, when I can figure out how to do it, or at least until I have convinced myself that a parametric model is a good approximation to reality.
+6.4 Bootstrapping Regression Models
+Let’s recap what we’re doing estimating regression models. We want to learn the re- gression function μ(x) = 􏰌[Y|X = x]. We estimate the model on a set of predictor- response pairs, (x1,y1),(x2,y2),...(xn,yn), resulting in an estimated curve (or surface) μ􏰨(x), fitted values μ􏰨i = μ􏰨(xi ), and residuals, εi = yi − μ􏰨i . For any such model, we have a choice of several ways of bootstrapping, in decreasing order of reliance on the model.
+• Simulate new X values from the model’s distribution of X , and then draw Y from the specified conditional distribution Y |X .
+• Hold the x fixed, but draw Y |X from the specified distribution.
+• Hold the x fixed, but make Y equal to μ􏰨(x) plus a randomly re-sampled εj .
+• Re-sample(x,y)pairs.
+12Even if the Pareto model is wrong, the estimator of the exponent will converge on the value which gives, in a certain sense, the best approximation to the true distribution from among all power laws. Econometricians call such parameter values the pseudo-truth; we are getting a confidence interval for the pseudo-truth. In this case, the pseudo-true scaling exponent can still be a useful way of summarizing how heavy tailed the income distribution is, despite the fact that the power law makes systematic errors.
+00:02 Monday 18th April, 2016
+￼￼
+157 6.4. BOOTSTRAPPINGREGRESSIONMODELS
+The first case is pure model-based bootstrapping. (So is the second, sometimes, when the regression model is agnostic about X .) The last case is just re-sampling from the joint distribution of (X , Y ). The next-to-last case is called re-sampling the residuals or re-sampling the errors. When we do that, we rely on the regression model to get the conditional expectation function right, but we don’t count on it getting the distribution of the noise around the expectations.
+The specific procedure of re-sampling the residuals is to re-sample the εi , with replacement,togetε ̃1,ε ̃2,...ε ̃n,andthensetx ̃i =xi,y ̃i =μ􏰨(x ̃i)+ε ̃i.Thissurrogate data set is then re-analyzed like new data.
+6.4.1 Re-sampling Points: Parametric Model Example
+A classic data set contains the time between 299 eruptions of the Old Faithful geyser in Yellowstone, and the length of the subsequent eruptions; these variables are called waiting and duration. (We saw this data set already in §5.4.2.1, and will see it again in §7.3.2.) We’ll look at the linear regression of waiting on duration. We’ll re-sample (duration, waiting) pairs, and would like confidence intervals for the regression coefficients. This is a confidence interval for the coefficients of the best linear predictor, a functional of the distribution, which, as we saw in Chapters 1 and 2, exists no matter how nonlinear the process really is. It’s only a confidence interval for the true regression parameters if the real regression function is linear.
+Before anything else, look at the model:
+Pr(>|t|) (Intercept) 0 duration 0
+The first step in bootstrapping this is to build our simulator, which just means sampling rows from the data frame:
+We can check this by running summary(geyser.resample()), and seeing that it gives about the same quartiles and mean for both variables as summary(geyser)13, but that the former gives different numbers each time it’s run.
+Next, we define the estimator:
+13The minimum and maximum won’t match up well — why not? 00:02 Monday 18th April, 2016
+[[ATTN: Replace with more modern data example?]]
+￼library(MASS)
+data(geyser)
+geyser.lm <- lm(waiting ~ duration, data = geyser)
+￼￼￼Estimate
+Std. Error
+￼￼t value
+￼￼99.3
+1.960
+￼￼50.7
+￼￼-7.8
+0.537
+￼￼-14.5
+￼￼￼￼resample.geyser <- function() {
+    resample.data.frame(geyser)
+}
+￼
+6.4. BOOTSTRAPPINGREGRESSIONMODELS 158
+We can check that this function works by seeing that coefficients(geyser.lm) matches est.geyser.lm(geyser), but that est.geyser.lm(resample.geyser() is different every time we run it.
+Put the pieces together:
+upper (Intercept) 102.00 duration -6.91
+Notice that we do not have to assume homoskedastic Gaussian noise — fortu- nately, because that’s a very bad assumption here14.
+￼est.geyser.lm <- function(data) {
+    fit <- lm(waiting ~ duration, data = data)
+    return(coefficients(fit))
+}
+￼geyser.lm.ci <- bootstrap.ci(statistic=est.geyser.lm,
+                             simulator=resample.geyser,
+                             level=0.95,
+                             t.hat=coefficients(geyser.lm),
+                             B=1e4)
+￼￼￼lower
+￼￼96.5
+￼￼-8.7
+￼￼￼￼14We have calculated 95% confidence intervals for the intercept β0 and the slope β1 separately. These intervals cover their coefficients all but 5% of the time. Taken together, they give us a rectangle in (β0,β1) space, but the coverage probability of this rectangle could be anywhere from 95% all the way down to 90%. To get a confidence region which simultaneously covers both coefficients 95% of the time, we have two big options. One is to stick to a box-shaped region and just increase the confidence level on each coordinate (to 97.5%). The other is to define some suitable metric of how far apart coefficient vectors are (e.g., ordinary Euclidean distance), find the 95% percentile of the distribution of this metric, and trace the appropriate contour around βˆ0,βˆ1. [[TODO: Example.]]
+00:02 Monday 18th April, 2016
+159 6.4. BOOTSTRAPPINGREGRESSIONMODELS
+￼￼main.curve <- npr.geyser(geyser)
+# We already defined this in a previous example, but it doesn't hurt resample.geyser <- function() { resample.data.frame(geyser) }
+geyser.resampled.curves <- rboot(statistic=npr.geyser,
+                                 simulator=resample.geyser,
+B=800)
+￼￼￼CODE EXAMPLE 14: Generating multiple kernel-regression curves for the geyser data, by resampling that data frame and re-estimating the model on each simulation. geyser.resampled.curves stores the predictions of those 800 models, evaluated at a common set of values for the predictor variable. The vector main.curve, which we’ll use presently to get confidence intervals, stores predictions of the model fit to the whole data, evaluated at that same set of points.
+6.4.2 Re-sampling Points: Non-parametric Model Example
+Nothing in the logic of re-sampling data points for regression requires us to use a para- metric model. Here we’ll provide 95% confidence bounds for the kernel smoothing of the geyser data. Since the functional is a whole curve, the confidence set is often called a confidence band.
+We use the same simulator, but start with a different regression curve, and need a different estimator.
+evaluation.points <- data.frame(duration = seq(from = 0.8, to = 5.5, length.out = 200))
+library(np)
+npr.geyser <- function(data, tol = 0.1, ftol = 0.1, plot.df = evaluation.points) {
+￼    bw <- npregbw(waiting ~ duration, data = data, tol = tol, ftol = ftol)
+    mdl <- npreg(bw)
+    return(predict(mdl, newdata = plot.df))
+}
+Now we construct pointwise 95% confidence bands for the regression curve. For this end, we don’t really need to keep around the whole kernel regression object — we’ll just use its predicted values on a uniform grid of points, extending slightly beyond the range of the data (Code Example 14). Observe that this will go through bandwidth selection again for each bootstrap sample. This is slow, but it is the most secure way of getting good confidence bands. Applying the bandwidth we found on the data to each re-sample would be faster, but would introduce an extra level of approximation, since we wouldn’t be treating each simulation run the same as the original data.
+Figure 6.4 shows the curve fit to the data, the 95% confidence limits, and (faintly) all of the bootstrapped curves. Doing the 800 bootstrap replicates took 4 minutes on my laptop15.
+15Specifically, I ran system.time(geyser.resampled.curves <- rboot(statistic=npr.geyser, 00:02 Monday 18th April, 2016
+[[TODO: Talk about the bias issue (here? further reading?), hacks vs. living with it]]
+￼
+6.4. BOOTSTRAPPINGREGRESSIONMODELS 160
+plot(0, type = "n", xlim = c(0.8, 5.5), ylim = c(0, 100), xlab = "Duration (min)",
+    ylab = "Waiting (min)")
+for (i in 1:ncol(geyser.resampled.curves)) {
+    lines(evaluation.points$duration, geyser.resampled.curves[, i], lwd = 0.1,
+col = "grey")
+}
+geyser.npr.cis <- bootstrap.ci(tboots = geyser.resampled.curves, t.hat = main.curve,
+    level = 0.95)
+lines(evaluation.points$duration, geyser.npr.cis[, "lower"])
+lines(evaluation.points$duration, geyser.npr.cis[, "upper"])
+lines(evaluation.points$duration, main.curve)
+rug(geyser$duration, side = 1)
+points(geyser$duration, geyser$waiting)
+FIGURE 6.4: Kernel regression curve for Old Faithful (central black line), with 95% confidence bands (other black lines), the 800 bootstrapped curves (thin, grey lines), and the data points. Notice that the confidence bands get wider where there is less data. Caution: doing the bootstrap took 4 minutes to run on my computer.
+00:02 Monday 18th April, 2016
+￼￼
+161 6.4. BOOTSTRAPPINGREGRESSIONMODELS
+￼simulator=resample.geyser, B=800)), which not only did the calculations and stored them in geyser.resampled.curves, but told me how much time it took R to do all that.
+00:02 Monday 18th April, 2016
+6.4. BOOTSTRAPPINGREGRESSIONMODELS 162
+resample.residuals.penn <- function() {
+    new.frame <- penn
+    new.growths <- fitted(penn.lm) + resample(residuals(penn.lm))
+    new.frame$gdp.growth <- new.growths
+    return(new.frame)
+}
+penn.estimator <- function(data) {
+    mdl <- lm(penn.formula, data = data)
+    return(coefficients(mdl))
+}
+penn.lm.cis <- bootstrap.ci(statistic = penn.estimator, simulator = resample.residuals.penn,
+    B = 10000, t.hat = coefficients(penn.lm), level = 0.95)
+CODE EXAMPLE 15: Re-sampling the residuals to get confidence intervals in a linear model. 6.4.3 Re-sampling Residuals: Example
+As an example of re-sampling the residuals, rather than data points, let’s take a lin- ear regression, based on the data-analysis assignment in §A.13.16 We will regress gdp.growth on log(gdp), pop.growth, invest and trade:
+penn <- read.csv("http://www.stat.cmu.edu/~cshalizi/uADA/13/hw/02/penn-select.csv")
+penn.formula <- "gdp.growth ~ log(gdp) + pop.growth + invest + trade"
+penn.lm <- lm(penn.formula, data = penn)
+(Why make the formula a separate object here?) The estimated parameters are
+(Intercept) 5.71e-04 log(gdp) 5.07e-04 pop.growth -1.87e-01 invest 7.15e-04 trade 3.11e-05
+Code Example 15 shows the new simulator for this set-up (resample.residuals.penn)17, the new estimation function (penn.estimator)18, and the confidence interval calcu-
+lation (penn.lm.cis):
+￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼lower
+￼￼-1.58e-02
+￼￼-1.46e-03
+￼￼-3.56e-01
+￼￼4.93e-04
+￼￼-1.86e-05
+￼(Intercept) log(gdp) pop.growth invest
+trade
+upper 1.70e-02 2.45e-03 -1.92e-02 9.42e-04 8.35e-05
+￼￼￼￼￼￼16Note to 2016 students: This is an old problem set related to our homework 2, also on the determinants of economic growth across countries and years, but using a different set of variables. gdp.growth and gdp are obvious, pop.growth is the country’s rate of population growth, invest is the fraction of GDP devoted to investment, and trade is the ratio of imports plus exports to GDP. The data repository is the “Penn World Tables”. See pp. 673 of the full draft for details and the assignment.
+17How would you check that this worked? 18How would you check that this worked?
+00:02 Monday 18th April, 2016
+163 6.4. BOOTSTRAPPINGREGRESSIONMODELS
+Doing ten thousand linear regressions took 45 seconds on my computer, as op- posed to 4 minutes for eight hundred kernel regressions.
+00:02 Monday 18th April, 2016
+6.5. BOOTSTRAPWITHDEPENDENTDATA 164
+6.5 Bootstrap with Dependent Data
+If the data points we are looking at are vectors (or more complicated structures) with dependence between components, but each data point is independently generated from the same distribution, then dependence isn’t really an issue. We re-sample vec- tors, or generate vectors from our model, and proceed as usual. In fact, that’s what we’ve done so far in several cases.
+If there is dependence across data points, things are more tricky. If our model incorporates this dependence, then we can just simulate whole data sets from it. An appropriate re-sampling method is trickier — just re-sampling individual data points destroys the dependence, so it won’t do. We will revisit this question when we look at time series and spatial data in Chapters 21–22.
+6.6 Things Bootstrapping Does Poorly
+The principle behind bootstrapping is that sampling distributions under the true pro- cess should be close to sampling distributions under good estimates of the truth. If small perturbations to the data-generating process produce huge swings in the sam- pling distribution, bootstrapping will not work well, and may fail spectacularly. For model-based bootstrapping, this means that small changes to the underlying param- eters must produce small changes to the functionals of interest. Similarly, for resam- pling, it means that adding or removing a few data points must change the functionals only a little19.
+Re-sampling in particular has trouble with extreme values. Here is a simple ex- ample: Our data points Xi are IID, with Xi ∼ Uni f (0,θ0), and we want to estimate
+θ0. The maximum likelihood estimate θˆ is just the sample maximum of the xi . We’ll use resampling to get a confidence interval for this, as above — but I will fix the true θ0 = 1, and see how often the 95% confidence interval covers the truth.
+That is, the actual coverage probability is not 95% but about 88%.
+If you suspect that your use of the bootstrap may be setting yourself up for a similar epic fail, your two options are (1) learn some of the theory of the bootstrap from the references in the “Further Reading” section below, or (2) set up a simulation experiment like this one.
+19 More generally, moving from one distribution function f to another (1 − ε) f + ε g mustn’t change the functional very much when ε is small, no matter in what “direction” g we perturb it. Making this idea precise calls for some fairly deep mathematics, about differential calculus on spaces of functions (see, e.g., van der Vaart 1998, ch. 20).
+00:02 Monday 18th April, 2016
+￼max.boot.ci <- function(x, B) {
+    max.boot <- replicate(B, max(resample(x)))
+    return(2 * max(x) - quantile(max.boot, c(0.975, 0.025)))
+}
+boot.cis <- replicate(1000, max.boot.ci(x = runif(100), B = 1000))
+(true.coverage <- mean((1 >= boot.cis[1, ]) & (1 <= boot.cis[2, ])))
+## [1] 0.878
+￼
+165 6.7. WHICHBOOTSTRAPWHEN?
+6.7 Which Bootstrap When?
+This chapter has introduced a bunch of different bootstraps, and before it closes it’s worth reviewing the general principles, and some of the considerations which go into choosing among them in a particular problem.
+When we bootstrap, we try to approximate the sampling distribution of some statistic (mean, median, correlation coefficient, regression coefficients, smoothing curve, difference in MSEs. . . ) by running simulations, and calculating the statistic on the simulation. We’ve seen three major ways of doing this:
+• The model-based bootstrap: we estimate the model, and then simulate from x the estimated model;
+• Resampling residuals: we estimate the model, and then simulate by resampling residuals to that estimate and adding them back to the fitted values;
+• Resampling cases or whole data points: we ignore the estimated model com- pletely in our simulation, and just re-sample whole rows from the data frame.
+Which kind of bootstrap is appropriate depends on how much trust we have in our model.
+The model-based bootstrap trusts the model to be completely correct for some parameter value. In, e.g., regression, it trusts that we have the right shape for the regression function and that we have the right distribution for the noise. When we trust our model this much, we could in principle work out sampling distributions analytically; the model-based bootstrap replaces hard math with simulation.
+Resampling residuals doesn’t trust the model as much. In regression problems, it assumes that the model gets the shape of the regression function right, and that the noise around the regression function is independent of the predictor variables, but doesn’t make any further assumption about how the fluctuations are distributed. It is therefore more secure than model-based bootstrap.20
+Finally, resampling cases assumes nothing at all about either the shape of the re- gression function or the distribution of the noise, it just assumes that each data point (row in the data frame) is an independent observation. Because it assumes so little, and doesn’t depend on any particular model being correct, it is very safe.
+The reason we do not always use the safest bootstrap, which is resampling cases, is that there is, as usual, a bias-variance trade-off. Generally speaking, if we compare three sets of bootstrap confidence intervals on the same data for the same statistic, the model-based bootstrap will give the narrowest intervals, followed by resampling residuals, and resampling cases will give the loosest bounds. If the model really is correct about the shape of the curve, we can get more precise results, without any loss of accuracy, by resampling residuals rather than resampling cases. If the model is also correct about the distribution of noise, we can do even better with a model-based bootstrap.
+20You could also imagine simulations where we presume that the noise takes a very particular form (e.g., a t-distribution with 10 degrees of freedom), but are agnostic about the shape of the regression function, and learn that non-parametrically. It’s harder to think of situations where this is really plausible, however, except maybe Gaussian noise arising from central-limit-theorem considerations.
+00:02 Monday 18th April, 2016
+￼
+6.8. FURTHERREADING 166
+To sum up: resampling cases is safer than resampling residuals, but gives wider, weaker bounds. If you have good reason to trust a model’s guess at the shape of the regression function, then resampling residuals is preferable. If you don’t, or it’s not a regression problem so there are no residuals, then you prefer to resample cases. The model-based bootstrap works best when the over-all model is correct, and we’re just uncertain about the exact parameter values we need.
+6.8 Further Reading
+Davison and Hinkley (1997) is both a good textbook, and the reference I consult most often. Efron and Tibshirani (1993), while also very good, is more theoretical. Canty et al. (2006) has useful advice for serious applications.
+All the bootstraps discussed in this chapter presume IID observations. For boot- straps for time series, see §21.5.
+Software For professional purposes, I strongly recommend using the R package boot (Canty and Ripley, 2013), based on Davison and Hinkley (1997). I deliberately do not use it in this chapter, or later in the book, for pedagogical reasons; I have found that forcing students to write their own bootstrapping code helps build character, or at least understanding.
+The bootstrap vs. robust standard errors For linear regression coefficients, econo- metricians have developed a variety of “robust” standard errors which are valid under weaker conditions than the usual assumptions. Buja et al. (2014) shows their equiva- lence to resampling cases. (See also King and Roberts 2015.)
+Historical notes The original paper on the bootstrap, Efron (1979), is extremely clear, and for the most part presented in the simplest possible terms; it’s worth read- ing. His later small book (Efron, 1982), while often cited, is not in my opinion so useful nowadays21.
+As the title of that last reference suggests, the bootstrap is in some ways a suc- cessor to an older method, apparently dating back to the 1940s if not before, called the “jackknife”, in which each data point is successively held back and the estimate is re-calculated; the variance of these re-estimates, appropriately scaled, is then taken as the variance of estimation, and similarly for the bias22. The jackknife is appealing in its simplicity, but is only valid under much stronger conditions than the bootstrap.
+6.9 Exercises
+1. Show that x0 is the mode of the Pareto distribution.
+21It seems to have done a good job of explaining things to people who were already professional statis- ticians in 1982.
+22A “jackknife” is a knife with a blade which folds into the handle; think of the held-back data point as the folded-away blade.
+00:02 Monday 18th April, 2016
+￼
+167 6.9. EXERCISES
+2. DerivethemaximumlikelihoodestimatorfortheParetodistribution(Eq.6.15) from the density (Eq. 6.14).
+3. Show that the MLE of the Pareto distribution is consistent.
+(a) Using the law of large numbers, show that θˆ (Eq. 6.15) converges to a
+limit which depends on 􏰌[logX/x0].
+(b) Find an expression for 􏰌[logX/x0] in terms of θ and from the density (Eq. 6.14). Hint: Write 􏰌[logX/x0] as an integral, change the variable of integration from x to z = log(x/x0), and remember that the mean of an exponential random variable with rate λ is 1/λ.
+4. Find
+(a) TheusualGaussianassumptions(hint:trytheintervals="confidence"
+confidence bands for the linear regression model of §6.4.1 using
+option to predict);
+(b) Resampling of residuals; and
+(c) Resampling of cases.
+5. (Computational) Writing new functions to simulate every particular linear model is somewhat tedious.
+(a) Write a function which takes, as inputs, an lm model and a data frame, and returns a new data frame where the response variable is replaced by the model’s predictions plus Gaussian noise, but all other columns are left alone.
+(b) Write a function which takes, as inputs, an lm model and a data frame, and returns a new data frame where the response variable is replaced by the model’s predictions plus resampled residuals.
+(c) Will your functions work with npreg models, as well as lm models? If not, what do you have to modify?
+Hint: See Code Example 2 in Chapter 3 for some R tricks to extract the name of the response variable from the estimated model.
+00:02 Monday 18th April, 2016
+00:02 Monday 18th April, 2016
+Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/
