@@ -1,9 +1,0 @@
-
-Appendix M
-More about Hypothesis Testing
-[[To come]]
-[[The logic of hypothesis testing: learning by eliminating alternatives. Error by
-leaping to conclusions and error by refusing truths, or significance, power, and the will to believe. Choice of test statistic as a filter on the data. P-values and their calcula- tion; the importance of sampling distributions. Exact formulas for sampling distribu- tions as short-cuts for exhaustive simulation. Gygax tests: properly sized, correctly calculated p-values, utterly useless as evidence. The importance of power, and of the sampling distribution changing as the truth changes. Size-power trade-off; ROC curves. Why the likelihood ratio, i.e., “economic” interpretation of the Neyman- Pearson lemma. Lack of uniformly most powerful tests in most situations. Ways of increasing power or easing the size-power trade-off: more efficient test statistics (i.e., better filters); increasing (effective) sample size; increasing precision of measurement; focusing power against some alternatives rather than others. Role of modeling as- sumptions in controlling power. Substantive vs. statistical significance once more. Multiple testing: Bonferroni correction, less conservative ones; false discovery con- trol as an alternative. Higher criticism and related procedures. Confidence sets: the confidence set as a bet; turning hypothesis tests into confidence sets; turning con- fidence sets into hypothesis tests. Why it is generally better to report confidence intervals than p-values. Some strategic advice: don’t use statistical significance as a substitute for thought; avoid dead-salmon testing; test important null hypotheses against interesting alternatives; test background assumptions; try sensitivity analy- ses; be careful of interpretations.]]
-783
-00:02 Monday 18th April, 2016
-Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/

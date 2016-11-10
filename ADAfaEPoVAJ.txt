@@ -1,6 +1,5 @@
+Appendix J: Proof of the Gauss-Markov Theorem
 
-Appendix J
-Proof of the Gauss-Markov Theorem
 We want to prove that, when we are doing weighted least squares for linear regres- sion, the best choice of weights wi = 1/σx2 . We have already established that WLS
 i
 is unbiased (Eq. 7.8), so “best” here means minimizing the variance. We have also already established that

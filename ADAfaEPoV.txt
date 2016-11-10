@@ -9,7 +9,9 @@ O.5. EXERCISES 830
 00:02 Monday 18th April, 2016
 00:02 Monday 18th April, 2016
 Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/
+
 Bibliography
+
 Abadie, Alberto and Guido W. Imbens (2006). “Large Sample Properties of Match- ing Estimators for Average Treatment Effects.” Econometrica, 74: 235–267. URL http://www.ksg.harvard.edu/fs/aabadie/smep.pdf. doi:10.1111/j.1468- 0262.2006.00655.x.
 Abarbanel, Henry D. I. (1996). Analysis of Observed Chaotic Data. Berlin: Springer- Verlag.
 Adler, Joseph (2009). R in a Nutshell. Sebastopol, California: O’Reilly.

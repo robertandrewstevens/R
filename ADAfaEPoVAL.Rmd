@@ -1,0 +1,14 @@
+---
+title: "ADAfaEPoVAL"
+author: "Robert A. Stevens"
+date: "November 9, 2016"
+output: html_document
+---
+
+*Advanced Data Analysis from an Elementary Point of View*
+
+by Cosma Rohilla Shalizi
+
+# Appendix L: Information Theory
+
+[[TODO: write appendix, drawing in material about information theory, relative entropy/Kullback-Leibler divergence, and expected log-likelihood currently scattered across chapters in trees, density estimation, and EM]]

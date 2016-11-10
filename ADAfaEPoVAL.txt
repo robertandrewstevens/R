@@ -1,6 +1,0 @@
-
-Appendix L Information Theory
-[[TODO: write appendix, drawing in material about information theory, relative entropy/Kullback-Leibler divergence, and expected log-likelihood currently scattered across chapters in trees, density estimation, and EM]]
-782
-00:02 Monday 18th April, 2016
-Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/
