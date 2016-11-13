@@ -1,20 +1,31 @@
 Appendix J: Proof of the Gauss-Markov Theorem
 
-We want to prove that, when we are doing weighted least squares for linear regres- sion, the best choice of weights wi = 1/σx2 . We have already established that WLS
-i
-is unbiased (Eq. 7.8), so “best” here means minimizing the variance. We have also already established that
+We want to prove that, when we are doing weighted least squares for linear regres- sion, the best choice of weights w[i] = 1/σ[x]^2 . We have already established that WLS is unbiased (Eq. 7.8), so “best” here means minimizing the variance. We have also already established that
+
+    β[WLS] = h(w)*y (J.1) 
+
 where the matrix h(w) is
-β􏰨W LS = h(w)y (J.1) h(w) = (xT wx)−1xT w (J.2)
+
+    h(w) = inv(t(x)*w*x)*t(x)*w (J.2)
+
 It would be natural to try to write out the variance as a function of the weights w, set the derivative equal to zero, and solve. This is tricky, partly because we need to make sure that all the weights are positive and add up to one, but mostly because of the matrix inversion in the definition of h. A slightly indirect approach is actually much easier.
+
 Write w0 for the inverse-variance weight matrix, and h0 for the hat matrix we get with those weights. Then for any other choice of weights, we have h(w) = h0 + c. Since we know WLS estimates are all unbiased, we must have
-(h0 + c)xβ = β
+
+    (h0 + c)x*β = β  (J.3)
+
 but using the inverse-variance weights is a particular WLS estimate so
-(J.3)
-(J.4) (J.5)
-and so we can deduce that from unbiasedness.
-h0xβ = β cx = 0
-777
+
+    h0xβ = β (J.4) 
+
+and so we can deduce that 
+
+   cx = 0  (J.5)
+
+from unbiasedness.
+
 Now consider the covariance matrix of the estimates, 􏰎 which we can expand:
+
 􏰪  ̃􏰫 β
 􏰪  ̃􏰫 􏰎 β
 = 􏰎[(h0+c)Y]
@@ -34,10 +45,15 @@ Now consider the covariance matrix of the estimates, 􏰎 which we can expand:
 (J.10)
 (J.11)
 (J.12)
+
 whereinthelaststepweusethefactthatcx=0(andsoxTcT =0T =0). Since cw0−1cT ≥ 0, we see that the variance is minimized by setting c = 0, and using the inverse variance weights.
+
 Notes:
+
 1. The proof actually works when comparing the inverse-variance weights to any other linear, unbiased estimator; WLS with different weights is just a special case.
+
 2. If all the variances are equal, then we’ve proved the optimality of OLS.
+
 3. We can write the WLS problem as that of minimizing (y − xβ)T w(y − xβ).
 If we allow w to be a non-diagonal, but still positive-definite, matrix, then we
 have the generalized least squares problem. This is appropriate when there
@@ -47,5 +63,3 @@ show that the optimal weight matrix w is the inverse of the noise covariance mat
 00:02 Monday 18th April, 2016
 778
 . This will be 􏰎 [(h0 + c)Y],
-00:02 Monday 18th April, 2016
-Copyright ©Cosma Rohilla Shalizi; do not distribute without permission updates at http://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/
