@@ -1,0 +1,29 @@
+---
+title: "cckt"
+author: "Robert A. Stevens"
+date: "February 8, 2017"
+output: html_document
+---
+
+Chambers, John, William Cleveland, Beat Kleiner, and Paul Tukey, (1983), *Graphical Methods for Data Analysis*, Wadsworth.
+
+Need to find the data to reproduce.
+
+```{r, comment=NA}
+names(car.all)
+# [1] "Length"       "Wheel.base"   "Width"        "Height"       "Front.Hd."    "Rear.Hd"      "Frt.Leg.Room" "Rear.Seating" "Frt.Shld"    
+#[10] "RearShld"     "Luggage"      "Weight"       "Tires"        "Steering"     "Turning"      "Disp."        "HP"           "Trans1"      
+#[19] "Gear.Ratio"   "Eng.Rev"      "Tank"         "Model2"       "Dist.n"       "Tires2"       "Pwr.Steer"    ".empty."      "Disp2"       
+#[28] "HP.revs"      "Trans2"       "Gear2"        "Eng.Rev2"     "Price"        "Country"      "Reliability"  "Mileage"      "Type"        
+
+names(car.test.frame)
+#[1] "Price"       "Country"     "Reliability" "Mileage"     "Type"        "Weight"      "Disp."       "HP"         
+
+plot(car.test.frame$Weight, car.test.frame$Disp.)
+xyplot(Disp. ~ Weight, data=car.test.frame)
+
+names(air)
+#[1] "ozone"       "radiation"   "temperature" "wind"       
+qqplot(air$ozone, air$temperature)
+```
+
