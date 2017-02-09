@@ -1,0 +1,29 @@
+---
+title: "s-plus"
+author: "Robert A. Stevens"
+date: "February 8, 2017"
+output: html_document
+---
+
+*From Microsoft Word document "s-plus.doc" dated Friday, October 1, 1999 at 2:38 PM.*
+
+I've been an S-PLUS user for many years now, since 1988 when I was a graduate co-op student at Ford and it was just AT&T's "S."  I should be an expert by now; unfortunately my previous job did not have much data to analyze, so I only used it sporadically.  My current job does have a lot of data, so I'm using it much more now than ever before, and I still find it to be the best tool for the job, especially for non-linear modeling problems and "tree" methods.  As background, I was very proficient at Minitab while a graduate statistics student and co-op at Ford and then went to GM and "mastered" SAS, so I do have a basis for recommending S-PLUS over other packages.
+
+I do not, however, recommend S-PLUS to everyone.  It's great for the kind of work I do, mainly because it's rarely textbook, standard analysis and rarely do I repeat it; that is to say, it's mostly one-of-a-kind type analysis.  Also, I'm trained in mathematics and statistics and pretty good at programming, so S-PLUS seems more natural to me than it might to others without this background.
+
+If you don't have this education, I highly recommend Minitab.  It has come a long way since I used it in 1988 in terms of features and environment, and its menu system makes it very easy.  Still, if you're doing research, either at a university or company, or just need an advanced, very flexible tool, then by all means try S-PLUS.  I also recommend you take MathSoft's 1-week course to get up the learning curve and avoid any frustration that might turn you off from the product.  And while I haven't tried it myself, the language "R," which has the same syntax as "S," is available via the web.  So you might want to try it, and, if you like it, then go ahead and invest in S-PLUS.
+
+And one more thing... if you go the Carnagie Mellon's StatLib Archive (http://lib.stat.cmu.edu/.index.html) and go to the "S" section, you'll find a file "sas.vs.S", which is "A short (and somewhat outdated) comparision of Sas and S. (therneau@mayo.edu) Terry Therneau."  I think that just the fact that there is such a great resource available for S-PLUS users is reason enough to use the product.
+
+Hope this helps,
+Andy Stevens (stevenra@meritorauto.com)
+
+```
+Hello,
+ 
+Is there anyone who can share some experiences with respect to the statistical/graphics software S PLUS. My interest is in its features especially in comparison with other packages on the market
+ 
+Regards,
+ 
+Frank J. de Klein, CQE, CQM
+```
