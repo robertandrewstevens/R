@@ -5,194 +5,49 @@ date: "February 8, 2017"
 output: html_document
 ---
 
-From Microsoft Word document "sas_vs.S.doc" dated Wednesday, May 5, 1999 at 4:39 PM.
+*From Microsoft Word document "sas_vs.S.doc" dated Wednesday, May 5, 1999 at 4:39 PM.*
 
-A Comparison of SAS and S
-Terry M. Therneau, Ph.D.
-Section of Biostatistics
-Mayo Clinic
+# A Comparison of SAS and S
 
-5 June, 1989
+Terry M. Therneau, Ph.D.  
+Section of Biostatistics  
+Mayo Clinic  
+5 June, 1989  
 
-     Just to make this discussion seem more legitimate, let me start by
-stating my own credentials.  I am the author of five SAS procedures, two of
-which (COXREGR and SURVTEST) have been widely distributed as part of the
-SAS supplemental library.  I have been a user of the SAS language as a
-data analysis tool for over 12 years.  I have used S significantly for 6
-years, for both data analysis and simulation work, and have authored seven
-S functions.  (An S function is roughly equivalent to a SAS procedure,
-i.e., an extension of the package).
+Just to make this discussion seem more legitimate, let me start by stating my own credentials.  I am the author of five SAS procedures, two of which (COXREGR and SURVTEST) have been widely distributed as part of the SAS supplemental library.  I have been a user of the SAS language as a data analysis tool for over 12 years.  I have used S significantly for 6 years, for both data analysis and simulation work, and have authored seven S functions.  (An S function is roughly equivalent to a SAS procedure, i.e., an extension of the package).
 
-     The section of Biostatistics at Mayo Clinic is an extensive user of
-SAS, it has been by far and away our key analysis tool.  Four of us who are
-associated with the Mayo Comprehensive Cancer Center also have desktop
-access to S using a SUN workstation.  The four of us have found the
-combination of both packages to be far superior to either one alone.  S is
-weakest in those areas where SAS is most capable, and vice versa.
+The section of Biostatistics at Mayo Clinic is an extensive user of SAS, it has been by far and away our key analysis tool.  Four of us who are associated with the Mayo Comprehensive Cancer Center also have desktop access to S using a SUN workstation.  The four of us have found the combination of both packages to be far superior to either one alone.  S is weakest in those areas where SAS is most capable, and vice versa.
 
-     SAS has a very simple data model, the rectangular table.  Each row is
-an observation, each column a variable which can be either numeric or
-character.  A table (or DATA Set) may not be modified once it is created,
-but a very powerful facility is present to create a new table from an
-existing table, from the join (MERGE) of one or more tables, or from a
-sequential input file.  New variables are computed and/or old ones dropped
-during this creation step.  A data set may be used as input to a PROCEDURE
-such as regression, frequency, or listing.  SAS is very much oriented
-toward printed output.  Most of the procedures can return none or only some of
-the results of their computations to the SAS job as new tables.
+SAS has a very simple data model, the rectangular table.  Each row is an observation, each column a variable which can be either numeric or character.  A table (or DATA Set) may not be modified once it is created, but a very powerful facility is present to create a new table from an existing table, from the join (MERGE) of one or more tables, or from a sequential input file.  New variables are computed and/or old ones dropped during this creation step.  A data set may be used as input to a PROCEDURE such as regression, frequency, or listing.  SAS is very much oriented toward printed output.  Most of the procedures can return none or only some of the results of their computations to the SAS job as new tables.
 
-     S is oriented in the opposite direction: each function is designed to
-return its results to S as a data object, and only a very few functions
-produce "nice" printed output.  To accommodate this, the S data model is
-far richer than that of SAS.  An S data object may be a character string
-(of variable length, as opposed to SAS's fixed lengths), a numeric value, a
-logical value, a vector or matrix of one of these, or a list.  A list is a
-concatenation of objects, these may be of any type, including other lists.
-The coxreg function for instance returns a list with components beta (a px1
-vector), var (pxp matrix), loglik (2x1 vector), and scoretest(scalar).  S
-can read only simple input data files, has no join facility, and only minor
-tools for formatting its output.
+S is oriented in the opposite direction: each function is designed to return its results to S as a data object, and only a very few functions produce "nice" printed output.  To accommodate this, the S data model is far richer than that of SAS.  An S data object may be a character string (of variable length, as opposed to SAS's fixed lengths), a numeric value, a logical value, a vector or matrix of one of these, or a list.  A list is a concatenation of objects, these may be of any type, including other lists. The coxreg function for instance returns a list with components beta (a px1 vector), var (pxp matrix), loglik (2x1 vector), and scoretest(scalar).  S can read only simple input data files, has no join facility, and only minor tools for formatting its output.
 
-     In our own operation, the first step of nearly any data analysis
-project is to create the data set, possibly from multiple input files,
-create new variables and recodings, and generate multiple listings and
-frequency tables.  SAS is clearly the tool for this job.  Later on, we may
-want to do multiple 2x2 tables, and then display the collection of chi-
-square statistics achieved by these tables on a q-q plot versus the chi-
-square distribution (an excellent way to control for multiple comparisons).
-This is very simple to do in S, but cannot be done at all in SAS since the
-FREQ routine will only print the chi-square statistic, but will not return
-it.  (Of course, one can always redirect the output to a file and then
-parse it in again.  This is a major pain, but in defense of SAS their input
-statements are good enough to actually do it.)
+In our own operation, the first step of nearly any data analysis project is to create the data set, possibly from multiple input files, create new variables and recodings, and generate multiple listings and frequency tables.  SAS is clearly the tool for this job.  Later on, we may want to do multiple 2x2 tables, and then display the collection of chi-square statistics achieved by these tables on a q-q plot versus the chi-square distribution (an excellent way to control for multiple comparisons). This is very simple to do in S, but cannot be done at all in SAS since the FREQ routine will only print the chi-square statistic, but will not return it.  (Of course, one can always redirect the output to a file and then parse it in again.  This is a major pain, but in defense of SAS their input statements are good enough to actually do it.)
 
-     Another major difference between S and SAS lies in their graphical
-abilities.  In SAS a graph is generated from a single data set by a single
-procedure call.  In S a graph can be created in layers: the points, lines,
-and text routines are all separate functions which add to the current
-plot, and each may refer to a separate data set.  As a consequence, SAS
-graphics functions have a plethora of options, and if you would like a
-slightly specialized graph it is highly likely that none of these options
-gives quite the right thing.  The S functions have relatively few options.
-SAS supports many more output devices, and multiple fonts.  S supports only
-those fonts native to the device (but with Postscript at least, this is not a
-problem).
+Another major difference between S and SAS lies in their graphical abilities.  In SAS a graph is generated from a single data set by a single procedure call.  In S a graph can be created in layers: the points, lines, and text routines are all separate functions which add to the current plot, and each may refer to a separate data set.  As a consequence, SAS graphics functions have a plethora of options, and if you would like a slightly specialized graph it is highly likely that none of these options gives quite the right thing.  The S functions have relatively few options. SAS supports many more output devices, and multiple fonts.  S supports only those fonts native to the device (but with Postscript at least, this is not a problem).
 
-     A completely new graphic function, such as ours for annotated Kaplan-
-Meier curves, can usually be created in S in a few hours using the macro
-facility.  It is very easy in S to add a fitted function to a data plot,
-though that fit came from some other procedure (Poisson regression, say),
-and the number of points in the fitted curve is not the same number in the
-plotted data set.  We have found S graphics uniformly easier to use than
-SAS graphics, extremely so when a publication quality result is desired.
-In fairness, this last statement may also reflect the KINDS of plots our
-group prefers, e.g., we're not big on pie charts, do lots of smoothed scatter-
-plots, etc., etc.
+A completely new graphic function, such as ours for annotated Kaplan-Meier curves, can usually be created in S in a few hours using the macro facility.  It is very easy in S to add a fitted function to a data plot, though that fit came from some other procedure (Poisson regression, say), and the number of points in the fitted curve is not the same number in the plotted data set.  We have found S graphics uniformly easier to use than SAS graphics, extremely so when a publication quality result is desired. In fairness, this last statement may also reflect the KINDS of plots our group prefers, e.g., we're not big on pie charts, do lots of smoothed scatterplots, etc., etc.
 
-     Both S and SAS allow locally written extensions to the language, which
-is a very important aspect.  How difficult is this process?  In either
-case, of course, the greatest time effort is likely to be development of
-the computing algorithm itself, say for a new and unusual factor analysis
-rotation scheme.  Assuming that a working subroutine is in hand, however,
-an interface to the package would take me 1-4 hours in new S, 2-4 days in
-old S, and 2-4 weeks in SAS.  (Multiply by some constant k for a complex
-function).  Up to half the SAS time may be spent writing print statements;
-getting things to look right on the paper can be a lot more difficult than
-the "return" statement S requires.  Creating a returned data set is the
-most difficult part of a SAS extension to program (at least the first
-time), which discourages most user-written procedures from returning
-anything but printed output.  The time required to learn the interface
-techniques is also in the relative proportions given above.
+Both S and SAS allow locally written extensions to the language, which is a very important aspect.  How difficult is this process?  In either case, of course, the greatest time effort is likely to be development of the computing algorithm itself, say for a new and unusual factor analysis rotation scheme.  Assuming that a working subroutine is in hand, however, an interface to the package would take me 1-4 hours in new S, 2-4 days in old S, and 2-4 weeks in SAS.  (Multiply by some constant k for a complex function).  Up to half the SAS time may be spent writing print statements; getting things to look right on the paper can be a lot more difficult than the "return" statement S requires.  Creating a returned data set is the most difficult part of a SAS extension to program (at least the first time), which discourages most user-written procedures from returning anything but printed output.  The time required to learn the interface techniques is also in the relative proportions given above.
 
-     One major difference to be mentioned is more chance than design, and
-that is that there is a surprisingly small overlap in the list of
-statistical functions provided.  SAS is strong in classical linear models,
-such as ANOVA, canonical correlation, and factor analysis.  S is strong in
-robust techniques, such as bounded influence regression and scatterplot
-smoothing.  This reflects, I am sure, the personal tastes of the authors of
-the two packages.  The consequence is that the two together give a very
-well stocked toolbox to the statistical practitioner.
+One major difference to be mentioned is more chance than design, and that is that there is a surprisingly small overlap in the list of statistical functions provided.  SAS is strong in classical linear models, such as ANOVA, canonical correlation, and factor analysis.  S is strong in robust techniques, such as bounded influence regression and scatterplot smoothing.  This reflects, I am sure, the personal tastes of the authors of the two packages.  The consequence is that the two together give a very well stocked toolbox to the statistical practitioner.
 
-     In terms of similarities, both SAS and S are major software packages --
-not the toy statistical packages currently propagating on PCs.  There is a
-substantial learning curve for either product, >6 months, though SAS has
-better developed teaching aids.  Both have a good user interface.  Both
-have a powerful macro language, with new S >> SAS > old S.
+In terms of similarities, both SAS and S are major software packages -- not the toy statistical packages currently propagating on PCs.  There is a substantial learning curve for either product, >6 months, though SAS has better developed teaching aids.  Both have a good user interface.  Both have a powerful macro language, with new S >> SAS > old S.
 
-     As a note for those who are familiar with the SAS Interactive
-Matrix Language product:  IML is similar to S, but much smaller.  IML
-includes a subset of the matrix operations that S does, and includes a very
-small subset of the S functions.  But the "flavor" of an S program,
-particularly one doing data manipulations such as subsetting or recoding,
-is very similar to IML.
+As a note for those who are familiar with the SAS Interactive Matrix Language product:  IML is similar to S, but much smaller.  IML includes a subset of the matrix operations that S does, and includes a very small subset of the S functions.  But the "flavor" of an S program, particularly one doing data manipulations such as subsetting or recoding, is very similar to IML.
 
-     If forced to choose only one of the two, we would have to take SAS.
-Medical data is always "messy", and SAS's data manipulation facilities are
-absolutely essential.  But it is our intention to have both.
+If forced to choose only one of the two, we would have to take SAS. Medical data is always "messy", and SAS's data manipulation facilities are absolutely essential.  But it is our intention to have both.
 
-     Oh yes--cost.  SAS costs about 3X S, and charges an annual renewal fee
-of .5 * initial cost.  Cost per line of code is probably about the same.
-SAS is a big corporation, with an earned reputation for customer support,
-and a staggering amount of manuals and documentation (I sometimes wonder if
-their printing business earns more than the software....)  S can be
-obtained from Bell cheap but with no support, or from resellers.  We get S
-from Statistical Sciences, Inc.; they add some functionality but I
-personally think that support alone is worth every dime.  I don't want to
-beta test software any more, at least not when others in the group look to
-me as the support person.
+Oh yes--cost.  SAS costs about 3X S, and charges an annual renewal fee of .5 * initial cost.  Cost per line of code is probably about the same. SAS is a big corporation, with an earned reputation for customer support, and a staggering amount of manuals and documentation (I sometimes wonder if their printing business earns more than the software....)  S can be obtained from Bell cheap but with no support, or from resellers.  We get S from Statistical Sciences, Inc.; they add some functionality but I personally think that support alone is worth every dime.  I don't want to beta test software any more, at least not when others in the group look to me as the support person.
 
------
+# Update, 4 June 1993.
 
-  Update, 4 June 1993.
+In four years several things have changed: "old S" (e.g. Splus 1.x) has completely disappeared, there are now several serious PC statistics packages (e.g. Stata), and both SAS and Splus have spent considerable effort on GUI versions of their product.  Nevertheless, I still stand behind almost all of what is written above.  Let me amplify on a couple of points.
 
-     In four years several things have changed: "old S" (e.g. Splus 1.x) has
-completely disappeared, there are now several serious PC statistics packages
-(e.g. Stata), and both SAS and Splus have spent considerable effort on
-GUI versions of their product.  Nevertheless, I still stand behind almost all
-of what is written above.  Let me amplify on a couple of points.
+S is one of the only packages that was designed to be extensible.  Given the title of the book, "The New S Language: A programming environment for data analysis and graphics", it was perhaps the primary goal.  With each major release of the code this facility has grown richer.  SAS functionality in this area has gone in the opposite direction.  All support for the supplemental library has been dropped.  The SAS libraries to allow user written procedures were expected in the fall (of 1989) when the above was written, but still are not available for the SUN platform.  (Rumors abound on whether they will ever be available, but their priority within SAS Inc is now perfectly clear).  The SAS macro language, though well featured as far as macro languages go, is orders of magnitude less functional than S.  In the last few weeks I have been preparing a talk for the ASA meetings on Cox regression with correlated data, including examples in both SAS and S that implement the adjusted variance estimator required.  The SAS macro is obscure, arcane, and was a challenge to program.  I was reminded of a favorite Unix systems administrator, about 12 years ago, saying "You can make pigs fly with shell scripts... though I can't write them".  It is not a surprise that many of the University statistics departments have gravitated toward the use of S.
 
-     S is one of the only packages that was designed to be extensible.  Given
-the title of the book, "The New S Language: A programming environment for
-data analysis and graphics", it was perhaps the primary goal.  With each major
-release of the code this facility has grown richer.  SAS functionality in this
-area has gone in the opposite direction.  All support for the supplemental
-library has been dropped.  The SAS libraries to allow user written procedures
-were expected in the fall (of 1989) when the above was written, but still
-are not available for the SUN platform.  (Rumors abound on whether they
-will ever be available, but their priority within SAS Inc is now perfectly
-clear).  The SAS macro language, though well featured as far as macro
-languages go, is orders of magnitude less functional than S.  In the last
-few weeks I have been preparing a talk for the ASA meetings on Cox
-regression with correlated data, including examples in both SAS and S that
-implement the adjusted variance estimator required.  The SAS macro is
-obscure, arcane, and was a challenge to program.  I was reminded of a
-favorite Unix systems administrator, about 12 years ago, saying "You can
-make pigs fly with shell scripts... though I can't write them".  It is not
-a surprise that many of the University statistics departments have
-gravitated toward the use of S.
+(On the S-news mailing list you will occasionally see a "who can write the shortest code to do __" contest.  The results are, of course, completely unreadable.  But that is not the language's fault.)
 
-     (On the S-news mailing list you will occasionally see a "who can write
-the shortest code to do __" contest.  The results are, of course, completely
-unreadable.  But that is not the language's fault.)
+Since the review was written, S has added a new "data.frame" object, which is a rectangular array of observations (rows) by variables (columns), and which has some of the same benefits as a SAS data set.  However, in keeping with the object-oriented flavor of S, the data frame is implemented as a collection of objects, each variable is a separate object with its own attributes (type=numeric, character, date, ..., label= , etc).  As a consequence data frames are inherently stored in column major order.  This means that some operations, in particular the relational join (SAS MERGE) of several data frames, require all the data to be read into memory at once! The SAS data organization, however, is almost ideal for data manipulations such as this.  It is not a surprise that many groups who deal with large data have gravitated toward the use of SAS.
 
-     Since the review was written, S has added a new "data.frame" object,
-which is a rectangular array of observations (rows) by variables (columns),
-and which has some of the same benefits as a SAS data set.  However, in
-keeping with the object-oriented flavor of S, the data frame is implemented
-as a collection of objects, each variable is a separate object with its
-own attributes (type=numeric, character, date, ..., label= , etc).  As a
-consequence data frames are inherently stored in column major order.  This
-means that some operations, in particular the relational join (SAS MERGE) of
-several data frames, require all the data to be read into memory at once!
-The SAS data organization, however, is almost ideal for data manipulations
-such as this.  It is not a surprise that many groups who deal with large
-data have gravitated toward the use of SAS.
-
-     Many of the features in SAS and S that I like or dislike are similar to
-the last paragraph, in that they are consequences of the way in which the
-underlying package is organized.  They are not right or wrong, nor can they
-be `fixed', but in many particular instances one or the other can be
-very inconvenient.  Though GUI interfaces are a good thing in their own
-right, and are a big help to a certain class of user, they cannot undo some
-of these features:  PROC INSIGHT is not, nor is it even close to, a
-replacement for S graphics.
+Many of the features in SAS and S that I like or dislike are similar to the last paragraph, in that they are consequences of the way in which the underlying package is organized.  They are not right or wrong, nor can they be `fixed', but in many particular instances one or the other can be very inconvenient.  Though GUI interfaces are a good thing in their own right, and are a big help to a certain class of user, they cannot undo some of these features:  PROC INSIGHT is not, nor is it even close to, a replacement for S graphics.
