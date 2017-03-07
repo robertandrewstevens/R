@@ -1,0 +1,89 @@
+---
+title: "Predicting-Agriculture"
+author: "Robert A. Stevens"
+date: "January 11, 2017"
+output: html_document
+---
+
+http://meanmean.me/agriculture/r/2016/07/24/Predicting-Agriculture,-Poorly-(Part-I).html
+
+# Predicting Agriculture, Poorly (Part I)
+
+Jul 24, 2016
+
+Crop rotation is an agricultural production practice to increase yield, mitigate disease, and control pests. This production practice involves growing crops in specific sequences to improve the quality of soil for the following crop. A common example in the United States is the practice of growing soybeans before corn. In this example soybeans fixate nitrogen in the soil leading to an increase in yield and reduction in fertilizer consumption.
+
+Provided that this production process is prevalent and we have some data regarding where and when particular crops grow, then a stochastic process such as a Markov chain can be used to predict what will be grown where. Luckily, the United States Department of Agriculture's (USDA) Cropland Data Layer (CDL) can be used to obtain crop location anywhere in the continental United States from 2008-2015. The literature on this subject for major crops including corn, soybeans, winter wheat, cotton and peanuts points towards a high degree of employment of crop rotation across the continental United States. An analysis of the CDL data by (Sahajpal, 2013) showed that 90% of Iowa's crop production could be represented with three different crop rotations, and 80% of the U.S. crop production could be described with 180 unique rotations. Crop rotation analysis by (Boryan, 2014) examined corn and soybean rotations in the corn belt from 2004 to 2008. This analysis showed that over 45% of the total cultivated acreage in Iowa, 32% of Illinois, and 20% of Nebraska could be explained by corn-to-soy rotations. Further analysis showed that particular rotation patterns are spatially associated with particular regions. An example of this can be seen along the Platte river in Nebraska where 65%, 49%, and 50% of the cultivated acreage within Hall, Chase, and Dawson Counties respectfully grew corn for at least four out of the five years studied, while the statewide cultivated acreage covered by continuous or near-continuous corn cropping was much lower. Similar activity was seen in Iowa and Illinois.
+
+## Model Development
+
+In the United States crop rotation can be observed for most major row crops such as corn, soybeans, and wheat. A naive model will be introduced using a simple Markov chain to assist in prediction. Future models in this blog will build on this model, and use this simple model as a benchmark.
+
+## A Naive Approach
+
+A stochastic processes is an ordered sequence of random variables. The relationship between these variables can be described by a stochastic model, such models are a typical way to capture changes in states such as crop rotations. A general form of a categorical stochastic model for land use is
+
+where  is a categorical random variable for classes  indexed by time  in a set of temporal indexes , and  a spatial location in a region . In this model the current land use or state is a function of the prior states and random error . If we were to make the naive assumption that each land use unit is an independent realization of a stationary in time Markov Chain, where a Markov Chain is a stochastic process satisfying
+
+under these conditions the stochastic model can be written as
+
+The term stationary when applied to a stochastic process implies that the distribution is invariant to the index of the process. Stationarity can be applied to time, space or both. For the purposes of this simple model we will assume that  is stationary in time, and each observed transition is independent and identically distributed. Future models will relax these restrictions. Since the transition probabilities are stationary in time, then the process can be also described via a single transition or stochastic matrix,
+
+where  for any . Under the typical assumption that each row of  follows a multinomial distribution conditioned on the prior state, then estimates of  can be easily be estimated via maximum likelihood.
+
+## Example
+
+The maximum likelihood estimates are simply the observed transitions for each prior state divieded by the total number of observed transitions from the prior state. To calculate these reatios we need to aggregate the year-to-year transition data from the CDL pixels for Iowa. Note that due to resampling, this may take a considerable amount of time (hours) depending on your system. To speed things up the results csv is provided through the website.
+
+Now that you have the data, hopefully from downloading it, we can start working with it:
+
+```{r, comment=NA}
+library(dplyr)
+library(magrittr)
+library(tidyr)
+
+library(devtools)
+install_github('jlisic/cdlTools')
+library(cdlTools)
+
+# read in csv file
+cropChange <- read.csv("Iowa_2008_2015_change.csv")
+
+# create a major crop type identifier
+# preference is given to corn for corn/soy multiple cropping
+justSoy <- setdiff(soybeans, corn)
+
+# Major crop identifier: 
+# 0 non Cultivated
+# 1 other cultivated
+# 2 soybeans (but no dual crop soybeans and corn)
+# 3 corn
+cropChange$cropTypeFrom <- cropChange$In %in% cultivated
+cropChange$cropTypeFrom <- cropChange$In %in% justSoy + cropChange$cropTypeFrom
+cropChange$cropTypeFrom <- 2*cropChange$In %in% corn + cropChange$cropTypeFrom
+
+cropChange$cropTypeTo <- cropChange$Out %in% cultivated
+cropChange$cropTypeTo <- cropChange$Out %in% justSoy + cropChange$cropTypeTo
+cropChange$cropTypeTo <- 2*cropChange$Out %in% corn + cropChange$cropTypeTo
+
+#create a tidy transition matrix
+K.tidy <- cropChange %>%                 # get data
+  group_by(cropTypeTo, cropTypeFrom) %>% # group by unique To and From
+  summarize(totalPixels = sum(Pixels))     # sum pixels in each group
+
+# create the transition matrix K
+K <- spread(K.tidy, cropTypeTo, totalPixels) %>% select(2:5)
+K <- K/rowSums(K)
+rownames(K) <- colnames(K) <- c('nonCult', 'cult', 'soybeans', 'corn')
+print(K)
+```
+
+Next time, we will compare these results to some federal statistics.
+
+## References
+
+Boryan, Claire, et al. "Monitoring US agriculture: the US department of agriculture, national agricultural statistics service, cropland data layer program." Geocarto International 26.5 (2011): 341-358.
+
+Boryan, Claire G., Zhengwei Yang, and Patrick Willis. "US geospatial crop frequency data layers." Agro-geoinformatics (Agro-geoinformatics 2014), Third International Conference on. IEEE, 2014.
+
+Sahajpal, R., et al. "Generating a Crop Rotation Dataset for the US and its Application in Inferring Land Use Change Induced Wetland Losses in the Prairie Pothole Region." AGU Fall Meeting Abstracts. Vol. 1. 2013.

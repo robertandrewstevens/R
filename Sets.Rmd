@@ -1,0 +1,62 @@
+---
+title: "Sets"
+author: "Robert A. Stevens"
+date: "August 3, 2016"
+output: html_document
+---
+
+https://stat.ethz.ch/R-manual/R-devel/library/base/html/sets.html
+
+## Set Operations
+
+Examples
+
+```{r, comment=NA}
+(x <- c(sort(sample(1:20, 9)), NA))
+(y <- c(sort(sample(3:23, 7)), NA))
+union(x, y)
+intersect(x, y)
+setdiff(x, y)
+setdiff(y, x)
+setequal(x, y)
+
+## True for all possible x & y :
+setequal(union(x, y), c(setdiff(x, y), intersect(x, y), setdiff(y, x)))
+
+is.element(x, y) # length 10
+is.element(y, x) # length  8
+```
+
+https://www.safaribooksonline.com/library/view/the-art-of/9781593273842/ch08s05.html
+
+## Set Operations
+
+R includes some handy set operations, including these:
+
+- union(x, y): Union of the sets x and y
+
+- intersect(x, y): Intersection of the sets x and y
+
+- setdiff(x, y): Set difference between x and y, consisting of all elements of x that are not in y
+
+- setequal(x, y): Test for equality between x and y
+
+- c %in% y: Membership, testing whether c is an element of the set y
+
+- choose(n, k): Number of possible subsets of size k chosen from a set of size n
+
+Here are some simple examples of using these functions:
+
+```{r, comment=NA}
+x <- c(1, 2, 5)
+y <- c(5, 1, 8, 9)
+union(x, y)
+intersect(x, y)
+setdiff(x, y)
+setdiff(y, x)
+setequal(x, y)
+setequal(x, c(1, 2, 5))
+2 %in% x
+2 %in% y
+choose(5, 2)
+```
