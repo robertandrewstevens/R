@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "spark.rstudio.com"
 author: "Robert A. Stevens"
 date: "10/6/2017"
 output: html_document
