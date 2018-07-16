@@ -1,0 +1,256 @@
+ 
+    Generalized Additive Models:
+an introduction with R COPYRIGHT CRC DO NOT DISTRIBUTE
+Simon N. Wood
+     
+        
+     Contents
+Preface xi
+1 Linear Models 1
+1.1 A simple linear model 2 Simple least squares estimation 3
+1.1.1 Sampling properties of βˆ 3
+1.1.2 So how old is the universe? 5
+1.1.3 Adding a distributional assumption 7 Testing hypotheses about β 7 Confidence intervals 9
+1.2 Linear models in general 10
+1.3 The theory of linear models 12
+1.3.1 Least squares estimation of β 12
+1.3.2 The distribution of βˆ 13
+1.3.3 (βˆi−βi)/σˆβˆi∼tn−p 14
+1.3.4 F-ratio results 15
+1.3.5 The influence matrix 16
+1.3.6 The residuals, εˆ, and fitted values, μˆ 16
+1.3.7 Results in terms of X 17
+1.3.8 The Gauss Markov Theorem: what’s special about least
+squares? 17
+1.4 The geometry of linear modelling 18
+1.4.1 Least squares 19
+1.4.2 Fitting by orthogonal decompositions 20
+iii
+     
+    iv
+CONTENTS 1.4.3 Comparison of nested models 21
+1.5 Practical linear models 22
+1.5.1 Model fitting and model checking 23
+1.5.2 Model summary 28
+1.5.3 Model selection 30
+1.5.4 Another model selection example 31 A follow up 34
+1.5.5 Confidence intervals 35
+1.5.6 Prediction 36
+1.6 Practical modelling with factors 36
+1.6.1 Identifiability 37
+1.6.2 Multiple factors 39
+1.6.3 ‘Interactions’ of factors 40
+1.6.4 Using factor variables in R 41
+1.7 General linear model specification in R 44
+1.8 Further linear modelling theory 45
+1.8.1 Constraints I: general linear constraints 45
+1.8.2 Constraints II: ‘contrasts’ and factor variables 46
+1.8.3 Likelihood 48
+1.8.4 Non-independent data with variable variance 49
+1.8.5 AIC and Mallow’s statistic, 50
+1.8.6 Non-linear least squares 52
+1.8.7 Further reading 54
+1.9 Exercises 55
+Generalized Linear Models 59
+2.1 The theory of GLMs 60
+2.1.1 The exponential family of distributions 62
+2.1.2 Fitting Generalized Linear Models 63
+2.1.3 The IRLS objective is a quadratic approximation to the log-likelihood 66
+2
+    
+    CONTENTS
+2.1.4 AIC for GLMs 67
+2.1.5 Large sample distribution of βˆ 68
+2.1.6 Comparing models by hypothesis testing 68
+Deviance 69
+Model comparison with unknown φ 70
+2.1.7 φˆ and Pearson’s statistic 70
+2.1.8 Canonical link functions 71
+2.1.9 Residuals 72
+Pearson Residuals 72
+Deviance Residuals 73
+2.1.10 Quasi-likelihood 73
+2.2 Geometry of GLMs 75
+2.2.1 The geometry of IRLS 76
+2.2.2 Geometry and IRLS convergence 79
+2.3 GLMs with R 80
+2.3.1 Binomial models and heart disease 80
+2.3.2 A Poisson regression epidemic model 87
+2.3.3 Log-linear models for categorical data 92
+2.3.4 Sole eggs in the Bristol channel 96
+2.4 Likelihood 101
+2.4.1 Invariance 102
+2.4.2 Properties of the expected log-likelihood 102
+2.4.3 Consistency 105
+2.4.4 Large sample distribution of θˆ 107
+2.4.5 The generalized likelihood ratio test (GLRT) 107
+2.4.6 Derivation of 2λ ∼ χ2r under H0 108
+2.4.7 AIC in general 110
+2.4.8 Quasi-likelihood results 112
+2.5 Exercises 114
+v
+    
+    vi
+3
+CONTENTS
+Introducing GAMs 119
+3.1 Introduction 119
+3.2 Univariate smooth functions 120
+3.2.1 Representing a smooth function: regression splines 120 A very simple example: a polynomial basis 120 Another example: a cubic spline basis 122 Using the cubic spline basis 124
+3.2.2 Controlling the degree of smoothing with penalized regres-
+sion splines 126
+3.2.3 Choosing the smoothing parameter, λ: cross validation 128
+3.3 Additive Models 131
+3.3.1 Penalized regression spline representation of an additive
+model 132
+3.3.2 Fitting additive models by penalized least squares 132
+3.4 Generalized Additive Models 135
+3.5 Summary 137
+3.6 Exercises 138
+Some GAM theory 141
+4.1 Smoothing bases 142
+4.1.1 Why splines? 142 Natural cubic splines are smoothest interpolators 142 Cubic smoothing splines 144
+4.1.2 Cubic regression splines 145
+4.1.3 A cyclic cubic regression spline 147
+4.1.4 P-splines 148
+4.1.5 Thin plate regression splines 150 Thin plate splines 150 Thin plate regression splines 153 Properties of thin plate regression splines 154 Knot based approximation 156
+4.1.6 Shrinkage smoothers 156
+4
+    
+    CONTENTS 4.1.7
+4.1.8
+vii Choosing the basis dimension 157 Tensor product smooths 158 Tensor product bases 158 Tensor product penalties 161 4.2 Setting up GAMs as penalized GLMs 163 4.2.1 Variable coefficient models 164
+4.3 Justifying P-IRLS 165
+4.4 Degrees of freedom and residual variance estimation 166
+4.4.1 Residual variance or scale parameter estimation 167
+4.5 Smoothing Parameter Estimation Criteria 168
+4.5.1 Known scale parameter: UBRE 168
+4.5.2 Unknown scale parameter: Cross Validation 169 Problems with Ordinary Cross Validation 170
+4.5.3 Generalized Cross Validation 171
+4.5.4 GCV/UBRE/AIC in the Generalized case 173 Approaches to GAM GCV/UBRE minimization 175
+4.6 Numerical GCV/UBRE: performance iteration 177
+4.6.1 Minimizing the GCV or UBRE score 177 Stable and efficient evaluation of the scores and derivatives 178 The weighted constrained case 181 4.7 Numerical GCV/UBRE optimization by outer iteration 182 4.7.1 Differentiating the GCV/UBRE function 182 4.8 Distributional results 185
+4.8.1 Bayesian model, and posterior distribution of the parameters,
+for an additive model 185
+4.8.2 Structure of the prior 187
+4.8.3 Posterior distribution for a GAM 187
+4.8.4 Bayesian confidence intervals for non-linear functions of parameters 190
+4.8.5 P-values 190
+4.9 Confidence interval performance 192
+    
+    viii
+CONTENTS
+4.9.1 Single smooths 192
+4.9.2 GAMs and their components 195
+4.9.3 Unconditional Bayesian confidence intervals 198
+4.10 Further GAM theory 200
+4.10.1 Comparing GAMs by hypothesis testing 200
+4.10.2 ANOVA decompositions and Nesting 202
+4.10.3 The geometry of penalized regression 204
+4.10.4 The “natural” parameterization of a penalized smoother 205
+4.11 Other approaches to GAMs 208 4.11.1 Backfitting GAMs 209 4.11.2 Generalized smoothing splines 211
+4.12 Exercises 213
+GAMs in practice: mgcv 217
+5.1 Cherry trees again 217
+5.1.1 Finer control of gam 219
+5.1.2 Smooths of several variables 221
+5.1.3 Parametric model terms 224
+5.2 Brain Imaging Example 226
+5.2.1 Preliminary Modelling 228
+5.2.2 Would an additive structure be better? 232
+5.2.3 Isotropic or tensor product smooths? 233
+5.2.4 Detecting symmetry (with by variables) 235
+5.2.5 Comparing two surfaces 237
+5.2.6 Prediction with predict.gam 239
+Prediction with lpmatrix 241
+5.2.7 Variances of non-linear functions of the fitted model 242
+5.3 Air Pollution in Chicago Example 243
+5.4 Mackerel egg survey example 249
+5.4.1 Model development 250
+5.4.2 Model predictions 255
+5
+    
+    CONTENTS ix
+5.5 Portuguese larks 257
+5.6 Other packages 261
+5.6.1 Package gam 261
+5.6.2 Package gss 263
+5.7 Exercises 265
+6 Mixed models: GAMMs 273
+6.1 Mixed models for balanced data 273
+6.1.1 A motivating example 273 The wrong approach: a fixed effects linear model 274 The right approach: a mixed effects model 276
+6.1.2 General principles 277
+6.1.3 A single random factor 278
+6.1.4 A model with two factors 281
+6.1.5 Discussion 286
+6.2 Linear mixed models in general 287
+6.2.1 Estimation of linear mixed models 288
+6.2.2 Directly maximizing a mixed model likelihood in R 289
+6.2.3 Inference with linear mixed models 290 Fixed effects 290 Inference about the random effects 291
+6.2.4 Predicting the random effects 292
+6.2.5 REML 293 The explicit form of the REML criterion 295
+6.2.6 A link with penalized regression 296
+6.3 Linear mixed models in R 297
+6.3.1 Tree Growth: an example using lme 298
+6.3.2 Several levels of nesting 303
+6.4 Generalized linear mixed models 303
+6.5 GLMMs with R 305
+6.6 Generalized Additive Mixed Models 309
+    
+    x
+CONTENTS Smooths as mixed model components 309 Inference with GAMMs 311 GAMMs with R 312
+6.7.1 A GAMM for sole eggs 312
+6.7.2 The Temperature in Cairo 314
+Exercises 318
+A
+Some Matrix Algebra 325
+A.1 Basic computational efficiency 325
+A.2 Covariance matrices 326
+A.3 Differentiating a matrix inverse 326
+A.4 Kronecker product 327
+A.5 Orthogonal matrices and Householder matrices 327
+A.6 QR decomposition 328
+A.7 Choleski decomposition 328
+A.8 Eigen-decomposition 329
+A.9 Singular value decomposition 330
+A.10 Pivoting 331
+A.11 Lanczos iteration 331
+Solutions to exercises 335
+B.1 Chapter 1 335
+B.2 Chapter 2 340
+B.3 Chapter 3 345
+B.4 Chapter 4 347
+B.5 Chapter 5 354
+B.6 Chapter 6 363
+B
+6.7
+6.8
+6.6.1 6.6.2
+Bibliography 373 Index 378
+    
+     Preface
+This book is designed for readers wanting a compact, but thorough, introduction to linear models, generalized linear models , generalized additive models, and the mixed model extension of these, with particular emphasis on generalized additive models. The aim is to provide a full, but concise, theoretical treatment, explaining how the models and methods work, in order to underpin quite extensive material on practical application of the models using R.
+Linear models are statistical models in which a univariate response is modelled as the sum of a ‘linear predictor’ and a zero mean random error term. The linear predictor depends on some predictor variables, measured with the response variable, and some unknown parameters, which must be estimated. A key feature of linear models is that the linear predictor depends linearly on these parameters. Statistical inference with such models is usually based on the assumption that the response variable has a normal distribution. Linear models are used widely in most branches of science, both in the analysis of designed experiments, and for other modeling tasks, such as polynomial regression. The linearity of the models endows them with some rather elegant theory, which is explored in some depth in Chapter 1, alongside practical examples of their use.
+Generalized linear models (GLMs) somewhat relax the strict linearity assumption of linear models, by allowing the expected value of the response to depend on a smooth monotonic function of the linear predictor. Similarly the assumption that the response is normally distributed is relaxed by allowing it to follow any distribution from the exponential family (for example, normal, Poisson, binomial, gamma etc.). Inference for GLMs is based on likelihood theory, as is explained, quite fully, in chapter 2, where the practical use of these models is also covered.
+A Generalized Additive Model (GAM) is a GLM in which part of the linear pre- dictor is specified in terms of a sum of smooth functions of predictor variables. The exact parametric form of these functions is unknown, as is the degree of smoothness appropriate for each of them. To use GAMs in practice requires some extensions to GLM methods:
+1. The smooth functions must be represented somehow.
+2. The degree of smoothness of the functions must be made controllable, so that models with varying degrees of smoothness can be explored.
+xi
+     
+    xii PREFACE
+3. Some means for estimating the most appropriate degree of smoothness from data is required, if the models are to be useful for more than purely exploratory work.
+This book provides an introduction to the framework for Generalized Additive Mod- elling in which (i) is addressed using basis expansions of the smooth functions, (ii) is addressed by estimating models by penalized likelihood maximization, in which wig- gly models are penalized more heavily than smooth models in a controllable manner, and (iii) is performed using methods based on cross validation or sometimes AIC or Mallow’s statistic. Chapter 3 introduces this framework, chapter 4 provides details of the theory and methods for using it, and chapter 5 illustrated the practical use of GAMs using the R package mgcv.
+The final chapter of the book looks at mixed model extensions of linear, general- ized linear, and generalized additive models. In mixed models, some of the unknown coefficients (or functions) in the model linear predictor are now treated as random variables (or functions). These ‘random effects’ are treated as having a covariance structure that itself depends on some unknown fixed parameters. This approach en- ables the use of more complex models for the random component of data, thereby improving our ability to model correlated data. Again theory and practical applica- tion are presented side by side.
+I assume that most people are interested in statistical models in order to use them, rather than to gaze upon the mathematical beauty of their structure, and for this rea- son I have tried to keep this book practically focused. However, I think that practical work tends to progress much more smoothly if it is based on solid understanding of how the models and methods used actually work. For this reason, the book includes fairly full explanations of the theory underlying the methods, including the underly- ing geometry, where this is helpful. Given that the applied modelling involves using computer programs, the book includes a good deal of material on statistical mod- elling in R. This approach is now fairly standard when writing about practical sta- tistical analysis, but in addition Chapter 3 attempts to introduce GAMs by having the reader ‘build their own’ GAM using R: I hope that this provides a useful way of quickly gaining a rather solid familiarity with the fundamentals of the GAM frame- work presented in this book. Once the basic framework is mastered from chapter 3, the theory in chapter 4 is really filling in details, albeit practically important ones.
+The book includes a moderately high proportion of practical examples which re- flect the reality that statistical modelling problems are usually quite involved, and rarely require only straightforward brain-free application of some standard model. This means that some of the examples are fairly lengthy, but do provide illustration of the process of producing practical models of some scientific utility, and of check- ing those models. They also provide much greater scope for the reader to decide that what I’ve done is utter rubbish.
+Working through this book from Linear Models, through GLMs to GAMs and even- tually GAMMs, it is striking that as model flexibility increases, so that the models become better able to describe the reality that we believe generated a set of data, so the methods for inference become less well founded. The linear model class is quite
+    
+    PREFACE xiii
+restricted, but within it, hypothesis testing and interval estimation are exact, while estimation is unbiased. For the larger class of GLMs this exactness is generally lost in favour of the large sample approximations of general likelihood theory, while esti- mators themselves are consistent, but not necessarily unbiased. Generalizing further to GAMs, penalization lowers the convergence rates of estimators, hypothesis testing is only approximate, and satisfactory interval estimation seems to require the adop- tion of a Bayesian approach. With time, improved theory will hopefully reduce these differences. In the meantime, this book is offered in the belief that it is usually better to be able to say something approximate about the right model, rather than something very precise about the wrong model.
+Life is too short to spend too much of it reading statistics text books. This book is of course an exception to this rule and should be read from cover to cover. However, if you don’t feel inclined to follow this suggestion, here are some alternatives.
+• For those who are already very familiar with linear models and GLMs, but want to use GAMs with a reasonable degree of understanding: work through Chapter 3 and read chapter 5, trying some exercises from both, use chapter 4 for reference. Perhaps skim the other chapters.
+• For those who want to focus only on practical modelling in R, rather than theory. Work through the following: 1.5, 1.6.4, 1.7, 2.3, Chapter 5, 6.3, 6.5 and 6.7.
+• For those familiar with the basic idea of setting up a GAM using basis expansions and penalties, but wanting to know more about the underlying theory and practical application: work through Chapters 4 and 5, and probably 6.
+• For those not interested in GAMs, but wanting to know about linear models, GLMs and mixed models. Work through Chapters 1 and 2, and Chapter 6 up to section 6.6.
+The book is written to be accessible to numerate researchers and students from the last two years of an undergraduate programme upwards. It is designed to be used ei- ther for self study, or as the text for the ‘regression modelling’ strand of mathematics and/or statistics degree programme. Some familiarity with statistical concepts is as- sumed, particularly with notions such as random variable, expectation, variance and distribution. Some knowledge of matrix algebra is also needed, although Appendix A is intended to provide all that is needed beyond the fundamentals.
+Finally, I’d like to thank the people who have in various ways helped me out in the writing of this book, or in the work that lead to writing it. Among these, are Lucy Augustin, Nicole Augustin, Miguel Bernal, Steve Blythe, David Borchers, Mark Bravington, Steve Buckland, Richard Cormack, Jose ́ Pedro Granadeiro ,Chong Gu, Bill Gurney, John Halley, Joe Horwood, Sharon Hedley, Peter Jupp, Alain Le Tetre, Stephan Lang, Mike Lonergan, Henric Nilsson, Roger D. Peng, Charles Paxton, Bjo ̈rn Stollenwerk, Yorgos Stratoudaki, the R core team in particular Kurt Hornik and Brian Ripley, the Little Italians and the RiederAlpinists. I am also very grateful to the people who have sent me bug reports and suggestions which have greatly im- proved the the mgcv package over the last few years: the list is rather too long to reproduce here, but thankyou.

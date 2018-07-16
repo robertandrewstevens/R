@@ -1,0 +1,1596 @@
+
+       
+     CHAPTER 4
+Some GAM theory
+In the last chapter, it was demonstrated how the problem of estimating a general- ized additive model, becomes the problem of estimating smoothing parameters and model coefficients for a penalized likelihood maximization problem, once a basis for the smooth functions has been chosen, together with associated measures of function wiggliness. In practice the penalized likelihood maximization problem is solved by penalized iteratively re-weighted least squares (P-IRLS), while the smoothing pa- rameters can be estimated using cross validation or related criteria. The purpose of this chapter is to justify and extend the methods introduced in chapter 3, and to add some distribution theory to facilitate confidence interval calculation and hypothesis testing. Table 4.1 lists the main elements of the approach, and where they can be found within the chapter.
+The methods discussed in this chapter are almost all built around penalized regression smoothers, based on splines. This type of smoother goes back at least as far as Wahba (1980) and Parker and Rice (1985). The suggestion of representing GAMs using spline like penalized regression smoothers was made in section 9.3.6 of Hastie and Tibshirani (1990) and was given renewed impetus by Marx and Eilers (1998), but it is not the only possibility, as will briefly be covered at the chapter’s end.
+The chapter starts by introducing several different penalized regression smoothers useful for practical work, including smooth functions of several covariates. Since these are all spline based, some discussion of why splines are useful smoothers is also presented. There follows a short explanation of how these can be assembled into an estimable GAM, and the P-IRLS estimation scheme is then justified, be- fore moving on to the important topic of smoothing parameter estimation. Having covered model representation and estimation, a Bayesian model useful for deriving confidence intervals is then introduced, before considering practical performance of such intervals, and the calculation of approximate p-values for model terms. Some further topics of theoretical interest are then touched on before finishing with a very brief presentation of some key ideas underpinning two alternative frameworks for GAM estimation and inference. A review of the matrix algebra used in this chapter is provided in Appendix A.
+141
+     
+    142 What
+Turn GAM into penalized GLM with coefficients β and smooth- ing parameters λ
+Select λ Estimate β
+Find confidence intervals/ credi- ble intervals for (functions of) β
+Test hypotheses about GAMs
+How
+SOME GAM THEORY Where
+  Choose bases and wiggliness measures for the smooth terms
+By GCV, UBRE or AIC
+using efficient, robust Newton
+methods By P-IRLS
+Use Bayesian smoothing model
+Use frequentist approximations, or GLM methods on unpenalized GAM
+4.1, 4.2
+4.5 4.6, 4.7
+4.3 4.8, 4.9
+4.8.5, 4.10.1
+    Table 4.1 The main components of the framework for generalized additive modelling covered in this chapter, and where they can be found.
+4.1 Smoothing bases
+For simplicity of presentation, only one very simple type of penalized regression smoother was presented in Chapter 3. For practical work a variety of alternative smoothers are available, and this section introduces a useful subset of the possibili- ties, starting with smooths of one covariate, and then moving on to smooths of one or more covariates. Since all the smooths presented are based on splines (although the tensor product smooths need not be), the section starts by addressing the question: what’s so special about splines?
+4.1.1 Why splines?
+Almost all the smooths considered in this book are based in some way on splines, so it is worth spending a little time on the theoretical properties that make these functions so appealing for penalized regression. Rather than attempt full generality, the flavour of the theoretical ideas can be gleaned by considering some properties of cubic splines, first in the context of interpolation, and then of smoothing.
+Natural cubic splines are smoothest interpolators
+Consider a set of points {xi,yi : i = 1,...,n} where xi < xi+1. The natural cubic spline, g(x), interpolating these points, is a function made up of sections of cubic polynomial, one for each [xi, xi+1], which are joined together so that the whole
+    
+    SMOOTHING BASES 143 spline is continuous to second derivative, while g(xi) = yi and g′′(x1) = g′′(xn) =
+0. Figure 3.3 illustrates such a cubic spline.
+Of all functions that are continuous on [x1,xn], have absolutely continuous first derivatives and interpolate {xi, yi}, g(x) is the one that is is smoothest in the sense
+of minimizing:
+ xn ′′ 2 J(f)= f (x) dx.
+x1
+Green and Silverman (1994) provide a neat proof of this, based on the original work of Schoenberg (1964). Let f(x) be an interpolant of {xi,yi}, other than g(x), and let h(x) = f(x) − g(x). We seek an expression for J(f) in terms of J(g).
+ xn′′2  xn′′ ′′2
+f (x) dx = {g (x)+h (x)} dx
+x1 x1
+ xn ′′ 2  xn ′′ ′′  xn ′′ 2
+= g (x) dx + 2 g (x)h (x)dx + h (x) dx x1 x1 x1
+and integrating the second term on the second line, by parts, yields
+xn
+= − g′′′(x)h′(x)dx
+xn  ′′′′ ′′ ′′′′ ′′′′
+xn x1
+g (x)h (x)dx = g (xn)h (xn) − g (x1)h (x1) − g (x)h (x)dx x1
+i=1 = 0,
+x1  n − 1
+i=1  n−1
+  x i + 1
+g ′ ′ ′ ( x +i ) h ′ ( x ) d x
+xi
+g′′′(x+i ){h(xi+1)−h(xi)}
+where equality of lines 1 and 2 follows from the fact that g′′(x1) = g′′(xn) = 0. Equality of lines 2 and 3 results from the fact that g(x) is made up of sections of cubic polynomial, so that g′′′(x) is constant over any interval (xi,xi+1). The final equality to zero follows from the fact that both f(x) and g(x) are interpolants, and are hence equal at xi, implying that h(xi) = 0.
+So we have shown that
+ xn ′′ 2  xn ′′ 2  xn ′′ 2  xn ′′ 2
+f (x) dx = g (x) dx + h (x) dx ≥ g (x) dx
+x1 x1 x1 x1
+with equality only if h′′(x) = 0 for x1 < x < xn. However, h(x1) = h(xn) = 0, so in fact we have equality if and only if h(x) = 0 on [x1, xn]. In other words any interpolant that is not identical to g(x) will have a higher integrated squared second derivative. So there is a well defined sense in which the cubic spline is the smoothest possible interpolant through any set of data.
+The smoothest interpolation property is not the only good property of cubic spline
+= −
+= −
+    
+    144 SOME GAM THEORY
+interpolants. In de Boor (1978, Chapter 5) a number of results are presented showing that cubic spline interpolation is optimal, or at least very good, in various respects.
+ ̃
+ ̃  ̃′
+by interpolating a set of points {xi, f(xi) : i = 1, . . . , n} and matching f (x1) and
+ ̃′  ̃
+f (xn) then if f(x) has 4 continuous derivatives:
+ ̃5 ̃ max|f − g| ≤ 384max(xi+1 − xi)4max|f′′′′|,
+and this can be shown to be the best achievable.
+These properties of spline interpolants, suggest that splines ought to provide a good basis for representing smooth terms in statistical models. Whatever the true under- lying smooth function is, a spline ought to be able to approximate it closely, and if we want to construct models from smooth functions of covariates, then representing those functions from smoothest approximations is intuitively appealing.
+Cubic smoothing splines
+In statistical work, yi is usually measured with noise, and it is generally more useful to smooth xi, yi data, rather than interpolating them. To this end, rather than setting g(xi) = yi, it might be better to treat the g(xi) as n free parameters of the cubic spline, and to estimate them in order to minimize
+ n  
+{yi − g(xi)}2 + λ g′′(x)2dx, i=1
+where λ is a tuneable parameter, used to control the relative weight to be given to the conflicting goals of matching the data and producing a smooth g. The resulting g(x) is a smoothing spline (Reinsch, 1967). In fact, of all functions, f , that are continuous on [x1,xn], and have absolutely continuous first derivatives, g(x) is the function minimizing:
+ n  
+{yi − f(xi)}2 + λ f′′(x)2dx. (4.1) i=1
+The proof is easy. Suppose that some other function, f∗(x), minimized (4.1). In that case we could interpolate {xi,f∗(xi)} using a cubic spline, g(x). Now g(x) and f∗(x) have the same sum of squares term in (4.1), but by the properties of interpo- lating splines, g(x) must have the lower integrated squared second derivative. Hence g(x) yields a lower (4.1) than f∗(x), and a contradiction, unless f∗ = g.
+So, the cubic spline basis arises naturally from the specification of the smoothing ob- jective (4.1), in which, what is meant by model fit is defined precisely, what is meant by smoothness is defined precisely, and the basis for representing smooth functions is not chosen in advance, but rather emerges from seeking the function minimizing (4.1).
+Smoothing splines, then, seem to be somewhat ideal smoothers. The only substantial problem, is the fact that they have as many free parameters as there are data to be
+For example, if a ‘complete’ cubic spline, g, is used to approximate a function, f,
+     
+    SMOOTHING BASES 145
+smoothed. This seems wasteful, given that, in practice, λ will almost always be high enough that the resulting spline is much smoother than n degrees of freedom would suggest. Indeed, in section 4.10.4 we will see that many degrees of freedom of a spline are often suppressed completely by the penalty. For univariate smoothing with cubic splines, the large number of parameters turns out not to be problematic, but as soon as we try to deal with more covariates, the computational expense becomes severe.
+An obvious compromise between retaining the good properties of splines, and com- putational efficiency, is to use penalized regression splines, as introduced in Chapter 3. At its simplest, this involves constructing a spline basis (and associated penalties) for a much smaller data-set than the one to be analyzed, and then using that basis (plus penalties) to model the original data set. The covariate values in the smaller data set should be arranged to nicely cover the distribution of covariate values in the original data set. This penalized regression spline idea is presented in Wahba (1980) and Parker and Rice (1985), for example. In the rest of this section, some spline based penalized regression smoothers will be presented, starting with univariate smoothers, and then moving on to smooths of several variables.
+4.1.2 Cubic regression splines
+The basis used in Chapter 3 was one way of defining a cubic regression spline basis, but there are other ways of defining such smoothers, which have some advantages in terms of interpretability of the parameters. One approach is to parameterize the spline in terms of its values at the knots.
+Consider defining a cubic spline function, f (x), with k knots, x1 . . . xk . Let βj = f(xj) and δj = f′′(xj). Then the spline can be written as
+f(x)=a−j(x)βj+a+j(x)βj+1+c−j(x)δj+c+j(x)δj+1ifxj≤x≤xj+1 (4.2)
+where the basis functions a−j , a+j , c−j and c+j are defined in table 4.2. The conditions that the spline must be continuous to second derivative, at the xj , and should have zero second derivative at x1 and xk, can be shown to imply (exercise 1) that
+Bδ− = Dβ. (4.3) where δ− = (δ2,...,δk−1)T (since δ1 = δk = 0) and B and D are defined in table
+4.2.
+Defining F− = B−1D, and
+0 F=F− 
+0
+where 0 is a row of zeros, we have that δ = Fβ. Hence, the spline can be re-written
+entirely in terms of β as
+f ( x ) = a −j ( x ) β j + a +j ( x ) β j + 1 + c −j ( x ) F j β + c +j ( x ) F j + 1 β i f x j ≤ x ≤ x j + 1 ,
+    
+    146
+SOME GAM THEORY
+Basis functions for a cubic spline
+ a−j (x) = (xj+1 − x)/hj c−j (x) = [(xj+1 − x)3/hj − hj(xj+1 − x)]/6 a+j (x) = (x − xj)/hj c+j (x) = [(x − xj)3/hj − hj(x − xj)]/6
+Non-zero matrix elements — non cyclic spline
+ Di,i = 1/hi
+Bi,i =(hi +hi+1)/3
+Di,i+1 = −1/hi − 1/hi+1 Bi+1,i =hi+1/6
+Di,i+2 = 1/hi+1 i=1...k−2
+Bi,i+1 =hi+1/6
+B ̃i−1,i = B ̃i,i−1 = hi−1/6 D ̃i−1,i =D ̃i,i−1 =1/hi−1
+B ̃1,1 = (hk−1 + h1)/3 D ̃1,1 = −1/h1 − 1/hk−1
+B ̃i,i = (hi−1 + hi)/3 D ̃i,i =−1/hi−1 −1/hi
+i=2...k−1 B ̃k−1,1 = hk−1/6
+i=1...k−3 Non-zero matrix elements — cyclic spline
+ B ̃1,k−1 = hk−1/6 D ̃1,k−1 = 1/hk−1
+D ̃k−1,1 = 1/hk−1 Table 4.2 Definitions of basis functions and matrices used to define a cubic regression spline.
+ hj =xj+1 −xj.
+which can be re-written, once more, as
+k
+f(x) =   bi(x)βi i=1
+by implicit definition of new basis functions bi(x): figure 4.1 illustrates the basis. Hence, given a set of x values, at which to evaluate the spline, it is easy to obtain a model matrix mapping β to the evaluated spline. It can further be shown (e.g. Lancaster and Sˇ alkauskas, 1986, or exercise 2) that
+ xk ′′ 2 T T −1 f(x)dx=βDB Dβ
+x1
+i.e. S ≡ DTB−1D is the penalty matrix for this basis.
+Notice that in addition to having directly interpretable parameters, this basis does not require any re-scaling of the predictor variables before it can be used to construct a GAM, although, as with the chapter 3 basis, we do have to choose the locations of the knots xj . See Lancaster and Sˇ alkauskas (1986) for more details about this basis.
+    
+    SMOOTHING BASES 147
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+xx
+Figure 4.1 The left hand panel illustrates one basis function,b4(x), for a cubic regression spline of the type discussed in section 4.1.2: this basis function takes the value one at one knot of the spline, and zero at all other knots (such basis functions are sometimes called ‘cardinal basis functions’). The right hand panel shows how such basis functions are combined to repre- sent a smooth curve. The various curves of medium thickness show the basis functions, bj (x), of a cubic regression spline, each multiplied by its associated coefficient βj : these scaled basis functions are summed to get the smooth curve illustrated by the thick continuous curve. The vertical thin lines show the knot locations.
+4.1.3 A cyclic cubic regression spline
+It is quite often appropriate for a model smooth function to be ‘cyclic’, meaning that the function has the same value and first few derivatives at its upper and lower boundaries. For example, in most applications, it would not be appropriate for a smooth function of time of year to change discontinuously at the year end. The pe- nalized cubic regression spline, of the previous section, can be modified to produce such a smooth. The spline can still be written in the form (4.2), but we now have that β1 = βk and δ1 = δk. In this case then, we define vectors βT = (β1,...,βk−1) and δT =(δ1,...,δk−1).Theconditionsthatthesplinemustbecontinuoustosecond derivative at each knot, and that f(x1) must match f(xk), up to second derivative, are equivalent to
+B ̃ δ = D ̃ β
+where B ̃ and D ̃ are defined in table 4.2. Similar reasoning to that employed in the
+previous section implies that the spline can be written as
+A second derivative penalty also follows:
+  xk ′′ 2 T  ̃ T  ̃ −1  ̃ f(x)dx=βDB Dβ.
+x1
+                            k−1 i=1
+ ̃bi(x)βi,
+by appropriate definition of the basis functions  ̃bi(x): figure 4.2 illustrates this basis.
+f(x) =
+    b4(x)
+0.0 0.4 0.8
+f(x)
+0.0 0.2 0.4 0.6 0.8
+    148 SOME GAM THEORY
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+xx
+Figure 4.2 The left hand panel illustrates one basis function, b2(x), for a cyclic cubic regres- sion spline of the type discussed in section 4.1.3: this basis function takes the value one at one knot of the spline, and zero at all other knots - notice how the basis function values and first two derivatives match at x = 0 and x = 1. The right hand panel shows how such basis functions are combined to represent a smooth curve. The various curves of medium thickness show the basis functions, bj (x), of a cubic regression spline, each multiplied by its associated coefficient βj : these scaled basis functions are summed to get the smooth curve illustrated by the thick continuous curve. The vertical thin lines show the knot locations.
+4.1.4 P-splines
+Yet another way to represent cubic splines (and indeed splines of higher or lower order), is by use of the B-spline basis. The B-spline basis is appealing because the basis functions are strictly local — each basis function is only non-zero over the intervals between m + 3 adjacent knots, where m + 1 is the order of the basis (e.g. m = 2 for a cubic spline∗). To define a k parameter B-spline basis, we need to define k+m+1knots,x1 <x2 <...<xk+m+1,wheretheintervaloverwhichthespline is to be evaluated lies within [xm+2, xk] (so that the first and last m+1 knot locations are essentially arbitrary). An (m + 1)th order spline can then be represented as
+k
+f ( x ) =   B im ( x ) β i ,
+i=1
+where the B-spline basis functions are most conveniently defined recursively as fol-
+                                 lows:
+Bm(x)= i
+x−xi Bm−1(x)+ xi+m+2 −x Bm−1(x) i=1,...k xi+m+1 − xi i xi+m+2 − xi+1 i+1
+B−1(x)=  1 xi ≤x<xi+1 i 0 otherwise
+  and
+(see e.g. de Boor, 1978; Lancaster and Sˇ alkauskas, 1986). For example, the following R code can be used to evaluate single B-spline basis functions at a series of x values:
+∗ The somewhat inconvenient definition of order is for compatibility with the notation usually used for normal splines.
+    b2(x)
+0.0 0.4 0.8
+f
+0.0 0.2 0.4 0.6 0.8
+    SMOOTHING BASES 149
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+xx
+Figure 4.3 Illustration of the representation of a smooth curve by rank 10 B-spline bases. The left plot shows a B spline basis with m = 1. The thin curves show B-spline basis functions multiplied by their associated coefficients, each is non-zero over only 3 intervals. The sum of the coefficients multiplied by the basis functions gives the spline itself, represented by the thicker continuous curve. The right panel is the same, but for a basis for which m = 2: in this case each basis function is non-zero over 4 adjacent intervals. In both panels the knot locations are where each basis function peaks.
+bspline <- function(x,k,i,m=2)
+# evaluate ith b-spline basis function of order m at the values
+# in x, given knot locations in k
+{ if (m==-1) # base of recursion
+{ res <- as.numeric(x<k[i+1]&x>=k[i])
+} else # construct from call to lower order basis { z0 <- (x-k[i])/(k[i+m+1]-k[i])
+    z1 <- (k[i+m+2]-x)/(k[i+m+2]-k[i+1])
+res <- z0*bspline(x,k,i,m-1)+ z1*bspline(x,k,i+1,m-1) }
+res }
+Figure 4.3 illustrates the representation of functions using B-spline bases of two dif- ferent orders.
+B-splines were developed as a very stable basis for large scale spline interpolation (see de Boor, 1978, for further details), but for most statistical work with low rank penalized regression splines, you would have to be using very poor numerical meth- ods before the enhanced stability of the basis became noticeable. The real statistical interest in B-splines has resulted from the work of Eilers and Marx (1996) in using them to develop what they term P-splines.
+P-splines are low rank smoothers using a B-spline basis, usually defined on evenly spaced knots, and a difference penalty applied directly to the parameters, βi, to con- trol function wiggliness. How this works is best seen by example. If we decide to penalize the squared difference between adjacent βi values then the penalty would
+                                f
+0.0 0.2 0.4 0.6 0.8
+f
+0.0 0.2 0.4 0.6 0.8
+    150 be
+ 1 −1 0 . .  T−1 2 −1 . .
+P=β0 −1 2 ..β.  . . . . . 
+.....
+Such penalties are very easily generated in R. For example the penalty matrix for P can be generated by:
+k<-6 # example basis dimension P <- diff(diag(k),differences=1) # sqrt of penalty matrix S <- t(P)%*%P # penalty matrix
+Higher order penalties are produced by increasing the differences parameter. The only lower order penalty is the identity matrix.
+P-splines are extremely easy to set up and use, and allow a good deal of flexibility, in that any order of penalty can be combined with any order of B-spline basis, as the user sees fit. Their disadvantage is that the simplicity is somewhat diminished if uneven knot spacing is required, and that the penalties are less easy to interpret in terms of the properties of the fitted smooth, than the more usual spline penalties. See exercises 7 to 9, for further coverage of P-splines.
+4.1.5 Thin plate regression splines
+The bases covered so far are each useful in practice, but are open to some criticisms.
+1. It is necessary to choose knot locations, in order to use each basis: this introduces an extra degree of subjectivity into the model fits.
+2. The bases are only useful for representing smooths of one predictor variable.
+3. It is not clear to what extent the bases are better or worse than any other basis that might be used.
+In this section, an approach is developed which goes some way to addressing these issues, by producing knot free bases, for smooths of any number of predictors, that are in a certain limited sense ‘optimal’: the thin plate regression splines.
+Thin plate splines
+Thin plate splines (Duchon, 1977) are a very elegant and general solution to the problem of estimating a smooth function of multiple predictor variables, from noisy
+ k−1 i=1
+(βi+1 −βi)2 =β12 −2β1β2 +2β2 −2β2β3 +...+βk2, and it is straightforward to see that this can be written
+P =
+SOME GAM THEORY
+    
+    SMOOTHING BASES 151
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+xxxx
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+xxxx
+Figure 4.4 Illustration of a thin plate spline basis for representing a smooth function of one variable fitted to 7 data with penalty order m = 2. The first 7 panels (starting at top left) show the basis functions, multiplied by coefficients, that are summed to give the smooth curve in the lower right panel. The first two basis functions span the space of functions that are completely smooth, according to the wiggliness measure. The remaining basis functions represent the wiggly component of the smooth curve: these latter functions are shown after absorbtion of the thin plate spline constraints TTδ = 0 into the basis.
+observations of the function, at particular values of those predictors. Consider then, the problem of estimating the smooth function g(x), from n observations (yi,xi) such that
+yi =g(xi)+εi
+where εi is a random error term and where x is a d - vector (d ≤ n). Thin-plate spline
+smoothing estimates g by finding the function fˆ minimizing:
+∥y − f∥2 + λJmd(f) (4.4)
+where y is the vector of yi data and f = (f(x1),f(x2),...,f(xn))T. Jmd(f) is a penalty functional measuring the ‘wiggliness’ of f , and λ is a smoothing parameter, controlling the tradeoff between data fitting and smoothness of f. The wiggliness penalty is defined as
+                                                                                                                               m!   ∂mf  2
+Jmd = ... ν   ν dx1...dxd.† (4.5)
+ Rd ν1+...+νd=m ν1!...νd! ∂x11 ...∂xdd
+Further progress is only possible if m is chosen so that 2m > d, and in fact for
+‘visually smooth’ results it is preferable that 2m > d + 1. Subject to the first of these † The general form of the penalty is somewhat intimidating, so an example is useful. In the case of a
+smooth of two predictors with wiggliness measured using second derivatives, we have
+Z Z „∂2f«2 „ ∂2f «2 „∂2f«2
+J22= 2+ +2dx1dx2. ∂x1 ∂x1∂x2 ∂x2
+       0.6
+1.0 1.4 1.8
+10 14 18
+60
+100 140 180
+−10 0 10
+basis function
+basis function
+basis function
+basis function
+basis function
+basis function
+−140 −100 −60
+−80 −60 −40 −20
+f(x)
+basis function
+−2 0 2 4 6 8
+−15 −13 −11 −9
+    152 SOME GAM THEORY restrictions, it can be shown that the function minimizing (4.4) has the form,
+nM
+ˆ  
+f(x) = δiηmd(∥x − xi∥) + αjφj(x), (4.6)
+i=1 j=1
+where δ and α are vectors of coefficients to be estimated, δ being subject to the
+linear constraints that TTδ = 0 where Tij = φj(xi). The M =  m+d−1  functions, dd
+(−1)m+1+d/2 2m−d  22m−1πd/2(m−1)!(m−d/2)! r
+ηmd(r) =
+22m πd/2 (m−1)!
+φi, are linearly independent polynomials spanning the space of polynomials in R of degree less than m. The φi span the space of functions for which Jmd is zero, i.e. the ‘null space’ of Jmd: those functions that are considered ‘completely smooth’. For example, for m = d = 2 these functions are φ1(x) = 1, φ2(x) = x1 and φ3(x) = x2. The remaining basis functions used in (4.6) are defined as
+log(r) d even d odd.
+  Γ(d/2−m) r2m−d
+Now defining matrix E by Eij ≡ ηmd(∥xi − xj∥), the thin plate spline fitting
+ problem becomes,
+minimize ∥y − Eδ − Tα∥2 + λδTEδ subject to TTδ = 0, (4.7)
+with respect to δ and α. Wahba (1990) or Green and Silverman (1994) provide fur- ther information about thin-plate splines, and figure 4.4 illustrates a thin plate spline basis in one dimension.
+ˆ
+The thin plate spline, f, is something of an ideal smoother: it has been constructed by defining exactly what is meant by smoothness, exactly how much weight to give to the conflicting goals of matching the data and making fˆ smooth, and finding the function that best satisfies the resulting smoothing objective. Notice that in doing this we did not have to choose knot positions or select basis functions, both of these emerged naturally from the mathematical statement of the smoothing problem. In addition, thin plate splines can deal with any number of predictor variables, and allow the user some flexibility to select the order of derivative used in the measure of function wiggliness. So, at first sight it might seem that the problems listed at the start of this section are all solved, and thin plate spline bases and penalties should be used to represent all the smooth terms in the model.
+The problem with thin plate splines is computational cost: these smoothers have as many unknown parameters as there are data (strictly, number of unique predictor combinations), and, except in the single predictor case, the computational cost of model estimation is proportional to the cube of the number of parameters. This is a very high price to pay for using such smooths. Given that the effective degrees of freedom estimated for a model term is usually a small proportion of n, it seems wasteful to use so many parameters to represent the term, and this begs the question of whether a low rank approximation could be produced which is as close as possible to the thin plate spline smooth, without incurring prohibitive computational cost.
+    
+    SMOOTHING BASES 153
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+xxxx
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+xxxx
+Figure 4.5 Illustration of a rank 7 thin plate regression spline basis for representing a smooth function of one variable, with penalty order m = 2. The first 7 panels (starting at top left) show the basis functions, multiplied by coefficients, that are summed to give the smooth curve in the lower right panel. The first two basis functions span the space of functions that are completely smooth, according to the wiggliness measure. The remaining basis functions represent the wiggly component of the smooth curve: notice how these functions become successively more wiggly while generally tending to contribute less and less to the overall fit.
+Thin plate regression splines
+Thin plate regression splines are based the idea of truncating the space of the wig- gly components of the thin plate spline (the components with parameters δ), while leaving the components of ‘zero wiggliness’ unchanged (the α components). Let E = UDUT be the eigen-decomposition of E, so that D is a diagonal matrix of eigenvalues of E arranged so that |Di,i| ≥ |Di−1,i−1| and the columns of U are the corresponding eigenvectors. Now let Uk denote the matrix consisting of the first k columns of U and Dk denote the top right k × k submatrix of D. Restricting δ to the columns space of Uk, by writing δ = Ukδk, means that (4.7) becomes
+minimise ∥y − UkDkδk − Tα∥2 + λδkTDkδk subject to TTUkδk = 0
+w.r.t. δk and α. The constraints can be absorbed in the usual manner, described in section 1.8.1. We first find any orthogonal column basis, Zk, such that TTUkZk = 0. One way to do this is to form the QR decomposition of UTk T: the final M columns of the orthogonal factor give a Zk (see sections 1.8.1 and A.6). Restricting δk to this space, by writing δk = Zkδ ̃, yields the unconstrained problem that must be solved to fit the rank k approximation to the smoothing spline:
+minimise ∥y − UkDkZkδ ̃ − Tα∥2 + λδ ̃TZTk DkZkδ ̃
+with respect to δ ̃ and α. This has a computational cost of O(k3). Having fitted the model, evaluation of the spline at any point is easy: simply evaluate δ = Uk Zk δ ̃ and use (4.6).
+                                                                                                                          basis function
+basis function
+0 5 10
+15
+8 10 12 14 16 18
+basis function
+basis function
+−4 0 2 4 6 8
+−15 −5 5 10
+basis function
+basis function
+−5 −4 −3 −2 −1
+−30 −25 −20 −15 −10
+f(x)
+basis function
+−2 0 2 4 6 8
+−5 0 5 10
+    154 SOME GAM THEORY
+Now, the main problem is how to find Uk and Dk sufficiently cheaply. A full eigen- decomposition of E requires O(n3) operations, which would somewhat limit the utility of the TPRS approach. Fortunately the method of Lanczos iteration can be employed to find Uk and Dk at the substantially lower cost of O(n2k) operations. See Appendix A, section A.11, for a suitable Lanczos algorithm.
+Properties of thin plate regression splines
+It is clear that thin plate regression splines avoid the problem of knot placement, are relatively cheap to compute, and can be constructed for smooths of any number of predictor variables, but what of their optimality properties? The thin-plate splines are optimal in the sense that no smooth function will better minimize (4.4), but to what extent is that optimality inherited by the TPRS approximation? To answer this it helps to think about what would make a good approximation. An ideal approximation would probably result in the minimum possible perturbation of the fitted values of the spline, at the same time as making the minimum possible change to the ‘shape’ of the fitted spline. It is difficult to see how both these aims could be achieved, for all possible response data, without first fitting the full thin plate spline. But if the criteria are loosened somewhat to minimizing the worst possible changes in shape and fitted value then progress can be made, as follows.
+The basis change and truncation can be thought of as replacing E, in the norm in (4.7), by the matrix Eˆ = EUk UTk , while replacing E, in the penalty term of (4.7), by E ̃ = UTkUkEUkUTk. Now since the fitted values of the spline are given by Eδˆ + Tα, the worst possible change in fitted values could be measured by:
+eˆ k = m a x ∥ ( E − Eˆ k ) δ ∥ . δ̸=0 ∥δ∥
+(dividing by ∥δ∥ is necessary since the upper norm otherwise has a maximum at infinity.) The ‘shape’ of the spline is measured by the penalty term in (4.7), so a suitable measure of the worst possible change in the shape of the spline caused by the truncation might be:
+e ̃ k = m a x δ T ( E − E ̃ k ) δ . δ̸=0 ∥δ∥2
+It turns out to be quite easy to show that eˆk and e ̃k are simultaneously minimized by the choice of Uk, as the truncated basis for δ. i.e. there is no matrix of the same dimension as Uk which would lead to lower eˆk or e ̃k, if used in place of Uk (see Wood, 2003).
+Note that eˆk and e ̃k are really formulated in too large a space. Ideally we would impose the constraints TTδ = 0 on both, but in that case different bases minimize the two criteria. This in turn leads to the question of whether it would not be better to concentrate on just one of the criteria, but this is unsatisfactory, as it leads to results that depend on how the original thin plate spline problem is parameterized.
+      
+ SMOOTHING BASES 155
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+z
+z
+z
+z
+z
+z
+z
+z
+z
+z
+z
+z
+z
+z
+z
+z
+f
+Figure4.6 Illustrationofarank15thinplateregressionsplinebasisforrepresentingasmooth function of two variables, with penalty order m = 2. The first 15 panels (starting at top left) show the basis functions, multiplied by coefficients, that are summed to give the smooth surface in the lower right panel. The first three basis functions span the space of functions that are completely smooth, according to the wiggliness measure, J22. The remaining basis functions represent the wiggly component of the smooth curve: notice how these functions become successively more wiggly.
+Furthermore, these results can be extremely poor for some parameterizations. For example, if the thin plate spline. is parameterized in terms of the fitted values, then the eˆk optimal approximation is not smooth. Similarly, very poor fitted values result from an e ̃k optimal approximation to a thin plate spline., if that thin plate spline is parameterized so that the penalty matrix is an identity matrix, with some leading diagonal entries zeroed.
+To sum up: thin plate regression splines are probably the best that can be hoped for in terms of approximating the behaviour of a thin plate spline using a basis of any given low rank. They have the nice property of avoiding having to choose ‘knot lo- cations’, and are reasonably computationally efficient, if Lanczos iteration is used to find the truncated eigen-decomposition of E. They also retain the rotational invari-
+    156 SOME GAM THEORY
+ance (isotropy) of full thin plate spline. Figures 4.5 and 4.6 provide examples of the bases functions that result from adopting a t.p.r.s approach.
+Knot based approximation
+If one is prepared to forgo optimality, and choose knot locations, then a simpler approximation is available, which avoids the truncated eigen-decomposition. If knot locations{x∗i :i=1...k}arechosen,thenthesplinecanbeapproximatedby
+kM
+ˆ ∗ 
+f (x) = δi ηmd (∥x − xi ∥) + αj φj (x)
+i=1 j=1 where δ and α are estimated by minimizing
+∥y−Xβ∥2+λβTSβ subjectto Cβ=0 w.r.t.βT =(δT,αT).Xisann×k+M matrixsuchthat
+Xij= ηmd(∥xi−x∗j∥) j=1,...,k
+φj−k(xi) j = k + 1, . . . , k + M.
+(4.8)
+S is a (k + M) × (k + M) matrix with zeroes everywhere except in its upper left k × k block where Sij = ηmd(∥x∗i − x∗j∥). Finally, C is an M × (k + M) matrix
+such that
+Cij= φi(x∗j) j=1,...,k
+0 j = k + 1, . . . , k + M.
+This approximation goes back at least to Wahba (1980). Some care is required to choose the knot locations carefully. In one dimension it is usual to choose quantiles of the empirical distribution of the predictor, or even spacing, but in more dimensions matters are often more difficult. One possibility is to take a random sample of the ob- served predictor variable combinations, another to take a ‘spatially stratified’ sample of the predictor variable combinations. Even spacing is sometimes appropriate, or more sophisticated space filling schemes can be used: Ruppert et al. (2003) provide a useful discussion of the alternatives.
+4.1.6 Shrinkage smoothers
+A disadvantage of the smooths discussed so far, is that no matter how large their associated smoothing parameter becomes, the smooth is never completely eliminated in the sense of having all its parameters estimated to be zero. On the contrary, some functions are treated as completely smooth by the penalty, and hence functions of this class are always completely un-penalized. From the point of view of model selection with GAMs it would be more convenient if smooths could be zeroed by adjustment of smoothing parameters. One way to do this would be to add an extra penalty, with associated smoothing parameter which acted only on the unpenalized functions, but this would open up the possibility of penalizing the smooth components of a function
+    
+    SMOOTHING BASES 157
+more than the wiggly components, which seems unsatisfactory, as well as requiring an extra smoothing parameter per smooth. A fairly crude alternative, is simply to add a small multiple of the identity matrix to the penalty matrix of the smooth, i.e.
+S → S + εI
+so that the penalty will now shrink all parameters to zero if its associated smooth- ing parameter is large enough. If ε is small enough, the identity part of the penalty will have almost no impact when a function is ‘wiggly’: only once it becomes close to ‘completely smooth’ will the identity component start to become important, and really start shrinking the parameters towards zero.
+4.1.7 Choosing the basis dimension
+When using penalized regression splines the modeller chooses the basis dimension as part of the model building process. Typically, this substantially reduces the compu- tational burden of modelling, relative to full spline methods, and recognizes the fact that, usually, something is seriously wrong if a statistical model really requires as many coefficients as there are data. Working with fixed basis dimensions also makes it rather trivial to demonstrate large sample consistency, and other properties, of the smoothing methods, but only at the cost of a slightly artificial assumption that the truth is really in the space spanned by the reduced basis.
+The main challenge introduced, by this low rank approach, is that a basis dimension has to be chosen. In the context of spline smoothing, Kim and Gu (2004) showed that the basis size should scale as n2/9, where n is the number of data. Based on simulation they suggested using 10n2/9 as the basis dimension, but it is hard to see how one can really know what the constant of proportionality should be, without knowing the truth that is being estimated. Chapter 5 includes several examples where the rule appears to give too small a basis dimension, for example in section 5.6.2. Wood (2006) also suggests that the basis dimension should depend on the number of covariates of a smooth, as well as the sample size.
+In practice, then, choice of basis dimension is something that probably has to remain a part of model specification. However, it is important to note that the exact size of basis dimension is really not that critical. The basis dimension is only setting an upper bound on the flexibility of a term: it is the smoothing parameter that controls the actual effective degrees of freedom. Hence the model fit is usually rather insensitive to the basis dimension, provided that it is not set restrictively low for the application concerned. The only caveat to this point is the slightly subtle one, that a function space with basis dimension 20 will contain a larger space of functions with EDF 5 than will a function space of dimension 10 (the numbers being arbitrary): it is this fact that causes model fit to retain some sensitivity to basis dimension, even if the appropriate EDF for a term is well below the basis dimension.
+In practice, the modeller needs to decide roughly how large a basis dimension is fairly certain to provide adequate flexibility, in any particular application, and use that.
+    
+    158 SOME GAM THEORY
+4.1.8 Tensor product smooths
+A major feature of the thin plate (regression) spline approach of section 4.1.5 is the isotropy of the wiggliness penalty: wiggliness in all directions is treated equally, with the fitted spline entirely invariant to rotation of the co-ordinate system for the predictor variables. For example, suppose we were to measure air pollution at a fixed set of points in Southern England, measuring the location of the points relative to the UK national grid and modelling pollution levels as a smooth function of the two spatial co-ordinates. Now suppose that the locations were instead measured on the French grid, and the modelling exercise repeated: the model fit would be identical (provided that the earth is flat).
+This isotropy is often considered to be desirable when modelling things as a smooth function of geographic co-ordinates‡, but it has some disadvantages. Chief among them is the difficulty of knowing how to scale predictors relative to one another, when both are arguments of the same smooth, but they are measured in fundamentally dif- ferent units. For example, consider a smooth function of a single spatial co-ordinate and time: the implied relative importance of smoothness in time versus smoothness in space, is very different between a situation in which the units are metres and hours, compared to that in which the units are light-years and nanoseconds. One pragmatic approach is to scale all predictors into the unit square, as is often done in loess smoothing, but this is essentially arbitrary. A more satisfactory approach uses tensor product smooths.
+Tensor product bases
+The basic approach of this section is to start from smooths of single covariates, rep- resented using any basis with associated quadratic penalty measuring ‘wiggliness’ of the smooth. From these ‘marginal smooths’ a ‘tensor product’ construction is used to build up smooths of several variables. See de Boor (1978) for an important early reference on tensor product spline bases.
+The methods developed here can be used to construct smooth functions of any num- ber of covariates, but the simplest introduction is via the construction of a smooth function of 3 covariates, x, z and v, the generalization then being trivial. The process starts by assuming that we have low rank bases available, for representing smooth functions fx, fz and fv of each of the covariates. That is we can write:
+ILK
+fx(x) =  αiai(x), fz(z) =  δldl(z) and fv(v) =  βkbk(v), i=1 l=1 k=1
+where the αi, δl and βk are parameters, and the ai(x), dl(z) and bk(v) are known basis functions.
+‡ Although it’s possible to overstate the case for doing this: in many applications at many locations North-South is not the same as East-West.
+    
+ SMOOTHING BASES
+0.0 0.2 0.4
+0.0 0.2 0.4
+159
+b(x, z)
+x
+z
+0.6
+0.6
+0.8 1.0
+0.8 1.0
+x
+d5(z) a3(x) −0.2 0.4 0.8 −0.2 0.4 0.8
+z
+Figure 4.7 How the product of two marginal basis functions for smooth functions of x and z, separately, results in a basis function for a smooth function of x and z together. The two left panels show the 3rd and 5th basis functions for rank 8 cubic regression spline smooths of x and z respectively. The right hand plot shows a3(x)b5(z), one of 64 similar basis functions of the tensor product smooth derived from these two marginal smooths.
+Now consider how the smooth function of x, fx, could be converted into a smooth function of x and z. What is required is for fx to vary smoothly with z, and this can be achieved by allowing its parameters, αi, to vary smoothly with z. Using the basis already available for representing smooth functions of z we could write:
+L
+αi(z) =   δildl(z) l=1
+which immediately gives
+IL
+fxz(x,z) =   δildl(z)ai(x).
+i=1 l=1
+Figure 4.7 illustrates this construction. Continuing in the same way, we could now create a smooth function of x, z and v by allowing fxz to vary smoothly with v. Again, the obvious way to do this is to let the parameters of fxz vary smoothly with v, and following the same reasoning as before we get
+ILK
+fxzv(x, z, v) =       βilkbk(v)dl(z)ai(x).
+i=1 l=1 k=1
+For any particular set of observations of x, z and v, there is a simple relationship between the model matrix, X, evaluating the tensor product smooth at these obser- vations, and the model matrices Xx, Xz and Xv that would evaluate the marginal smooths at the same observations. If ⊗ is the usual Kronecker product (see section A.4), then it is easy to show that, given appropriate ordering of the βilk into a vector
+ 160 SOME GAM THEORY
+smooth
+z
+x
+Figure 4.8 Illustration of a tensor product smooth of two variables x and z, constructed from 2 rank 6 marginal bases. Following section 4.1.8 a tensor product smooth can always be parameterized in terms of the values of the function at a set of ‘knots’ spread over the function domain on a regular mesh: i.e. in terms of the heights of the •’s shown. The basis construction can be thought of as follows: start with a smooth of x parameterized in terms of function values at a set of ‘knots’; to make the smooth of x vary smoothly with z, simply allow each of its parameters to vary smoothly with z: this can be done by representing each parameter using a smooth of z, also parameterized in terms of function values at a set of ‘knots’. Exactly the same smooth arises if we reverse the roles of x and z in this construction. The tensor product smooth penalty in the x direction, advocated in section 4.1.8, is simply the sum of the the marginal wiggliness measure for the smooth of x applied to the thick black curves parallel to the x axes: the z penalty is similarly defined in terms of the marginal penalty of the smooth of z applied to the thick black curves parallel to the z axis.
+β, the ith row of X is simply:
+Xi = Xxi ⊗ Xzi ⊗ Xvi.
+Clearly (i) this construction can be continued for as many covariates as are required; (ii) the result is independent of the order in which we treat the covariates and (iii) the covariates can themselves be vector covariates. Figure 4.8 attempts to illustrate the tensor product construction for a smooth of two covariates.
+    SMOOTHING BASES 161
+Tensor product penalties
+Having derived a ‘tensor product’ basis for representing smooth functions, it is also necessary to have some way of measuring function ‘wiggliness’, if the basis is to be useful for representing smooth functions in a GAM context. Again, it is possible to start from wiggliness measures associated with the marginal smooth functions, and again the three covariate case provides sufficient illustration. Suppose then, that each marginal smooth has an associated functional that measures function wiggliness, and can be expressed as a quadratic form in the marginal parameters. That is
+Jx(fx) = αTSxα, Jz(fz) = δTSzδ and Jv(fv) = BTSvB.
+The S• matrices contain known coefficients, and α, δ and B are vectors of coeffi- cients of the marginal smooths. An example of a penalty functional is the cubic spline penalty, Jx(fx) =  (∂2fx/∂x2)2dx. Now let fx|zv(x) be fxvz(x,z,v) considered as a function of x only, with z and v held constant, and define fz|xv(z) and fv|xz(v) similarly. A natural way of measuring wiggliness of fxzv is to use:
+J(fxzv) = λx  
+Jx(fx|zv)dzdv+λz   Jz(fz|xv)dxdv+λv   Jv(fv|xz)dxdz z,v x,v x,z
+where the λ• are smoothing parameters controlling the tradeoff between wiggliness in different directions, and allowing the penalty to be invariant to the relative scaling of the covariates. As an example, if cubic spline penalties were used as the marginal penalties, then
+   ∂2f  2  ∂2f  2  ∂2f  2
+J(f) = λx ∂x2 + λz ∂z2 + λv ∂v2 dxdzdv.
+x,z,v
+Hence, if the marginal penalties are easily interpretable, in terms of function shape, then so is the induced penalty. Numerical evaluation of the integrals in J is straight- forward. As an example consider the penalty in the x direction. The function fx|zv (x) can be written as
+I
+fx|zv(x) =  αi(z,v)ai(x),
+i=1
+and it is always possible to find the matrix of coefficients Mz,v such that α(z, v) =
+Mzvβ where β is the vector of βilk arranged in some appropriate order. Hence Jx(fx|zv) = α(z, v)TSxα(z, v) = βTMTzvSxMzvβ
+   and so
+  Jx(fx|zv)dzdv = βT   MTzvSxMzvdzdvβ. z,v z,v
+The last integral can be performed numerically, and it is clear that the same approach can be applied to all components of the penalty. However, a simple reparameteri- zation can be used to provide an approximation to the terms in the penalty, which performs well in practice, and avoids the need for explicit numerical integration.
+To see how the approach works, consider the marginal smooth fx. Let {x∗i : i =
+    
+    162 SOME GAM THEORY 1, . . . , I} be a set of values of x spread evenly through the range of the observed x
+values. In this case we can always re-parameterize fx in terms of new parameters α i′ = f x ( x ∗i ) .
+Clearly under this re-parameterization α′ = Γα where Γij = ai(x∗j). Hence the marginal model matrix becomes X′x = XxΓ−1 and the penalty coefficient matrix becomes S′x = Γ−TSxΓ−1.
+Now suppose that the same sort of re-parameterization is applied to the marginal smooths fv and fz . In this case we have that
+Jx(fx|zv)dzdv ≈ h Jx(fx|zl∗vk∗ ),  z,v lk
+where h is some constant of proportionality related to the spacing of the zl∗ ’s and vk∗ ’s. Similar expressions hold for the other integrals making up J. It is straightforward to show that the summation in the above approximation is:
+J x∗ ( f x z v ) = β T S ̃ x β w h e r e S ̃ x = S ′x ⊗ I L ⊗ I K
+and IL is the rank L identity matrix. Exactly similar definitions hold for the other
+components of the penalty so that
+Jz∗(fxzv) = βTS ̃zβ where S ̃z = II ⊗ S′z ⊗ IK Jv∗(fxzv) = βTS ̃vβ where S ̃v = II ⊗ IL ⊗ S′v.
+and Hence
+where any constants, h, have been absorbed into the λj . Again, this penalty construc- tion clearly generalizes to any number of covariates. Figure 4.8 attempts to illustrate what the penalties actually measure, for a smooth of two variables.
+Given its model matrix and penalties, the coefficients and smoothing parameters of a tensor product smooth can be estimated as GAM components using the methods of sections 4.3 and 4.6 or 4.7. These smooths have the nice property of being invariant to rescaling of the covariates, provided only that the marginal smooths are similarly invariant (which is always the case in practice).
+Note that it is possible to omit the reparameterization of the marginal smooths, in terms of function values, and to work with penalties of the form
+β T S ̄ z β w h e r e S ̄ z = I I ⊗ S z ⊗ I K
+for example: Eilers and Marx (2003) successfully used this approach to smooth with respect to two variables using tensor products of B-splines. A potential problem with the approach is that the penalties no-longer have the interpretation in terms of (averaged) function shape, that is inherited from the marginal smooths when re- parameterization is used. Another proposal in the literature is to use single penalties
+J(fxzv) ≈ J∗(fxzv) = λxJx∗(fxzv) + λzJz∗(fxzv) + λvJv∗(fxzv),
+    
+    SETTING UP GAMS AS PENALIZED GLMS 163 of the form:
+βTSβ where S=S1⊗S2⊗···⊗Sd.
+but this often leads to severe undersmoothing. The reason for the undersmoothing is straightforward: the rank of S is the product of the ranks of the Sj , and in practice this is often far too low for practical work. For example, consider a smooth of 3 predictors constructed as a tensor product smooth of 3 cubic spline bases, each of rank 5. The resulting smooth would have 125 free parameters, but a penalty matrix of rank 27. This means that varying the weight given to the penalty would only result in the effective degrees of freedom for the smooth varying between 98 and 125: not a very useful range. By contrast, for the same marginal bases, the multiple term penalties would have rank 117, leading to a much more useful range of effective degrees of freedom of between 8 and 125.
+4.2 Setting up GAMs as penalized GLMs
+As we saw in Chapter 3, a GAM models a response variable, yi, using a model structure of a form like:
+g(μi) = X∗i θ + f1(x1i) + f2(x2i, x3i) + f3(x4i) + · · · (4.9)
+where μi ≡ E(yi) and yi ∼ ‘an exponential family distribution’§. Here g is a known, monotonic, twice differentiable, link function; X∗i is the ith row of a model matrix for any strictly parametric model components, with parameter vector θ; the fj are smooth functions of the covariates xj .
+To estimate such a model we can specify a basis for each smooth function, along with a corresponding definition of what is meant by smoothness/wiggliness of the function. Starting with the bases, we choose a set of basis functions, bji, for each function, so that it can be represented as:
+qj
+fj(xj) =  βjibji(xj)
+i=1
+where xj may be a vector quantity and the βji are coefficients of the smooth, which
+will need to be estimated as part of model fitting.
+Given a basis, it is straightforward to create a model matrix, X ̃ j, for each smooth. If
+fj is the vector such that fji = fj(xji) and β ̃j =  βj1,βj2,...,βjqj  T, then f j = X ̃ j β ̃ j
+whereX ̃j,ik =bjk(xji),andthecovariate,xj,maysometimesbeavectorquantity. Typically, (4.9) is not an identifiable model, unless each smooth is subject to a ‘cen-
+tering constraint’. A suitable constraint is that the sum (or mean) of the elements of
+§ although if we take a quasi-likelihood approach we can relax the distributional assumption somewhat and only specify a mean variance relationship for yi.
+    
+    164 SOME GAM THEORY fj should be zero, which can be written as
+1 T X ̃ j β ̃ j = 0 .
+Using the approach taken in section 1.8.1, this constraint can easily be absorbed by re-parameterization. Specifically we find a matrix Z, the qj − 1 columns of which are orthogonal, and which satisfies:
+1 T X ̃ j Z = 0 .
+Now reparameterizing the smooth in terms of qj − 1 new parameters, βj, such that β ̃j = Zβj, we obtain a new model matrix for the jth term, Xj = X ̃ jZ, such that fj = Xjβj automatically satisfies the centering constraint. Z is never formed explicitly, since it can be represented by a single Householder matrix (see section A.5).
+Given centered model matrices, for each smooth term, (4.9) can now be re-written as
+g(μi) = Xiβ (4.10)
+where X = [X∗ : X1 : X2 : ···] and βT = [θT,β1T,β2T,···]. Clearly (4.10) is just a GLM, and we can therefore write down its likelihood, l(β), say. Equally clearly, if the qj are large enough that we have a reasonable chance of accurately representing the unknown fj’s, and β is estimated by ordinary likelihood maximization, then there is a good chance of substantially overfitting. For this reason, GAMs are usually estimated by penalized likelihood maximization, where the penalties are designed to suppress overly wiggly estimates of the fj terms.
+The most convenient penalties to work with are those which measure function wig- gliness as a quadratic form in the coefficients of the function. For example, the wig- gliness of the jth function might be measured by β ̃jTS ̃jβ ̃j, where S ̃j is a matrix of
+known coefficients. Sometimes S ̃j may itself be a weighted sum of simpler matrices of known coefficients, where the weights are parameters to be estimated (see sec- tion 4.1.8). The centering reparameterization would convert this penalty to the form βjTS ̄jβj where S ̄j = ZTS ̃jZ. Notationally it is convenient to re-write the penalty in terms of the full coefficient vector β, so that it becomes βTSjβ, where Sj is just S ̄j padded with zeroes so that βTSj β ≡ βjTS ̄j βj.
+Given a wiggliness measure for each function, we can define a penalized likelihood
+for the model,
+lp(β) = l(β) − 1   λj βTSj β, (4.11) 2j
+ where the λj are smoothing parameters, controlling the tradeoff between goodness of fit of the model and model smoothness. Given values for the λj , then lp is maximized to find βˆ, but the λj must themselves be estimated.
+4.2.1 Variable coefficient models
+Hastie and Tibshirani (1993) proposed a class of models, which they dubbed ‘vari- able coefficient models’. These models are basically GAMs, in which the smooths
+    
+    JUSTIFYING P-IRLS 165 may be multiplied by some known covariate. An example is
+g(μi) = X∗i θ + f1(x1i)x2i + f2(x3i, x4i)x5i + f3(x6i)x7i + · · ·
+Setting up these models for estimation by penalized regression methods is straight- forward. Each row of the model matrix for the smooth is multiplied by the corre- sponding value of the covariate. For example, the formal expression for the model matrix for the term f1(x1i)x2i, in the above example, is simply diag(x2)X1, where X1 is the model matrix for f1(x1i), and diag(x2) is a diagonal matrix with x2i at the ith position on its leading diagonal (in the terminology of the mgcv package, covered in Chapter 5, variables like x2 are known as ‘by’ variables). No other modification of the GAM framework presented in this chapter is necessary.
+Note that such models make it easy to condition smooths on factors. For example, if a smooth of x should depend on which of two levels of a factor, a, pertains for a particular response observation, we could write a model as
+g(μi) = f(xi)z1i + f(xi)z2i,
+where zj is an indicator variable for whether the corresponding factor level is j.
+4.3 Justifying P-IRLS
+As we saw in chapter 3, the GAM penalized likelihood, (4.11), can be maximized by penalized iteratively re-weighted least squares, and in this section some justification for this approach is provided. For notational compactness (4.11) can be re-written as
+lp(β) = l(β) − 1βTSβ 2
+where S =  j λj Sj , and for the moment the λj are taken as known. To maximize lp we set its derivatives with respect to the βj to zero:
+∂lp=∂l−[Sβ]j=1 n yi−μi∂μi−[Sβ]j=0, ∂βj ∂βj φi=1 V(μi)∂βj
+where [·]j denotes the jth row of a vector. But by the same argument used in section 2.1.2 these equations are exactly those that would have to be solved to maximize the penalized non-linear least squares problem
+ n(yi−μi)2 T Sp= var(Yi) +βSβ,
+i=1
+assuming that the var(Yi) terms were known. Again following section 2.1.2 it is easy
+to show that, in the vicinity of some parameter vector estimate βˆ[k],
+   [k] [k]   2 T
+Sp≃  W z −Xβ +βSβ, (4.12)
+            
+    166 SOME GAM THEORY where, if g is the model link function, z[k] is a vector of pseudodata and W[k] is a
+diagonal matrix with diagonal elements w[k] then i
+w[k] = 1 and zi = g(μ[k])(yi − μ[k]) + Xiβˆ[k]. i V (μ[k])g′(μ[k])2 i i
+ii
+Hence given smoothing parameters, the maximum penalized likelihood estimates, βˆ, are obtained by iterating the steps
+1. Given the current βˆ[k] calculate the pseudodata z[k] and weights w[k]. i
+2. Minimize 4.12 w.r.t. β to find βˆ[k+1]. Increment k.
+to convergence. See O’Sullivan et al. (1986) for an early reference on penalized like-
+lihood maximization for smooth models.
+4.4 Degrees of freedom and residual variance estimation
+Before covering λ estimation, it is helpful to consider the notion of degrees of free- dom for a GAM, and this will also lead on naturally to the question of scale parameter estimation. How many degrees of freedom does a fitted GAM have? Clearly, if the smoothing parameters were all set to zero then the degrees of freedom of the model would be the dimension of β (less the number of identifiability constraints). At the opposite extreme, if all the smoothing parameters are very high then the model will be quite inflexible and will hence have very few degrees of freedom. One way of mea- suring the flexibility of the fitted model is to define the effective degrees of freedom as tr (A), by analogy with section 1.3.5. It is fairly easy to show that the maximum of tr (A) is just the number of parameters less the number of constraints, and similarly that the minimum values is rank( i Si) less than this. As the smoothing parameters vary, from zero to infinity, the effective degrees of freedom moves smoothly between these limits.
+Now the degrees of freedom of the model are, in effect, reduced by the application of the penalties during fitting, and penalties for different model terms will have different smoothing parameters, and will hence penalize their smooth functions differently. It is therefore natural to want to break the effective degrees of freedom down, into effective degrees of freedom for each smooth. In fact one might as well go further still, and try to ascertain the effective degrees of freedom associated with each βˆi, separately. Again this is natural, since the penalties generally penalize each element of β differently.
+To this end, first define¶ P ≡ (XTX+S)−1XT, so that βˆ = Py (in the un-weighted additivemodelcase).Hencetr(A)=tr(XP).NowdefineP0i tobePwithallits
+¶ Again writing S = Pj λjSj.
+     
+    DEGREES OF FREEDOM AND RESIDUAL VARIANCE ESTIMATION 167
+rows zeroed except the ith, which is left unchanged. In this case the vector P0i y has βˆi for its ith element, and zero elsewhere, while
+p
+tr(A) =  tr XP0i  .
+i=1
+So, it is natural to interpret tr  XP0i   as the effective degrees of freedom associated
+with the ith parameter. However,
+tr  XP0i   = (PX)i,i ,
+so the vector of effective degrees of freedom for the model parameters is given by the leading diagonal of
+F = PX = (XTX + S)−1XTX.
+For an intuitive insight into the meaning of effective degrees of freedom, an alterna- tive argument is perhaps more useful. Without penalization, the parameter estimates
+would be,
+With penalization the estimates are
+βˆ = (XTX + S)−1XTy
+= (XTX + S)−1XTX(XTX)−1XTy = Fβ ̃
+i.e. F is the matrix mapping the un-penalized estimates to the penalized ones. Now ∂βˆi/∂β ̃i = Fii, meaning that Fii measures how much the penalized βˆi will change, as a result of a unit change in the un-penalized β ̃. This is why Fii measures the effec- tive degrees of freedom of the ith penalized parameters: the un-penalized parameter has one degree of freedom, but the penalties effectively shrink that freedom to vary, by a factor Fii. Actually things are not quite as straightforward as this implies, since there is actually no general guarantee that Fii > 0, although for most reasonable bases and penalties the Fii are positive, unless autocorrelated data are being mod- elled (as in chapter 6).
+In the general, weighted, case the degrees of freedom matrix is easily shown to be
+F = (XTWX + S)−1XTWX.
+4.4.1 Residual variance or scale parameter estimation
+In the identity link, normal errors case, then by analogy with linear regression, σ2 could be estimated by the residual sum of squares divided by the residual degrees of
+freedom:
+2 ∥y − Ay∥2
+σˆ = n − t r ( A ) , ( 4 . 1 3 )
+β ̃ = (XTX)−1XTy.
+     
+    168 SOME GAM THEORY where tr (A) = tr (F). In fact (4.13) is not unbiased, since it is readily shown that
+E  ∥y − Ay∥2  = σ2  n − 2tr (A) + tr  ATA   + bTb, (4.14)
+where b = μ − Aμ represents the smoothing bias. Re-arranging (4.14) and sub- stituting μˆ for μ, yields an alternative estimator for σˆ2, but the need to estimate b means that it is still a biased estimator, and a rather complicated one to work with. For this reason (4.13) is usually preferred.
+In the generalized additive model case, the scale parameter is usually estimated by the Pearson-like scale estimator,
+ˆ  i V (μˆi)−1(yi − μˆi)2 φ = n − tr (A) .
+4.5 Smoothing Parameter Estimation Criteria
+Penalized likelihood maximization can only estimate model coefficients, β, given smoothing parameters λ, so this section covers the topic of smoothing parameter estimation introduced in section 3.2.3. Two basic approaches are useful: when the scale parameter is known then attempting to minimize the expected mean square er- ror leads to estimation by Mallow’s Cp/UBRE; when the scale parameter is unknown then attempting to minimize prediction error leads to cross validation or GCV. As usual it helps to start with the additive model case, and to generalize it at the end.
+4.5.1 Known scale parameter: UBRE
+An appealing way of estimating smoothing parameters would be to choose them in order that μˆ is as close as possible to the true μ ≡ E(y). An appropriate measure of this proximity might be M , the expected Mean Square Error (MSE) of the model, and in section 1.8.5, the argument∥ leading to (1.14) implies that this is:
+E(M)=E ∥μ−Xβˆ∥2/n =E ∥y−Ay∥2 /n−σ2 +2tr(A)σ2/n. (4.15)
+Hence it seems reasonable to choose smoothing parameters which minimize an es- timate of this expected MSE, that is to minimize the Un-Biased Risk Estimator (Craven and Wahba, 1979),
+Vu(λ) = ∥y − Ay∥2/n − σ2 + 2tr (A) σ2/n, (4.16) which is also Mallow’s Cp (Mallows, 1973). Note that the r.h.s. of (4.16) depends on
+the smoothing parameters through A.
+If σ2 is known then estimating λ by minimizing Vu works well, but problems arise
+∥ which makes no assumptions that are invalidated by penalized least squares estimation.
+     
+    SMOOTHING PARAMETER ESTIMATION CRITERIA
+if σ2 has to be estimated. For example, substituting the approximation
+E  ∥y − Ay∥2  = σ2(n − tr (A)), implied by (4.13), into (4.15) yields,
+M =E ∥μ−Xβˆ∥2/n = tr(A)σ2 n
+169
+(4.17)
+(4.18)
+ and the MSE estimator M ̃ = tr(A)σˆ2/n. Now consider comparison of 1 and 2 parameter models using M ̃ : the 2 parameter model has to reduce σˆ2 to less than half the one parameter σ2 estimate before it would be judged to be an improvement. Clearly, therefore, M ̃ is not a suitable basis for model selection.
+4.5.2 Unknown scale parameter: Cross Validation
+As we have seen, naively attempting to minimize the average square error in model predictions of E(y), will not work well when σ2 is unknown. An alternative is to base smoothing parameter estimation on mean square prediction error: that is on the average squared error in predicting a new observation y using the fitted model. The expected mean square prediction error is readily shown to be
+P = σ2 + M.
+The direct dependence on σ2 tends to mean that criteria based P are much more resistant to over-smoothing, which would inflate the σ2 estimate, than are criteria based on M alone.
+The most obvious way to estimate P is to use cross validation (e.g. Stone, 1974). By omitting a datum, yi, from the model fitting process, it becomes independent of the model fitted to the remaining data. Hence the squared error in predicting yi is readily estimated, and by omitting all data in turn we arrive at the ordinary cross validation estimate of P , given in section 3.2.3:
+1  n
+V o = ( y i − μˆ [ − i ] ) 2
+where μˆ[−i] denotes the prediction of E(yi) obtained from the model fitted to all data i
+except yi.
+Fortunately, calculating Vo by performing n model fits, to obtain the n terms μˆ[−i],
+is unnecessary. To see this, first consider the penalized least squares objective which in principle has to be minimized to find the ith term in the OCV score:
+n
+ (yj − μˆ[−i])2 + Penalties. j
+j=1 j ̸=i
+Clearly, adding zero to this objective will leave the estimates that minimize it com-
+ ni i=1
+i
+    
+    170
+pletely unchanged. So we can add the term (μˆ[−i] − μˆ[−i])2 to obtain
+n
+j=1
+elements which are yi and μˆ[−i], respectively. i
+Fitting, by minimizing (4.19), obviously results in ith prediction μˆ[−i], and also in an i
+influence matrix A, which is just the influence matrix for the model fitted to all the data (since (4.19) has the structure of the fitting objective for the model of the whole data). So considering the ith prediction we have that:
+μˆ[−i] = Aiy∗ = Aiy − Aiiyi + Aiiμˆ[−i] = μˆi − Aiiyi + Aiiμˆ[−i], iii
+where μˆi is from the fit to the full y. Subtraction of yi from both sides, and a little rearrangement then yields
+ (y∗ − μˆ[−i])2 + Penalties, jj
+(4.19) where y∗ = y − y ̄[i] + μ ̄[i]: y ̄[i] and μ ̄[i] are vectors of zeroes except for their ith
+yi − μˆ[−i] = (yi − μˆi)/(1 − Aii), i
+so that the OCV score becomes
+1 n (yi−μˆi)2 Vo = n i=1 (1−Aii)2,
+(4.20)
+ii
+SOME GAM THEORY
+  which can clearly be calculated from a single fit of the original model. Stone (1977) demonstrates the asymptotic equivalence of cross validation and AIC.
+Problems with Ordinary Cross Validation
+OCV is a reasonable way of estimating smoothing parameters, but suffers from two potential drawbacks. Firstly, it is computationally expensive to minimize in the addi- tive model case, where there may be several smoothing parameters. Secondly, it has a slightly disturbing lack of invariance (see Golub et al., 1979; Wahba, 1990, p. 53).
+To appreciate the invariance problem, consider the additive model fitting objective,
+m
+∥y − Xβ∥2 +   λiβTSiβ,
+i=1
+again. Given smoothing parameters, all inferences about β, made on the basis of minimizing this objective, are identical to the inferences that would be made by using the alternative objective:
+m
+∥Qy − QXβ∥2 +   λiβTSiβ,
+i=1
+where Q is any orthogonal matrix of appropriate dimension. However, the two ob- jectives generally give rise to different OCV scores.
+    
+    SMOOTHING PARAMETER ESTIMATION CRITERIA 171
+                                                0.0 0.2 0.4 0.6 0.8 1.0 5 10 15 20
+x edf
+Figure 4.9 Lack of invariance or ordinary cross validation. The left panel shows a smooth function (continuous line) and some data sampled from it at random x values with noise added in the y direction. The right panel shows OCV scores against estimated degrees of freedom for a rank 20 penalized regression spline fitted to the data: the continuous curve is the OCV score for the model fitted using the original objective; the dashed line shows the OCV score for the model fitted by an alternative objective. Both objectives result in identical inferences about the model coefficients for any given smoothing parameters, so the difference in OCV score is somewhat unsatisfactory. GCV and UBRE do not suffer from this problem.
+Figure 4.9 illustrates this problem for a smooth of x, y data. The right hand side of figure 4.9 shows Vo plotted against effective degrees of freedom, for the same rank 20 penalized regression spline fitted to the data in the left panel: the continuous curve is Vo corresponding to the original objective, while the dashed curve is Vo for the orthogonally transformed objective. For this example, Q was obtained from the QR decomposition of X, but similar differences occur for arbitrary orthogonal Q. Note how the ‘optimal’ degrees of freedom differ between the two OCV scores, and that this occurs despite the fact that the fitted models at any particular EDF are identical.
+4.5.3 Generalized Cross Validation
+The problems with ordinary cross validation arise because, despite parameter esti- mates, effective degrees of freedom and expected prediction error being invariant to rotation of y − Xβ by any orthogonal matrix Q, the elements, Aii, on the leading diagonal of the influence matrix, are not invariant and neither are the individual terms in the summation in (4.20). This sensitivity to an essentially arbitrary choice about how fitting is done is unsatisfactory, but what can be done to improve matters?
+One approach is to consider what might make for ‘good’ or ‘bad’ rotations of y−Xβ and to decide to perform cross validation on a particularly nicely rotated problem. One thing that would appear to be undesirable is to base cross validation on data in which a few points have very high leverage relative to the others. That is highly un- even Aii values are undesirable, as they will tend to cause the cross validation score
+    y
+0 5 10
+ocv
+5 6 7 8 9 10 11
+    172
+SOME GAM THEORY
+                                         5 10 15 20
+EDF
+5 10 15 20
+EDF
+5 10 15 20
+EDF
+Figure 4.10 Comparison of different smoothing parameter estimation criteria for rank 20 penalized regression splines fitted to three replicates of the simulated data shown in figure 4.9. The curves are as follows (in ascending order at the 20 EDF end of the left hand panel): the continuous curve is observed mean square error + known σ2; the long dashed curve is Vu + σ2 ; the short dashed curve is Vg , the GCV criterion; the alternating dashes and dots are Vo, the OCV criterion. The dot on each curve shows the location of its minimum.
+(4.20) to be dominated by a small proportion of the data. This suggests choosing the rotation Q in order to make the Aii as even as possible.
+In fact it is possible to choose Q in order to make all the Aii equal. To see this note that if A is the influence matrix for the original problem, then the influence matrix for the rotated problem is
+AQ = QAQT
+but if B is any matrix such that BBT = A then the influence matrix can be written:
+AQ = QBBTQT.
+Now if the orthogonal matrix Q is such that each row of QB has the same Euclidean length, then it is clear that all the elements on the leading diagonal of the influ- ence matrix, AQ , have the same value, which must be tr (A) /n, since tr (AQ ) = tr  QAQT  = tr  AQTQ  = tr (A).
+Does a Q with this neat row-length-equalizing property actually exist? It is easy to see that it does, by construction. Firstly note that it is always possible to produce an orthogonal matrix to be applied from the left, whose action is to perform a rotation which affects only two rows of a target matrix, such as B: a matrix with this property is known as a Givens rotation. As the angle of rotation, θ, increases smoothly from zero, the Euclidean lengths of the two rows varies smoothly, although the sum of their squared lengths remains constant, as befits a rotation. Once θ reaches 90 degrees, the row lengths are interchanged, since the magnitudes of the elements of the rows have been interchanged. Hence there must exist an intermediate θ at which the row lengths are exactly equal. Let the Givens rotation with this θ be termed the ‘averaging rotation’ for the two rows. If we now apply an averaging rotation to the pair of rows of
+    4.0 4.5 5.0
+5.5 6.0
+4.0 4.5 5.0
+5.5 6.0
+4.0 4.5 5.0
+5.5 6.0
+Score
+Score
+Score
+    SMOOTHING PARAMETER ESTIMATION CRITERIA 173
+B having smallest and largest Euclidean lengths, then the range of row lengths in the modified B will automatically be reduced. Iterating this process must eventually lead to all row lengths being equal, and the product of the averaging rotations employed in the iteration yields Q.
+With this best rotation of the fitting problem, the ordinary cross validation score (4.20) can be written
+n ∥ y − μˆ ∥ 2
+Vg = [n − tr (A)]2 . (4.21)
+which is known as the Generalized Cross Validation score (GCV, Craven and Wahba, 1979; Golub et al., 1979). Notice that we do not have to actually perform the rotation in order to use GCV. Also, since the expected prediction error is unaffected by the rotation, and GCV is just OCV on the rotated problem, GCV must be as valid an es- timate of prediction error as OCV, but GCV has the nice property of being invariant.
+Figure 4.10 compares GCV, OCV and UBRE scores for some simulated data. Un- surprisingly the criteria tend to be in quite close agreement, and are all in closer agreement with each other than with the observed MSE + σ2.
+4.5.4 GCV/UBRE/AIC in the Generalized case
+The previous sections have only dealt with additive models rather than generalized additive models, but the generalization is straightforward. The GAM fitting objective can be written in terms of the model deviance (equation (2.7), section 2.1.6), as
+m D(β)+ λjβTSjβ
+j=1
+which is minimized w.r.t. β. Given λ then this objective can be quadratically approx- imated, by
+√  m
+∥ W(z − Xβ)∥2 + λjβTSjβ, (4.22)
+j=1
+where the approximation should reasonably capture the dependence of the penalized
+deviance on λ and β, in the vicinity of the current λ, and the corresponding minimiz- ing values of β. This approximation is justified in section 2.1.3, which shows that the first two derivatives of D(β) and ∥√W(z − Xβ)∥2 are approximately equal, while the approximate distributional results for the Pearson statistic and Deviance (e.g. sec- tion 2.1.7) suggest that they have approximately equal expected value.
+Now, for the problem (4.22), it is straightforward to re-use the arguments of sections 4.5.2 and 4.5.3 in order to derive a GCV score for smoothing parameter selection:
+w n∥√W(z − Xβ)∥2
+Vg = [n−tr(A)]2 . (4.23)
+Of course, this approximation is only valid locally to the λ used to find z and W,
+         
+    174 SOME GAM THEORY
+but re-using the approximation from section 2.1.3, a globally applicable GCV score (Hastie and Tibshirani, 1990) can be obtained
+Vg = nD(βˆ) . (n − tr (A))2
+Applying similar arguments to the UBRE criterion, yields
+(4.24)
+(4.25)
+(4.26)
+    and hence
+Vuw = 1∥√W(z−Xβ)∥2 −σ2 + 2tr(A)σ2. nn
+Vu = 1D(βˆ)−σ2 + 2tr(A)σ2. nn
+  Notice how this criterion is effectively just a linear transformation of AIC.
+Although the definition of Vg is intuitively very reasonable (since the deviance is specifically constructed to behave like the residual sum of squares term it is replac- ing) the given justification for Vg is not strong. In particular the value of D(βˆ) is often not all that close to that of ∥√W(z − Xβˆ)∥2, so that the final approximation in the argument leading to Vg is rather poor. One way of dealing with this would be to recognize that in reality D(βˆ) + k ≈ ∥√W(z − Xβˆ)∥2, where k is a constant which could be estimated from an initial model fit in which it is neglected. A sec- ond fit could then be performed in which the GCV score used D(βˆ) + k in place of D(βˆ). However, in practice this seems not to result in large enough improvements to be worthwhile (see exercise 9). Clearly the whole issue presents no problem for the UBRE score, for which the value of k is immaterial.
+Intuitively, it might also seem reasonable∗∗ to replace the deviance by the Pearson statistic in order to obtain GCV and UBRE scores for the generalized case. The resulting scores are:
+   and
+V gp = n   ni = 1 V ( μˆ i ) − 1 ( y i − μˆ i ) 2 [n − tr (A)]2
+1  n 2
+Vup = n V(μˆi)−1(yi −μˆi)2 −σ2 + ntr(A)σ2.
+i=1
+  Actually, these scores are a little problematic: they are more difficult to justify us- ing the sorts of arguments presented in previous sections, because of the depen- dence of V on μˆi (which also means that the Pearson statistic is not a quadratic approximation to the deviance). More seriously, they can lead to oversmoothing, which is particularly severe for binary data. It’s easy to show that for binary data E(Vgp) = n2/(n − tr (A))2, which is clearly minimized by adopting the smoothest possible model (exercise 4).
+    
+    SMOOTHING PARAMETER ESTIMATION CRITERIA
+175
+                                                                       0.0 0.2 0.4 0.6 0.8 1.0
+x
+5 10 15 20 25
+edf
+5 10 15 20 25
+edf
+5 10 15 20 25
+edf
+5 10 15 20 25
+edf
+5 10 15 20 25
+edf
+                                                   Figure4.11 Illustrationofperformanceiteration.Thetopleftpanelshows200simulatedx,y data: the x co-ordinates are uniform random deviates and the y co-ordinates are Poisson ran- dom variables with x dependent mean given by the thick curve. The data are modelled as log(μi ) = f (xi ), yi ∼ Poi(μi ) with f represented using a rank 25 penalized regression spline. The effective degrees of freedom for f were chosen by performance iteration. Working from middle top to bottom right, the remaining panels illustrate the progress of the perfor- mance iteration. In each panel the continuous curve is the (deviance based) GCV score for the model plotted against EDF (this curve is the same in each panel), while the dashed curve is the GCV score for the working linear model of the current P-IRLS iteration, against EDF. In each panel the minimum of each curve is marked. Notice how the two curves become increasingly close in the vicinity of the finally selected model, as iteration progresses: in fact the correspon- dence is unusually close in the replicate shown, often the dashed curve is a further below the continuous curve, with the performance iteration therefore suggesting a slightly more complex model. The thin continuous curve, in the upper left panel, shows the model fits corresponding to the minimum of the model GCV score and the model corresponding to the performance iteration estimate: they are indistinguishable.
+Approaches to GAM GCV/UBRE minimization
+In the GAM case there are two possible numerical strategies for estimating smooth- ing parameters using Vg or Vu minimization:
+• Vg/u can be minimized directly, which means that the P-IRLS scheme must be iterated to convergence for each trial set of smoothing parameters. This is some- times termed outer iteration, since estimation is outer to the P-IRLS loop.
+• Vw can be minimized and smoothing parameters selected for each working pe- g/u
+∗∗ at least to those as foolish as the author of this volume.
+    gcv
+y
+0.8 0.9 1.0 1.1 1.2 1.3 1.4
+0
+5 10 15
+gcv
+gcv
+0.8 0.9 1.0 1.1 1.2 1.3 1.4
+0.8 0.9 1.0 1.1 1.2 1.3 1.4
+gcv
+gcv
+0.8 0.9 1.0 1.1 1.2 1.3 1.4
+0.8 0.9 1.0 1.1 1.2 1.3 1.4
+    176 SOME GAM THEORY nalized linear model of the P-IRLS iteration. This is known as performance iter-
+ation, since it is typically rather computationally efficient.
+Performance iteration (originally proposed by Gu, 1992) usually converges, and re- quires only that we have available a reliable and efficient method for score minimiza- tion in the context of penalized least squares problems. It typically requires no more P-IRLS iterations than are required to fit a model with known smoothing parame- ters. Figure 4.11 illustrates how performance iteration works using a simple model of Poisson data. Note how the performance iteration results do not exactly match the results obtained by direct outer iteration.
+The fact that performance iteration does not exactly minimize Vu/g, of the actual
+model, is slightly unsatisfactory when it comes to comparing alternative models on
+the basis of their Vw scores — if the scores of two models are quite similar then u/g
+there is always a possibility that the model with the lower score, from performance iteration, might actually have the higher score, if you minimized the scores directly. Of course in practice this is only likely to occur when models are essentially indis- tinguishable, but it is still not entirely satisfactory. A more substantial concern with performance iteration is that it can fail to converge at all.
+The simplest sort of failure for performance iteration is as follows. At some stage in the P-IRLS a set of smoothing parameter estimates and coefficient estimates, {λ ̃ , β ̃} is obtained; this set in turn implies a working linear model and GCV score which yields a new set of estimates, {λˆ,βˆ}; this new set of estimates itself yields a new working model and GCV score, which in turn yield a new set of estimates, but these turn out to be {λ ̃ , β ̃}. This cycling never ends and convergence therefore never oc- curs. Similar problems involving cycling through a much larger number of sets of estimates also occur, so that simple tactics for detecting and dealing with this prob- lem are not viable. The cycling is related to the fitting geometry issues discussed in section 2.2.2, which are exacerbated by the way in which changing smoothing parameters modify that geometry (see section 4.10.3). This sort of problem is partic- ularly common in the presence of ‘concurvity’, for example when a model includes terms such as f1(xi) + f2(zi), but z is itself a smooth function of x: in this circum- stance the smooth functions, f1 and f2, are confounded, and there may be very little information in Vu/g from which to estimate their smoothing parameters separately: neglected dependencies in the performance iteration approach then become critical. Concurvity problems like this are very common in models which include a smooth of spatial location, and a number of covariates which themselves vary fairly smoothly over space.
+A final technical problem, with performance iteration, relates to divergence of the P-IRLS scheme. Such divergence can occasionally occur with all GLM fitting by iteratively reweighted least squares, but is easily dealt with by reducing the parameter step length taken, if divergence is detected. Unfortunately divergence is not easily detected with performance iteration, because model likelihood, GCV/UBRE score and penalized likelihood may all legitimately increase as well as decrease from one iteration to the next (see e.g. steps 2 to 3 in figure 4.11).
+    
+    NUMERICAL GCV/UBRE: PERFORMANCE ITERATION 177
+Direct outer iteration (which was proposed in O’Sullivan et al., 1986) suffers none of these disadvantages of performance iteration, but it is more computationally costly, since the P-IRLS scheme must be iterated to convergence in order to evaluate Vu/g, for each trial set of smoothing parameters. Reliable and reasonably efficient opti- mization, in this case, requires that at least first derivatives of Vu/g w.r.t. smoothing parameters be calculated, as part of the P-IRLS process.
+In the following sections the computations required for performance and outer itera- tion will be explained.
+4.6 Numerical GCV/UBRE: performance iteration
+Estimation of smoothing parameters for an additive model, or for a generalized ad- ditive model using performance iteration, requires that we can minimize the GCV score (4.21) or UBRE score (4.16) with respect to multiple smoothing parameters, for models estimated by penalized least squares. This section explains the computa- tional method by which this can be achieved in an efficient and stable manner. Gu and Wahba (1991) provided the first algorithm for this sort of problem, which exploited the special structure of the smoothing spline models in which they were interested. Wood (2000) provided a method, based on a similar optimization strategy, for the type of models considered here, but this section will follow the more stable approach of Wood (2004).
+4.6.1 Minimizing the GCV or UBRE score
+In order to fit GAMs, it will eventually be necessary to estimate smoothing parame- ters for weighted penalized least squares problems, possibly subject to linear equality constraints. But, as we saw in sections 1.8.1 and 1.8.4, a constrained weighted prob- lem can always be transformed to an un-weighted, unconstrained one, so it is with such problems that this section will deal. The penalized least squares objective con- sidered here will therefore be
+m
+Sp = ∥y − Xβ∥2 + βTHβ +   λiβTSiβ, (4.27)
+i=1
+and for a given λ, this is minimized w.r.t. β to obtain βˆ. H is any positive semi- definite matrix, which may be zero, but may also be used to allow lower bounds to be imposed on the smoothing parameters, or to regularize an ill-conditioned problem. For example, if it is required that λ1 ≥ 0.1 and λ2 ≥ 10, then we could set H = 0.1S1 + 10S2.
+One slight practical modification of the GCV and UBRE scores is worth including at this stage. Sometimes the GCV or UBRE selected model is deemed to be too wiggly, and a smoother model is desired. One way to achieve this, in a systematic way, is to increase the amount that each model effective degree of freedom counts, in the GCV
+    
+    178 SOME GAM THEORY
+or UBRE score, by a factor γ ≥ 1 (see e.g. Chambers and Hastie, 1993, p. 574). The slightly modified criteria that will be considered here are therefore:
+n∥y − Ay∥2 Vg = [n − γtr(A)]2
+and
+The dependence of Vg and Vu on λ, is through the influence matrix A, which is in
+turn obtained via the minimization of Sp.
+In the multiple smoothing parameter case there is no efficient direct method for min- imizing the GCV and UBRE scores: their evaluation is made numerically costly be the presence of the tr (A) terms in both. It is therefore necessary to adopt a numer- ical approach based on Newton’s method. That is, the score, V, is approximated in the vicinity of the current best estimate of the smoothing parameters, by a quadratic function.
+V(λ) ≃ V(λ[k]) + (λ − λ[k])Tm + 1(λ − λ[k])TM(λ − λ[k]) 2
+where m and M are the first derivative vector and second derivative matrix of V w.r.t. the smoothing parameters. It is easy to show that the minimum of the approximating quadratic is at
+λ[k+1] = λ[k] − M−1m,
+and this can be used as the next estimate of the smoothing parameters. A new approx- imating quadratic is then found by expansion about λ[k+1] and this is minimized to find λ[k+2], with the process being repeated until convergence.
+In fact several things can go wrong with Newton’s method, so some modifications are needed. Firstly, the method does not ‘know’ that the smoothing parameters must be positive, and may step to negative values, but this is easily avoided by using ρi = log(λi) as the optimization parameters. Secondly M may not be positive definite, so that the quadratic has no unique minimum: in this case the best that can be done is to search in the steepest descent direction, −m, for parameter values that will reduce the score. Finally the quadratic approximation may simply be very poor, so that stepping to its minimum actually increases the real V: in this case it is worth trying to successively half the length of the step, from ρ[k], until a step is found that actually decreases V; if this fails then steepest descent can be tried. See Gill et al. (1981) for a general coverage of optimization.
+Stable and efficient evaluation of the scores and derivatives
+The main challenge, in implementing the numerical approach outlined above, is to be able to evaluate the GCV and UBRE scores, and their derivatives, in a manner that is both computationally efficient and stable. Stability can be an issue, as the model matrix for a complex GAM can become close to column rank deficient, which can
+Vu = 1∥y−Ay∥2 + 2σ2γtr(A)−σ2. nn
+(4.29)
+(4.28)
+        
+    NUMERICAL GCV/UBRE: PERFORMANCE ITERATION 179
+cause problems with the estimation of the β parameters, let alone the smoothing parameters, if care is not taken.
+The expensive part of evaluating the GCV or UBRE/AIC criteria is the evaluation of the trace of the influence matrix of the problem (4.27), so it is this influence matrix that must be considered first:
+   m  −1
+A = X XTX + H + λiSi XT.
+i=1
+The process of getting this into a more useful form starts with a QR decomposition
+of X,
+X = QR,
+where the columns of Q are columns of an orthogonal matrix, and R is an upper tri- angular matrix (see A.6). For maximum stability a pivoted QR decomposition should actually be used here (Golub and van Loan, 1996): this has the consequence that the parameter vector and rows and columns of the Si matrices have to be permuted be- fore proceeding, with the inverse permutation applied to the parameter vector and covariance matrix at the end of the estimation procedure.
+The next step is to define S = H +  mi=1 λiSi and B as any matrix square root of S such that BTB = S. B can be obtained efficiently by pivoted Choleski decompo- sition (see ?chol in R, for example) or by eigen-decomposition of the symmetric matrix S (see e.g. Golub and van Loan, 1996). Augmenting R with B, a singular value decomposition (Golub and van Loan, 1996, LAPACK contains a suitable ver- sion) is then obtained:
+  RB   = U D V T .
+The columns of U are columns of an orthogonal matrix, and V is an orthogonal matrix. D is the diagonal matrix of singular values: examination of these is the most reliable way of detecting numerical rank deficiency of the fitting problem (Golub and van Loan, 1996; Watkins, 1991). Rank deficiency of the fitting problem is dealt with at this stage by removing from D the rows and columns containing any singular values that are ‘too small’, along with the corresponding columns of U and V. This has the effect of recasting the original fitting problem into a reduced space in which the model parameters are identifiable. ‘Too small’ is judged with reference to the largest singular value: for example, singular values less than the largest singular value multiplied by the square root of the machine precision might be deleted.
+Now let U1 be the sub matrix of U such that R = U1DVT. This implies that X = QU1DVT, while XTX + S = VD2VT and consequently
+A = QU1DVTVD−2VTVDUT1 QT = QU1UT1QT.
+Hence, tr (A) = tr  U1UT1 QTQ  = tr  U1UT1  . Notice that the main computa- tional cost is the forming the QR decomposition, but thereafter evaluation of tr (A) is relatively cheap for new trial values of λ.
+    
+    180 SOME GAM THEORY
+For efficient minimization of the smoothness selection criteria, we also need to find the derivatives of the criteria w.r.t. the smoothing parameters. To this end, it helps to write the influence matrix as A = XG−1XT where G = XTX+S = VD2VT and hence G−1 = VD−2VT. Letting ρi = log(λi) we then have that
+  and so
+∂G−1 −1∂G −1 −2 T −2 T ∂ρ =−G ∂ρG =−λiVD VSiVD V
+ii
+∂A ∂G−1 T −1 T −1 T T ∂ρ =X ∂ρ X =−λiQU1D V SiVD U1Q .
+ii
+  Turning to the second derivatives, we have
+∂2G−1 −1∂G −1∂G −1 −1 ∂2G −1 −1∂G −1∂G −1 ∂ρ∂ρ =G ∂ρG ∂ρG −G ∂ρ∂ρG +G ∂ρG ∂ρG
+      ijjiijij
+and, of course,
+This becomes
+∂2A ∂ρi∂ρj
+∂2A ∂2G−1 T ∂ρ∂ρ =X∂ρ∂ρX.
+  ij ij
+= λiλjQU1D−1VT[SjVD−2VTSi]‡VD−1UT1 QT + δji ∂A ∂ρi
+  whereB‡ ≡B+BT andδji =1,ifi=j,andzerootherwise.
+Writing α = ∥y−Ay∥2, we can now find convenient expressions for the component
+derivatives needed in order to find the derivatives of the GCV or UBRE/AIC scores.
+First define: (i) y1 = UT1 QTy; (ii) Mi = D−1VTSiVD−1 and (iii) Ki = MiUT1 U1. Some tedious manipulation then shows that:
+  while
+and
+tr ∂A  = −λitr(Ki) ∂ρi
+tr  ∂2A  =2λiλjtr(MjKi)−δjiλitr(Ki) ∂ρi∂ρj
+∂α = 2λi  y1TMiy1 − y1TKiy1  ∂ρi
+ ∂2α =2λiλjy1T[MiKj+MjKi−MiMj−MjMi+KiMj]y1+δji∂α. ∂ρi∂ρj ∂ρi
+The above derivatives can be used to find the derivatives of Vg or Vu w.r.t. the ρi. Defining δ = n − γtr(A), so that
+Vg=nα and Vu=1α−2δσ2+σ2, δ2 nn
+         
+    NUMERICAL GCV/UBRE: PERFORMANCE ITERATION 181
+then
+and
+∂Vg = n ∂α − 2nα ∂δ ∂ρi δ2 ∂ρi δ3 ∂ρi
+     ∂2Vg =−2n∂δ∂α+n∂2α−2n∂α∂δ+6nα∂δ∂δ−2nα∂2δ. ∂ρi∂ρj δ3 ∂ρj ∂ρi δ2 ∂ρi∂ρj δ3 ∂ρj ∂ρi δ4 ∂ρj ∂ρi δ3 ∂ρi∂ρj
+              Similarly
+and
+For each trial λ, these derivatives can be obtained at quite reasonable computational cost, so that Newton’s method backed up by steepest descent can be used to find the optimum λ fairly efficiently. Given the estimated λˆ, the best fit β vector is simply,
+βˆ = VD−1y1,
+while the Bayesian covariance matrix for the parameters (see section 4.8) is
+Vβ = VD−2VT.
+The weighted constrained case
+So far weights and constraints have been neglected. GAM estimation, by perfor- mance iteration, requires that smoothing parameters be estimated for the working linear models at each P-IRLS iteration, which are generally weighted. Similarly, in most cases, some linear constraints on a GAM are required to ensure identifiabil- ity of its smooth components, and, if these have not been absorbed into the basis as described in section 4.2, they must be imposed during fitting. Hence, in general the problems of interest will be of the form
+√  m
+minimize ∥ W(y−Xβ)∥2+βTHβ+ λiβTSiβ w.r.t. β subject to Cβ = 0
+i=1
+where W typically contains the iterative weights of a P-IRLS iteration, although it could also be a general positive definite matrix††, such as the inverse of the covariance matrix of the response data.
+Exactly as described in section 1.8.1, the constraints can be eliminated from the problem by forming the QR decomposition of CT, in order to find a basis for the null space of the constraints, Z. Writing β = Zβz ensures that the constraints are
+†† in which case √W is any matrix square root such that √WT√W = W.
+∂Vu =1∂α−2∂δσ2 ∂ρi n∂ρi ∂ρi n
+∂2Vu 1 ∂2α ∂2δ σ2 ∂ρ∂ρ =n∂ρ∂ρ −2∂ρ∂ρ n.
+          ijijij
+        
+    182 SOME GAM THEORY
+met. Hence, letting y ̃ = √Wy, X ̃ = √WXZ, H ̃ = ZTHZ and S ̃i = ZTSiZ the problem becomes
+m minimize∥y ̃−X ̃βz∥2 +βzTH ̃βz + λiβzTS ̃iβz w.r.t.βz
+i=1
+which is in exactly the un-weighted, unconstrained form, required for the smoothing
+parameter selection method described above.
+Transforming the parameters and their variances back to the original parameter space, after fitting, is straightforward:
+βˆ = Zβˆz and Vβ = ZVβz ZT.
+4.7 Numerical GCV/UBRE optimization by outer iteration
+The previous section detailed an effective numerical method for use with perfor- mance iteration, or to estimate a simple additive model. In this section a numerical method for ‘outer iteration’ is presented. Our aim is to minimize the GCV score,
+Vg = nD(μˆ) , (4.30) [n−γtr(A)]2
+   or UBRE score (scaled AIC),
+Vu = 1D(μˆ)−σ2 + 2γtr(A)σ2, (4.31)
+  nn
+with respect to the model smoothing parameters. Recall that μˆi is a maximum penal-
+ized likelihood estimate of μi given smoothing parameters, and tr (A) is the trace of the influence matrix of the working weighted linear model, at convergence of the P-IRLS scheme used to find μˆi.
+The basic approach is to use a Newton type method, as outlined in section 4.6.1, to minimize (4.30) or (4.31), directly. To do this, we need to evaluate the gradient vec- tor, and Hessian matrix, of Vg or Vu, which involves either iterating various deriva- tives alongside the P-IRLS model fitting iterations, or estimating the derivatives by finite differencing. In this section first derivatives are calculated exactly, as part of a modified P-IRLS iteration, while the Hessian is calculated by finite differencing of these first derivatives. Given exact first derivatives, Newton methods are usually very effective, even if second derivatives are quite crudely approximated, so this is a safe approach to take.
+4.7.1 Differentiating the GCV/UBRE function
+The derivatives of the GCV and UBRE functions, w.r.t. smoothing parameters, have similar components, so it suffices to concentrate on the GCV score. All quantities in
+    
+    NUMERICAL GCV/UBRE OPTIMIZATION BY OUTER ITERATION 183 this section are estimates at the current βˆ, but to avoid clutter I will omit hats from
+all quantities except βˆ. Writing (4.30) as Vg = nD/δ2, we have that
+and, of course,
+where ρk = log(λk). The key component in this expression is ∂βj/∂ρk which has to be calculated iteratively as part of the P-IRLS calculation. ∂δ/∂ρk depends on the derivative of tr(A) w.r.t. ρk, which must also be obtained.
+To calculate these derivatives, the P-IRLS iteration of section 4.3 is generalized, so that one iteration step becomes:
+1. Evaluate the pseudodata ,
+zi = ∂ηi (yi − μi) + ηi, ∂μi
+and corresponding derivatives,
+∂zi = (yi − μi)g′′(μi)∂μi ∂ηi . ∂ρk ∂ηi ∂ρk
+Note that ηi = Xiβˆ, is the ‘linear predictor’ for the ith datum. 2. Evaluate the weights,
+∂ D  n y i − μˆ i
+∂β =−2 ωiV(μˆ)g′(μˆ)Xij
+  j i=1 i i ∂D= p ∂D∂βj.
+   ∂ρk j=1 ∂βj ∂ρk
+    and derivatives,
+wi =  V (μi)g′(μi)2 −1/2 ,
+∂wi =−1wi3 ∂V ∂μi +2V(μi)g′′(μi) ∂ηi.
+     ∂ρk 2 ∂μi ∂ηi ∂ρk
+3. Drop any observations (for this iteration only) for which wi = 0 or ∂μi/∂ηi = 0.
+4. Find the parameters, βˆ, minimizing
+  wi2(zi − Xiβ)2 + βTHβ +   eρi βTSiβ ik
+and the derivative vector, ∂βˆ/∂ρk, for the next iteration.
+Notice that the iteration requires the second derivative of the link w.r.t. μi, and the first derivative of the variance function: these are not required by the usual P-IRLS iteration.
+The penalized least squares step (4), and corresponding derivative update, need to be spelled out. This is facilitated by first transforming the pseudodata so that
+z ′ = w z a n d ∂ z i′ = ∂ w i z + w ∂ z i . i i i ∂ρk ∂ρk i i∂ρk
+       
+    184 SOME GAM THEORY Now define W = diag(w) and S = H +  k eρk Sk. Formally, we have that
+βˆ = (XTW2X + S)−1XTWz′ = Bz′ by definition of B. Similarly the influence matrix is formally:
+A = WX(XTW2X + S)−1XTW.
+Of course these expressions are not suitable for computation. Instead, find the QR
+decomposition
+(as in the methods for performance iteration, this would usually be done with pivot-
+ing) and find a square root E, such that ETE = S. Now form the SVD,   RE   = U D V T .
+Again some truncation of this SVD may be performed at this stage, exactly as for the performance iteration method. Let U1 be the first p rows of U, so that R = U1DVT. Now
+and
+It is also useful to define G = (XTW2X + S)−1 = VD−2VT.
+WX = QR
+B = VD−1UT1 QT A = QU1UT1 QT.
+(4.32) (4.33)
+∂ βˆ = ∂ B z ′ + B ∂ z ′ ∂ρk ∂ρk ∂ρk
+   and some effort then yields:
+∂B = −2BTkA − eρk G−1SkB + BTk ∂ρk
+where Tk = diag{∂wi/∂ρk/wi}. Similarly
+∂A =TkA−2ATkA−eρkBTSkB+ATk.
+  ∂ρk
+Actual evaluation of the trace of the derivatives of A, and of the product of B’s
+derivatives and z′ uses the representations of A and B given in (4.33) and (4.32).
+In practice ∂βˆ/∂ρk must be updated at each step of the P-IRLS iteration, while the slightly more expensive, ∂tr (A) /∂ρk, need only be evaluated once the iteration has converged.
+Given this numerically efficient and stable method for evaluating GCV or UBRE scores, and their derivatives w.r.t. smoothing parameters, smoothing parameter es- timation can proceed by Quasi-Newton methods, or by the Newton method, with finite differencing to obtain an estimate of the Hessian. It is possible to extend the derivative calculations further, in order to obtain an exact Hessian, but the resulting expressions become somewhat involved, and the benefits of an exact Hessian are nothing like as substantial as the benefits of exact first derivatives.
+    
+    DISTRIBUTIONAL RESULTS 185
+4.8 Distributional results
+The previous few sections have shown how point estimates for the model parameters, β, and smoothing parameters, λ, can be obtained, but it is also of interest to quantify the uncertainty of those estimates. In particular it would be useful to be able to find confidence intervals for the parameters, β, and quantities derived from them, such as the estimates of the smooth terms themselves. Similarly it would be useful to be able to test whether terms were required in a model at all.
+There are two approaches to uncertainty estimation. Firstly, writing S = H+ i λiSi, and recalling that the parameter estimators are of the form,
+βˆ = (XTWX + S)−1XTWy,
+where the data or pseudodata, y, have covariance matrix W−1φ, we have that
+Ve = (XTWX + S)−1XTWX(XTWX + S)−1φ
+is the covariance matrix for the estimators βˆ. From the normality of y, or large sam- ple multivariate normality of XTWy, (see section 4.8.3), it follows that, approxi-
+mately
+βˆ ∼ N(E(βˆ),Ve). (4.34)
+Generally E(βˆ) ̸= β, so that there are problems in using this result for calculating confidence intervals. However, if β = 0 then E(βˆ) = 0, with the same holding approximately for some subsets of β: hence the result can be useful for testing model terms for equality to zero.
+An alternative is to use a Bayesian approach to uncertainty estimation, which results in a Bayesian posterior covariance matrix for the parameters,
+Vβ = (XTWX + S)−1φ
+and a corresponding posterior distribution for those parameters,
+β ∼ N (βˆ, Vβ ). (4.35)
+Once again, for non normal data, posterior normality of the parameters is an approx- imation justified by large sample results. This latter result can be used directly to calculate credible intervals for parameters.
+The remainder of this section, derives the Bayesian results, and considers the calcu- lation of p-values from the frequentist distribution of the estimators.
+4.8.1 Bayesian model, and posterior distribution of the parameters, for an additive model
+Consider an additive model, for which we have selected smoothing bases and penal- ties, so that the model can be written as
+Y = Xβ + ε, ε ∼ N(0, W−1σ2), (4.36)
+    
+    186 SOME GAM THEORY
+to be fitted by minimization of the penalized least squares objective
+m
+∥W1/2(y − Xβ)∥2 +   λiβTSiβ. (4.37)
+i=1
+where W is some positive definite weight matrix. Assume that the model has already
+been re-parameterized to eliminate any identifiability constraints.
+Following Wahba (1983) and Silverman (1985), we can recognize that, by imposing a particular penalty, we are effectively imposing some prior beliefs about the likely characteristics of the correct model. That is, the model structure allows considerably more flexibility than we believe is really likely, and we choose to penalize models that are in some sense too wiggly. It is natural to give a Bayesian structure to this approach, by specifying a prior distribution on the parameters β.
+Specifically let the (generally improper) prior for β be: f (β)∝e−1βTPSi/τiβ
+where the τi are parameters controlling the dispersion of the prior. The prior is ap- propriate since it makes explicit the fact that we believe smooth models to be more likely than wiggly ones, but it gives equal probability density to all models of equal smoothness.
+From the original model specification we know that the conditional distribution of y given β is
+f (y|β) ∝ e− 1 (y−Xβ)T W(y−Xβ)/σ2 . 2
+So using Bayes rule we have:
+f(β|y) ∝ e−1(yTWy/σ2−2βTXTWy/σ2+βT(XTWX/σ2+PSi/τi)β) 2
+∝ e− 1 (−2βT XT Wy/σ2 +βT (XT WX/σ2 +P Si /τi )β) 2
+Now, if α ∼ N([XTWX +   λiSi]−1XTWy, [XTWX +   λiSi)]−1σ2), then the probability density function for α is:
+fα(α) ∝ e−1(α−(XTWX+PλiSi)−1XTWy)T(XTWX+PλiSi)(α−(XTWX+PλiSi)−1XTWy)/σ2
+2
+∝ e− 1 (−2αT XT Wy/σ2 +αT (XT WX/σ2 +P λi Si /σ2 )α) 2
+Comparing fα(α) and f(β|y), it is clear that if we choose τi = σ2/λi then β|y ∼ N([XTWX +   λiSi]−1XTWy, [XTWX +   λiSi]−1σ2).
+ β2
+     That is
+This result yields a self consistent basis for constructing Bayesian “confidence inter-
+β | y ∼ N ( βˆ , ( X T W X +   λ i S i ) − 1 σ 2 ) . ( 4 . 3 8 ) vals”, or more correctly “credible intervals”, for any quantity derived from β.
+Clearly the problem of choosing the τi is equivalent to the problem of choosing the λi, and in practice it is usual to simply plug the GCV or UBRE estimates, λˆi into
+    
+    DISTRIBUTIONAL RESULTS 187
+(4.38). An estimate of σ2 is also usually required and we can use (4.13) from section 4.4.1, for this purpose.
+4.8.2 Structure of the prior
+To some extent, the prior on β has been chosen to give the rather convenient form for the distribution of β|y, that intuition might suggest is sensible. However the structure of the prior is rather reasonable in any case. Firstly, note that the prior is equivalent to assuming that each of the components of model wiggliness, βTSiβ, is an inde- pendent exponentially distributed random variable with expected value τi. The inde- pendence assumption is quite natural in situations in which the penalties are “non- overlapping”, for example when   Si is block-diagonal, as in the case for most of the GAMs considered here.
+To explore the prior structure further, first define S ≡  Si/τi. Since S will gen- erally not be of full rank, the prior fβ is generally improper, being “almost” multi- variate normal. Re-parameterizing in terms of the eigen-basis of S clarifies this. Let S = UDUT where the columns of U are the eigenvectors of S, and the diagonal matrix D has the eigenvalues of S arranged in order of decreasing magnitude on its leading diagonal. The model fitting problem, and Bayesian analysis, are invariant‡‡ to re-parameterization in terms of βu = UTβ.
+Given this basis change βTSβ ≡ βuTDβu, but the rank deficiency of S generally means that the lower right portion of D is zero. Hence the last few elements of βu are completely un-penalized. Accordingly βu can be partitioned into parts corresponding to the wiggly and smooth components of the model: βuT = [βwT,βsT]T. Now, given the prior for β, the prior for βu is:
+f (β )∝e−1βTDβu/σ2 βuu 2u
+but if D+ is the largest sub matrix of D having strictly positive elements on its leading diagonal, then
+f (β)∝e−1βTD+βw/σ2. βuu 2w
+i.e. the prior is a multivariate normal for the non-smooth component of the model (as measured by the penalty), multiplied by a completely uninformative improper prior on the parameters corresponding to the components of the model that are of zero wiggliness, according to the penalty.
+4.8.3 Posterior distribution for a GAM
+Now consider a GAM, so that the model becomes
+g(μi) = Xiβ, μi ≡ E(Yi), Yi ∼ exponential family, (4.39)
+‡‡ The invariance is by orthogonality of U: it may readily be verified, for example, that the Bayesian covariance matrix for βu is (UTXTWXU + σ2D)−1σ2 corresponding to the Bayesian covariance matrix for β already given.
+      
+    188 SOME GAM THEORY where g is a known link function, and it is estimated by minimization of
+1  m
+−l(β) + 2 λiβTSiβ, (4.40)
+i
+with respect to β. l(β) is the log likelihood of the model.
+As we have seen repeatedly (4.40) is minimized by iteratively solving the problem,
+    2 m
+minimise   W[k](Xβ − z[k])  + λiβTSiβ w.r.t. β,
+i=1
+where k is the iteration index,
+z[k] = Xβ[k] + G[k](y − μ[k]),
+μ[k] is the current model estimate of E(Yi), G[k] is a diagonal matrix such that G[k] = i ii
+g′(μ[k]), and W is a diagonal weight matrix where i
+Wii =  G[k]2V  μ[k]  −1 . ii i
+V (μi) gives the variance of Yi to within a scale parameter. The penalized least squares problem can be viewed as a quadratic approximation to the penalized likeli- hood in the vicinity of the true parameters.
+The iterative least squares approach suggests working in terms of the random vector
+z = Xβ + G(y − μ).
+Then, E(z|β) = Xβ, and the covariance matrix of z|β is W−1φ (where φ is the scale parameter). Defining v = XTWz, it follows that E(v|β) = XT WXβ and the covariance matrix of v|β is XTWXφ. It can further be shown that as sample size, n, tends to infinity the distribution of v|β tends to the multivariate normal
+N(XTWXβ, XTWXφ). (4.41)
+This last result follows from the Central Limit Theorem (Lindeberg, 1922) and the fact that a random vector v has a multivariate normal distribution if and only if cTv has a univariate normal distribution, for any vector of constants c.
+Specifically, if c is any vector of constants then, subject to some conditions, the distribution of,
+cTv = cTXTWz
+tends to normality as n → ∞, by the Central Limit Theorem of Lindeberg (1922).
+Hence the distribution of v tends to a multivariate normal distribution as n → ∞.
+Before using (4.41) it is important to examine the conditions for validity of the ap- proximation, which follow from Lindeberg’s conditions for the validity of the CLT (see e.g Feller, 1957). First let,
+ai = cjXijWi, j
+      
+    DISTRIBUTIONAL RESULTS so that,
+189
+Defining
+and
+n
+cTv =  aizi.
+i=1
+n
+s 2n =   a 2i φ / w i
+i=1
+Ui =  aizi −aiμi if |aizi −ai −μi|≤εsn
+0 if |aizi −ai −μi|>εsn for all ε, Lindeberg’s conditions are that:
+1  E(Ui2)→1 s2n
+ andsn → ∞asn → ∞.Inthecurrentcontextsn → ∞isagiven,andprovided that the ai are bounded, then the first condition will be satisfied if Pr[Ui = 0] → 0 as n → ∞. The elements of c do not change as the limit is taken, so boundedness of the ai is given by boundedness of the XijWi. Hence the condition will be met if:
+lim Pr(|aizi −aiμi|>ε a2iφ/wi)=0∀ε. n→∞ i
+By Chebyshev’s inequality
+Pr(|az −aμ|>ε a2φ/w)< a2iφ/wi
+i i i i i i [  a2φ/wi]2 ε2
+ iii
+a 2i / w i [ ia2i/wi]2 →0
+as n → ∞ for the result to hold. Since c does no more than form weighted sums over columns of X, a sufficient condition for the last condition to hold is that as n → ∞:
+This last condition is actually interpretable, and says that no element of X should dominate the fit, as the sample size tends to infinity: it is a fairly mild condition in most penalized regression settings.
+Having established its validity, we can now use the large sample approximation (4.41), for the distribution of v|β, and procede as in section 4.8.1, to obtain the posterior for β:
+β|v ∼ N([XTWX +   λiSi]−1v, [XTWX +   λiSi]−1φ), (4.42)
+which is (4.38). Plugging in the v and W estimates at convergence of the P-IRLS al- gorithm, along with the estimated smoothing parameters, and if necessary an estimate
+so it is sufficient that
+ (XijW1/2)2 i
+  (XijW1/2)2 2 →0∀i,j. ii
+     
+    190 SOME GAM THEORY
+for φ, these results can be used to set approximate Bayesian confidence intervals for any quantity derived from β. For many exponential family distributions the scale pa- r a m e t e r φ i s k n o w n , b u t i f a n e s t i m a t e i s n e e d e d t h e n φˆ = ∥ W 1 / 2 ( y − μˆ ) ∥ 2 / t r ( I − A ) can be used, where A is the influence (or hat) matrix for the model.
+4.8.4 Bayesian confidence intervals for non-linear functions of parameters
+Given the results of the previous sections, it is straightforward to find confidence in- tervals for linear functions of the model parameters, including the component func- tions of a GAM, for example. Bayesian confidence intervals for non-linear functions of the parameters can also be obtained by simulation from the posterior distribution of β. Specifically if G(β) is the function of interest, then the approximate posterior cumulative distribution function Fˆ(g) for G can be obtained by simulating a set of random vectors, {βi∗ : i = 1, . . . N }, from the multivariate normal posterior for β so that:
+ˆ 1 N
+F ( g ) = N H ( g − G ( β i∗ ) )
+i=1
+where H is the Heaviside function (jumping from 0 to 1 at g). Bayesian “confidence
+intervals” are obtained from the quantiles of this distribution in the obvious manner, and are of considerable practical use. Previous approaches to finding confidence in- tervals for G(β) have used bootstrapping (e.g. Borchers et al., 1997; Augustin et al., 1998): but in the usual case, in which evaluation of G is very much cheaper than model fitting, the cost of the intervals proposed here will be about the same as the cost of performing one bootstrap replicate.
+4.8.5 P-values
+Now consider the problem of testing whether some subset, βj, of β is identically zero. In a GAM context, if βj contains the coefficients for a single smooth term, then E(βˆj ) ≈ 0 if βj = 0. In fact if the covariates of the smooth are uncorrelated with other smooth terms in the model then E(βˆj ) = 0, but otherwise there is a (usually) weak dependence of E(βˆj ) on the bias in the other penalized model terms.
+Extracting the frequentist covariance matrix of βˆj , Vβˆj , from Ve (see (4.34)), we have that under the null hypothesis βj = 0 and so,
+βˆ j ∼ ̇ N ( 0 , V βˆ j ) .
+From this it follows that, if Vβˆj is of full rank, then under the null hypothesis
+βˆ T V − 1 βˆ ∼ ̇ χ 2 , j βˆj j d
+where d = dim(βj ). In fact the action of the penalty often suppresses some dimen- sions of the parameter space, so that Vβˆj is not of full rank (for example if a cubic
+     
+    DISTRIBUTIONAL RESULTS 191 spline term, subject to a centering constraint, is heavily penalized it becomes effec-
+tively a straight line, with only one degree of freedom). If r = rank(V ˆ ) and Vr− βj βˆj
+is the rank r pseudoinverse of the covariance matrix, then testing is performed using the result that under the null,
+βˆTVr−βˆ ∼ ̇ χ2. j βˆj j r
+Specifically the p-value for the test that βj = 0 is Pr[X > βˆjTVr−βˆj] where βˆj
+X ∼ χ2r. r is usually determined numerically, while forming the pseudoinverse of the covariance matrix.
+If Ve, and hence Vβˆj , contain an unknown scale parameter, φ, then it is usually better to base p-value calculations on the approximate result,
+βˆ T Vˆ r − βˆ / r j βˆj j
+φˆ / ( n − e d f ) ∼ F r , e d f ,
+where ‘edf’ denotes the estimated degrees of freedom for the model (the denominator
+here is effectively the GCV score).
+The p-values, calculated in this manner, behave correctly for un-penalized models, or models with known smoothing parameters, but when smoothing parameters have been estimated, the p-values are typically lower than they should be, meaning that the tests reject the null too readily. This is because smoothing parameter uncertainty has been neglected in the reference distributions used for testing. As a result these distributions are typically too narrow, so that they ascribe too low a probability to moderately high values of the test statistics. Limited simulation experience suggests that the p-values can be as little as half the correct value at around the 5% level, when the null is true, although they may be more accurate than this in other circumstances. Note that this problem is in no way unique to GAMs. If you perform model selection on any model, and then hypothesis test using the selected model, the p-values associ- ated with model terms will not be strictly correct, since they neglect model selection uncertainty. The advantage in performing model selection before hypothesis testing is that the elimination of unnecessary model degrees of freedom increases power.
+In practical terms, if these p-values suggest that a term is not needed in a model, then this is probably true, but if a term is deemed ‘significant’ it is important to be aware that this significance may be overstated. If hypothesis testing is a key aim of an analysis, then it may sometimes be preferable to base tests on overspecified un- penalized models, so that although the fits may be excessively wiggly, the p-values will be correct: the price to pay will be some loss of power. If adopting this approach, it is quite important to avoid allowing the smooths excessively flexibility, otherwise tests will have low power. Hence the choice of basis dimension for a smooth becomes quite important: it needs to be large enough that the model structure can include a reasonable approximation to the truth, but small enough to avoid loos of power. See question 11 in Chapter 5 for further discussion.
+     
+ 192
+SOME GAM THEORY
+f3(x)
+0.0 0.2 0.4 0.6 0.8 1.0
+f1(x)
+f2(x)
+0.0 0.2 0.4 0.6 0.8 1.0
+0.0 0.2 0.4 0.6 0.8 1.0
+xxx
+f4(x, z) f5(x, z)
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+xx
+zf
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.5 1.0 1.5 2.0
+zf
+0.0 0.2 0.4 0.6 0.8 1.0 −3 −2 −1 0 1 2 3
+f
+0246
+Figure 4.12 The five test functions used in the simulation study reported in section 4.9.1. 4.9 Confidence interval performance
+Confidence intervals based on section 4.8 rely on large sample results to deal with non-Gaussian distributions, and treat the smoothing parameters as fixed, when in reality they are estimated from the data. It is not clear how these assumptions will affect the coverage probabilities of the intervals, so it worth looking at simulation evidence. This section first examines coverage probabilities of single smooths and then GAMs, via simulation.
+4.9.1 Single smooths
+This section examines the performance of the intervals for models involving only sin- gle smooth terms, examining Gaussian and non-Gaussian cases. Five test functions, plotted in figure 4.12, were employed:
+f1(x) = 2 sin(πx), f2(x) = e2x − 3.75,
+f3(x) = x11(10[1 − x])6 + 10(10x)3(1 − x)10 − 1.4,
+f4(x,z) = πσxσz  1.2e−(x−0.2)2/σx2−(z−0.3)2 +0.8e−(x−0.7)2/σx2−(z−0.8)2/σz2 ,
+f5(x, z) = 1.9  1.45 + ex sin(13[x − 0.6]2)  e−z sin(7z).
+ CONFIDENCE INTERVAL PERFORMANCE 193
+abc
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+xxx
+def
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+xxx
+ghi
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+xxx
+Figure 4.13 Illustration of the 3 noise levels employed for each of the 3 error families exam- ined. (a) Gaussian, σ = 0.2. (b) Gaussian, σ = 0.05. (c) Gaussian, σ = 0.02. (d) Poisson, pmax = 3. (e) Poisson, pmax = 6. (f) Poisson, pmax = 9. (g) Binomial nbin = 1. (h) Binomial nbin = 3. (i) Binomial nbin = 5.
+For each function, data were simulated from 3 error models (normal, Poisson and binomial) at each of 3 signal to noise ratios, at each of two sample sizes (n = 200 or n = 500). In each case, covariates were simulated from a uniform distribution on the unit interval or unit square. The functions were linearly scaled, as detailed below, and each was then applied to the simulated covariate to give the ‘true’ linear predictor for each function. The inverse of the canonical link for the distribution was applied to the linear predictor, to obtain the true response means, and data were simulated from the appropriate distribution, with that mean.
+In the normal case the functions were scaled to have range [0,1] and normal random deviates with one of three noise levels (σ = 0.02, 0.05 or 0.2) were then added to the true expected values. In the Poisson case the functions were scaled so that the true means lay in [0.2, pmax] where pmax was one of 3, 6 or 9, and Poisson deviates with the required mean were simulated. In the binomial case the functions were scaled so
+yyy
+0.0 0.4 0.8 0123456 −0.5 0.5 1.0
+yyy
+0.0 0.4 0.8 02468 0.0 0.4 0.8
+yyy
+0.0 0.4 0.8 0 4 8 12 0.0 0.4 0.8
+      194 SOME GAM THEORY
+normal
+.2 .05 .02 .2 .05 .02 .2 .05 .02 .2 .05 .02 .2 .05 .02 f1 f2 f3 f4 f5
+Poisson
+369369369369369 f1 f2 f3 f4 f5
+binomial
+135135135135135 f1 f2 f3 f4 f5
+Figure 4.14 Results from the confidence interval performance simulation study detailed in section 4.9.1. The three figures show results for the three noise models. Results are shown for each function at each noise level (see text for explanation of numbers). ◦ shows average realized coverage probabilities for sample sizes of 200, while • is the equivalent for n = 500. Dashed horizontal lines show the nominal coverage probabilities for the intervals examined, and vertical lines show ± 2 standard error bands for the realized coverage probabilities.
+that the binomial probabilities lay in the range [0.02,0.98], and data were simulated from binomial distributions with denominator nbin of 1, 3 or 5. Figure 4.13 shows data simulated in this way for f3, with each noise level shown for each distribution.
+500 replicate data sets were generated for each function at each combination of sam- ple size, distribution and noise level. Each replicate data set was modelled using a thin plate regression spline, fitted by penalized likelihood maximization, with smoothing parameter chosen by GCV in the normal case and UBRE via performance iteration otherwise. TPRS basis dimensions of 10, 10, 20, 40 and 100 where used for func- tions 1 to 5 respectively: these values were chosen to be as small as possible subject to the constraint that inability of the basis to fit the underlying truth should have a
+                                                                                                                                                                                                                                                                                                                                                                                                                                        coverage probability coverage probability coverage probability
+0.85 0.90 0.95 1.00 0.85 0.90 0.95 1.00 0.85 0.90 0.95 1.00
+ CONFIDENCE INTERVAL PERFORMANCE
+195
+0.0 0.2 0.4
+x1
+x3
+0.6
+0.6
+0.8
+0.8
+1.0
+1.0
+0.0
+0.0
+0.2
+0.2
+0.4 0.6
+x2
+0.4 0.6
+x4
+0.8 1.0
+0.8 1.0
+−6 −4 −2 0
+2 4 6
+−6 −4 −2 0 2 4 6
+−6 −4 −2 0
+2 4 6
+−6 −4 −2 0 2 4 6
+^f 3
+^f 1
+^f 6
+^f 2
+0.0 0.2 0.4
+Figure 4.15 Example component wise Bayesian confidence intervals for an additive model in which the linear predictor is the sum of (unscaled) functions 1, 2, 3 and 6 (see section 4.9.2) applied to independent covariates simulated from a uniform distribution. The gaussian noise standard deviation was 2 and the sample size was 400. Solid curves are the function estimates, and dashed curves delimit the 95 % confidence regions (credible regions) for each function. Smoothing parameter selection was by GCV.
+negligible affect on the realized coverage probabilities. For each replicate, coverage proportions were obtained for 90%, 95% and 99% confidence intervals for the func- tions evaluated at the covariate values. From the resulting 500 ‘across the function’ coverage proportions, an overall mean coverage probability, and its standard error, were calculated.
+Figure 4.14 shows the results. Clearly, for these single functions the confidence inter- vals perform well: the realized coverage probabilities are usually close to the nomi- nal. The exception is instructive: f2 sometimes shows low coverage, and this seems to relate to a tendency to wrongly select a straight line model, for this function, when the signal to noise ratio is low.
+4.9.2 GAMs and their components
+A further study was conducted to investigate the effectiveness of these confidence intervals in a GAM setting. Two sets of simulations were carried out. In each, n in- dependent values were simulated from U (0, 1) to simulate 4 independent covariates. In the first example, the linear predictor was made up of a sum of linearly scaled ver-
+       196 SOME GAM THEORY
+normal
+.2 .05 .02 .2 .05 .02 .2 .05 .02 .2 .05 .02 .2 .05 .02 all f1 f2 f3 f6
+Poisson
+369369369369369 all f1 f2 f3 f6
+binomial
+135135135135135 all f1 f2 f3 f6
+Figure 4.16 Results from the first GAM confidence interval performance simulation study de- tailed in section 4.9.2. The three figures show results for the three noise models. Results are shown for the whole model (left) and each component function at each noise level (see text for explanation of numbers). ◦ shows average realized coverage probabilities for sample sizes of 200, while • is the equivalent for n = 500. Each realized coverage probability is joined to its corresponding nominal probability by a vertical line. Dashed horizontal lines show the nominal coverage probabilities for the intervals examined.
+sions of functions 1, 2 and 3, from section 4.9.1, plus the null function 0 (referred to as f6 below), applied to these simulated covariate values. Figure 4.15 shows compo- nent wise intervals calculated from the fit to one such replicate (but without function scaling in the data simulation).
+Except for f6, the functions were scaled to have the same range before being summed. This linear predictor was then treated in exactly the same manner as in the univariate cases of section 4.9.1, so that the noise levels have broadly the same interpretation as before. The second set of simulations was carried out in a similar manner, but with true linear predictor given by a sum of scaled versions of functions 1, 3 and 5.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                        coverage probability coverage probability coverage probability
+0.70 0.80 0.90 1.00 0.70 0.80 0.90 1.00 0.70 0.80 0.90 1.00
+     CONFIDENCE INTERVAL PERFORMANCE 197
+normal
+.2 .05 .02 .2 .05 .02 .2 .05 .02 .2 .05 .02 all f2 f3 f6
+Poisson
+369369369369 all f2 f3 f6
+binomial
+135135135135 all f2 f3 f6
+Figure 4.17 As figure 4.16, but for the second GAM simulation study detailed in section 4.9.2.
+GAMs were fitted to each of 500 replicates at each sample size (n = 200 or 500), model structure, distribution and error level combination. The model terms were rep- resented using penalized thin plate regression splines, and the models were fitted by penalized likelihood maximization with smoothing parameters selected by GCV in the normal cases and UBRE via performance iteration in the Poisson and binomial cases. Confidence intervals for the linear predictor, at the simulated covariate values, were obtained, along with confidence intervals for each component function, evalu- ated at the simulated values of its covariate argument(s). 99%, 95% and 90% intervals were calculated in all cases. The proportion of these intervals including the truth was calculated for each replicate (i.e. the assessment was made ‘across the function’), and was eventually averaged across all replicates.
+Figure 4.16 summarizes the results from the first model structure. The results demon- strate that while the overall coverage for the whole model is reasonably close to nom- inal, the component wise coverages are quite unreliable. This pattern is confirmed by
+                                                                                                                                                                                                                                                                                                                                                  coverage probability coverage probability coverage probability
+0.70 0.80 0.90 1.00 0.70 0.80 0.90 1.00 0.70 0.80 0.90 1.00
+    198 SOME GAM THEORY
+the results for the second model structure shown in figure 4.17, where again the cov- erage probabilities, realized across the model, for the expected values of the response are close to nominal, while the component wise coverages are poor.
+In summary: confidence intervals for the ‘whole model’ appear to be reliable, while component-wise intervals can only be used as a rough guide to the uncertainty of the components. A likely explanation for this problem is that the intervals are conditional on the smoothing parameters. Because it is relatively easy to get the overall amount of smoothing right, whole model intervals behave well. However, getting smoothing parameters for individual components right is more difficult, and this may be what causes the poor performance of component wise intervals.
+4.9.3 Unconditional Bayesian confidence intervals
+One possibility for improving the performance of the intervals is to extend the Bayesian treatment further, and base intervals on the joint posterior density,
+f(β, λˆ|y) = f(β|λˆ, y)f(λˆ|y).
+By accounting for smoothing parameter uncertainty, the performance of the component- wise intervals should be improved. Provided that we are only interested in obtaining confidence intervals for quantities that are functions of β, but not λ, there is no diffi- culty in working in terms of λˆ rather than λ itself. However, f(λˆ|y) is unknown. To obtain this distribution would probably require a fully Bayesian treatment, in which priors were also specified for the τi (or λi), but then one might as well explore the full posterior distribution f(β,λ|y). While possible, (see e.g. Fahrmeir and Lang, 2001) this is a computer intensive undertaking, requiring MCMC simulations that are substantially less routine to use than the penalized regression methods employed here.
+A pragmatic alternative is to replace f (λˆ |y) by a parametric bootstrap approximation to the sampling distribution of λˆ, fλˆ(λˆ), say, so that
+f(β,λˆ|y) ≈ f(β|λˆ,y)fλˆ(λˆ).
+If this is done, then the following practical algorithm can be used:
+1. Fit the penalized regression model to response data y, selecting λ by GCV or
+similar, to obtain estimates λˆ[1]. Let the corresponding parameter estimates be
+βˆ[1] and the estimated parameter covariance matrix be Vˆ [1]. β
+2. Repeat steps 3 to 5 for k = 2...Nb.
+3. Based on the fitted model from step 1, simulate a parametric bootstrap response vector y[k]. That is, simulate random deviates with the appropriate response dis- tribution, and mean given by the fitted values from step 1.
+4. Fitthepenalizedregressionmodeltothebootstrapdata,y[k],toobtainabootstrap estimate of the smoothing parameters, λˆ[k].
+    
+    CONFIDENCE INTERVAL PERFORMANCE 199
+normal
+.2 .05 .02 .2 .05 .02 .2 .05 .02 .2 .05 .02 .2 .05 .02 all f1 f2 f3 f6
+Poisson
+369369369369369 all f1 f2 f3 f6
+binomial
+135135135135135 all f1 f2 f3 f6
+Figure 4.18 Coverage probability results for the first GAM from section 4.9.2, for a sample size of 200, but now using the unconditional intervals of section 4.9.3. Details are described in the caption of figure 4.16, to which this figure should be compared. Notice the huge im- provement in the performance of the component wise intervals, when smoothing parameter uncertainty is accounted for.
+5. Fit the penalized regression model to y, using the smoothing parameters λˆ[k], to obtain parameter estimates and estimated covariance matrix, βˆ[k] and Vˆ [k].
+6. Tosimulate,approximately,fromtheposteriorf(β,λˆ|z),generatearandominte-
+ger, j, from a discrete uniform distribution on {1, . . . , Nb} and simulate a random
+β f r o m N ( β [ j ] , Vˆ [ j ] ) . β
+Given steps 1 to 5, repeated simulations using step 6 can be used to find approximate Bayesian confidence intervals for any function of the parameters, β. The method offers substantial advantages over direct bootstrapping to find confidence intervals. Since bootstrapping is only used to approximate the distribution of the smoothing pa-
+                                                                                                                                                                                                       β
+    coverage probability coverage probability coverage probability
+0.70 0.80 0.90 1.00 0.70 0.80 0.90 1.00 0.70 0.80 0.90 1.00
+    200 SOME GAM THEORY rameters, there is no need to worry about the smoothing induced bias in the bootstrap
+βˆ, since they are not going to be used to obtain confidence intervals.
+Similarly, since we are typically only interested in confidence intervals on quanti- ties that are a function of β, and not λˆ, a rather small Nb will usually be tolerable, offering substantial computational savings, relative to a pure bootstrapping method (simulation from f(β|λˆ,y) is very cheap computationally, at least once the square root of the covariance matrix has been evaluated for a given λˆ).
+Figure 4.18 is the equivalent to figure 4.16, but with confidence intervals calculated by the above method, using Nb = 20. Notice that the intervals now show a tendency to over cover a little, but that the component wise confidence intervals are substan- tially improved. The only very poor result is for the nuisance function f6, where the intervals over cover at all confidence levels. This is likely to result from the fact that the true smoothing parameter is infinite for this function. Hence the only error that can be made is to under-smooth and therefore produce intervals that over-cover.
+4.10 Further GAM theory
+This section covers some further results that are useful for applied modelling with GAMs, as well as some material that is just interesting.
+4.10.1 Comparing GAMs by hypothesis testing
+Sometimes it is desirable to test a null hypothesis that the simpler of two nested GAMs is correct, against the alternative that the larger of the two is correct. As in the GLM case discussed in section 2.1.6, it is sensible to proceed by using the log- likelihood ratio (i.e. difference in deviance between the two models) as a test statis- tic, where the likelihoods are now evaluated at the maximum penalized likelihood estimates. If ηˆ0 is the estimated linear predictor for the null model, and ηˆ1 is the equivalent for the alternative, then the test statistic is
+λ = 2[l(ηˆ1) − l(ηˆ0)].
+Unfortunately the sampling distribution of λ, under the null, is unknown, and we are
+forced back onto rather crude approximations.
+In particular, if we condition on the smoothing parameters (i.e. treat them as known, rather than estimated) then a rough approximation is that under the null
+λ ∼ χ2EDF1−EDF0 . (4.43) i.e. that λ follows a χ2 distribution with degrees of freedom given by the difference
+in effective degrees of freedom between the two models.
+This approximation is most easily justified for penalized regression spline smooths.
+    
+ FURTHER GAM THEORY
+201
+0.8 1.0
+0.8 1.0
+0.0 0.2 0.4
+x0
+x2
+0.6
+0.6
+0.8
+0.8
+1.0
+1.0
+0.0
+0.0
+0.2
+0.2
+0.4 0.6
+x1
+0.4 0.6
+x3
+s(x2,8)
+s(x0,5)
+−10 −5 0 5 10
+−10 −5 0 5 10
+s(x3,1)
+s(x1,2)
+−10 −5 0 5 10
+−10 −5 0 5 10
+0.0 0.2 0.4
+Figure 4.19 Illustration of the similarity between the estimated terms of a GAM represented using penalized regression splines (solid curves) and pure regression splines (dashed curves — based on thin plate regression splines). Both models are fitted to the same data, and the effective degrees of freedom of each penalized term matches the degrees of freedom of its pure regression equivalent. Partial residuals are shown to give an indication of the scale of variability in the data. In this example the mean square difference between the fitted values from the two models is 1.2% of the residual variance. The correlation between the fitted values from the two models is 0.998.
+As we saw in section 4.1.5, it is possible to come up with an optimal rank k approxi- mation to a full spline smooth for any k (above some detail dependent technical min- imum). Such approximations perform rather well as pure regression splines. Hence for any penalized regression spline model, with given termwise effective degrees of freedom, there is a very similar model based on pure regression splines, with similar true termwise degrees of freedom. i.e for any set of data, the two models will produce very similar estimated linear predictors, and similar estimated smooth terms. Figure 4.19 illustrates the similarity between fits for a 4 term GAM, represented using pe- nalized regression splines and pure regression splines.
+Hence any comparison of two GAMs represented using penalized regression splines, can be approximated by the comparison of two GAMs represented using pure regres- sion splines. However GAMs represented using pure regression splines are simply GLMs, and for this case the distribution of λ under the null is well approximated by χ2p1 −p0 , where p0 and p1 are the numbers of parameters for the null and alter- native models, as we saw in sections 2.1.6 and 2.4.6. However, since the two ver- sions (penalized regression or pure regression) of each GAM produce very similar linear predictors for any replicate set of data, it follows that they must produce sim-
+    202 SOME GAM THEORY
+ilar statistics λ, which must therefore follow similar distributions (by construction EDF1 − EDF0 ≈ p1 − p0). i.e. there is some reason to expect (4.43) to be not too far from the truth.
+In the case in which the scale parameter is unknown, an F-ratio test would be used exactly as in section 2.1.6, with the modifications that maximum penalized likelihood estimates replace MLEs and effective degrees of freedom are used in place of real degrees of freedom. The justification follows from that for (4.43).
+Note that strictly, the foregoing argument requires the approximating regression mod- els to be properly nested, suggesting that (4.43) will be most reliable if we are careful to ensure that each smooth term in the estimated null model has no more effective degrees of freedom than same term in the alternative model (this can easily be forced in fitting). Note also, that the less like a spline a smoother is, the less clear it is that the argument in this section applies. However, for penalized regression smoothers of any sort it is probably the case that a pure regression approximation based on truncat- ing the natural parameterization (section 4.10.4) of the smoother would be adequate for the purposes of the argument. Hastie and Tibshirani (1990) provide an alternative justification of (4.43).
+As was mentioned in section 4.8.5, if hypothesis testing is a key aim of an analysis, then it is sometimes preferable to forgo penalization altogether in order to ensure that p-values are correct (i.e. have a uniform distribution under the null). This works because an un-penalized GAM is simply a GLM, for which Generalized Likelihood Ratio Tests work reliably. However, some care is required to ensure that smoothing bases are sufficiently small that test power is maintained, while being sufficiently large that the test is not compromised by model mis-specification. Of course having tested hypotheses in this way, it is still preferable to use penalized versions of the model(s) for point estimation and confidence interval calculations.
+4.10.2 ANOVA decompositions and Nesting
+It is sometimes of interest to fit models with a linear predictor containing terms like,
+f1(x) + f2(z) + f3(x, z),
+which can be thought of as an ANOVA decomposition of a function of x and z (there is a rich literature on such models in the context of smoothing splines, for example Wahba et al., 1995; Gu, 2002). If we use the tensor product methods of section 4.1.8, then it is quite easy to ensure that bases for the different terms are appropriately nested. For example the basis for f1(x) + f2(z) will be strictly nested within the basis for f3(x, z), if f3 is a represented using a tensor product basis which uses the bases for f1 and f2 as marginal bases. By strict nesting is meant that f3(x, z) could exactly represent any possible f1(x) + f2(z), given the bases used. Of course we do not have to ensure this exact nesting occurs, but it makes some aspects of model interpretation easier if we do.
+It is worth thinking quite carefully before using such models, for, even if we set
+    
+    FURTHER GAM THEORY 203
+things up to ensure strict nesting of the bases for f1 and f2 within the basis for f3, the notion of smoothness implied by using the ANOVA decomposition will be different to the notion of smoothness employed by using f3 alone. The ANOVA decomposition model has a more complicated wiggliness penalty than the simple smooth of x and z, with 2 extra smoothing parameters to be estimated. One way of viewing this, is as a way of allowing flexibility in the form of the wiggliness measure, so that the final choice of what smoothness means is somewhat data driven.
+If such nested models are used, then it is necessary to impose some identifiability conditions, if they are to be estimable. A general method, which can deal with any choice of bases for the smooths, is as follows. Working through all smooths, starting from smooths of two variables and working up through smooths of more variables:
+1. Identify all smooths of fewer or the same number of variables sharing covariates with the current smooth.
+2. Numerically identify any linear dependence of the basis for the current smooth on the other smooths sharing its covariates, and constrain the current smooth to remove this.
+Numerical identification of dependency is fairly straightforward. Let X1 be the com- bined model matrix for all the lower order model terms sharing covariates with the smooth of interest, and X2 be the model matrix of the smooth of interest. Provided X1 and X2 are separately of full column rank, then we could test for dependence between them by forming the QR decomposition,
+[X1 : X2] = QR,
+where the columns of Q are columns of an orthogonal matrix, and R is full rank upper triangular if [X1 : X2] is of full column rank, and reduced rank otherwise. Order d rank deficiency of R is identified by a d × d zero block at its lower right corner, but to identify which columns of X2 to remove in order to fix this requires identification of the rows of R at which the non-zero elements ‘step-in’ from the leading diagonal of the matrix. Furthermore, for the best performance, with rank deficient matrices the QR decomposition should really be done with column pivoting, but this may result in columns of X1 being identified as candidates for removal, which makes no sense in the current context.
+Given these considerations, a practical approach is based on performing the QR de- composition of [X1 : X2] with pivoting, but in two parts, so that columns of X1 can not be ‘pivoted past’ columns of X2. This is achieved as follows. Form the QR decomposition
+X1=Q1 R1  . 0
+Now let B be QT1 X2 with the first r rows removed, where r is the number of columns of X1. Now form a second QR decomposition with pivoting
+B=Q2 R2  . 0
+    
+    204
+SOME GAM THEORY
+               1
+       is
+  I 0    R 1 B ̄  [X1:X2]=Q1 0Q2 0R2,
+0.0 0.2 0.4
+0.6 0.8 1.0
+x
+Figure 4.20 The simple, one parameter, linear regression used to illustrate the geometry of penalized regression in section 4.10.3. The left panel shows the least square fit to two re- sponse data of a straight line through the origin. The right panel shows the corresponding un-penalized fitting geometry in a space in which there is an axis for each response datum, and the response data are therefore represented by a single point (the grey circle). The thick line shows the model-subspace: the model fitted values must lie on this line. The open circle is the orthogonal projection of the response data onto the model space: i.e. the fitted values.
+If some columns of X2 depend on columns of X1 then there will be a zero block at the lower right corner of R2, and columns of X2 responsible for this block will be identifiable from the record of which columns of X2 have been pivoted to these final columns. These dependent columns can be removed, to make the model identifiable, or equivalently, the corresponding parameters can be constrained to zero.
+If the basis of this algorithm is unclear, note that the implied QR decomposition used
+00
+The geometry of linear and generalized linear model fitting, covered in sections 1.4 and 2.2, becomes more complicated when quadratically penalized estimation is used. In the unpenalized cases a response data vector, y, which is exactly representable by the model (i.e. g(yi) = Xiβ for some β and all i), results in model fitted values μˆ = y. When penalized estimation is used, then this is generally not the case (except for y that are exactly representable by the model, with parameter values for which the penalty is exactly zero). However, there is a geometric interpretation of penal-
+where B ̄ is the first r rows of QT1 X2.
+4.10.3 The geometry of penalized regression
+    2
+0.0 0.2 0.4
+0.6 0.8 1.0
+y
+    FURTHER GAM THEORY 205
+ized fitting, in terms of projections in a larger space than the ‘data space’ that was considered in sections 1.4 and 2.2.
+Consider the model
+y = Xβ + ε
+to be estimated by minimization of the penalized objective function
+∥y − Xβ∥2 + λβTSβ. (4.44) A geometric interpretation of penalized estimation can be obtained by re-writing
+(4.44) as
+   y     X    2   0 − √λS β 
+ i.e. as the ordinary least squares objective for an augmented model, fitted to the re- sponse data augmented with zeroes. So penalized regression amounts to orthogonally
+projecting   y   onto the space spanned by the columns of   √X   and then or- 0 λS
+thogonally projecting back onto the space spanned by X, to get the fitted values corresponding to y.
+It’s difficult to draw pictures that really illustrate all aspects of this geometry in a satisfactory way, but some insight can be gained by considering the model
+yi =xiβ+εi
+for 2 data. Figure 4.20 illustrates the unpenalized fitting geometry for this model, as in section 1.4. Now consider fitting this model by penalized regression: in fact by simple ridge regression. The model fitting objective is then
+2   y   x   2  22 1 1 
+(yi−xiβ)+λβ= y2 − x2 β . i=1   0  √λ  
+The geometry of this model fit is shown in figure 4.21. Notice the way in which increasing λ results in fitted values closer and closer to zero.
+For the simple penalty, illustrated in figure 4.21, only β = 0 results in a zero penalty, and hence only the response data (0, 0) would result in identical fitted values (0, 0). For penalties on multiple parameters, the penalty coefficient matrix, S, is generally d short of full rank, where d is some integer. There is then a rank d subspace of the model space, for which the fitting penalty is identically zero, and if the data happen to be in that space (i.e. with no component outside it) then the fitted values will be exactly equal to the response data. For example, data lying exactly on a straight line are left unchanged by a cubic spline smoother.
+4.10.4 The “natural” parameterization of a penalized smoother
+Penalized smoothers, with a single penalty, can always be parameterized in such a way that the parameter estimators are independent, with unit variance, in the absence
+      
+    206 SOME GAM THEORY
+i ii iii
+1
+iv v vi
+Figure 4.21 Geometry of penalized linear regression for the model shown in figure 4.20. (i) The unpenalized geometry, exactly as in figure 4.20. (ii) The space shown in panel (i) is aug- mented by a space corresponding to the penalty term. (iii) Another view of the augmented space from (ii), still corresponding to the unpenalized, λ = 0 case. (iv) penalized geometry for λ = 0.1. The thin line now shows the model subspace spanned by the columns of the augmented model matrix. Fitting amounts to finding the orthogonal projection from the (zero augmented) response data vector (grey circle) onto the augmented model subspace (giving the black circle). The model fitted values for the (un-augmented) response data are obtained by then projecting back onto the original model subspace to get the model fitted values (the open circle). (v) Same as (iv) for the λ = 1. (vi) same as (iv) for λ = 10. Notice how even data lying exactly on the original model subspace, results in fitted values that are different from those data: only zero data are not shrunk in this way.
+of the penalty, and the penalty matrix is diagonal. This parameterization is particu- larly helpful for understanding the way in which the penalty suppresses model de- grees of freedom.
+Consider a smooth with model matrix X, parameter vector, β, wiggliness penalty coefficient matrix, S and smoothing parameter λ. Suppose that the model is to be estimated by penalized least squares from data with variance σ2. Forming the QR decomposition
+X = QR,
+we can re-parameterize in terms of β′ = Rβ, so that the model matrix is now Q, and the penalty matrix becomes R−TSR−1. Eigen-decomposing the penalty matrix yields
+R−TSR−1 = UDUT,
+where U is an orthogonal matrix, the columns of which are the eigenvectors of
+                  1
+                       2
+2
+penalty
+penalty
+penalty
+penalty
+2
+2
+2
+2
+1
+1
+1
+1
+    FURTHER GAM THEORY 207
+R−TSR−1, while D is a diagonal matrix of the corresponding eigenvalues, arranged in decreasing order. Reparameterization, via a rotation/reflection of the parameter space, now yields parameters β′′ = UTβ′, and correspondingly a model matrix QU and penalty matrix D. If the penalty is not applied then the covariance matrix for these parameters is Iσ2, since U is orthogonal, and the columns of Q are columns of an orthogonal matrix.
+If the penalty is applied, then the Bayesian covariance matrix of the parameters is simply the diagonal matrix (I + λD)−1σ2, from which the role of the penalty in limiting parameter variance is rather clear. The frequentist equivalent would simply be the square of the Bayesian covariance matrix.
+The effective degrees of freedom matrix, (XTX+λS)−1XTX, in the original parme- terization, now becomes the diagonal matrix:
+(I + λD)−1.
+Hence the effective degrees of freedom for the ith parameter is now given by (1 +
+λDii )−1 .
+So, in the natural parameterization, all parameters have the same degree of associated variability, when un-penalized, and the penalty acts on each parameter independently (i.e. the degree of penalization of one parameter has no affect on the the other pa- rameters). In this parameterization the relative magnitudes of different Dii terms directly indicate the relative degree of penalization of different components of the model space. Note that D is uniquely defined — no matter what parameterization you start out with, the elements of D are always the same.
+Figure 4.22 illustrates how parameters get ‘shrunk’ by the penalty, using the natural parameterization. The fact that at most levels of penalization, some subspace of the model space is almost completely suppressed, while some other subspace is left al- most unpenalized, is clear from these figures, and lends some support to the idea that a penalized fit is somehow equivalent to an unpenalized fit with degrees of freedom close to the effective degrees of freedom of the penalized model. However the fact that many parameters have intermediate penalization, means that this support is only limited.
+The natural parameterization makes the penalized smoothers behave more like full spline models than is otherwise immediately apparent. For example, for a full spline smoother the EDF matrix is simply the influence matrix, A, which also defines the Bayesian posterior covariance matrix Aσ2 and the equivalent frequentist ma- trix A2σ2. In other words, the relationship between these matrices, which holds for smoothing splines, also holds for general penalized regression smoothers with the natural parameterization.
+The penalty’s action in effectively suppressing some dimensions of the model space is also readily apparent in the natural parameterization. For most smoothers the penalty assesses the “wiggliness” of the fitted model, in such a way that smoother functions are generally not simply closer to the zero function. In this circumstance,
+    
+    208
+SOME GAM THEORY
+0 10 20 30 40
+parameter index
+EDF = 28.76
+                                                                                                                                    0 10 20 30 40
+parameter index
+EDF = 4.48
+0 10 20 30 40
+parameter index
+EDF = 11.79
+                                                                                                                                                                                                                                                                                          0 2
+4
+6
+8 10
+0.0 0.2 0.4 0.6 0.8 1.0
+0 2
+4
+6
+8 10
+0.0 0.2 0.4 0.6 0.8 1.0
+0 2
+4
+6
+8 10
+0.0 0.2 0.4 0.6 0.8 1.0
+y
+EDF per parameter
+y
+EDF per parameter
+y
+EDF per parameter
+                  0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+xxx
+Figure 4.22 How parameters are shrunk to zero by the penalty in the natural parameteriza- tion. All plots relate to a rank 40 cubic regression spline fit to the data shown in the bottom row plots. The top row plots the degrees of freedom associated with each parameter against parameter index using the natural parameterization, for 3 levels of penalization. On each plot the effective degrees of freedom (i.e. the effective number of free parameters) is shown by a vertical dashed line: note that this is simply the sum of the plotted degrees of freedom per parameter. The lower row shows the smooth fit corresponding to each of the top row plots. For this smooth the first two ‘natural’ parameters are never penalized. Notice how some po- tentially penalized parameters are effectively un-penalized, some are effectively suppressed completely, while some suffer intermediate penalization. Clearly, it is only approximately true that a penalized fit is equivalent to an unpenalized fit with the number of parameters given by the penalized fit effective degrees of freedom.
+if increased penalization is to lead to continuously smoother models then, in the natural parameterization, it is clear that the elements of D must have a spread of (non-negative) values, with the higher values penalizing coefficients corresponding to more wiggly components of the model function. If this not clear, consider the converse situation in which all elements on the leading diagonal of D are the same. In this case increased penalization amounts to simply multiplying each model coeffi- cient by the same constant, thereby shrinking the fitted function towards zero without changing its shape.
+4.11 Other approaches to GAMs
+The name “Generalized Additive Model” was coined by Hastie and Tibshirani, who first proposed this class of models, along with methods for their estimation, and as- sociated inference (Hastie and Tibshirani, 1986, 1990). Their proposed GAM es- timation technique of “backfitting” has the advantage that it allows the component functions of an additive model to be represented using almost any smoothing or mod-
+    
+    OTHER APPROACHES TO GAMS 209
+elling technique (regression trees for example). The disadvantage is that estimation of the degree of smoothness of a model is hard to integrate into this approach.
+The generalized smoothing spline methods of Wahba, Gu and co-workers also en- compass GAMs, within a rather complete theoretical framework, which does allow smoothness estimation, but is restricted to splines as model components (Wahba, 1990; Gu, 2002, see e.g.). Until recently, this framework had the drawback of rather high computational cost, but recent work by Kim and Gu (Gu and Kim, 2002; Kim and Gu, 2004) has much improved this situation.
+Another alternative, is to take the fully Bayesian approach to GAMs of Fahrmeir, Lang and co-workers (e.g. Fahrmeir and Lang, 2001; Fahrmeir et al., 2004; Lang and Bresger, 2004). In this case the representation of GAMs is rather similar to what has been presented in this chapter, but the Bayesian model of section 4.8.1 is pushed to its logical conclusion and all inference is fully Bayesian, using MCMC.
+The aim of the remainder of this section is to give a brief and partial sketch of the key ideas underpinning the backfitting and generalized smoothing spline frameworks. The aim is not to be comprehensive, but simply to give starting points for under- standing these approaches. For full treatments, see the books by Hastie and Tibshi- rani (1990) and Gu (2002), and for an introduction to practical computation with these methods see section 5.6.
+4.11.1 Backfitting GAMs
+Backfitting is a beautifully simple way of fitting GAMs, which allows an enormous range of possibilities for representing the component functions of a GAM, including many that are not really smooth at all, in the sense that we have been considering so far. In this section only the basic principles of the simplest version of backfitting will be presented.
+The basic idea behind backfitting is to estimate each smooth component of an addi- tive model by iteratively smoothing partial residuals from the AM, with respect to the covariate(s) that the smooth relates to. The partial residuals relating to the jth smooth term are the residuals resulting from subtracting all the current model term estimates from the response variable, except for the estimate of jth smooth. Almost any smoothing method (and mixtures of methods) can be employed to estimate the smooths.
+Here is a more formal description of the algorithm. Suppose that the object is to estimate the additive model:
+m
+yi =α+ fj(xji)+εi
+j=1
+where the fj are smooth functions, and the covariates xj , may sometimes be vector
+covariates. Let ˆfj denote the vector whose ith element is the estimate of fj (xji). The basic backfitting algorithm is as follows.
+    
+ 210
+SOME GAM THEORY
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0 0.0 0.2 0.4 0.6 0.8 1.0
+x1 x2 x3 x4
+ep ep ep ep
+−3 −1 1 3
+−3 −1 1 3
+−4 −2 0 2
+−5 0 5 10
+−4 0 2 4 6
+−4 0 2 4 6
+−4 0 2 4 6
+−5 0 5
+−4 0246
+−4 0246
+−4 0246
+−6 −2 246
+−3 −1 1 2
+−3 −1 1 2
+−3 −1 1 2
+−3 −1 1 3
+Figure 4.23 Fitting a 4 term Additive Model using backfitting. Iteration proceeded across the columns and down the rows (i.e. starts at top left and finishes at bottom right). The jth column relates to the jth smooth and its covariate. The points shown in each plot are the partial residuals for the term being estimated, plotted against the corresponding covariate. By smoothing these residuals, an estimate of the corresponding smooth function (evaluated at the covariate values) is produced: these estimates are shown as thick curves. For example, the third column, second row, shows the partial residuals for f3, at the second iteration, plotted against x3: the thick curve is therefore the second iteration estimate of f3, and results from smoothing the partial residuals with respect to x3. The estimated functions change moving down the rows, but have stabilized by the last row.
+1. Setαˆ=y ̄andˆfj =0forj=1,...,m.
+2. Repeat steps 3 to 5 until the estimates, ˆfj , stop changing.
+3. For j = 1,...,m repeat steps 4 and 5. 4. Calculate partial residuals:
+e jp = y − αˆ −   ˆf k k̸=j
+5. Set ˆfj equal to the result of smoothing ejp with respect to xj .
+As an example, here is some R code implementing the basic backfitting algorithm, using R routine smooth.spline as the smoothing method. It is assumed that edf[j] contains the required degrees of freedom for the jth smooth, that x is an m column array, with jth column containing the (single) covariate for the jth smooth, and that the response is in y.
+    OTHER APPROACHES TO GAMS 211
+f<-x*0;alpha<-mean(y);ok <- TRUE while (ok) { # backfitting loop
+for (i in 1:m) { # loop through the smooth terms ep <- y - rowSums(f[,-i]) - alpha
+b <- smooth.spline(x[,i],ep,df=edf[i])
+f[,i] <- predict(b,x[,i])$y
+}
+rss <- sum((y-rowSums(f))ˆ2)
+if (abs(rss-rss0)<1e-6*rss) ok <- FALSE rss0 <- rss
+}
+Figure 4.23 shows 4 iterations of the backfitting algorithm applied to the estimation of an additive model with 4 smooth components. In this case the data were simulated using the code given in the help file for gam in the mgcv package. The edf array was set to 3, 3, 8 and 3.
+To fit GAMs by penalized iteratively re-weighted least squares, a weighted version of the backfitting algorithm is used, and there are some refinements which speed up convergence (which can otherwise be slow if covariates are highly correlated). Notice how the cost of the algorithm depends on the cost of the componentwise smoothers: smooth.spline is a very efficient way of smoothing with respect to one variable, for example. Clearly the elegance of backfitting is appealing, as is the flexibility to choose a very wide variety of smoothing methods, for component estimation, but this does come at a price. It is not easy to efficiently integrate smoothness estimation methods with backfitting: the obvious approach of applying GCV to the smoothing of partial residuals is definitely not recommendable, while direct estimation of the influence/hat matrix of the whole model has computational cost of at least O(mn2), where n is the number of data, so that cross validation or GCV would both be quite expensive.
+4.11.2 Generalized smoothing splines
+The generalized smoothing spline approach is built around some very elegant and general methods for smoothing, based on the theory of reproducing kernel Hilbert spaces. This section will only give the briefest introduction to this theory, but even that is somewhat tougher going than the rest of this book.
+To reduce the level of abstraction, a little, let us revisit the cubic smoothing spline. To this end, first construct a space of functions of x, say, which are ‘wiggly’ accord- ing to the cubic spline penalty. That is consider a space o f functions, F, where the inner product of two functions, f and g ∈ F is ⟨g,f⟩ =   g′′(x)f′′(x)dx, and con- sequently a norm on the space is the cubic spline penalty, f′′(x)2dx: except for the zero function, functions for which this norm is zero are currently excluded from F.
+There is a rather remarkable theorem, the Reisz representation theorem, which says that there exists a function Rz ∈ F, such that f(z) = ⟨Rz,f⟩, for any f ∈ F: i.e. if
+    
+    212 SOME GAM THEORY
+we want to evaluate f at some particular value z, then one way of doing it is to take the inner product of the function, f, with the ‘representor of evaluation’ function, Rz.
+Suppose further that we construct a function of two variables R(z, x), such that for any z, R(z,x) = Rz(x). This function is known as the reproducing kernel of the space, since ⟨R(z, ·), R(·, t)⟩ = R(z, t), i.e.
+∂2R(z,x) ∂2R(x,t)dx = R(z,t), ∂x2 ∂x2
+by the Reisz representation theorem. Basically, if you take an appropriately defined inner product of R, with itself, you get back R: hence the terminology. If you must know what R actually looks like see (3.4) in section 3.2.1.
+Now, consider the cubic smoothing spline problem of finding the function minimiz-
+ing:
+It turns out that the minimizer is in the space of functions that can be represented as:
+n
+ˆ 
+f(x)=β0 +β1x+ δiR(xi,x).
+i=1
+where the βj’s and δi’s are coefficients to be estimated. The first two terms on the
+r.h.s simply span the space of functions for which   f′′(x)2dx = 0, the null space
+of the penalty: clearly β0 and β1 can be chosen to minimize the sum of squares
+term without worrying about the effect on the penalty. The terms in the summation
+ 
+   n  
+{yi − f(xi)}2 + λ f′′(x)2dx. (4.45) i=1
+ˆ
+represent the p art of f(x) that is in F. It is clear that not all functions in F can be
+represented as ni=1 δiR(x, xi), so how do we know that the minimizer of 4.45 can? ˆ
+The a nswer lies in writing the minimizer, f’s, component in F as r + η where r = ni=1 δiR(x, xi), and η is any function in the part of F which is orthogonal to r. Orthogonality means that each inner product ⟨R(xi, x), η(x)⟩ = 0, but these inner products evaluate η(xi), so we have that η(xi) = 0 for each i: i.e. η(x) can have no effect on the sum of squares term in (4.45). In the case of the penalty term, orthogonality of r and η means that:
+ ˆ  
+f′′(x)2dx = r′′(x)2dx + η′′(x)2dx.
+Obviously, the member of F which minimizes this, is the zero function, η(x) = 0.
+Having demonstrated what form the minimizer has, we must now actually find the minimizing βj’s and δi’s. Given that we now have a basis, this is not difficult, al- though it is necessary to derive two linear constraints ensuring identifiability between the null space components and the reproducing kernel terms in the model, before this can be done.
+The above argument is excessively complicated if all that is required is to derive the
+    
+    EXERCISES 213
+cubic smoothing spline, but its utility lies in how it generalizes. The cubic spline penalty can be replaced by any other derivative based penalty with associated inner product, and x can be a vector. In fact this reproducing kernel Hilbert space approach generalizes in all sorts of wonderful directions, and in contrast to the other methods described in this book, the basis for representing component functions of a model emerges naturally from the specification of fitting criteria like (4.45), rather than being a more or less arbitrary choice made by the modeller. See Wahba (1990) or Gu (2002) for a full treatment of this approach. The down sides are theoretical difficulty, less freedom to choose smoothers, greater difficulty in generalizing the models in some directions, and for full models, computational cost. However the work of Kim and Gu (2004) has made this point much less significant than it was.
+4.12 Exercises
+1. Itiseasytoseethatthecubicregressionsplinedefinedbyequation(4.2)insection 4.1.2 has value βj and second derivative δj at knot xj , and that value and second derivative are continuous across the knots. Show that the condition that the first derivative of the spline be continuous across xj (and that the second derivative be zero at x1 and xk), leads to equation (4.3).
+2. This question refers, again, to the cubic regression spline (4.2) of section 4.1.2.
+(a) Show that the second derivative of the spline can be expressed as
+′′  k−2
+f (x) = δidi(x),
+i=2
+where  (x − xi)/hi−1 xi−1 ≤ x ≤ xi di(x)= (xi−1 −x)/hi xi ≤x≤xi+1
+0 otherwise.
+(b) Hence show that, in the notation of section 4.1.2,
+ 
+(It may be helpful to review exercise 7 in Chapter 3, before proceeding with
+this part.)
+(c) Finally show that
+f′′(x)2dx = βTDTB−1Dβ.
+3. Prove that equation (4.14) in section 4.4.1 is true.
+4. This question follows on from section 4.5.4. Show that, in the notation of that
+section,
+E   n  i V (μi )−1 (y − μi )2   = n2
+{n − tr (A)}2 {n − tr (A)}2
+f′′(x)2dx = δ−TBδ−.
+  if the yi are binary random variables with mean μi and the model smoothing parameters are treated as known. What does this indicate about Vgp?
+    
+    214 SOME GAM THEORY
+5. The natural parameterization of section 4.10.4 is particularly useful for under- standing the way in which penalization causes bias in estimates, and this question explores this issue.
+(a) Find an expression for the bias in a parameter estimator βˆ′′ in the natural pa- i
+rameterization (bias being defined as E{βˆ′′ − β′′}). What does this tell you ii
+about the bias in components of the model which are unpenalized, or only very weakly penalized, and in components for which the ‘true value’ of the corre- sponding parameter is zero or nearly zero?
+(b) The Mean Square Error in a parameter estimator (MSE) is defined as E{(βˆi − βi)2} (dropping the primes for notational convenience). Show that the MSE of the estimator is in fact the estimator variance plus the square of the estimator bias.
+(c) Find an expression for the mean square error of the ith parameter of a smooth in the natural parameterization.
+(d) Show that the lowest achievable MSE, for any natural parameter, is bounded above by σ2, implying that penalization always has the potential to reduce the MSE of a parameter if the right smoothing parameter value is chosen. Com- ment on the proportion of the minimum achievable MSE that is contributed by the squared bias term, for different magnitudes of parameter value.
+(e) Under the prior from the Bayesian model of section 4.8.1, but still working in the natural parameterization, show that the expected squared value of the ith parameter is σ2/(λiDii). Using this result as a guide to the typical size of βi2, find an expression for the typical size of the squared bias in a parameter, and find a corresponding upper bound on the squared bias as a proportion of σ2.
+6. Cross validation can fail completely for some problems: this question explores why.
+(a) Consider attempting to smooth some response data yi by solving the ‘ridge regression’ problem
+nn
+minimise  (yi −μi)2 +λ μ2i w.r.t. μ,
+i=1 i=1
+where λ is a smoothing parameter. Show that for this problem the GCV and
+OCV scores are identical, and are independent of λ.
+(b) By considering the basic principle underpinning ordinary cross validation, ex-
+plain what causes the failure of cross validation in part (a).
+(c) Given the explanation of the failure of cross validation for the ridge regression problem in part (a), it might be expected that the following modified approach would work better. Suppose that we have an xi covariate observed for each yi (and for convenience xi < xi+1 ∀ i). Define the function μ(x) to be the piece- wise linear interpolant of the points (xi, μi). In this case we could estimate the
+μi by minimizing the following penalized least squares objective  n  
+(yi − μi)2 + λ μ(x)2dx i=1
+    
+    EXERCISES 215 w.r.t. the μi.
+Now consider 3 equally spaced points x1, x2, x3 with corresponding μ values
+μ1,μ2,μ3. Suppose that μ1 = μ3 = μ∗, but that we are free to choose μ2.
+Show that the in order to minimize   x3 μ(x)2dx we should set μ2 = −μ∗/2. x1
+What does this imply about trying to choose λ by cross validation? (Hint: think about what the penalty will do to μi if we ‘leave out’ yi.)
+(d) Would the penalty:
+μ′ (x)2 dx
+suffer from the same problem as  the penalty in part (c)?
+(e) Would you expect to encounter these sorts of problems with penalized regres- sion smoothers? Explain.
+7. ThisquestionconcernstheP-splinesofsection4.1.4,theeigen-basisofthepenalty discussed in section 4.8.2 and the natural parameterization of section 4.10.4.
+(a) WriteanRfunctionwhichwillreturnthemodelmatrixandsquarerootpenalty matrix for a P-spline, given a sequence of knots, covariate vector x, the re- quired basis dimension q, and the orders of B-spline and difference penalty required.
+(b) Simulate 100 uniform x data on (0, 1), use your routine to evaluate the basis functions of a rank 9 B-spline basis at the x values, and plot these 9 basis functions. (Use cubic B-splines with a second order difference penalty.)
+(c) Following section 4.8.2 and using the data and basis from the previous part, re-parameterize in terms of the eigen-basis of the P-spline penalty matrix, and plot the 9 evaluated basis functions corresponding to the re-parameterization.
+(d) Re-parameterize the P-spline smoother using its natural parameterization (see section 4.10.4). Again plot the 9 evaluated basis functions corresponding to this parameterization.
+8. This question covers P-IRLS and smoothing parameter estimation, using the P- spline set up in the previous question. The following simulates some x, y data:
+f <- function(x) .04*xˆ11*(10*(1-x))ˆ6+2*(10*x)ˆ3*(1-x)ˆ10 n <- 100;x <- sort(runif(n))
+y <- rpois(rep(1,n),exp(f(x)))
+An appropriate model for the data is yi ∼ Poi(μi) where log(μi) = f(xi): f is a smooth function, representable as a P-spline, and the yi are independent.
+(a) Write an R function to estimate the model by penalized likelihood maximiza- tion, given a smoothing parameter. Re-use the function from the first part of the previous question, in order to set up the P-spline for f .
+(b) Modify your routine to return the model deviance and model degrees of free- dom, so that a GCV score can be calculated for the model.
+(c) Write a loop to fit the model and evaluate its (deviance based) GCV score, on a grid of smoothing parameter values. Plot the fitted values from the GCV optimal model, over the original data.
+    
+    216 SOME GAM THEORY
+9. In section 4.5.4 it was pointed out that the approximations underpinning the de- viance based GCV score are not very good, and that in principle a better GCV score might be obtained by adding a constant to the deviance in the GCV score, the constant being estimated from an initial model fit in which it is taken to be zero. Following on from the previous question, apply this approach and compare the best fit models, with and without the correction to the GCV score.
+10. The following R code simulates some data sampled with noise from a function of two covariates:
+   test1<-function(x,z,sx=0.3,sz=0.4)
+   { 1.2*exp(-(x-0.2)ˆ2/sxˆ2-(z-0.3)ˆ2/szˆ2)+
+     0.8*exp(-(x-0.7)ˆ2/sxˆ2-(z-0.8)ˆ2/szˆ2)
+   }
+   n <- 200
+   x <- matrix(runif(2*n),n,2)
+   f <- test1(x[,1],x[,2])
+   y <- f + rnorm(n)*.1
+Write an R function to fit a thin plate spline of two variables (penalty order m = 2) to the simulated {yi, xi} data, given a smoothing parameter value. Write the func- tion so that it can fit either a full thin plate spline or a ‘knot based’ thin plate regression spline (see first and last subsections of section 4.1.5 for details). To deal with the linear constraints on the spline, see section 1.8.1 and ?qr. The sim- ple augmented linear model approach introduced in section 3.2.2 can be used for actual fitting. Write another function to evaluate the fitted spline at new covari- ate values. Use your functions to fit thin plate splines to the simulated data and produce contour plots of the results, for several different smoothing parameter values.
+11. The natural parameterization of section 4.10.4 also allows the GCV score for a single smoothing parameter model to be evaluated very efficiently, for different trial values of the smoothing parameter. Consider such a single smooth to be fitted to response data y: this question examines the efficient calculation of the components of the GCV score.
+(a) In the notation of section 4.10.4, find an expression for the influence matrix A in terms of Q, U, D and λ.
+(b) Show that the effective degrees of freedom of the model is simply:
+k1.  i = 1 1 + λ D i i
+(c) Again using the natural parameterization, show how calculations can be ar- ranged so that, after some initial setting up, each new evaluation of ∥y − Ay∥2 costs only O(k) arithmetic operations.

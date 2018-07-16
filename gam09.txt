@@ -1,0 +1,107 @@
+
+    
+     Bibliography
+Agresti, A. (1996). An Introduction to Categorical Data Analysis. New York: Wiley.
+Akaike, H. (1973). Information theory and an extension of the maximum likelihood principle. In B. Petran and F. Csaaki (Eds.), International Symposium on Informa- tion Theory, Akadeemiai Kiadi, Budapest, Hungary., pp. 267–281.
+Asseburg, C., S. Smout, J. Matthiopoulos, C. Ferna ́ndez, S. Redpath, S. Thirgood, and J. Harwood (2005). The functional response of a generalist predator. Preprint.
+Augustin, N. H., D. L. Borchers, E. D. Clarke, S. T. Buckland, and M. Walsh (1998). Spatio-temporal modelling of annual egg production of fish stocks using gener- alized additive models. Canadian Journal of Fisheries and Aquatic Science 55, 2608–2621.
+Baker, R. R. and M. A. Bellis (1993). Human sperm competition: ejaculate adjust- ment by males and the function of masturbation. Animal behaviour 46, 861–885.
+Borchers, D. L., S. T. Buckland, I. G. Priede, and S. Ahmadi (1997). Improving the precision of the daily egg production method using generalized additive models. Canadian Journal of Fisheries and Aquatic Science 54, 2727–2742.
+Bowman, A. W. and A. Azzalini (1997). Applied Smoothing Techniques for Data Analysis. Oxford University Press.
+Breslow, N. E. and D. G. Clayton (1993). Approximate inference in generalized linear mixed models. Journal of the American Statistical Association 88, 9–25.
+Chambers, J. M. (1993). Linear models. In J. M. Chambers and T. J. Hastie (Eds.), Statistical Models in S, pp. 95–144. Chapman & Hall.
+Chambers, J. M. and T. J. Hastie (Eds.) (1993). Statistical Models in S. Chapman & Hall.
+Cox, D. R. and D. V. Hinkley (1974). Theoretical Statistics. Chapman & Hall. Craven, P. and G. Wahba (1979). Smoothing noisy data with spline functions. Nu-
+merische Mathematik 31, 377–403.
+Davison, A. C. (2003). Statistical Models. Cambridge, UK: Cambridge University
+Press.
+de Boor (1978). A Practical Guide to Splines. New York: Springer.
+Demmel, J. (1997). Applied Numerical Linear Algebra. Philadelphia: SIAM. Dixon, C. E. (2003). Multi-dimensional modelling of physiologically and temporally
+373
+     
+    374 BIBLIOGRAPHY structured populations. Ph. D. thesis, University of St Andrews.
+Dobson, A. J. (2001). An Introduction to Generalized Linear Models (2nd ed.). Chapman & Hall/CRC.
+Duchon, J. (1977). Splines minimizing rotation-invariant semi-norms in solobev spaces. In W. Schemp and K. Zeller (Eds.), Construction Theory of Functions of Several Variables, Berlin, pp. 85–100. Springer.
+Eilers, P. H. C. and B. D. Marx (1996). Flexible smoothing with B-splines and penalties. Statistical Science 11(2), 89–121.
+Eilers, P. H. C. and B. D. Marx (2003). Multivariate calibration with temperature interaction using two-dimensional penalized signal regression. Chemometrics and intelligent laboratory systems 66, 159–174.
+Ellner, S. P., B. E. Kendall, S. N. Wood, E. McCauley, and C. J. Briggs (1997). Inferring mechanism from time-series data: delay differential equations. Physica D 110(3-4), 182–194.
+Fahrmeir, L., T. Kneib, and S. Lang (2004). Penalized structured additive regression for space-time data: a bayesian perspective. Statistica Sinica 14(3), 731–761.
+Fahrmeir, L. and S. Lang (2001). Bayesian inference for generalized additive mixed models based on markov random field priors. Applied Statistics 50, 201–220.
+Faraway, J. J. (2004). Linear Models with R. Chapman & Hall/CRC.
+Feller, W. (1957). An Introduction to Probability Theory and its Applications (2nd
+ed.), Volume 1. New York: Wiley.
+Freedman, W. L., B. F. Madore, B. K. Gibson, L. Ferrarese, D. D. Kelson, S. Sakai, J. R. Mould, R. C. Kennicutt, H. C. Ford, J. A. Graham, J. P. Huchra, S. M. Hughes, G. D. Illingworth, L. M. Macri, and P. B. Stetson (2001). Final results from the hubble space telescope key project to measure the hubble constant. The Astrophys- ical Journal (553), 47–72.
+Gill, P. E., W. Murray, and M. H. Wright (1981). Practical Optimization. London: Academic Press.
+Golub, G. H., M. Heath, and G. Wahba (1979). Generalized cross validation as a method for choosing a good ridge parameter. Technometrics 21(2), 215–223.
+Golub, G. H. and C. F. van Loan (1996). Matrix Computations (3rd ed.). Baltimore: Johns Hopkins University Press.
+Green, P. J. and B. W. Silverman (1994). Nonparametric Regression and Generalized Linear Models. Chapman & Hall.
+Gu, C. (1992). Cross-validating non-gaussian data. Journal of Computational and Graphical Statistics 1, 169–179.
+Gu, C. (2002). Smoothing Spline ANOVA Models. New York: Springer.
+Gu, C. and Y. J. Kim (2002). Penalized likelihood regression: general approximation
+and efficient approximation. Canadian Journal of Statistics 34(4), 619–628.
+Gu, C. and G. Wahba (1991). Minimizing gcv/gml scores with multiple smoothing
+    
+    BIBLIOGRAPHY 375 parameters via the newton method. SIAM Journal on Scientific and Statistical
+Computing 12(2), 383–398.
+Hand, D. J., F. Daly, A. D. Lunn, K. J. McConway, and E. Ostrowski (1994). A
+Handbook of Small Data Sets. Chapman & Hall.
+Harville, D. A. (1976). Confidence intervals and sets for linear combinations of fixed
+and random effects. Biometrics 32(2), 403–407.
+Harville, D. A. (1977). Maximum likelihood approaches to variance component estimation and to related problems. Journal of the American Statistical Associa- tion 72(358), 320–340.
+Hastie, T. and R. Tibshirani (1986). Generalized additive models (with discussion). Statistical Science 1, 297–318.
+Hastie, T. and R. Tibshirani (1990). Generalized Additive Models. Chapman & Hall. Hastie, T. and R. Tibshirani (1993). Varying-coefficient models. Journal of the Royal
+Statistical Society, Series B 55(4), 757–796.
+Hastie, T. J. (1993). Generalized additive models. In J. Chambers and T. Hastie
+(Eds.), Statistical Models in S. London: Chapman & Hall.
+Horwood, J. (1993). The bristol channel sole (solea solea (l.)): A fisheries case study.
+Advances in Marine Biology 29, 215–367.
+Horwood, J. and M. G. Walker (1990). Determinacy of fecundity in sole (solea solea) from the bristol channel. Journal of the Marine Biological Association of the United Kingdom 70, 803–813.
+Kim, Y. J. and C. Gu (2004). Smoothing spline gaussian regression: more scalable computation via efficient approximation. Journal of the Royal Statistical Society, Series B 66, 337–356.
+Laird, N. M. and J. H. Ware (1982). Random-effects models for longitudinal data. Biometrics 38, 963–974.
+Lancaster, P. and K. Sˇ alkauskas (1986). Curve and Surace Fitting: an introduction. London: Academic Press.
+Landau, S., I. C. Ellison-Wright, and E. T. Bullmore (2003). Tests for a difference in timing of physiological response between two brain regions measured by using functional magnetic resonance imaging. Applied Statistics 53(1), 63–82.
+Lang, S. and D. Bresger (2004). Bayesian p-splines. Journal of Computational and Graphical Statistics 13, 183–212.
+Lin, X. and D. Zhang (1999). Inference in generalized additive mixed models using smoothing splines. Journal of the Royal Statistical Society, Series B 61, 381–400.
+Lindeberg, J. W. (1922). Eine neue herleitung des esponentialgesetzes in der wahrscheinlichkeitsrechnung. Mathematische Zeitschrift 15, 211–225.
+Lowry, M. and G. W. Schwert (2002). Ipo market cycles: Bubbles or sequential learning? The Journal of Finance 67(3), 1171–1198.
+Mallows, C. L. (1973). Some comments on cp. Technometrics 15, 661–675.
+    
+    376 BIBLIOGRAPHY Marx, B. D. and P. H. Eilers (1998). Direct generalized additive modeling with
+penalized likelihood. Computational Statistics and Data Analysis 28, 193–209. McCullagh, P. and J. A. Nelder (1989). Generalized Linear Models (2nd ed.). Lon-
+don: Chapman & Hall.
+Nelder, J. A. and R. W. M. Wedderburn (1972). Generalized linear models. Journal
+of the Royal Statistical Society, Series A 135, 370–384.
+Nicholson, A. J. (1954a). Compensatory reactions of populations to stresses and their
+evolutionary significance. Australian Journal of Zoology 2, 1–8.
+Nicholson, A. J. (1954b). An outline of the dynamics of animal populations. Aus-
+tralian Journal of Zoology 2, 9–65.
+O’Sullivan, F. B., B. Yandall, and W. Raynor (1986). Automatic smoothing of regres- sion functions in generalized linear models. Journal of the American Statistical Association 81, 96–103.
+Parker, R. and J. Rice (1985). Discussion of silverman (1985). Journal of the Royal Statistical Society, Series B 47(1).
+Patterson, H. D. and R. Thompson (1971). Recovery of interblock information when block sizes are unequal. Biometrika 58, 545–554.
+Peng, R. D. and L. J. Welty (2004). The NMMAPSdata package. R News 4(2), 10–14.
+Pinheiro, J. C. and D. M. Bates (2000). Mixed- Effects Models in S and S-PLUS. New York: Springer-Verlag.
+R Development Core Team (2005). R: A language and environment for statistical computing. Vienna, Austria: R Foundation for Statistical Computing. ISBN 3- 900051-07-0.
+Reinsch, C. H. (1967). Smoothing by spline functions. Numerische Mathematik 10, 177–183.
+Rigby, R. A. and D. M. Stasinopoulos (2004). Generalized additive models for loca- tion, scale and shape (with discussion). Applied Statistics 54, 1–38.
+Ruppert, D., M. P. Wand, and R. J. Carroll (2003). Semiparametric Regression. Cambridge University Press.
+Schoenberg, I. J. (1964). Spline functions and the problem of graduation. Proced- dings of the National Acadamy of Sciences 52, 947–950.
+Silverman, B. W. (1985). Some aspects of the spline smoothing approach to non- parametric regression curve fitting. Journal of the Royal Statistical Society, Series B 47(1), 1–53.
+Silvey, S. D. (1970). Statistical Inference. Chapman & Hall.
+Smith, A. F. (1967). Diagnostic value of serum-creatinine-kinase in a coronary care
+unit. Lancet 2, 178.
+Stone, M. (1974). Cross-validatory choice and assessment of statistical predictions (with discussion). Journal of the Royal Statistical Society, Series B 36, 111–147.
+    
+    BIBLIOGRAPHY 377 Stone, M. (1977). An asymptotic equivalence of choise of model by cross-validation
+and akaike’s criterion. Journal of the Royal Statistical Society, Series B 39, 44–47. Venables, B. and B. R. Ripley (2003). Modern Applied Statistics in S (4th ed.).
+Springer.
+Wahba, G. (1980). Spline bases, regularization, and generalized cross validation for solving approximation problems with large quantities of noisy data. In E. Cheney (Ed.), Approximation Theory III. London: Academic Press.
+Wahba, G. (1983). Bayesian confidence intervals for the cross validated smoothing spline. Journal of the Royal Statistical Society, Series B 45, 133–150.
+Wahba, G. (1990). Spline models for observational data. Philadelphia: SIAM.
+Wahba, G., Y. Wang, C. Gu, R. Klein, and B. Klein (1995). Smoothing spline ANOVA for exponential families, with application to the Wisconsin epidemio- logical The Annals of Statistics 23(6), 1865–1895.
+Wang, Y. (1998a). Mixed effects smoothing spline analysis of variance. Journal of the Royal Statistical Society, Series B 60, 159–174.
+Wang, Y. (1998b). Smoothing spline models with correlated random errors. Journal of the American Statistical Association 93(441), 341–348.
+Watkins, D. S. (1991). Fundamentals of Matrix Computation. New York: John Wiley and Sons.
+Wood, S. N. (2000). Modelling and smoothing parameter estimation with multiple quadratic penalties. Journal of the Royal Statistical Society, Series B 62, 413–428.
+Wood, S. N. (2003). Thin plate regression splines. Journal of the Royal Statistical Society, Series B 65, 95–114.
+Wood, S. N. (2004). Stable and efficient multiple smoothing parameter estimation for generalized additive models. Journal of the American Statistical Association 99, 673–686.
+Wood, S. N. (2006). Low rank scale invariant tensor product smooths for generalized additive mixed models. Biometrics.

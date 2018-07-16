@@ -1,0 +1,164 @@
+
+    
+        
+     APPENDIX A
+Some Matrix Algebra
+This appendix provides some useful matrix results, and a brief introduction to some relevant numerical linear algebra.
+A.1 Basic computational efficiency
+Consider the numerical evaluation of the the expression
+ABy
+where A and B are n×n matrices and y is an n-vector. The following code evaluates
+this expression in two ways (wrong and right).
+ > n <- 1000
+> A <- matrix(runif(n*n),n,n) > B <- matrix(runif(n*n),n,n) > y <- runif(n)
+> system.time((A%*%B)%*%y) [1] 5.60 0.01 5.61 NA NA > system.time(A%*%(B%*%y)) [1] 0.02 0.00 0.02 NA NA
+# wrong way
+# right way
+So, in this case, the ‘wrong way’ took 5.6 seconds and the ‘right way’ less than 0.02 seconds. Why? The wrong way first multiplied A and B at a cost of n3 floating point operations, and then multiplied AB by y at the cost of n2 further operations: total cost n3 + n2 operations. The right way first formed the vector By at a cost of n2 operations and then formed ABy at a further cost of n2 operations: total cost 2n2 operations. So we should have got around a 500 fold speed up by doing things the right way.
+This sort of effect is pervasive: the order in which matrix operations are performed can have a major impact on computational speed. An important example is in the evaluation of the trace of a matrix (the sum of the leading diagonal). It is easy to show that tr (AB) = tr (BA), and for non-square matrices, one of these is always cheaper to evaluate than the other. Here is an example
+> m <- 500;n<-5000
+325
+    
+    326 SOME MATRIX ALGEBRA
+> A <- matrix(runif(m*n),n,m)
+> B <- matrix(runif(m*n),m,n)
+> system.time(sum(diag(A%*%B))) [1] 51.61 0.16 51.93 NA NA > system.time(sum(diag(B%*%A))) [1] 4.92 0.00 4.92 NA NA
+In this case formation of AB costs n2m operations, while formation of BA costs only m2n: i.e. in the example, the second evaluation is 10 times faster than the first. Actually even the second evaluation is wasteful, as the following code is easily demonstrated to evaluate the trace, at a cost of only mn operations
+> system.time(sum(t(B)*A))
+[1] 0.11 0.00 0.11   NA   NA
+(somewhat similar code to this gets all the elements on the leading diagonal). Simple tricks like these can lead to very large efficiency gains in matrix computations.
+A.2 Covariance matrices
+If X is a random vector and μx = E(X), then the covariance matrix of X is Vx = E (X−μx)(X−μx)T .
+Vx is symmetric and positive semi definite (all its eigenvalues are ≥ 0). The ith ele- ment on the leading diagonal of Vx is the variance of Xi, while the (i, j)th element is the covariance of Xi and Xj .
+If C is a matrix of fixed real coefficients and Y = CX then the covariance matrix of Y is
+Vy = CVxCT.
+This result is sometimes known as the ‘law of propagation of errors’. It is easily proven. First note that μy ≡ E(Y) = CE(X) = Cμx. Then
+Vy = = = =
+E (Y−μy)(Y−μy)T 
+E  (CX − Cμx)(CX − Cμx)T  CE  (X − μx)(X − μx)T  CT CVxCT.
+A.3 Differentiating a matrix inverse
+Consider differentiation of A−1 w.r.t. x. By definition of a matrix inverse we have that I = A−1A. Differentiating this expression w.r.t. x gives
+∂A−1 −1 ∂A 0= ∂x A+A ∂x
+      
+    KRONECKER PRODUCT 327 which re-arranges to
+∂A−1 −1∂A −1 ∂x =−A ∂xA .
+A.4 Kronecker product
+The Kronecker product of a n × m matrix A and p × q matrix B is the np × qm
+  matrix
+A11B A12B . . A21B A22B . ..  . . . . 
+....
+In R this is implemented by the operator %x%: see ?kronecker for details. A.5 Orthogonal matrices and Householder matrices
+Orthogonal matrices are square matrices which rotate/reflect vectors and have a va- riety of interesting and useful properties. If Q is an orthogonal matrix then QQT = QTQ = I, i.e. Q−1 = QT. If x is any vector of appropriate dimension then ∥Qx∥ = ∥x∥∗, that is Q changes the elements of x without changing its length: i.e. it rotates/reflects x. It follows immediately that all the eigenvalues of Q are one.
+A particularly important class of orthogonal matrices are the Householder/reflector matrices. Let u be a non-zero vector. Then
+H=I−γuuT where γ=2/∥u∥2
+is a Householder matrix or reflector matrix. Note that H is symmetric.
+The multiplication of a vector by a householder matrix is a prime example of the need to think carefully about the order of operations when working with matrices. H is never stored as a complete matrix, but rather u and γ are stored. Then Hx is evaluated as follows (overwriting x by Hx).
+1. α←uTx
+2. x←x−αγu
+Notice how this requires only O(n) operations, where n = dim(x) — explicit for- mation and use of H is O(n2).
+Householder matrices are important, because if x and y are two non-zero vectors of the same length (i.e. ∥x∥ = ∥y∥), then the Householder matrix such that Hx = y is obtained by setting u = x − y. This property is exploited in the next section, but note that in practical computation it is important to guard against possible overflow or cancelation error when using these matrices: see e.g. Watkins (1991, section 3.2) for further details.
+∗ recall than ∥x∥2 = xTx.
+    
+    328 SOME MATRIX ALGEBRA
+A.6 QR decomposition
+Any real n × m (m ≤ n, here) matrix X can be written as X = Q   R0  
+where Q is an orthogonal matrix, and R is an m × m upper triangular matrix. Q can be made up of the product of m Householder matrices. Here is how.
+First construct the Householder matrix H1 which reflects/rotates the first column of x in such a way that all but its first element is zeroed. e.g.
+x11 x12 x13 . x′11 x′12 x′13. H x21 x22 x23 .= 0 x′22 x′23 . 1x31x32x33.0x′32 x′33.
+.... ....
+x′11 will be the length of the first column of X. The next step is to calculate the Householder matrix, H2, which will transform the second column of X, so that its first element is unchanged, and every element beyond the second is zeroed. e.g.
+ x′11 x′12 x′13 .   x′11 x′12 x′13. 0x′ x′ .0x′′ x′′.
+H 22 23 = 22 23  2 0 x′ x′ . 0 0 x′′ .
+3233 33 .... ....
+Notice that the fact that H2 is only acting on elements from the second row down has two implications: (i) the first row is unchanged by H2 and (ii) the first column is unchanged, since in this case H2 simply transforms zero to zero.
+Continuing in the same way we eventually reach the situation where
+H m H m − 1 · · · H 1 X =   R0  
+Hence QT = HmHm−1 ···H1 implying that Q = H1H2 ···Hm.
+Note that it is quite common to write the QR decomposition as X = QR where Q is the first m columns of the orthogonal matrix just constructed. Whichever convention is used, Q is always stored as a series of m Householder matrix components. See ?qr in R for details about using QR decompositions in R.
+A.7 Choleski decomposition
+The Choleski decomposition is a very efficient way of finding the ‘square root’ of a positive definite matrix. A positive definite matrix, D, is one for which xTDx > 0 for any non-zero vector x (of appropriate dimension). Positive definite matrices are symmetric and have strictly positive eigenvalues.
+    
+    EIGEN-DECOMPOSITION 329 The Choleski decomposition of D is
+D = RTR
+where R is an upper triangular matrix of the same dimension as D. The algorithm for constructing the Choleski factor, R, is quite simple, and can be found in any textbook on numerical linear algebra, for example Golub and van Loan (1996) or Watkins (1991). The Choleski decomposition costs around n3/6 operations for an n×n matrix, which makes it a rather efficient way of solving linear systems involving positive definite matrices. For example, the x satisfying Dx = y where D is the x satisfying
+RTRx = y
+where R is the Choleski factor of D. Because R is triangular it is cheap to solve for
+Rx and then for x. The following code provides an example in R.
+n <- 1000
+D <- matrix(runif(n*n),n,n)
+D <- D%*%t(D) # create a +ve def. matrix
+y <- runif(n) # and a y
+## now solve Dx=y, efficiently, using the Choleski factor of D R <- chol(D)
+x <- backsolve(R,y,transpose=TRUE)
+x <- backsolve(R,y)
+A.8 Eigen-decomposition
+Consider an n × n matrix A. There exist n scalars λi and n corresponding vectors ui such that
+Aui = λiui,
+i.e. multiplication of ui by A results in a scalar multiple of ui. The λi are known as the eigenvalues (own-values) of A, and the corresponding ui are the eigenvectors (strictly ‘right eigenvectors’, since ‘left eigenvectors’ can also be defined).
+In this book we only need eigenvalues and eigenvectors of symmetric matrices, so suppose that A is symmetric. In that case it is possible to write
+A = UΛUT
+where the eigenvectors, ui , are the columns of the n × n orthogonal matrix U, while the eigenvalues λi provide the diagonal elements of the diagonal matrix Λ. Such a decomposition is known as an eigen-decomposition or spectral decomposition.
+The eigen-decomposition of A provides an interesting geometric interpretation of how any n vector, x, is transformed by multiplication by A. The product Ax can be written as UΛUTx: so UT first rotates x into the ‘eigenspace’ of A, the resulting vector then has each of its elements multiplied by an eigenvector of A, before being rotated back into the original space by U.
+    
+    330 SOME MATRIX ALGEBRA
+It is easy to see that for any integer m, Am = UΛmUT, which, given the eigen- decomposition, is rather cheap to evaluate, since Λ is diagonal. This result also means that any function with a power series expansion has a natural generalization to the matrix setting. For example, the exponential of a matrix would be
+exp(A) = U exp(Λ)UT
+where exp(Λ) is the diagonal matrix with exp(λi) as the ith element on its leading
+diagonal.
+Here are some other useful results related to eigenvalues:
+• The ‘rank’ of a matrix is the number of non-zero eigenvalues that it possesses. The rank is the number of independent rows/columns of a matrix.
+• A symmetric matrix is positive definite if all its eigenvalues are strictly positive. i.e. xTAx > 0 ∀ x ̸= 0.
+• Asymmetricmatrixispositivesemidefiniteifallitseigenvaluesarenon-negative. i.e. xTAx ≥ 0 ∀ x ̸= 0.
+• The trace of a matrix is also the sum of its eigenvalues.
+• The determinant of a matrix is the product of its eigenvalues.
+Numerical calculation of eigenvalues and eigenvectors is quite a specialized topic. Algorithms usually start by reducing the matrix to tri-diagonal or bi-diagonal form by successive application of Householder rotations from the left and right. By orthog- onality of the Householder rotations, the reduced matrix has the same eigenvalues as the original matrix. The eigenvalues themselves are then found by an iterative proce- dure, usually the QR-algorithm (not to be confused with the QR decomposition!) see Golub and van Loan (1996) or Watkins (1991) for details. See ?eigen for details of the eigen routines available in R. Sometimes only the largest magnitude eigenvalues and corresponding eigenvectors are required, in which case see section A.11.
+A.9 Singular value decomposition
+The singular value decomposition is rather like the eigen-decomposition, except that it can be calculated for any real matrix (not just square ones), and its components are all real (eigenvalues and vectors can be complex for non-symmetric matrices). If X is an n × m real matrix (m ≤ n, say) then it is possible to write
+X = UDVT
+where the columns of the n × m matrix U are the first m columns of an orthogonal matrix (so that UTU = Im, but UUT ̸= In), V is an m × m orthogonal matrix and D is a diagonal matrix, the diagonal elements of which are the singular values of X.
+The ith singular value of X is the positive square root of the ith eigenvalue of XTX, so for a symmetric matrix, the eigenvalues and singular values are the same. Singular values are so called, because there is a sense in which they indicate the ‘distance’
+    
+    PIVOTING 331
+between a matrix and the ‘nearest’ singular matrix. The ratio of the largest to smallest singular values is known as the ‘condition number’ of a matrix, and provides a useful guide to the numerical stability of calculations involving the matrix: again, see Golub and van Loan (1996) or Watkins (1991) for details.
+The number of non-zero singular values gives the rank of a matrix, and the singular value decomposition is the most reliable method for estimating the rank of a matrix numerically.
+Again, the calculation of the singular value decomposition starts by transforming the matrix to a bi-diagonal form, after which, iteration is used to find the singular values themselves (once again, see Golub and van Loan, 1996; Watkins, 1991).
+A.10 Pivoting
+Some matrix decompositions have better numerical properties if they are applied, not to the original matrix, but to a matrix in which the columns and/or rows of the matrix have been permuted. This is known as pivoting. Some properties of decompositions are invariant to this pivoting, whilst for other uses the pivoting has to be unscrambled after the decomposition.
+As an example, if pivoting is used with a Choleski decomposition, then it is possible to find a square root of a positive semi- definite matrix, by this method. Here is an example in R
+> B <- matrix(runif(200*100),200,100)
+> B <- B%*%t(B) ## B is now +ve semi-definite...
+> chol(B) ## ... so un-pivoted Choleski fails Error in chol(B) : the leading minor of order 101 is not positive definite
+> R <- chol(B, pivot = TRUE) ## ok with pivoting
+> piv <- order(attr(R, "pivot")) ## extract pivot index > R <- R[, piv] ## unscramble pivoting
+> range(B-t(R)%*%R) ## check that result is valid sqrt [1] -4.867218e-12 4.444445e-12 ## it is!
+of course, what is lost here is that R is no-longer upper triangular. A.11 Lanczos iteration
+Lanczos iteration (see e.g. Demmel, 1997) is a method which can be used to ob- tain the rank k truncated eigen-decomposition of a symmetric matrix, E, in O(kn2) operations, by iteratively building up a tridiagonal matrix the eigenvalues of which converge (in order of decreasing magnitude) to those required, as iteration proceeds.
+The algorithm is iterative, and at the ith iteration produces an (i × i) symmetric tri-diagonal matrix (Ki, say), the eigenvalues of which approximate the i largest
+    
+    332 SOME MATRIX ALGEBRA
+magnitude eigenvalues of the original matrix: these eigenvalues converge as the it- eration proceeds, with those of largest magnitude converging first. The eigenvalues and vectors of Ki can be obtained in order i3 operations, using the usual QR algo- rithm† with accumulation of the eigenvectors. In principle it should be possible to get away with O(i2) operations by only using the QR algorithm to find the eigenvalues and then inverse iteration to find the eigenvectors, but I experienced some stability problems when using a simple implementation of inverse iteration to do this, partic- ularly for thin plate regression splines of one predictor variable. In any case i3 ≪ n2 in most cases. The eigenvectors of the original matrix are easily obtained from the eigenvectors of Ki.
+A complete version of the algorithm, suitable for finding the truncated decomposition of E is as follows.
+1. Let b be an arbitrary non-zero n vector‡.
+2. Set q1 ← b/∥b∥.
+3. Repeat steps (4) to (12) for j = 1,2,... until enough eigenvectors have con- verged.
+4. Formc←Eqj.
+5. Calculate γj ← qTj c
+6. Reorthogonalize c to ensure numerical stability, by performing the following step twice:
+ j − 1 i=1
+and ξ1, . . . ξj−1 on the leading sub- and super- diagonals.
+10. If iteration has proceeded far enough to make it worthwhile, find the eigen- de- composition (spectral decomposition) Kj = VΛVT, where the columns of V are eigenvectors of Kj and Λ is diagonal with eigenvalues on leading diagonal.
+11. Compute“errorbounds”foreachΛi,i:|ξjVi,j|.
+12. Use the error bounds to test for convergence of the k largest magnitude eigenval-
+ues. Terminate the loop if all are converged.
+13. The ith eigenvalue of E is Λi,i. The ith eigenvector of E is Qvi, where Q is the matrix whose columns are the qj (for all j calculated) and vi is the ith column of V (again calculated at the final iteration). Hence Dk and Uk can easily be formed.
+† Not to be confused with the QR decomposition: they are completely different things.
+‡ It may be best to initialize this from a simple random number generator, to reduce the risk of starting out orthogonal to some eigenvector (exact repeatability can be ensured by starting from the same random number generator seed)
+c ← c −
+9. Let Kj be the (j × j) tridiagonal matrix with γ1, . . . γj on the leading diagonal,
+7. Set ξj ← ∥c∥
+8. Set qj+1 ← c/ξj
+(cTqi)qi
+    
+    LANCZOS ITERATION 333
+The given algorithm is stabilized by orthogonalization against all previous vectors qj: several selective orthogonalization schemes have been proposed to reduce the computational burden of this step, but I experienced convergence problems when trying to use these schemes with E from the 1 covariate TPRS problem. In any case the computational cost of the method is dominated by the O(n2) step: c ← Eqj, so the efficiency benefits of using a selective method are unlikely to be very great, in the current case (if E were sparse then selective methods would offer a benefit).
+Finally note that E need not actually be formed and stored as a whole: it is only necessary that its product with a vector can be formed. For a fuller treatment of the Lanczos method see Demmel (1997), from which the algorithm given here has been modified.

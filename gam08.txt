@@ -1,0 +1,1323 @@
+
+    
+        
+     APPENDIX B
+Solutions to exercises
+To avoid this appendix reaching the same length as the rest of the book, the fol- lowing solutions do not generally include R output and plots, but only the code for generating them.
+B.1 Chapter 1
+1. ti = βdi + εi is a reasonable model. So the least squares estimate of β is
+ i xiyi 0.1 + 1.2 + 2 + 3 6.3
+β=   x2 = 1+9+16+25 = 51 ≃.1235
+implying a speed of 51/6.3 ≃ 8.1 kilometres per hour. 2.
+ ˆ
+   ii
+∂nn
+∂ β   ( y i − β ) 2 = − 2   ( y i − β ) = 0 ⇒ βˆ = y ̄
+i=1 i=1
+ 3. None of these. 4. (a)
+The constraint β1 = 0 ensures model identifiability (i.e. full column rank of X): any other constraint doing the same is ok.
+335
+ y11   1  y12   1
+0 0   ε11 
+0 0  α   ε12 
+y21 =1
+y22  1
+ y 3 1 1 0 1   ε 3 1 
+1 0 β2 +ε21 
+1 0β3  ε22 y32 101 ε32
+
+    
+    336 (b)
+SOLUTIONS TO EXERCISES
+y11 100000
+y12 100100
+y13 1 0 0 0 1 0
+y14 1 0 0 0 0 1α ε14
+y21 1 1 0 0 0 0β2 ε21 y22 =1 1 0 1 0 0β3 +ε22 
+ y23   1 1 0 0 1 0  γ2   ε23 
+  y 2 4     1 1 0 0 0 1    γ 3    ε 2 4  
+y31 1 0 1 0 0 0 γ4 ε31 y32 1 0 1 1 0 0 ε32 y33 101010 ε33 y34 101001 ε34
+Here β1 = γ1 = 0 have been chosen as constraints ensuring identifiability: of course there are many other possibilities (depending on what contrasts are of most interest).
+(c)
+ y1   1 0  y1   1 0
+y3 =1 1  y4   1 1  y 5 1 1
+0.1   ε1  0.4  α   ε2 
+0 . 4   ε 5  0.7 ε6
+y6 1 1
+5. The situation described in the question translates into a model of the form:
+ k x i + α x 2i μ i = k x i + β x 2i k x i + γ x 2i
+a l l o y 1 a l l o y 2 a l l o y 3
+0.5 β2 +ε3 0.3  γ   ε4 
+ε11 ε12 ε13
+
+    
+    CHAPTER 1 337 where yi ∼ N(μi, σ2). Written out in full matrix-vector form this is
+x21 0 0 x2 0 0 x23 0 0 x24 0 0 x25 0 0 x26 0 0
+0 x21 0 0 x2 0 0 x23 0 0 x24 0 0 x25 0 0 x26 0 0 0 x21 0 0 x2 0 0 x23 0 0 x24 0 0 x25 0 0 x26
+If the model has an intercept then one column of X is a column of ones, so that one of the equations in XTμˆ = XTy is simply  i μˆi =  i yi. Re-arrangement of this shows that the residuals must sum to zero.
+7. Given that E(ri2) = σ2,
+n −p i=0
+8.(a) library(MASS)
+m1 <- lm(loss ̃hard+tens+I(hard*tens)+I(hardˆ2)+I(tensˆ2)+ I(hardˆ2*tens)+I(tensˆ2*hard)+I(tensˆ3)+I(hardˆ3),Rubber) plot(m1) ## residuals OK
+summary(m1) ## p-values => drop I(tensˆ2*hard)
+m2 <- update(m1,. ̃.-I(tensˆ2*hard))
+summary(m2)
+m3 <- update(m2,. ̃.-hard)
+summary(m3)
+m4 <- update(m3,. ̃.-1)
+summary(m4)
+m5 <- update(m4,. ̃.-I(hardˆ2))
+summary(m5) ## p-values => keep all remaining
+plot(m5) ## residuals OK
+(b) AIC(m1,m2,m3,m4,m5) m6 <- step(m1)
+6.
+x6
+μˆ = X(XTX)−1XTy ⇒ XTμˆ = XTX(XTX)−1XTy = XTy
+and the result follows.
+2y1 6y2 6 6y3 6 6y4 6 6y5 6 6y6 6 6y7 6 y8 6 y9 6y10 6 6 y11 6 6 y12 6 y13 6 y14 6 6 y15 6 6 y16 4 y17
+y18
+32x1 76x2 7 76x3 7 76x4 7 76x5 7 76x6 7 76x1 76x2 7=6x3 7 6x4 7 7
+3
+7 7 7
+7 7
+7 7
+7 7
+2ε1
+6ε2
+6 6ε3
+6 6ε4
+6 6ε5
+6 ε6
+6 ε7
+3
+7 7 7
+7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+7
+7 7 7
+7 7 5
+7 7 7
+7 7 7
+7 7 5
+7 7γ 7 7
+7
+7 7 7
+7 7 5
+6 ε11 6 6 ε12 6 ε13 6 ε14 6 6 ε15 6 6 ε16 4 ε17
+ε18
+6 x5 6 6x6 6 x1 6 x2 6 6x3 6 6x4 4x5
+764β75 6ε10
+E(∥r∥2) =
+E(ri2) = (n − p)σ2,
+7 7 72k3
+6 ε8 76α7+6 ε9
+    
+    338 (c)
+SOLUTIONS TO EXERCISES
+m <- 40;attach(Rubber)
+mt <- seq(min(tens),max(tens),length=m)
+mh <- seq(min(hard),max(hard),length=m)
+lp <- predict(m6,data.frame(hard=rep(mh,rep(m,m)),
+                            tens=rep(mt,m)))
+contour(mt,mh,matrix(lp,m,m),xlab="tens",ylab="hard")
+points(tens,hard)
+detach(Rubber)
+9. > wm <- lm(breaks ̃wool*tension,warpbreaks) > plot(wm) # residuals OK
+> anova(wm)
+Analysis of Variance Table
+Response: breaks
+             Df Sum Sq
+wool          1  450.7
+tension       2 2034.3
+wool:tension  2 1002.8
+Residuals    48 5745.1
+---
+Mean Sq
+  450.7
+ 1017.1
+  501.4
+  119.7
+F value    Pr(>F)
+ 3.7653 0.0582130 .
+ 8.4980 0.0006926 ***
+ 4.1891 0.0210442 *
+## ... so there is evidence for a wool:tension interaction. > with(warpbreaks,interaction.plot(tension,wool,breaks))
+10.(a) > cm1 <- lm(dist  ̃ speed + I(speedˆ2),cars) > summary(cm1)
+## Intercept has very high p-value, so drop it
+> cm2 <- lm(dist  ̃ speed + I(speedˆ2)-1,cars)
+> summary(cm2)
+## both terms now significant, but try the alternative of ## dropping ‘speed’
+> cm3 <- lm(dist  ̃ I(speedˆ2),cars) > AIC(cm1,cm2,cm3)
+         df      AIC
+     cm1  4 418.7721
+     cm2  3 416.8016
+     cm3  3 416.9860
+> plot(cm2)
+Clearly cm2, with speed and speed squared terms is to be preferred, but note that variance seems to be increasing with mean a little: perhaps a GLM, better?
+(b) In seconds, the answer is obtained as follows
+     > b <- coef(cm2)
+     > 5280/(b[1]*60ˆ2)
+     1.183722
+This is a long time, but would have a rather wide associated confidence interval. The stopping distances in cars are quite long relative to those usually quoted.
+(c) The usual argument is really nonsense, and seems to result from confusing
+    
+    CHAPTER 1 339
+continuous and factor variables. In the current case it would condemn us to leaving in the constant, and tolerating very high estimator uncertainty, even though hypothesis testing, AIC, and the physical mechanisms underlying the data all suggest dropping it.
+11. The following is a version of the function that you should end up with.
+fitlm <- function(y,X)
+{ qrx <- qr(X)
+## get QR decomposition
+## form Q’y efficiently
+## extract R
+y <- qr.qty(qrx,y)
+R <- qr.R(qrx)
+p <- ncol(R);n
+f <- y[1:p]; r
+beta <- backsolve(R,f) ## parameter estimates (a) sig2 <- sum(rˆ2)/(n-p) ## resid variance estimate (c) Ri <- backsolve(R,diag(ncol(R))) ## inverse of R matrix
+<- length(y) ## get dimensions <- y[(p+1):n]## partition Q’y
+Vb <- Ri%*%t(Ri)*sig2
+se <- diag(Vb)ˆ.5
+F.ratio <- fˆ2/sig2
+seq.p.val <- 1-pf(F.ratio,1,n-p) ## seq. p-values (e) list(beta=beta,se=se,sig2=sig2,seq.p.val=seq.p.val,df=n-p)
+}
+The following code uses the function to answer some of the question parts.
+## get example X ...
+X <- model.matrix(dist  ̃
+cm <- fitlm(cars$dist,X)
+cm$beta;cm$se
+cm1<-lm(dist  ̃ speed + I(speedˆ2),cars) # equiv. lm call summary(cm1) # check estimates and s.e.s (b,c) t.ratio <- cm$beta/cm$se # form t-ratios
+p.val <- pt(-abs(t.ratio),df=cm$df)*2
+p.val # print evaluated p-values (d) ## print sequential ANOVA p-values, and check them (e) cm$seq.p.val
+anova(cm1)
+12. X <- model.matrix( ̃spray-1,InsectSprays)
+X <- cbind(rep(1,nrow(X)),X) # redundant model matrix
+C <- matrix(c(0,rep(1,6)),1,7) # constraints
+qrc <- qr(t(C)) # QR decomp. of C’
+## use fact that Q=[D:Z] and XQ = (Q’X’)’ to form XZ ... XZ <- t(qr.qty(qrc,t(X)))[,2:7]
+m1 <- lm(InsectSprays$count ̃XZ-1) # fit model
+bz <- coef(m1) # estimates in constrained parameterization ## form b = Z b_z, using fact that Q=[D:Z], again
+b <- c(0,bz)
+b <- qr.qy(qrc,b)
+sum(b[2:7])
+13.(a) EV.func <- function(b,g,h) { mu <- b[1]*gˆb[2]*hˆb[3]
+## covariance matrix
+## standard errors (c)
+## sequential F-ratios
+speed + I(speedˆ2),cars)
+# used fitting function
+# print estimates and s.e.s (a,c)
+    
+    340 SOLUTIONS TO EXERCISES
+      J <- cbind(gˆb[2]*hˆb[3],mu*log(g),mu*log(h))
+      list(mu=mu,J=J)
+    }
+(b) >
+> b <- c(.002,2,1);b.old <- 100*b+100
+> while (sum(abs(b-b.old))>1e-7*sum(abs(b.old))) {
+(c)
+attach(trees)
++
++
++
++
++}
+>b
+0.001448827 1.996921475 1.087646524
+> sig2 <- sum((Volume - EV$mu)ˆ2)/(nrow(trees)-3) > Vb <- solve(t(EV$J)%*%EV$J)*sig2
+EV <- EV.func(b,Girth,Height) z <- (Volume-EV$mu) + EV$J%*%b b.old <- b
+b <- coef(lm(z ̃EV$J-1))
+> se <- diag(Vb)ˆ.5;se
+[1] 0.001366994 0.082077439 0.242158811
+B.2 Chapter 2
+1.(a) μ≡E(Y)=(1−p)×0+p×1=p. (b)
+f (y) = exp(log(μy (1 − μ)1−y ))
+= exp(y log(μ) + (1 − y) log(1 − μ))
+= exp ylog  μ  +log(1−μ) . 1−μ
+Now let θ = log(μ/(1 − μ)) so that eθ = μ/(1 − μ) and therefor
+1+eθ = 1 ⇒−log(1+eθ)=log(1−μ)⇒b(θ)=log(1+eθ).
+f (y) = exp(yθ − b(θ)),
+which is exponential form with a(φ) = φ = 1 and c(y,φ) ≡ 0. So the
+Bernoulli distribution is in the exponential family.
+(c) Acanonicallinkisonewhichwhenappliedtothemean,μ,givesthecanonical
+parameter, so for the Bernoulli it is clearly:
+  1−μ Hence,
+g(μ)=log  μ  
+ 1−μ
+2. After completing all 4 parts, you get something like the following:
+  ## example glm fit...
+  b <- glm(y/m ̃x,family=binomial,weights=rep(m,n))
+  reps <- 200;mu <- fitted(b)
+a special case of the logit link.
+    
+    CHAPTER 2 341
+rsd <- matrix(0,reps,n) # array for simulated resids runs <- rep(0,reps) # array for simulated run counts for (i in 1:reps) { # simulation loop
+ys <- rbinom(1:n,m,mu) # simulate from fitted model
+## refit model to simulated data
+br <- glm(ys/m ̃x,family=binomial,weights=rep(m,n))
+rs <- residuals(br) # simulated resids (meet assumptions) rsd[i,] <- sort(rs) # store sorted residuals
+fv.sort <- sort(fitted(br),index.return=TRUE)
+rs <- rs[fv.sort$ix] # order resids by sorted fit values rs <- rs > 0 # check runs of +ve, -ve resids runs[i] <- sum(rs[1:(n-1)]!=rs[2:n])
+}
+# plot original ordered residuals, and simulation envelope for (i in 1:n) rsd[,i] <- sort(rsd[,i])
+par(mfrow=c(1,1))
+plot(sort(residuals(b)),(1:n-.5)/n) # original
+## plot 95% envelope .... lines(rsd[5,],(1:n-.5)/n);lines(rsd[reps-5,],(1:n-.5)/n)
+# compare original runs to distribution under independence rs <- residuals(b)
+fv.sort <- sort(fitted(b),index.return=TRUE)
+rs <- rs[fv.sort$ix]
+  rs <- rs > 0
+  obs.runs <- sum(rs[1:(n-1)]!=rs[2:n])
+  sum(runs>obs.runs)
+3. First read in the data:
+> count <- c(53,414,11,37,0,16,4,139)
+> death <- factor(c(1,0,1,0,1,0,1,0))
+> defendant <- factor(c(0,0,1,1,0,0,1,1)) > victim <- factor(c(0,0,0,0,1,1,1,1))
+> levels(death) <- c("no","yes")
+> levels(defendant) <- c("white","black") > levels(victim) <- c("white","black")
+(a) > sum(count[death=="yes"&defendent=="black"])/ + sum(count[defendent=="black"])
+[1] 0.07853403
+> sum(count[death=="yes"&defendent=="white"])/ + sum(count[defendent=="white"])
+     [1] 0.1097308
+(b) > dm <- glm(count ̃death*victim+death*defendant+
+     +           victim*defendant,family=poisson(link=log))
+     > summary(dm)
+     [edited]
+     Coefficients:
+Estimate Std Err z value Pr(>|z|) (Intercept) 6.02631 0.04913 122.669 < 2e-16
+    
+    342
+SOLUTIONS TO EXERCISES
+(c)
+> dm0 <- glm(count ̃death*victim+victim*defendant, + family=poisson(link=log))
+> anova(dm0,dm,test="Chisq")
+Analysis of Deviance Table
+Model 1: count  ̃ death * victim + victim * defendant Model 2: count  ̃ death * victim + death * defendant+
+victim * defendant
+Resid. Df Resid. Dev Df Deviance P(>|Chi|)
+1 2 5.3940
+2 1 0.3798 1 5.0142 0.0251
+A model in which the counts depend on all two way interactions seems ap- propriate. Note that the least significant interaction is between the defendant’s skin ‘colour’ and death penalty, but that dropping this term does not seem to be justified (AIC also suggests leaving it in).
+From the summary table it is clear that the strongest and most significant as- sociation is between skin colour of victim and defendant: blacks kill blacks and whites kill whites, for the most part. Next in terms of significance and strength of effect is the association between victims colour, and death penalty: the death penalty is less likely if the victim is black. Finally, being black is associated with an increased likelihood of being sentenced to death, once these other associations have been taken into account. Most of these effects can be ascertained by careful examination of the original table, but their significance and the relative strength of the effects are striking results from the modelling.
+deathyes
+victimblack
+defendblack
+deathyes:victimblack -2.40444 0.60061 deathyes:defendblack 0.86780 0.36707 victimblack:defendblack 4.59497 0.31353
+-14.121
+-12.816
+-14.109
+ -4.003
+  2.364
+ 14.656
+ < 2e-16
+ < 2e-16
+ < 2e-16
+6.25e-05
+  0.0181
+ < 2e-16
+-2.05946 0.14585
+-3.26517 0.25478
+-2.42032 0.17155
+4.
+5 .   i w i ( y i − X i β ) 2 ≡   i ( y ̃ i − X ̃ i β ) 2 w h e r e y ̃ i = √ w i y i a n d X ̃ i j = √ w i X i j . Hence re-using the results from section 1.3.7 we have (X ̃ TX ̃ )−1X ̃ Ty ̃. Re-writing this in terms of X and W yields the required result.
+6.(a) E(zi) = g′(μi)(E(yi) − μi) + ηi = 0 + Xiβ
+ μi yi−zdz = 1[yilog(z)−z]μi yi φz φ yi
+= 1 [yi log(μi/yi) − μi + yi] φ
+   Since the quasi likelihood of the saturated model is zero, the corresponding de- viance is simply
+2yi log(yi/μi) − 2(yi − μi), which corresponds to the Poisson deviance.
+      
+    CHAPTER 2 343 (b)
+8. (a)
+1=1+t E ( c i ) a d mi
+var(zi)
+= var {g′(μi)yi}
+= g′(μi)2var(yi)
+= g′(μi)2V (μi)φ = w−1φ. i
+Furthermore, since the yi are independent, then so are the zi, so the covariance
+matrix of the zi’s is W−1φ, as required.
+(c) From the previous question we have that βˆ = (XTWX)−1XTWz. So, by
+the results of A.2 on transformation of covariance matrices, we have that the covariance matrix of βˆ is
+(XTWX)−1XTWW−1WX(XTWX)−1φ = (XTWX)−1φ. Similarly,
+E(βˆ) = (XTWX)−1XTWE(z) = (XTWX)−1XTWXβ = β.
+(d) If XTWz tends to multivariate normality than so must βˆ. Hence, in the large sample limit, βˆ ∼ N(β,(XTWX)−1φ). Of course in practical application of GLMs we calculate z and W using βˆ, rather than β, but as sample size tends to infinity βˆ → β, so the result still holds.
+7. y<- c(12,14,33,50,67,74,123,141,165,204,253,246,240) t<-1:13
+X <- cbind(rep(1,13),t,tˆ2) # model matrix mu <- y;eta <- log(mu) # initial values ok <- TRUE
+while (ok) {
+## evalaute pseudodata and weights z <- (y-mu)/mu + eta
+w <- as.numeric(mu)
+## fit weighted working linear model z <- sqrt(w)*z; WX <- sqrt(w)*X beta <- coef(lm(z ̃WX-1))
+## evaluate new eta and mu eta.old <- eta
+eta <- X%*%beta
+mu <- exp(eta)
+   ## test for convergence...
+if (max(abs(eta-eta.old))<1e-7*max(abs(eta))) ok <- FALSE }
+plot(t,y);lines(t,mu) # plot fit
+  (b) m <- 1
+b <- glm(Consumption.Rate ̃I(1/Grouse.Densityˆm),
+        family=quasi(link=inverse,variance=mu),data=harrier)
+    
+    344 SOLUTIONS TO EXERCISES (c) plot(harrier$Grouse.Density,residuals(b))
+. . . the plot shows a clear pattern if m = 1, and the parameter estimates lead to a rather odd curve.
+(d) Re-using the code from (b) with different m values, suggests that m ≈ 3.25 produces the lowest deviance.
+(e) pd <- data.frame(Grouse.Density = seq(0,130,length=200)) pr <- predict(b,newdata=pd,se=TRUE) with(harrier,plot(Grouse.Density,Consumption.Rate)) lines(pd$Grouse.Density,1/pr$fit,col=2) lines(pd$Grouse.Density,1/(pr$fit-pr$se*2),col=3) lines(pd$Grouse.Density,1/(pr$fit+pr$se*2),col=3)
+(f) ll <- function(b,cr,d)
+## evalates -ve quasi- log likelihood of model
+## b is parameters, cr is consumption, d is density { ## get expected consumption...
+dm <- dˆb[3]
+Ec <- exp(b[1])*dm/(1+exp(b[1])*exp(b[2])*dm)
+## appropriate quasi-likelihood...
+ind <- cr>0 ## have to deal with cr==0 case
+ql <- cr - Ec
+ql[ind] <- ql[ind] + cr[ind]*log(Ec[ind]/cr[ind]) -sum(ql)
+     }
+     ## Now fit model ...
+     fit <- optim(c(log(.4),log(10),3),ll,method="L-BFGS-B",
+                  hessian=TRUE,cr=harrier$Consumption.Rate,
+                  d=harrier$Grouse.Density)
+     ## and plot results ...
+b <- fit$par
+d <- seq(0,130,length=200); dm <- dˆb[3]
+Ec <- exp(b[1])*dm/(1+exp(b[1])*exp(b[2])*dm) with(harrier,plot(Grouse.Density,Consumption.Rate)) lines(d,Ec,col=2)
+9. death <- as.numeric(ldeaths)
+month <- rep(1:12,6)
+time <- 1:72
+ldm <- glm(death  ̃ sin(month/12*2*pi)+cos(month/12*2*pi),
+family=poisson(link=identity)) plot(time,death,type="l");lines(time,fitted(ldm),col=2) summary(ldm)
+plot(ldm)
+The model is clearly inadequate: massive over-dispersion and clear pattern in the residuals. Probably residual autocorrelation should be modelled properly here, reflecting the time-series nature of the data.
+10. y<- c(12,14,33,50,67,74,123,141,165,204,253,246,240) t<-1:13
+   b <- glm(y ̃t + I(tˆ2),family=poisson)
+    
+    CHAPTER 3 345
+log.lik <- b1 <- seq(.4,.7,length=100)
+for (i in 1:100)
+{ log.lik[i] <- logLik(glm(y ̃offset(b1[i]*t)+I(tˆ2),
+                             family=poisson))
+}
+plot(b1,log.lik,type="l")
+points(coef(b)[2],logLik(b),pch=19) abline(logLik(b)-qchisq(.95,df=1),0,lty=2)
+From the resulting plot, the 95% CI is (0.43,0.68), slightly wider than the (0.47,0.65) found earlier, but in this case almost symmetric. One key difference between these intervals and the intervals covered in the text, is that they are not necessar- ily symmetric. Another is that parameter values within the interval always have higher likelihood than those outside it, and a third is that they are invariant to re-parameterization.
+B.3 Chapter 3
+1. ## polynomial fits ...
+xx <- seq(min(x),max(x),length=200)
+plot(x,y)
+b<-lm(y ̃poly(x,5))
+lines(xx,predict(b,data.frame(x=xx)))
+b<-lm(y ̃poly(x,10)) lines(xx,predict(b,data.frame(x=xx)),col=2)
+## spline fits ...
+sb <- function(x,xk) { abs(x-xk)ˆ3}
+q<-11
+xk<-((1:(q-2)/(q-1))*10)ˆ.5
+## lazy person’s formula construction ... form<-paste("sb(x,xk[",1:(q-2),"])",sep="",collapse="+") form <- paste("y ̃x+",form)
+b<-lm(formula(form)) lines(xx,predict(b,data.frame(x=xx)),col=3)
+Note the wild behaviour of the order 10 polynomial, compared to the much better behaviour of the spline model of the same rank.
+The difference in behaviour of the two rank 11 models is perhaps unsurprising. The theoretical justification for polynomial approximations of unknown functions would probably be Taylor’s theorem: but this is concerned with getting good ap- proximations in the vicinity of some particular point of interest: it is clear from the theorem that the approximation will eventually become very poor as we move away from that point. The theoretical justifications for splines are much more concerned with properties of the function over the whole region of interest.
+2. ## x,y, and xx from previous question
+b1 <- lm(form)
+plot(x,y) lines(xx,predict(b1,data.frame(x=xx)),col=4) X <- model.matrix(b1) # extract model matrix
+    
+    346 SOLUTIONS TO EXERCISES
+beta <- solve(t(X)%*%X,t(X)%*%y,tol=0)
+b1$coefficients <- beta # trick for simple prediction lines(xx,predict(b1,data.frame(x=xx)),col=5)
+. . . upping the basis dimension to 11, makes the normal equations estimates per- form very badly.
+3. pls <- function(x,y,m=10,lambda=1,order=2) { n <- length(x)
+xk <- seq(min(x),max(x),length=m) # knot locations
+X <- matrix(0,n,m) # model matrix
+for (i in 1:m) X[,i] <- approx(xk,diag(m)[,i],x)$y
+D <- diff(diag(m),differences=order) # sqrt penalty matrix Xa <- rbind(X,lambda*D) # augmented model matrix b<-lm(c(y,rep(0,m-order)) ̃Xa-1) # fit model edf<-sum(influence(b)$hat[1:n]) # effective d.o.f. fv<-fitted(b)[1:n]
+    rss <- sum((y-fv)ˆ2)
+    list(gcv=rss/(n-edf)ˆ2,edf=edf,fv=fv,coef=coef(b),xk=xk)
+  }
+## Example (at approx GCV optimum lambda) library(MASS)
+b <- pls(mcycle$time,mcycle$accel,m=20,lambda=.8) plot(mcycle$time,accel);
+lines(mcycle$time,b$fv)
+4.
+which yields the required result.
+5. Theresultfollowsfromthefactthattheupperleftn×nsubmatrixofX ̃(X ̃TX ̃)−1X ̃T
+is X(XTX + S)−1XT, as the following shows:
+X ̃(X ̃TX ̃)−1X ̃T =   XB  (XTX+S)−1  XT BT  
+=   X(XTX + S)−1XT X(XTX + S)−1BT   B(XTX + S)−1XT B(XTX + S)−1BT
+6. Zero. The most complex model will always be chosen, as this will allow the data to be fitted most closely (only for a set of data configurations of probability zero is this not true — for example data lying exactly on a straight line).
+7. Differentiating the basis expansion for f, we get f′′(x) = βTd(x) where dj(x) =
+∥y−Xβ∥2 +λβTSβ
+Sp =
+= (y−Xβ)T (y−Xβ)+λβTSβ
+= yTy−2βTXTy+βT  XTX+λS β.
+Differentiating Sp w.r.t. β and setting to zero results in the system of equations (XTX + λS)βˆ = XTy,
+    
+    CHAPTER 4 347 b′′(x). Using the fact that a scalar is its own transpose we then have that:
+8.
+S =   ∂2f  2
+  T d(x)d(x) dx.
+ ∂f2 2
+∂z2 dxdz =
+j
+where
+   ∂2f 2 ∂x2
+  f′′(x)2dx =   βTd(x)d(x)Tβdx = βTSβ
+∂x∂z +
+   ∂2f 2     ∂2f  2
++ 2
+   dxdz +
+Treating each integral on the r.h.s. in a similar way to the integral in the previous
+question we find that the penalty can be written as βTSβ where
+S =   dxx(x,z)dxx(x,z)T+2dxz(x,z)dxz(x,z)T+dzz(x,z)dzz(x,z)Tdxdy.
+Here the jth element of dxz(s,z) is ∂2bj/∂x∂z, with similar definitions for dxx and dzz. Obviously this sort of argument can be applied to all sorts of penalties involving integrals of sums of squared derivatives.
+∂x2 dxdz + 2 ∂x∂z
+   ∂f2 2
+∂z2 dxdz
+   B.4 Chapter 4
+1. Consider the spline defined by (4.2). At knot position xj, we require that the derivative at xj of the section of cubic to the left of xj matches the derivative at xj of the section of cubic to the right of xj . Writing this condition out in full yields
+−βj +βj+1 +δ hj +δ 3hj −δ hj = hj hj j6 j+16 j+16
+− βj+1 + βj+2 −δ 3hj+1 +δ hj+1 −δ hj+1 hj+1 hj+1 j+1 6 j+1 6 j+2 6
+and simple re-arrangement leads to
+1βj− 1+ 1  βj+1+ 1 βj+2= hj hj hj+1 hj+1
+hjδj+ hj +hj+1 δj+1+hj+1δj+2. 6336
+With the additional restriction that δ1 = δk = 0, this latter system repeated for j = 1, . . . , k − 2 is (4.3).
+2.(a) Differentiating (4.2) twice, yields
+f′′(x) = δj(xj+1 − x)/hj + δj+1(x − xj)/hj, xj ≤ x ≤ xj+1.
+                      
+    348 (b)
+SOLUTIONS TO EXERCISES By inspection this can be re-written in the required form.
+Writing d(x) as the vector with ith element di+1(x) (the first and last di’s have coefficients zero, so are of no interest), it is easy to show (e.g. exercise 7, Chapter 3), that
+  f′′(x)2dx = δ−T   d(x)d(x)Tdxδ−.
+Since each di(x) is non-zero over only 2 intervals, it is clear that   d(x)d(x)Tdx is tridiagonal, and it is also obviously symmetric, by construction. The (i−1)th leading diagonal element is given by
+  xi+1 2 di(x)dx=
+xi−1
+ (x − xi−1)3  xi 3h2
+−
+ (xi+1 − x)3  xi+1 hi−1 hi 3h2 = 3 +3,
+    i−1 xi−1
+i xi
+where i runs from 2 to k − 1. In the same vein, the off diagonal elements
+(i − 1, i) and (i, i − 1) are given by:
+  xi
+  xi
+x − xi−1 xi − x hi−1 h h dx= 6 .
+di(x)di−1(x)=
+In other words   d(x)d(x)Tdx = B, as required.
+   3.
+(c)
+i−1 i−1
+From (4.3) we have that δ− = B−1Dβ, form which the result follows imme-
+xi−1
+diately by substitution.
+xi−1
+E(∥y−Ay∥2) = = =
+E(∥μ+ε−Aμ−Aε∥2) (μ+ε−Aμ−Aε)T(μ+ε−Aμ−Aε) μTμ−μTAμ+μTAAμ+
+E(εTε) − 2E(εTAε) + E(εTAAε) bTb+nσ2 −2tr(A)σ2 +tr(AA)σ2
+=
+where E(εTAε) = E(tr εTAε ) = E(tr AεεT ) = tr Aσ2 , and similar
+have been used.
+4. For binary random variables we have that,
+E{(yi −μi)2}=E(yi2)−2μiE(yi)+E(μ2i)=μ−2μ2 +μ=μ−μ2, and V (μi) = μi(1 − μi). Substituting into the expression to be evaluated yields,
+n  i 1 n2
+{n − tr(A)}2 = {n − tr(A)}2 ,
+as required. So the expected value of E(Vgp) → n2/{n − tr (A)}2 as n → ∞, provided that μˆ is consistent.
+5.(a) In the regular parameterization:
+E(βˆ) = (XTX + λS)−1XTE(y) = (XTX + λS)−1XTXβ.
+      
+    CHAPTER 4 349 In the natural parameterization this becomes:
+E(βˆ′′) = (I + λD)−1β′′ bias(βˆ′′)=−β′′λD /(1+λD ).
+So
+So if β′′ = 0 then its estimator is unbiased. Equally if the parameter is unpenal-
+i iii ii
+i
+ized because λDii = 0 then the estimator is unbiased. Clearly the bias will be
+small for small true parameter value or low penalization: it is only moderate or strongly penalized model components of substantial magnitude that are subject to substantial bias.
+(b)
+= var(βˆi) + bias(βˆi)2 + 0 (c) So the MSE, M , of βi (natural parameterization) is
+σ2 (λDii)2βi2 σ2 + (λDiiβi)2 M = (1+λDii)2 + (1+λDii)2 = (1+λDii)2
+this expression makes it rather clear how increasing λ decreases variance while increasing bias.
+E{(βˆi − βi)2} =
+= E{(βˆi − E(βˆi))2} + E{(E(βˆi) − βi)2}
+E{(βˆi − E(βˆi) + E(βˆi) − βi)2} +E{(βˆi − E(βˆi))(E(βˆi) − βi)}
+   (d) Writing
+M = 1+k2r
+σ2 (1 + k)2
+  where λDii = k and βi2/σ2 = r, it’s clear that M/σ2 (and hence M) is minimized by choosing λ so that k = 1/r, in which case M = σ2r/(1 + r). In the natural parameterization the unpenalized estimator variance (and hence unpenalized MSE) is σ2, and σ2r/(1 + r) is clearly always less than this. If λ could be chosen to minimize the MSE for a particular parameter, then from the preceding formulae, it is clear that small magnitude βi’s would lead to high penalization and MSE dominated by the bias term, while large magnitude βi’s would be lightly penalized, with the MSE dominated by the variance.
+(e) In the natural parameterization the Bayesian prior variance for βi is σ2/(λiDii). Since the prior expected value (for penalized terms) is 0, this means that E(βi2) = σ2/(λiDii) according to the prior. If this is representative of the typical size of βi2 then the typical size of the bias(βˆi)2 would be:
+λDiiσ2
+(1 + λDii)2 ,
+implying that the squared bias should typically be bounded above by something like σ2/4.
+     
+    350 SOLUTIONS TO EXERCISES
+6.(a) The influence matrix for this problem is obviously A = (I + λI)−1. Hence tr(A) = n/(1 + λ) and μi = yi/(1 + λ). Substituting into the expression for the OCV or GCV scores results in Vo = Vg =  i yi2/n, which does not depend on λ.
+(b) If we were to drop a yi from the model sum of squares term, then the only thing influencing the estimate of μi would be the penalty term, which would be minimized by setting μi = 0, whatever (positive) value λ takes. This com- plete decoupling, where each μi is influenced only by its own yi, will clearly cause cross validation to fail: if we leave out yi then the corresponding μi is always estimated as zero, since the other data have no influence on it, and this behaviour occurs for any possible value of λ. In a sense this is unsurprising, since there is actually no covariate in this problem, and hence nothing to indi- cate which yi or μi values should be close in value.
+(c) From the symmetry around x2 it suffices to examine only the integral of the penalty from x1 to x2. Without loss of generality we can take x1 to be 0. If b is the slope of the line segment joining (x1 = 0, μ1 = μ∗) to (x2, μ2) then μ2 = μ∗ + bx2, and it is simpler to work in terms of b, initially. So
+ x3 2  x2 ∗ 2 2P= μi(x)dx=2 (μ +bx)dx
+x1 0
+P = μ∗2x2 + μ∗bx2 + b2x32/3.
+so that
+To find the b minimizing P, set ∂P = 0, which implies b = −3μ∗/(2x2) and
+ hence μ2 = −μ∗/2. ∂b
+So, consider a set of 3 adjacent points with roughly similar yi and μi values: if we omit the middle point from the fitting, then the action of the penalty will send its μi estimate to the other side of zero, from its neighbours. This is a rather unfortunate tendency. It means that the missing datum will always be better predicted with a high λ than with a lower one, since the higher λ will tend to shrink the μi for the included data towards zero, which will mean that the μi for the omitted datum will also be closer to zero, and hence less far from the omitted datum value. Hence cross validation will have the patholog- ical tendency to always select the model μi = 0 ∀ i, an effect which can be demonstrated practically!
+(d) The first derivative penalty does not suffer from the problems of the other two penalties. In this case the action of the penalty is merely to try and flatten μ(x) in the vicinity of an omitted datum: increased flattening with increased λ generally pulls μ(x) away from the omitted datum, in the way that cross validation implicitly assumes will happen.
+(e) Generally, penalized regression smoothers can not decouple in the manner of the smoothers considered in this question: because each smoother has far fewer parameters than data, each μi is necessarily dependent on several yi, rather than just one: it is simply not possible for the penalty to do something bizarre to one μi while leaving the others unchanged.
+    
+    CHAPTER 4 351
+7.(a)
+library(splines)
+pspline.XB <- function(x,q=10,m=2,p.m=2)
+# Get model matrix and sqrt Penalty matrix for P-spline { # first make knot sequence, k
+k <- seq(min(x),max(x),length=q-m)
+dk <- k[2]-k[1]
+k <- c(k[1]-dk*((m+1):1),k,k[q-m]+dk*(1:(m+1))) # now get model matrix and root penalty
+X <- splineDesign(k,x,ord=m+2)
+B <- diff(diag(q),difference=p.m) list(X=X,B=B)
+}
+(b)
+(c)
+(d)
+8. (a)
+n<-100
+x <- sort(runif(n))
+ps <- pspline.XB(x,q=9,m=2,p.m=2)
+par(mfrow=c(3,3)) # plot the original basis functions for (i in 1:9) plot(x,ps$X[,i],type="l")
+S <- t(ps$B)%*%ps$B
+es <- eigen(S);U <- es$vectors
+XU <- ps$X%*%U # last p.m cols are penalty null space par(mfrow=c(3,3)) # plot penalty eigenbasis functions for (i in 1:9) plot(x,XU[,i],type="l")
+qrx <- qr(ps$X) # QR of X
+R <- qr.R(qrx)
+RSR <- solve(t(R),S);RSR <- t(solve(t(R),t(RSR))) ersr <- eigen(RSR)
+U <- ersr$vectors
+Q <- qr.Q(qrx)
+QU <- Q%*%U
+par(mfrow=c(3,3)) # plot the natural basis functions for (i in 1:9) plot(x,QU[,i],type="l")
+The following answers (a) and (b). Note that rss is only returned in order to facilitate question 9.
+fit.wPs <- function(y,X,B,lambda=0,w=rep(1,length(y)))
+# fit to y by weighted penalized least squares, X is
+# model matrix, B is sqrt penalty, lambda is smothing p. { w <- as.numeric(wˆ.5)
+n <- nrow(X) X<-rbind(w*X,sqrt(lambda)*B) y<-c(w*y,rep(0,nrow(B)))
+b <- lm(y ̃X-1) # actually estimate model trA <- sum(influence(b)$hat[1:n])
+rss <- sum((y-fitted(b))[1:n]ˆ2) list(trA=trA,rss=rss,b=coef(b))
+}
+fitPoiPs <- function(y,X,B,lambda=0)
+# Fit Poisson model with log-link by P-IRLS
+    
+    352
+{
+SOLUTIONS TO EXERCISES
+mu <- y;mu[mu==0] <- .1
+eta <- log(mu)
+converged <- FALSE
+dev <- ll.sat <- sum(dpois(y,y,log=TRUE))
+while (!converged) {
+z <- (y-mu)/mu + eta
+w <- mu
+fPs <- fit.wPs(z,X,B,lambda,w)
+eta <- X%*%fPs$b
+mu=exp(eta)
+old.dev <- dev
+dev <- 2*(ll.sat-sum(dpois(y,mu,log=TRUE)))
+if (abs(dev-old.dev)<1e-6*dev) converged <- TRUE
+}
+  list(dev=dev,rss=fPs$rss,trA=fPs$trA,b=fPs$b,fv=mu)
+}
+(c) #
+library(splines)
+ps <- pspline.XB(x,q=10,m=2,p.m=2)
+lambda <- 1e-4;reps <- 60
+sp <- trA <- gcv <- rep(0,reps)
+for (i in 1:reps) { # loop through trial s.p.s
+fps <- fitPoiPs(y,ps$X,ps$B,lambda=lambda) trA[i] <- fps$trA;sp[i] <- lambda
+gcv[i] <- n*fps$dev/(n-trA[i])ˆ2
+lambda <- lambda*1.3
+     }
+     plot(trA,gcv,type="l")
+     fps1 <- fitPoiPs(y,ps$X,ps$B,lambda=sp[gcv==min(gcv)])
+     plot(x,y);lines(x,fps1$fv)
+9. Following on from Q.8, the following code estimates k and uses it in a modified GCV score.
+   k <- fps1$rss - fps1$dev
+   lambda <- 1e-4;reps <- 60
+   sp <- trA <- gcv <- rep(0,reps)
+   for (i in 1:reps) {
+fps <- fitPoiPs(y,ps$X,ps$B,lambda=lambda) trA[i] <- fps$trA;sp[i] <- lambda
+gcv[i] <- n*(fps$dev+k)/(n-trA[i])ˆ2 lambda <- lambda*1.3
+}
+fps2 <- fitPoiPs(y,ps$X,ps$B,lambda=sp[gcv==min(gcv)]) lines(x,fps2$fv,col=2) # added to Q8 plot
+Repeated simulation of the question 8/9 example, suggests that the modified GCV score seldom gives very different results to the unmodified version, although, of course, it tends to smooth a little less.
+10. eta <- function(r)
+{ # thin plate spline basis functions
+set up P-spline using code from Q 7.(a)
+    
+    CHAPTER 4 353
+ind <- r<=0
+eta <- r
+eta[!ind] <- r[!ind]ˆ2*log(r[!ind])/(8*pi) eta[ind] <- 0
+eta
+}
+XSC <- function(x,xk=x)
+{ # set up t.p.s., given covariates, x, and knots, xk
+n <- nrow(x);k <- nrow(xk)
+X <- matrix(1,n,k+3) # tps model matrix for (j in 1:k) {
+      r <- sqrt((x[,1]-xk[j,1])ˆ2+(x[,2]-xk[j,2])ˆ2)
+      X[,j] <- eta(r)
+    }
+X[,j+2] <- x[,1];X[,j+3] <- x[,2]
+C <- matrix(0,3,k+3) # tps constraint matrix S <- matrix(0,k+3,k+3)# tps penalty matrix for (i in 1:k) {
+C[1,i]<-1;C[2,i] <- xk[i,1];C[3,i] <- xk[i,2] for (j in i:k) S[j,i]<-S[i,j] <-
+                  eta(sqrt(sum((xk[i,]-xk[j,])ˆ2)))
+}
+    list(X=X,S=S,C=C)
+  }
+absorb.con <- function(X,S,C)
+{ # get constraint null space, Z...
+qrc <- qr(t(C)) # QR=C’, Q=[Y,Z]
+m <- nrow(C);k <- ncol(X)
+X <- t(qr.qty(qrc,t(X)))[,(m+1):k] # form XZ
+# now form Z’SZ ...
+S <- qr.qty(qrc,t(qr.qty(qrc,t(S))))[(m+1):k,(m+1):k] list(X=X,S=S,qrc=qrc)
+}
+fit.tps <- function(y,x,xk=x,lambda=0)
+{ tp <- XSC(x,xk) # get tps matrices
+tp <- absorb.con(tp$X,tp$S,tp$C) # make unconstrained
+ev <- eigen(tp$S,symmetric=TRUE) # get sqrt penalty, rS rS <- ev$vectors%*%(ev$valuesˆ.5*t(ev$vectors))
+X <- rbind(tp$X,rS*sqrt(lambda)) # augmented model matrix z <- c(y,rep(0,ncol(rS))) # augmented data
+beta <- coef(lm(z ̃X-1)) # fit model
+beta <- qr.qy(tp$qrc,c(0,0,0,beta)) # backtransform beta
+}
+eval.tps <- function(x,beta,xk)
+{ # evaluate tps at x, given parameters, beta, and knots, xk.
+    k <- nrow(xk);n <- nrow(x)
+    f <- rep(beta[k+1],n)
+    
+    354
+f <- f + beta[k+2]*x[,1] + beta[k+3]*x[,2] }
+## select some ‘knots’, xk ...
+ind <- sample(1:n,100,replace=FALSE) xk <- x[ind,]
+## fit model ...
+beta <- fit.tps(y,x,xk=xk,lambda=.01)
+  ## contour truth and fit
+  par(mfrow=c(1,2))
+  xp <- matrix(0,900,2)
+  x1<-seq(0,1,length=30);x2<-seq(0,1,length=30)
+  xp[,1]<-rep(x1,30);xp[,2]<-rep(x2,rep(30,30))
+  truth<-matrix(test1(xp[,1],xp[,2]),30,30)
+  contour(x1,x2,truth)
+fit <- matrix(eval.tps(xp,beta,xk),30,30) contour(x1,x2,fit)
+. . . obviously, many other solutions are possible.
+SOLUTIONS TO EXERCISES
+for (i in 1:k) {
+  r <- sqrt((x[,1]-xk[i,1])ˆ2+(x[,2]-xk[i,2])ˆ2)
+  f <- f + beta[i]*eta(r)
+}
+11. (a) (b)
+(c)
+B.5 Chapter 5
+1.(a) data(hubble)
+h1 <- gam(V ̃s(D),data=hubble) plot(h1) ## model is curved h0 <- gam(V ̃D,data=hubble)
+A = QU(I + λD)−1UTQT.
+−1 T T −1 T T tr(A) = tr QU(I+λD) U Q =tr (I+λD) U Q QU
+     
+k1
+= tr (I+λD)−1 = 1+λD .
+i=1 ii ∥y−Ay∥2 = yTy−2yTAy+yTAAy
+= yTy − 2y ̃T(I + λD)−1y ̃ + y ̃T(I + λD)−2y ̃
+ where y ̃ = UTQTy. Once yTy and y ̃ have been evaluated, it’s clear that ∥y − Ay∥2 can be evaluated in O(k) operations, since D is diagonal, and y ̃ is of dimension k. So the GCV score can be calculated in O(k) operations, for each trial λ.
+    
+    CHAPTER 5 355
+     h1;h0
+     AIC(h1,h0)
+The smooth (curved) model has a lower GCV and lower AIC score than the straight line model. On the face of it there is a suggestion that velocities are lower at very high distances than Hubble’s law suggests. This would imply an accelerating expansion!
+(b) gam.check(h1) # oh dear
+h2 <- gam(V ̃s(D),data=hubble,family=quasi(var=mu)) gam.check(h2) # not great, but better
+h2
+The residual plots for h1 are problematic: there is a clear relationship between the mean and the variance. Perhaps a quasi-likelihood approach might solve this. m2 does have somewhat better residual plots, although they are still not perfect. All evidence for departure from Hubble’s has has now vanished.
+2.(a) library(MASS) par(mfrow=c(2,2))
+     mc <- gam(accel ̃s(times,k=40),data=mcycle)
+     plot(mc,residuals=TRUE,se=FALSE,pch=1)
+Note the way the fitted curve dips too early.
+(b) mc1 <- lm(accel ̃poly(times,11),data=mcycle)
+     termplot(mc1,partial.resid=TRUE)
+Notice the wild oscillations, unsupported by the data.
+(c) mc2 <- gam(accel ̃s(times,k=11,fx=TRUE),data=mcycle)
+     plot(mc2,residuals=TRUE,se=FALSE,pch=1)
+. . . not much worse than the penalized fit.
+(d) mc3 <- gam(accel ̃s(times,k=11,fx=TRUE,bs="cr"),data=mcycle)
+     plot(mc3,residuals=TRUE,se=FALSE,pch=1)
+So, mc is a bit better than mc2 which is a bit better than mc3 which is much better than mc1: i.e. the polynomial does much worse than any sort of spline, while regression splines are a bit worse than penalized splines, however the TPRS is almost as good as a penalized spline.
+(e) par(mfrow=c(1,1)) plot(mcycle$times,residuals(mc))
+The first 20 residuals have much lower variance than the remainder. In addition, just after time 9 there is a substantial cluster of negative residuals, followed by a cluster of positive residuals, suggesting that the model is not capturing the mean acceleration correctly in this region: something which is also apparent in the defualt plot of mc: the model dips too early.
+(f) The following was run several times with different α values, before settling on 400 as the weight which causes the final ratio to be approximately 1.
+     mcw <- gam(accel ̃s(times,k=40),data=mcycle,
+               weights=c(rep(400,20),rep(1,113)))
+     plot(mcw,residuals=TRUE,pch=1)
+     rsd <- residuals(mcw)
+    
+    356 SOLUTIONS TO EXERCISES
+     plot(mcycle$times,rsd)
+     var(rsd[21:133])/var(rsd[1:20])
+The model and residual plots are now very much better. Although this pro- cedure was somewhat ad hoc it can only be better than ignoring the variance problem in this case.
+(g) The following uses the integrated squared third derivative as penalty (m=3). gam(accel ̃s(times,k=40,m=3),data=mcycle,
+         weights=c(rep(400,20),rep(1,113)))
+the original model perhaps failed to go quite deep enough at the minimum of the data: the new curve is fine. Further increase of m doesn’t result in much further change.
+3.(a) Fitting the model to Ij and evaluating the fitted values, μˆ∗, is equivalent to forming μˆ∗ = AIj, but this is clearly just the jth column of A.
+(b) library(MASS)
+n <- nrow(mcycle) A <- matrix(0,n,n) for (i in 1:n) {
+mcycle$y<-mcycle$accel*0;mcycle$y[i] <- 1
+       A[,i] <- fitted(gam(y ̃s(times,k=40),data=mcycle,sp=mc$sp))
+     }
+(Actually this could be done more efficiently using the fit=FALSE option in gam.)
+(c) rowSums(A) shows that all the rows sum to 1. This has to happen, since by construction the model does not penalize the constant (or linear trend) part of the model. Hence if b is a vector all elements of which have the same value, b, then we require that b = Ab. This means that bi =  nj=1 Aijbj ∀ i, but this is equivalent to b = b  nj=1 Aij ∀ i, which will only happen if  nj=1 Aij = 1 ∀ i. i.e. the rows of A must each sum to 1.
+(d) plot(mcycle$times,A[,65],type="l",ylim=c(-0.05,0.15)) Notice how the kernel peaks at the time of the datum that it relates to.
+(e) for (i in 1:n) lines(mcycle$times,A[,i])
+The kernels all have rather similar typical widths: the heights vary according to the number of data within that width. If many data are making a substantial contribution to the weighted sum that defines the fitted value, then the weights must be lower than if fewer data contribute.
+(f) par(mfrow=c(2,2)) mcycle$y<-mcycle$accel*0;mcycle$y[65] <- 1 for (k in 1:4) plot(mcycle$times,fitted(
+          gam(y ̃s(times,k=40),data=mcycle,sp=mc$sp*10ˆ(k-1.5))
+          ),type="l",ylab="A[65,]",ylim=c(-0.01,0.12))
+Low smoothing parameters lead to narrow, high kernels, while high smoothing parameters result in wide low kernels.
+    
+    CHAPTER 5 357
+4.(a) w <- c(rep(400,20),rep(1,113))
+m <- 40;par(mfrow=c(1,1))
+sp <- seq(-13,12,length=m) ## trial log(sp)’s AC1 <- EDF <- rep(0,m)
+for (i in 1:m) { ## loop through s.p.’s
+      b <- gam(accel ̃s(times,k=40),data=mcycle,weights=w,
+              sp=exp(sp[i]))
+      EDF[i] <- sum(b$edf)
+      AC1[i] <- acf(residuals(b),plot=FALSE)$acf[2]
+     }
+     plot(EDF,AC1,type="l");abline(0,0,col=2)
+So the lag 1 residual autocorrelation starts positive declines to zero around the GCV best fit model, and then becomes increasingly negative.
+(b) At low EDF the model oversmooths and fails to capture the mean of the data. This will lead to clear patterns in the mean of the residuals against time: the ACF picks this residual trend up as positive autocorrelation.
+(c) i. Sothejth rowofthen×nmatrixAisj−(k+1)/2zeroes,followedby k values, 1/k, followed by n − j − (k − 1)/2 further zeroes. i.e. something like:
+  0 . . 0 1/k 1/k . . 1/k 0 . . 0  
+ii. Using Vεˆ/σ2 = I − 2A + AA and slogging through, it turns out that the leading diagonal elements (in the interior) are σ2(k − 1)/k, while the elements on the sub and super diagonal (the lag 1 covariances) are −σ2(k + 1)/k2.
+iii. The correlation at lag 1 is clearly
+−  k+1 k(k − 1)
+So the residual autocorrelation is always negative, with magnitude decreas- ing as k increases. Once k is small enough, oversmoothing is avoided, so that the observed ACF reflects this residual autocorrelation, rather than the inadequately modelled trend. It is this increasingly negative auto-correlation that was seen in the mcycle example in part (a).
+It is tempting to view negative autocorrelation in the residuals as an indica- tion of overfitting, but the preceding analysis indicates that some care would be needed to do this, since the true residual auto-correlation (at lag 1) should always be negative.
+5.(a) attach(co2s) plot(c.month,co2,type="l")
+(b) b<-gam(co2 ̃s(c.month,k=300,bs="cr"))
+(c) pd <- data.frame(c.month=1:(n+36))
+fv <- predict(b,pd,se=TRUE) plot(pd$c.month,fv$fit,type="l") lines(pd$c.month,fv$fit+2*fv$se,col=2) lines(pd$c.month,fv$fit-2*fv$se,col=2)
+      
+    358 SOLUTIONS TO EXERCISES
+The prediction of smoothly and sharply decreasing CO2 is completely out of line with the long term pattern in the data, and is driven entirely by the seasonal dip at the end of the data.
+(d) b2 <- gam(co2 ̃s(month,bs="cc")+s(c.month,bs="cr",k=300), knots=list(month=seq(1,13,length=10)))
+Notice how the knots argument has been used to ensure that the smooth of month wraps round correctly: month 1 should be the same as month 13 (if it ever occurred), not month 12.
+(e) pd2 <- data.frame(c.month=1:(n+36), month=rep(1:12,length.out=n+36))
+     fv <- predict(b2,pd2,se=TRUE)
+     plot(pd$c.month,fv$fit,type="l")
+     lines(pd$c.month,fv$fit+2*fv$se,col=2)
+     lines(pd$c.month,fv$fit-2*fv$se,col=2)
+The predictions now look much more credible, since we now extrapolate the long terms trend, and simply repeat the seasonal cycle on top of it. However, it is worth noting that the smooth of cumulative month (the long term trend) is still estimated to have rather high effective degrees of freedom, and it does still wiggle alot, suggesting that extrapolation is still a fairly dangerous thing to do, and we had better not rely on it very far into the future.
+Note that an alternative way of extrapolating is to add knots beyond the range of the observed data. e.g. with the argument
+     knots=list(...,c.month=seq(1,n+36,length=300))
+Since the function value at these extra knots can only very subtly alter the shape of the function in the range of the data, the resulting curves tend to have very high associated standard errors: this is probably realistic!
+6. There is no unique ‘right’ answer to this, but here is an outline of how to get started. I looked at ir and dp lagged for 1 to 4 months. Everything suggested dropping the effect of ir at lag 4 from the model, but everything else marginally improved the model, so was left in. Here is the code.
+n<-nrow(ipo)
+## create lagged variables ...
+ipo$ir1 <- c(NA,ipo$ir[1:(n-1)])
+ipo$ir2 <- c(NA,NA,ipo$ir[1:(n-2)])
+ipo$ir3 <- c(NA,NA,NA,ipo$ir[1:(n-3)])
+ipo$ir4 <- c(NA,NA,NA,NA,ipo$ir[1:(n-4)])
+ipo$dp1 <- c(NA,ipo$dp[1:(n-1)])
+ipo$dp2 <- c(NA,NA,ipo$dp[1:(n-2)])
+ipo$dp3 <- c(NA,NA,NA,ipo$dp[1:(n-3)])
+ipo$dp4 <- c(NA,NA,NA,NA,ipo$dp[1:(n-4)])
+## fit initial model and look at it ... b<-gam(n.ipo ̃s(ir1)+s(ir2)+s(ir3)+s(ir4)+s(log(reg.t))+
+     s(dp1)+s(dp2)+s(dp3)+s(dp4)+s(month,bs="cc")+s(t,k=20),
+     data=ipo,knots=list(month=seq(1,13,length=10)),
+     family=poisson,gamma=1.4)
+  par(mfrow=c(3,4))
+    
+    CHAPTER 5 359
+plot(b,scale=0)
+summary(b)
+## re-fit model dropping ir4 ...
+b1 <- gam(n.ipo ̃s(ir1)+s(ir2)+s(ir3)+s(log(reg.t))+s(dp1)+
+            s(dp2)+s(dp3)+s(dp4)+s(month,bs="cc")+s(t,k=20),
+            data=ipo,knots=list(month=seq(1,13,length=10)),
+            family=poisson,gamma=1.4)
+par(mfrow=c(3,4)) plot(b1,scale=0) summary(b1)
+## residual checking ... gam.check(b1) acf(residuals(b1))
+The final model has good residual plots that largely eliminate the auto-correlation. In the above the degrees of freedom for t have been kept fairly low, in order to try and force the model to use the other covariates in preference to t, and because too much freedom for the smooth of time tends to lead to it being used to the point of overfitting (lag 1 residual auto-correlation becomes very negative, for example). The most noticeable feature of the plotted smooth effects is the way that IR at all significant lags tends to be associated with an increase in IPO volume up to around 20%, after which there is a decline. If this reflects company behaviour, it certainly makes sense. If IR averages are too low then there is a danger of investors not being interested in IPOs, while excessively high IRs suggest that companies are currently being undervalued excessively, so that unreasonably small amounts of capital will be raised by the IPO. The other plots are harder to interpret!
+7. The following is the best model I found.
+  wm<-gam(price ̃s(h.rain)+s(s.temp)+s(h.temp)+s(year),
+      data=wine,family=Gamma(link=identity),gamma=1.4)
+  plot(wm,pages=1,residuals=TRUE,pch=1,scale=0)
+  acf(residuals(wm))
+  gam.check(wm)
+  predict(wm,wine,se=TRUE)
+A Gamma family seems to produce acceptable residual plots. w.temp appears to be redundant. Two way interactions between the weather variables only make the GCV and AIC scores worse. gamma=1.4 is a prudent defence against over- fitting, given that the sample size is so small. The effects are easy to interpret: (i) more recent vintages are worth less than older ones; (ii) low harvest rainfall and high summer temperatures are both associated with higher prices; (iii) there is some suggestion of an optimum harvest temperature at 17.5C, but the possible increases at very low and very high harvest temperatures make interpretation dif- ficult (however this harvest effect substantially increases the proportion deviance explained).
+8. smooth.construct.tr.smooth.spec<-function(object,data,knots) ## a truncated power spline constructor method function
+## object$p.order = null space dimension
+{ m <- object$p.order
+    
+    360
+SOLUTIONS TO EXERCISES
+if (m<1) stop("silly m supplied") nk<-object$bs.dim-m-1 # number of knots
+if (nk<=0) stop("k too small for m")
+x <- get.var(object$term,data) # find the data x.shift <- mean(x) # shift used to enhance stability if (!is.null(knots)) # are there supplied knots?
+k <- get.var(object$term,knots)
+else k<-NULL
+if (is.null(k)) # space knots through data
+{ n<-length(x)
+  k<-quantile(x[2:(n-1)],seq(0,1,length=nk+2))[2:(nk+1)]
+}
+if (length(k)!=nk) # right number of knot? stop(paste("there should be ",nk," supplied knots"))
+x <- x - x.shift # basis stabilizing shift
+k <- k - x.shift # knots treated the same! X<-matrix(0,length(x),object$bs.dim)
+for (i in 1:(m+1)) X[,i] <- xˆ(i-1)
+for (i in 1:nk) X[,i+m+1]<-(x-k[i])ˆm*as.numeric(x>k[i]) object$X<-X # the finished model matrix
+if (!object$fixed) # create the penalty matrix
+{ object$S[[1]]<-diag(c(rep(0,m+1),rep(1,nk)))
+}
+object$rank<-nk # penalty rank
+object$null.space.dim <- m+1 # dim. of unpenalized space ## store "tr" specific stuff ... object$knots<-k;object$m<-m;object$x.shift <- x.shift
+## get the centering constraint ... object$C<-matrix(colSums(object$X),1,object$bs.dim) object$df<-ncol(object$X)-1 # maximum DoF
+if (object$by!="NA") # deal with "by" variable
+{ by <- get.var(object$by,data) # find by variable
+if (is.null(by)) stop("Can’t find by variable")
+object$X<-by*object$X # form diag(by)%*%X }
+class(object)<-"tr.smooth" # Give object a class
+object }
+Predict.matrix.tr.smooth<-function(object,data)
+## prediction method function for the ‘tr’ smooth class { x <- get.var(object$term,data)
+x <- x - object$x.shift # stabilizing shift
+m <- object$m;
+k<-object$knots
+nk<-length(k)
+X<-matrix(0,length(x),object$bs.dim)
+for (i in 1:(m+1)) X[,i] <- xˆ(i-1)
+for (i in 1:nk) X[,i+m+1] <- (x-k[i])ˆm*as.numeric(x>k[i])
+# spline order (3=cubic)
+# knot locations
+# number of knots
+    
+    CHAPTER 5 361
+X # return the prediction matrix }
+### Now run first data simulation in ?gam ###
+## Fit simulated data using the new class ... m <- 2 b<-gam(y ̃s(x0,bs="tr",m=m)+s(x1,bs="tr",m=m)+
+           s(x2,bs="tr",m=m)+s(x3,bs="tr",m=m))
+  plot(b,pages=1)
+9.(a) plot(bf$day,bf$pop,type="l")
+(b) ## prepare differenced and lagged data ...
+bf$dn <- c(NA,bf$pop[2:n]-bf$pop[1:(n-1)])
+lag <- 6
+bf$n.lag <- c(rep(NA,lag),bf$pop[1:(n-lag)])
+bf1 <- bf[(lag+1):n,] # strip out NAs, for convenience ## fit model, note no intercept ... b<-gam(dn ̃n.lag+pop+s(log(n.lag),by=n.lag)+
+s(log(pop),by=-pop)-1,data=bf1) plot(b,pages=1,scale=-1,se=F) ## effects plot(abs(fitted(b)),residuals(b)) acf(residuals(b))
+So the per capita birth rate declines with increasing population, which is sen- sible, given likely competition for resources. The mortality rate increases with population, which is also plausible, although the decline at very high densi- ties is surprising, and may not be real. Note that both functions are negative in places: this is biologically nonsensical. The residual plots are not brilliant, and there is residual auto-correlation at lag 1, so the model is clearly not great.
+(c) fv <- bf$pop
+e <- rnorm(n)*0 ## increase multiplier for noisy version min.pop <- min(bf$pop);max.pop <- max(bf$pop)
+for (i in (lag+1):n) { ## iteration loop
+dn <- predict(b,data.frame(n.lag=fv[i-lag],pop=fv[i-1])) fv[i] <- fv[i-1]+dn + e[i]; fv[i]<-min(max.pop,max(min.pop,fv[i]))
+     }
+     plot(bf$day,fv,type="l")
+The amplitude without noise is rather low, but does improve with noise, how- ever the feature that cycles tend to be smoother at the trough and noisier at the peak is not re-captured, suggesting that something more complicated than a constant variance model may be needed. Ideally we would fit the model with constraints forcing the functions to be positive, and possibly monotonic: this is possible, but more complicated (see ?pcls).
+(d) Census data like these are rather unusual. In most cases the model has to deal with measurement error as well, which rather invalidates the approach used in this question.
+    
+    362 SOLUTIONS TO EXERCISES
+10.(a) pairs(chl)
+Notice, in particular, that there is fairly good coverage of the predictors bath
+and jul.day. Plotting histograms of individual predictors indicates very skewed distributions for chl.sw and bath: raising these to the power of .4 and .25 respectively largely eliminates this problem.
+(b) fam <- quasi(link=log,var=muˆ2)
+cm <- gam(chl  ̃ s(I(chl.swˆ.4),bs="cr",k=20)+
+           s(I(bathˆ.25),bs="cr",k=60)+s(jul.day,bs="cr",k=20),
+           data=chl,family=fam,gamma=1.4)
+     gam.check(cm)
+summary(cm)
+The given quasi family seems to deal nicely with the mean variance relation- ship, and a log link is required to linearize the model.
+(c) ## create fit and validation sets ... set.seed(2)
+n<-nrow(chl);nf <- floor(n*.9)
+ind <- sample(1:n,nf,replace=FALSE)
+chlf <- chl[ind,];chlv <- chl[-ind,]
+## fit to the fit set
+smf<-gam(chl  ̃ s(I(chl.swˆ.4),bs="cr",k=20)+
+          s(I(bathˆ.25),bs="cr",k=60)+s(jul.day,bs="cr",k=20),
+data=chlf,family=fam,gamma=1.4)
+## evaluate prop. dev. explained for validation set y <- chlv$chl;w <- y*0+1
+mu <- predict(cmf,chlv,type="response")
+pred.dev <- sum(fam$dev.resids(y,mu,w))
+null.dev <- sum(fam$dev.resids(y,mean(y),w)) 1-pred.dev/null.dev # prop dev. explained
+I got proportion deviance explained of about 46% for the fitted models and for predicting the validation set, suggesting that the model is not overfitting, and does provide a useful improvement on the raw satellite data. More sophisti- cated models based on tensor product smooths can be used to improve matters further. For practical use of these models, it is always important to look at their predictions over the whole spatial arena of interest, at a number of times through the year, to check for artefacts (for example from extrapolating outside the observed predictor space).
+11. Based on ?gam here is a function to simulate data.
+sim.data <- function(n=400,sig=2) {
+x0 <- runif(n, 0, 1);x1 <- runif(n, 0, 1)
+x2 <- runif(n, 0, 1);x3 <- runif(n, 0, 1)
+f0 <- function(x) 2 * sin(pi * x)
+f1 <- function(x) exp(2 * x)
+f2<-function(x) 0.2*xˆ11*(10*(1-x))ˆ6+10*(10*x)ˆ3*(1-x)ˆ10 f3 <- function(x) 0*x
+f <- f0(x0) + f1(x1) + f2(x2)
+e <- rnorm(n, 0, sig)
+y <- f + e
+    
+    CHAPTER 6 363
+   return(data.frame(y=y,f=f,x0=x0,x1=x1,x2=x2,x3=x3))
+  }
+Note that x3 has no effect on the response, while x0 has the weakest effect of the
+significant predictors.
+(a) reps <- 200
+n.func<-4 # which term to examine
+pv <- rep(0,reps) # array for observed p-values for (i in 1:reps) {
+     dat <- sim.data(n=200,sig=2)
+     b<-gam(y ̃s(x0)+s(x1)+s(x2)+s(x3,fx=FALSE),data=dat)
+     pv[i] <- summary(b)$s.pv[n.func]
+    }
+    pv <- sort(pv)
+    true <- (1:reps-.5)/reps
+    plot(true,pv);abline(0,1,col=2)
+The resulting QQ-plot should look like a random scatter around the plotted straight line, if the p-values are really from a uniform distribution. In this case the points lie on a curve a little below the line: the p-values tend to be a little too small — they reject the null too easily. So if a p-value says that a term is not significant, it probably isn’t, but significance is a little harder to be sure about.
+If the code is re-run with fx=TRUE then the p-values behave as they should.
+(b) The answer to (a) suggests basing hypothesis tests on un-penalized terms, in order to get the p-values right. This will mean that all terms have rather wiggly estimates, which might be expected to result in low power to reject a false null (of no effect). This can be investigated by slight modification of the code given for part (a). Set n.func<-1, in order to look at p-values for the first term, which should be in the model, but only has a weak effect. Then compare what proportion of p-values are less than, say, 0.05, (i) when the smoothing parameter for the first term is estimated, and (ii) when the first term is replaced by s(x0,fx=TRUE), so that it is unpenalized. When I did this (i) gave 90% of p-values less than 0.05, while (ii) gave 80%. Hence there is some reduction in power, but this is perhaps modest given the better behaviour of the p-values
+without penalization.
+B.6 Chapter 6
+1. (a)
+bi and εij are all mutually independent.
+(b) H0 : σb2 = 0 against H1 : σb2 > 0. i.e. testing whether or not there is a maternal
+component of piglet weight variability.
+(c) There is very strong evidence (p ≈ 10−6) that σb2 > 0. i.e. very strong evidence
+for a maternal component to piglet weight variability.
+yij=α+bi+εij,bi∼N(0,σb2) εij∼N(0,σ2),
+where yij is the weight of the jth piglet in the ith litter and the random variables
+    
+    364 SOLUTIONS TO EXERCISES (d)
+2. (a)
+σˆ b2 = σˆ 02 − σˆ 12 / 5 = 0 . 5 9 2
+1JJ1J
+y ̄i· = J yij=α+bi+ cj+J εij
+j=1 j=1 j=1 = a+ei
+  wherea=α+ jcj andei =bi+ jεij/J.Theei’sareobviouslyinde- pendent since the bi’s and εij’s are mutually independent and no two ei’s share a bi or εij. Normality of the ei’s follows immediately from normality of the bi’s and εij’s. Furthermore,
+1  J
+E(ei) = E(bi) + J E(εij) = 0
+j=1 and (using independence of the terms)
+1  J
+var(ei) = var(bi) + J2 var(εij) = σb2 + σ2/J.
+j=1
+So σb2 + σ2/J can be estimated from the residual sum of squares, RSS1, of
+the least squares fit of the aggregated model to the y ̄i· data: σˆb2 + σˆ2/J = RSS1/(I − 1)
+⇒ σˆb2 = RSS1/(I − 1) − σˆ2/J where σˆ2 is given in the question.
+  (b) Calculations tediously similar to part (a), culminate in:
+σˆc2 = RSS2/(J − 1) − σˆ2/I
+where RSS2 is the residual sum of squares for the 2nd aggregated model fit to
+the y ̄·j data.
+3.(a) H0 : σa2 = 0 would be tested by ANOVA comparison of the fit of the given full
+model, to the fit of the simplified model implied by H0,
+yij =μ+βxij +εij, εij ∼N(0,σ2).
+H0 : β = 0 would be tested by comparing the fit of the full model with the fit of the reduced model implied by this null,
+yij =μ+ai +εij, ai ∼N(0,σa2) and εij ∼N(0,σ2),
+using ANOVA, in the same manner as if both were fixed effect linear models.
+(b) To estimate σa2 and β the data would be averaged at each level of the random
+    
+    CHAPTER 6
+effect ai to yield
+365
+y ̄ i ·
+1  J
+= μ + a i + β x ̄ i · + J = μ+βx ̄i·+ei
+ε i j
+ whereei ∼N(0,σa2+σ2/J).Theleastsquaresfitofthismodelcanbeusedto estimate β (the full model fit can not be used, since βˆ will not be independent
+of the ai). If RSS1 and RSS0 are the residual sums of squares for fitting the full and reduced models respectively to the yij and y ̄i· data, then the obvious estimator of σa2 is:
+σˆ a2 = R S S 0 − R S S 1 . I − 2 J(IJ − I − 1)
+4. (In this question the fixed effects model matrices resulting from any other valid identifiability constraints on the fixed effects are fine, of course.)
+j=1
+  (a)
+with (b)
+ ε11 
+ ε12   ε21  +ε22   ε31 
+ ε32   ε 4 1 
+ε42
+y11 1x11 1000 y12 1x12 1000 y21  1 x21  0 1 0 0a1 y22 =1 x22  α +0 1 0 0a2 y31  1 x31  β 0 0 1 0a3 y32 1 x32 0010a4 y411 x41 0001
+with
+y42 1 x42 0 0 0 1 ψ = I 4 σ a2
+21000003 61000007
+60 1 0 0 0 07
+60 1 0 0 0 072b13 6ε227 60 0 1 0 0 076b27 6ε317
+2y113 2103 6y127 6107
+6y217 61 07
+6y227 61 07
+6y317 61 07
+6y32 7=61 07»α1 –+60 0 1 0 0 076b3 7+6ε32 7 6y417 60 17 α2 60 0 0 1 0 076b47 6ε417 6y42 7 60 17 60 0 0 1 0 0764b5 75 6ε42 7
+6y517 60 17 60 0 0 0 1 07 b6 6ε517 6y52 7 60 17 60 0 0 0 1 07 6ε52 7 4y615 4015 40000015 4ε615 y62 01 000001 ε62
+ψ = I 6 σ b2
+2ε113 6ε127 6ε217
+    
+    366 (c)
+SOLUTIONS TO EXERCISES
+5. (a)
+ψ= I3σb2 0  0 I6σα2b
+E[(X+Z−μx −μz)(X+Z−μx −μz)T] E[(X − μx)(X − μx)T] + E[(Z − μz)(X − μx)T]
+(b) i.
+2 y111 6 y112 6 y113 6 y121 6 y122
+32 1 0 3 2 1 0
+76 1 0 7 6 1 0
+7 6 1 0 7 6 1 0
+7 6 1 0 7 6 0 1
+0 1 0 1 0 1 0 0 0 0 0 0 1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0
+0 0 0 0 0 0 1 0 1 0 1 0 0 1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0 1 0 0 1 0 1 0 1 0 0
+0 32 0 76
+0 7 6
+0 7 6
+ε111 3
+ε112 7
+ε113 7
+ε121 7
+7 6 1 0 7 6 0 1 6 76 7 6
+0 72 36 7b16 7
+76 1 0 7 6 0 1 6 76 7 6
+6 76 76
+6 y132 76 1 0 7 6 0 0 6 76 7»–6
+6 y133 76 1 0 7μ 6 0 0 6 7=6 7 +6
+6 y211 76 1 1 7α2 6 1 0 6 76 7 6
+6 y212 76 1 1 7 6 1 0 6 76 7 6
+6 y213 76 1 1 7 6 1 0 6 76 7 6
+6 y221 76 1 1 7 6 0 1 6 76 7 6
+6 y222 76 1 1 7 6 0 1
+6 y223 7 6 1 1 7 6 0 1
+ε123 7 0 7676 ε131 7
+6 y123
+6 y131 76 1 0 7 6 0 0
+0 76 76b276 7
+7 6 1 1 7 6 0 0
+54 1 1 5 4 0 0 1 0 0 0 0 0 1 5
+6 y231 4 y232
+y233 11
+001000001
+6 4
+Σx+z = =
+= =
+E[(X − μx)(X − μx)T] + E[(Z − μz)(Z − μz)T] Σx+Σz
+(by ind.)
++ E[(X − μx)(Z − μz)T] + E[(Z − μz)(Z − μz)T]
+100 100
+y22 =1 x22  β +0 1 0b2 +ε22  y23  1 x23  0 1 0 b3 ε23 
+y11 1x11 y12 1x12
+1 0 0
+y21  1 x21  α  0 1 0b1  ε21 
+y13  1 x13 
+y31  1 y321
+x31  0 0 x33 0 0
+1 ε33
+1 ε31  x32  0 0 1   ε 3 2 
+y33 1
+where b ∼ N(0, Iσb2) and ε ∼ N(0, Iσ2).
+76b376 7 0 76 76 ε132 7 76 (αb)11 7 6 7 0 76 76 ε133 7 76 (αb)12 7+6 7
+76 ε211 7 76 (αb)13 76 7
+0 76
+76 ε212 7 76 7
+0 76
+76 (αb)21
+6 ε213 7 6 7
+0 74
+7 (αb)22
+5
+6 ε221 7 6 7
+0 7
+7 (αb)23
+6 ε222 7 6 ε223 7
+0 7
+0 7
+1 7
+ε231 7
+ε232 5
+ε233
+ε11 ε12 ε13 
+ε122 7
+    
+    CHAPTER 6 367 ii. The covariance matrix of y is
+100 100
+1 0 0
+ 0 1 0  1 0 0  1 1 1 0 0 0 0 0 0  2
+0 1 00 1 00 0 0 1 1 1 0 0 0σ+ b
+010001 000000111 0 0 1
+ 0 0 1  001
+which is
+2σ2+σb2 σb2 σb2 0 6σ2σ2+σ2σ20
+100000000 010000000
+ 0 0 1 0 0 0 0 0 0 
+ 0 0 0 1 0 0 0 0 0  2 0 0 0 0 1 0 0 0 0σ  0 0 0 0 0 1 0 0 0 
+ 0 0 0 0 0 0 1 0 0   0 0 0 0 0 0 0 1 0  000000001
+0 0 0 0 0 3 0 0 0 0 0 7
+6bbb 7
+6 σ2 σ2 σ2+σ2 0 0 0 0 0 0 7 6bbb 7
+0 σ2+σ2 σ2 σ2 6bbb7
+6 0 0
+6 0 0 0 σ2 σ2 σ2+σ2 0 0 0 7
+2222 640 0 0 0 0 0 σbσ+σbσb75
+0 0 0 0 0 0 σb2 σb2 σ2+σb2 6.(a) Site and source should be fixed; Lot and Wafer should be random.
+(b) The thickness for wafer l, lot k, site j and source i is
+yijkl =μ+αi +βj +bk +c(k)l +εijkl
+where bk ∼ N(0,σb2), c(k)l ∼ N(0,σc2), εijkl ∼ N(0,σ2) and all these r.v.s are independent. The subscript, (k)l, is used to emphasize that wafer is nested within lot to help clarify the practical fitting of the model (I haven’t indicated all such nestings this way!).
+(c) > options(contrasts=c("contr.treatment",
++ "contr.treatment"))
+> m1 <- lme(Thickness ̃Site+Source,Oxide, ̃1|Lot/Wafer)
+> plot(m1) # check resids vs. fitted vals
+> qqnorm(residuals(m1)) # check resids for normality
+> abline(0,sd(resid(m1)))# adding a "reference line"
+> qqnorm(m1, ̃ranef(.,level=1)) # check normality of b_k
+> qqnorm(m1, ̃ranef(.,level=2)) # check normality of c_(k)l > m2 <- lme(Thickness ̃Site+Source,Oxide, ̃1|Lot)
+> anova(m1,m2)
+6bbb7
+6 0 0 0 σ2 σ2+σ2 σ2 0 0 0 7
+6bbb7 6 0 0 0 0 0 0 σ2+σb2 σb2 σb2 7
+0 0 0 7
+    
+    368
+m1 m2
+SOLUTIONS TO EXERCISES
+Model df AIC BIC logLik Test L.Ratio p-value 1 7 455.76 471.30 -220.88
+2 6 489.41 502.72 -238.70 1 vs 2 35.6444 <.0001
+The checking plots suggest no problems at all in this case. m1 is the full model fit and m2 is a reduced version, with no c(k)l terms. The anova(m1,m2) command performs a generalized likelihood ratio test of the hypothesis that the data were generated my m2 against the alternative that they were generated by m1. The p value is so low in this case that, despite the problems with GLRT tests in this context, we can be very confident in rejecting H0 and concluding that m1 is necessary. i.e. there is evidence for wafer to wafer variability above what is explicable by lot to lot variability.
+> anova(m1)
+(Intercept)
+Site
+Source
+numDF denDF F-value p-value 1 46 240197.01 <.0001 2 46 0.60 0.5508 1 6 1.53 0.2629
+There appears to be no evidence for site or source effects, and hence no need for follow up multiple comparisons. Note that for unbalanced data you would usually refit without the redundant fixed effects at this point, in order to gain a little precision, but these data are balanced, so doing so would make no differ- ence.
+> intervals(m1)
+Approximate 95% confidence intervals
+ Fixed effects:
+(Intercept) 1983.237346
+        est.
+1994.9166667
+  -0.2500000
+   0.8333333
+  10.0833333
+      upper
+2006.595987
+   1.827301
+   2.910634
+  30.055615
+Site2
+Site3
+Source2
+attr(,"label")
+[1] "Fixed effects:"
+Random Effects:
+ Level: Lot
+lower
+-2.327301
+-1.243967
+-9.888949
+lower est. upper sd((Intercept)) 5.831891 10.94954 20.55808
+Level: Wafer
+sd((Intercept)) 4.057118 5.982933 8.822887
+Within-group standard error: lower est. upper 2.914196 3.574940 4.385495
+So the lot to lot variation is substantial, with a standard deviation of between 5.8 and 20.6, while the wafer to wafer variation, within a lot, is not much
+lower     est.    upper
+    
+    CHAPTER 6 369
+less, with standard deviation between 4.1 and 8.8. The unaccounted for ‘within wafer’ variability seems to be a little less, having a standard deviation some- where between 2.9 and 4.4. There is no evidence that site on the wafer or source have any influence on thickness.
+7. library(nlme)
+attach(Machines)
+interaction.plot(Machine,Worker,score) # note 6B
+## base model m1<-lme(score ̃Machine,Machines, ̃1|Worker/Machine)
+## check it...
+plot(m1)
+plot(m1,Machine ̃resid(.),abline=0) plot(m1,Worker ̃resid(.),abline=0)
+qqnorm(m1, ̃resid(.))
+qqnorm(m1, ̃ranef(.,level=1))
+qqnorm(m1, ̃ranef(.,level=2)) ## note outlier
+## try more general r.e. structure m2<-lme(score ̃Machine,Machines, ̃Machine|Worker)
+## check it...
+qqnorm(m2, ̃resid(.))
+qqnorm(m2, ̃ranef(.,level=1)) ## still an outlier
+## simplified model...
+m0 <- lme(score ̃Machine,Machines, ̃1|Worker)
+## formal comparison
+anova(m0,m1,m2) ## m1 most appropriate
+anova(m1) ## significant Machine effect
+intervals(m1) ## Machines B and C better than A
+## remove problematic worker 6, machine B
+Machines <- Machines[-(34:36),]
+## re-running improves plots, but conclusions same.
+It seems that (6.6) is the most appropriate model of those tried, and broadly the same conclusions are reached with or without Worker 6, on Machine B, which causes outliers on several checking plots. See next question for comparison of machines B and C.
+8. Using the data without worker 6 machine B:
+> intervals(m1,level=1-0.05/3,which="fixed") Approximate 98.3333333333333% confidence intervals
+   Fixed effects:
+lower est. upper (Intercept) 48.084573 52.35556 56.62654 MachineB 6.402636 10.43100 14.45936 MachineC 9.735685 13.76405 17.79241
+  attr(,"label")
+  [1] "Fixed effects:"
+  > levels(Machines$Machine)
+  [1] "A" "B" "C"
+  > Machines$Machine<-relevel(Machines$Machine,"B")
+    
+    370 SOLUTIONS TO EXERCISES
+> m1a<-lme(score ̃Machine,Machines, ̃1|Worker/Machine) > intervals(m1a,level=1-0.05/3,which="fixed") Approximate 98.3333333333333% confidence intervals
+   Fixed effects:
+lower est. upper (Intercept) 58.3517968 62.786554 67.221311 MachineA -14.4593604 -10.430998 -6.402636 MachineC -0.9798778 3.333049 7.645975
+  attr(,"label")
+  [1] "Fixed effects:"
+So, there is evidence for differences between machine A and the other 2, but not between B and C, at the 5% level. However, depending on how economically sig- nificant the point estimate of the B-C difference is, it might be worth conducting a study with more workers in order to check whether the possible small difference might actually be real.
+9.(a) Physique and method would be modelled as fixed effects: the estimation of these effects is of direct interest and we would expect to obtain similar es- timates in a replicate experiment; the effect of these factors should be fixed properties of the population of interest. Team would be modelled as a ran- dom effect — team to team variation is to be expected, but the individual team effects are not of direct interest and would be completely different if the exper- iment were repeated with different gunners.
+(b) If yijk denotes the number of rounds for team i, which physique j using method k then a possible model is
+yijk =μ+αj +βk +bi +εijk
+where the bi are i.i.d. N(0, σb2) and the εijk are i.i.d. N(0, σ2). A more careful notation might make explicit the nesting of team within build by, for example, replacing bi by bi(j). An interaction between physique and method might also be considered (as might a random two way interaction of method and team).
+(c) > library(nlme);data(Gun) # R only
+> options(contrasts=c("contr.treatment","contr.treatment")) > plot(Gun$method,Gun$rounds)
+> plot(Gun$Physique,Gun$rounds)
+> m1 <- lme(rounds ̃Method+Physique,Gun, ̃1|Team)
+> plot(m1)
+> qqnorm(residuals(m1)) > abline(0,m1$sigma) # > anova(m1)
+# fitted vs. resid plot
+add line of "perfect Normality"
+ F-value p-value
+2056.533  <.0001
+ 316.843  <.0001
+   1.227  0.3576
+ F-value p-value
+2056.533  <.0001
+ 316.843  <.0001
+(Intercept)
+     Method
+   Physique
+(Intercept)
+     Method
+numDF denDF
+    1    26
+    1    26
+    2     6
+numDF denDF
+    1    26
+    1    26
+    
+    CHAPTER 6 371
+Physique 2 6 1.227 0.3576 > m1 <- lme(rounds ̃Method,Gun, ̃1|Team) > intervals(m1)
+Approximate 95% confidence intervals
+      Fixed effects:
+lower est. upper (Intercept) 22.562759 23.588889 24.615019 Method -9.493963 -8.511111 -7.528259
+      Random Effects:
+       Level: Team
+lower est. upper sd((Intercept)) 0.5399411 1.101828 2.24844
+Within-group standard error: lower est. upper 1.092947 1.434451 1.882661
+The residual plots appear quite reasonable in this case (although if you check the random effects themselves these are not so good). Since there is no evi- dence for an effect of Physique the only sensible follow up comparison would compare methods: method one appears to lead to an average increase in firing rate of between 7.5 and 9.5 rounds per minute relative to method 2 (with 95% confidence). By contrast the team to team variability and within team variabil- ity are rather low with 95% CIs on their standard deviations of (0.5,2.2) and (1.1,1.9) respectively.
+10.(a) library(nlme) attach(Soybean)
+     m1<-lme(weight ̃Variety*Time+Variety*I(Timeˆ2)+
+             Variety*I(Timeˆ3),Soybean, ̃Time|Plot)
+plot(m1) ## clear increasing variance with mean
+(b) library(MASS)
+     m2<-glmmPQL(weight ̃Variety*Time+Variety*I(Timeˆ2)+
+         Variety*I(Timeˆ3),data=Soybean,random= ̃Time|Plot,
+         family=Gamma(link=log))
+     plot(m2) ## much better
+(c) m0<-glmmPQL(weight ̃Variety*Time+Variety*I(Timeˆ2)+
+         Variety*I(Timeˆ3),data=Soybean,random= ̃1|Plot,
+family=Gamma(link=log)) ## simpler r.e. structure m3<-glmmPQL(weight ̃Variety*Time+Variety*I(Timeˆ2)+
+         Variety*I(Timeˆ3),data=Soybean,random= ̃Time+
+I(Timeˆ2)|Plot,family=Gamma(link=log))
+## ... m3 has more complex r.e. structure
+## Following not strictly valid, but gives a rough ## quide. Suggests m2 is best...
+AIC(m0,m2,m3)
+summary(m2) ## drop Variety:Time m4<-glmmPQL(weight ̃Variety+Time+Variety*I(Timeˆ2)+
+    
+    372 SOLUTIONS TO EXERCISES
+         Variety*I(Timeˆ3),data=Soybean,random= ̃Time|Plot,
+family=Gamma(link=log))
+summary(m4) ## perhaps drop Variety:I(Timeˆ3)? m5<-glmmPQL(weight ̃Variety+Time+Variety*I(Timeˆ2)+
+         I(Timeˆ3),data=Soybean,random= ̃Time|Plot,
+family=Gamma(link=log)) summary(m5) ## don’t drop any more AIC(m2,m4,m5) ## supports m4 intervals(m5,which="fixed")
+So m4 or m5 are probably the best models to use, and both suggest that variety P has a higher weight on average.
+11.(a) g1<-gamm(weight  ̃ Variety + s(Time) + s(Time,by=as.numeric(Variety=="P")),data=Soybean, family=Gamma(link=log), random=list(Plot= ̃Time))
+plot(g1$lme) ## standard mean variance plot par(mfrow=c(1,3)) plot(g1$gam,residuals=TRUE,all.terms=TRUE) ## gam plot
+The residual plots look fine. It seems that variety P increases its weight a little
+more slowly than variety F (don’t forget that this is on the log scale).
+(b) summary(g1$gam) ## evidence for variety dependence ## could also do following ....
+g2 <- gamm(weight ̃s(Time),family=Gamma(link=log),
+           data=Soybean,random=list(Plot= ̃Time))
+     g3 <- gamm(weight ̃Variety+s(Time),family=Gamma(link=log),
+data=Soybean,random=list(Plot= ̃Time))
+## following only a rough guide, but also supports g1 ... AIC(g1$lme,g2$lme,g3$lme)
+The summary (in combination with the plotted effects) gives strong evidence that variety P gives higher weights, with the difference decreasing slightly with time. Fitting models without a smooth function of time as a correction for P, or without any effect of Variety both give model fits that seem worse than the original model fit according to the AIC of the working model at convergence of the PQL iterations, confirming the implications of the summary.
+(c) If varieties F and P have only slightly different trajectories through time, but we use completely separate smooths for each, then both smooths will require a similar relatively large number of degrees of freedom in order to represent the time trajectory of each variety. On the other hand, if we model the trajectory of P as F’s trajectory plus a correction, it is possible that this correction may be very smooth, so that a good fit can be achieved without using up as many degrees of freedom as would be needed for the same fit, using the completely separate smooths. This is in fact what happens for the Soybean data.

@@ -1,0 +1,1287 @@
+
+    
+     CHAPTER 1
+Linear Models
+How old is the universe? The standard big-bang model of the origin of the universe says that it expands uniformly, and locally, according to Hubble’s law:
+y = βx
+where y is the relative velocity of any two galaxies separated by distance x, and β is “Hubble’s constant”(in standard astrophysical notation y ≡ v, x ≡ d and β ≡ H0). β−1 gives the approximate age of the universe, but β is unknown and must somehow be estimated from observations of y and x, made for a variety of galaxies at different distances from us.
+Figure 1.1 plots velocity against distance for 24 galaxies, according to measurements made using the Hubble Space Telescope. Velocities are assessed by measuring the Doppler effect red shift in the spectrum of light observed from the Galaxies con- cerned, although some correction for ‘local’ velocity components is required. Dis-
+                                   5 10 15 20 Distance (Mpc)
+Figure 1.1 A Hubble diagram showing the relationship between distance, x, and velocity, y, for 24 Galaxies containing Cepheid stars. The data are from the Hubble Space Telescope key project to measure the Hubble constant as reported in Freedman et al. (2001).
+1
+    Velocity (kms−1)
+500 1000 1500
+    2 LINEAR MODELS
+tance measurement is much less direct, and is based on the 1912 discovery, by Hen- rietta Leavit, of a relationship between the period of a certain class of variable stars, known as the Cepheids, and their luminosity. The intensity of Cepheids varies regu- larly with a period of between 1.5 and something over 50 days, and the mean intensity increases predictably with period. This means that, if you can find a Cepheid, you can tell how far away it is, by comparing its apparent brightness to its period predicted intensity.
+It is clear, from the figure, that the observed data do not follow Hubble’s law exactly, but given the measurement process, it would be surprising if they did. Given the apparent variability, what can be inferred from these data? In particular: (i) what value of β is most consistent with the data? (ii) what range of β values is consistent with the data and (iii) are some particular theoretically derived values of β consistent with the data? Statistics is about trying to answer these three sorts of question.
+One way to proceed is to formulate a linear statistical model of the way that the data were generated, and to use this as the basis for inference. Specifically, suppose that, rather than being governed directly by Hubble’s law, the observed velocity is given by Hubble’s constant multiplied by the observed distance plus a ‘random variability’ term. That is
+yi = βxi + εi i = 1 . . . 24 (1.1)
+where the εi terms are independent random variables such that E(εi) = 0 and E(ε2i ) = σ2. The random component of the model is intended to capture the fact that if we gathered a replicate set of data, for a new set of galaxies, Hubble’s law would not change, but the apparent random variation from it would be different, as a result of different measurement errors. Notice that it is not implied that these errors are completely unpredictable: their mean and variance are assumed to be fixed, it is only their particular values, for any particular galaxy, that are not known.
+1.1 A simple linear model
+This section develops statistical methods for a simple linear model of the form (1.1). This allows the key concepts of linear modelling to be introduced without the dis- traction of any mathematical difficulty.
+Formally, consider n observations, xi , yi , where yi is an observation on random vari- able, Yi, with expectation, μi ≡ E(Yi). Suppose that an appropriate model for the relationship between x and y is:
+Yi =μi +εi where μi =xiβ. (1.2)
+Here β is an unknown parameter and the εi are mutually independent zero mean random variables, each with the same variance σ2. So the model says that Y is given by x multiplied by a constant plus a random term. Y is an example of a response variable, while x is an example of a predictor variable. Figure 1.2 illustrates this model for a case where n = 8.
+    
+    A SIMPLE LINEAR MODEL
+Yi
+3
+      εi
+xi
+                                             Figure 1.2 Schematic illustration of a simple linear model with one explanatory variable. Simple least squares estimation
+How can β, in model (1.2) be estimated from the xi,yi data? A sensible approach is to choose a value of β that makes the model fit closely to the data. To do this we need to define a measure of how well, or how badly, a model with a particular β fits the data. One possible measure is the residual sum of squares of the model:
+nn
+S =  (yi − μi)2 =  (yi − xiβ)2
+i=1 i=1
+If we have chosen a good value of β, close to the true value, then the model pre- dicted μi should be relatively close to the yi, so that S should be small, whereas poor choices will lead to μi far from their corresponding yi, and high values of S. Hence β can be estimated by minimizing S w.r.t. β and this is known as the method of least squares.
+To minimize S, differentiate w.r.t. β:
+∂S  n
+∂β = − 2xi(yi − xiβ) i=1
+ and set the result to zero to find βˆ, the least squares estimate of β: nnnnn
+− 2xi(yi −xiβˆ)=0⇒ xiyi −βˆ x2i =0⇒βˆ= xiyi/ x2i.∗ i=1 i=1 i=1 i=1 i=1
+1.1.1 Sampling properties of βˆ
+To evaluate the reliability of the least squares estimate, βˆ, it is useful to consider the sampling properties of βˆ. That is, we should consider some properties of the distri- bution of βˆ values, which would be obtained from repeated independent replication
+∗ ∂2S/∂β2 = 2 P x2i which is clearly positive, so a minimum of S has been found.
+    βx
+    4 LINEAR MODELS
+of the xi, yi data used for estimation. To do this, it is helpful to introduce the concept of an estimator, which is obtained by replacing the observations, yi, in the estimate of βˆ by the random variables, Yi, to obtain
+nn
+βˆ =   x i Y i /   x 2i .
+i=1 i=1
+Clearly the estimator, βˆ, is a random variable and we can therefore discuss its distri-
+bution. For now, consider only the first two moments of that distribution. The expected value of βˆ is obtained as follows:
+ˆ nn nnnn
+E(β) = E  xiYi/ x2i =  xiE(Yi)/ x2i =  x2i β/ x2i = β.
+i=1 i=1
+So βˆ is an unbiased estimator — its expected value is equal to the true value of the
+parameter that it is supposed to estimate.
+Unbiasedness is a reassuring property, but knowing that an estimator gets it right on average, does not tell us much about how good any one particular estimate is likely to be: for this we also need to know how much estimates would vary from one replicate data set to the next — we need to know the estimator variance.
+From general probability theory we know that if Y1 , Y2 , . . . , Yn are independent ran- dom variables and a1, a2, . . . an are real constants then
+i=1 i=1 i=1 i=1
+var    aiYi  =   a2i var(Yi). ii
+βˆ= aiYi where ai =xi/ x2i, ii
+and from the original model specification we have that var(Yi) = σ2 for all i. Hence, ˆ       2     −1
+But we can write
+v a r ( β ) = x 2i / x 2i σ 2 = x 2i σ 2 . ( 1 . 3 ) iii
+In most circumstances σ2 itself is an unknown parameter and must also be estimated.
+Since σ2 is the variance of the εi, it makes sense to estimate it using the variance of
+the estimated ε , the model residuals, εˆ = y − x βˆ. An unbiased estimator of σ2 is: i iii
+σˆ2= 1  (yi−xiβˆ)2 n−1 i
+(proof of unbiasedness is given later for the general case). Plugging this into (1.3) obviously gives an unbiased estimate of the variance of βˆ.
+     
+    A SIMPLE LINEAR MODEL 5
+1.1.2 So how old is the universe?
+The least squares calculations derived above are available as part of the statistical package and environment R. The function lm fits linear models to data, including the simple example currently under consideration. The Cepheid distance — velocity data shown in figure 1.1 are stored in a data frame† hubble. The following R code fits the model and produces the (edited) output shown.
+> data(hubble)
+> hub.mod <- lm(y ̃x-1,data=hubble)
+> summary(hub.mod)
+Call:
+lm(formula = y  ̃ x - 1, data = hubble)
+Coefficients:
+  Estimate Std. Error
+x   76.581      3.965
+The call to lm passed two arguments to the function. The first is a model formula, y ̃x-1, specifying the model to be fitted: the name of the response variable is to the left of ‘ ̃’ while the predictor variable is specified on the right; the ‘-1’ term indicates that the model has no ‘intercept’ term, i.e. that the model is a straight line through the origin. The second (optional) argument gives the name of the data frame in which the variables are to be found. lm takes this information and uses it to fit the model by least squares: the results are returned in a ‘fitted model object’, which in this case has been assigned to an object called hub.mod for later examination. ‘<-’ is the assignment operator, and hub.mod is created by this assignment (overwriting any previously existing object of this name).
+The summary function is then used to examine the fitted model object. Only part of its output is shown here: βˆ and the estimate of the standard error of βˆ (the square root of the estimated variance of βˆ, derived above). Before using these quantities it is important to check the model assumptions. In particular we should check the plausibility of the assumptions that the εi are independent and all have the same variance. The way to do this is to examine residual plots.
+The ‘fitted values’ of the model are defined as μˆi = βˆxi, while the residuals are simply εˆ = y − μˆ . A plot of residuals against fitted values is often useful and the
+following produces the plot in figure 1.3 (a).
+plot(fitted(hub.mod),residuals(hub.mod),xlab="fitted values", ylab="residuals")
+What we would like to see, in such a plot, is an apparently random scatter of residu- als around zero, with no trend in either the mean of the residuals, or their variability,
+† A data frame is just a two dimensional array of data in which the values of different variables are stored in different named columns.
+iii
+    
+    6
+LINEAR MODELS
+         a
+b
+                                                              500 1000 1500
+fitted values
+500 1000 1500
+fitted values
+Figure 1.3 Residuals against fitted values for (a) the model (1.1) fitted to all the data in figure 1.1 and (b) the same model fitted to data with two substantial outliers omitted.
+as the fitted values increase. A trend in the mean violates the independence assump- tion, and is usually indicative of something missing in the model structure, while a trend in the variability violates the constant variance assumption. The main problem- atic feature of figure 1.3(a) is the presence of two points with very large magnitude residuals, suggesting a problem with the constant variance assumption. It is proba- bly prudent to repeat the model fit, with and without these points, to check that they are not having undue influence on our conclusions. The following code omits the offending points and produces a new residual plot shown in figure 1.3(b).
+> hub.mod1 <- lm(y ̃x-1,data=hubble[-c(3,15),])
+> summary(hub.mod1)
+Call:
+lm(formula = y  ̃ x - 1, data = hubble[-c(3, 15), ])
+Coefficients:
+  Estimate Std. Error
+x 77.67 2.97
+> plot(fitted(hub.mod1),residuals(hub.mod1), + xlab="fitted values",ylab="residuals")
+The omission of the two large outliers has improved the residuals and changed βˆ somewhat, but not drastically.
+The Hubble constant estimates have units of (km)s−1 (Mpc)−1. A Mega-parsec is 3.09 × 1019km, so we need to divide βˆ by this amount, in order to obtain Hubble’s
+constant with units of s−1. The approximate age of the universe, in seconds, is then given by the reciprocal of βˆ. Here are the two possible estimates expressed in years:
+    residuals
+−600 −200 0 200 400 600
+residuals
+−300 −100 0 100 200
+    A SIMPLE LINEAR MODEL 7
+> hubble.const <- c(coef(hub.mod),coef(hub.mod1))/3.09e19 > age <- 1/hubble.const
+> age/(60ˆ2*24*365)
+12794692825 12614854757
+Both fits give an age of around 13 billion years. So we now have an idea of the best estimate of the age of the universe, but what range of ages would be consistent with the data?
+1.1.3 Adding a distributional assumption
+So far everything done with the simple model has been based only on the model equations and the two assumptions of independence and equal variance, for the re- sponse variable. If we wish to go further, and find confidence intervals for β, or test hypotheses related to the model, then a further distributional assumption will be nec- essary.
+Specifically, assume that εi ∼ N(0,σ2) for all i, which is equivalent to assuming Yi ∼ N(xiβ,σ2). Now we have already seen that βˆ is just a weighted sum of Yi,
+but the Yi are now assumed to be normal random variables, and a weighted sum of normal random variables is itself a normal random variable. Hence the estimator, βˆ, must be a normal random variable. Since we have already established the mean and variance of βˆ, we have that
+βˆ ∼ N  β,  xi −1 σ2 . (1.4)
+Testing hypotheses about β
+One thing we might want to do is to try and evaluate the consistency of some hy- pothesized value of β with the data. For example some Creation Scientists estimate the age of the universe to be 6000 years, based on a reading of the Bible. This would imply that β = 163 × 106‡. The consistency with data of such a hypothesized value for β, can be based on the probability that we would have observed the βˆ actually obtained, if the true value of β was the hypothetical one.
+Specifically, we can test the null hypothesis, H0 : β = β0, versus the alternative hypothesis, H1 : β ̸= β0, for some specified value β0, by examining the probability of getting the observed βˆ, or one further from β0, assuming H0 to be true. If σ2 were known then we could work directly from (1.4), as follows.
+The probability required is known as the p-value of the test. It is the probability of getting a value of βˆ at least as favourable to H1 as the one actually observed, if H0 is
+‡ This isn’t really valid, of course, since the Creation Scientists are not postulating a big bang theory.
+    
+    8 LINEAR MODELS actually true§. In this case it helps to distinguish notationally between the estimate,
+βˆobs , and estimator βˆ. The p-value is then
+p = Pr |βˆ−β |≥|βˆ −β | H  
+  | βˆ − β | | βˆ − β |     = 0≥obs0 H0
+σβˆ σβˆ    = Pr[|Z| > |z|]
+where Z ∼ N(0, 1), z = (βˆobs − β0)/σβˆ and σβˆ = ( x2i )−1σ2. Hence, having formed z, the p-value is easily worked out, using the cumulative distribution function for the standard normal, built into any statistics package. Small p-values suggest that the data are inconsistent with H0, while large values indicate consistency. 0.05 is often used as the boundary between ‘small’ and ‘large’ in this context.
+In reality σ2 is usually unknown. Broadly the same testing procedure can still be adopted, by replacing σ with σˆ, but we need to somehow allow for the extra uncer- tainty that this introduces (unless the sample size is very large). It turns out that if H0 :β=β0 istruethen
+T ≡ βˆ − β 0 ∼ t n − 1 σˆβˆ
+where n is the sample size, σˆβˆ = (  x2i )−1σˆ, and tn−1 is the t-distribution with n − 1 degrees of freedom. This result is proven in section 1.3. It is clear that large magnitude values of T favour H1, so using T as the test statistic, in place of βˆ we can calculate a p-value by evaluating
+p = Pr[|T| > |t|]
+where T ∼ tn−1 and t = (βˆobs − β0)/σˆβˆ. This is easily evaluated using the c.d.f. of the t distributions, built into any decent statistics package. Here is some code to evaluate the p-value for H0 : the Hubble constant is 163000000.
+> cs.hubble <- 163000000
+> t.stat<-(coef(hub.mod1)-cs.hubble)/
++ summary(hub.mod1)$coefficients[2]
+> pt(t.stat,df=21)*2 # 2 because of |T| in p-value defn. 3.906388e-150
+i.e. as judged by the test statistic, t, the data would be hugely improbable if β = 1.63 × 108. It would seem that the hypothesized value can be rejected rather firmly (in this case, using the data with the outliers increases the p-value by a factor of 1000 or so).
+Hypothesis testing is particularly useful when there are good reasons to want to stick with some null hypothesis, until there is good reason to reject it. This is often the
+§ This definition holds for any hypothesis test, if the specific ‘βˆ’ is replaced by the general ‘a test statis- tic’.
+0 obs 0 0
+       
+    A SIMPLE LINEAR MODEL 9
+case when comparing models of differing complexity: it is often a good idea to retain the simpler model until there is quite firm evidence that it is inadequate. Note one interesting property of hypothesis testing. If we choose to reject a null hypothesis whenever the p-value is less than some fixed level, α (often termed the significance level of a test), then we will inevitably reject a proportion, α, of correct null hypothe- ses. We could try and reduce the probability of such mistakes by making α very small, but in that case we pay the price of reducing the probability of rejecting H0 when it is false!
+Confidence intervals
+Having seen how to test whether a particular hypothesized value of β is consistent with the data, the question naturally arises of what range of values of β would be consistent with the data. To do this, we need to select a definition of ‘consistent’: a common choice is to say that any parameter value is consistent with the data if it results in a p-value of ≥ 0.05, when used as the null value in a hypothesis test.
+Sticking with the Hubble constant example, and working at a significance level of 0.05, we would have rejected any hypothesized value for the constant, that resulted in a t value outside the range (−2.08, 2.08), since these values would result in p- values of less than 0.05. The R function qt can be used to find such ranges: e.g. qt(c(0.025,0.975),df=21) returns the range of the middle 95% of t21 ran- dom variables. So we would accept any β0 fulfilling:
+−2.08≤ βˆ−β0 ≤2.08 σˆβˆ
+which re-arranges to give the interval
+βˆ − 2.08σˆβˆ ≤ β0 ≤ βˆ + 2.08σˆβˆ. Such an interval is known as a ‘95% Confidence interval’ for β.
+The defining property of a 95% confidence interval is this: if we were to gather an infinite sequence of independent replicate data sets, and calculate 95% confidence intervals for β from each, then 95% of these intervals would include the true β, and 5% would not. It is easy to see how this comes about. By construction, a hypothesis test with a significance level of 5%, rejects the correct null hypothesis for 5% of replicate data sets, and accepts it for the other 95% of replicates. Hence 5% of 95% confidence intervals must exclude the true parameter, while 95% include it.
+For the Hubble example, a 95% CI for the constant (in the usual astro-physicists units) is given by:
+> sigb <- summary(hub.mod1)$coefficients[2]
+> h.ci<-coef(hub.mod1)+qt(c(0.025,0.975),df=21)*sigb
+> h.ci
+[1] 71.49588 83.84995
+     
+    10 LINEAR MODELS
+This can be converted to a confidence interval for the age of the universe, in years, as follows:
+> h.ci<-h.ci*60ˆ2*24*365.25/3.09e19 # convert to 1/years > sort(1/h.ci)
+[1] 11677548698 13695361072
+i.e. the 95% CI is (11.7,13.7) billion years. Actually this ‘Hubble age’ is the age of the universe if it has been expanding freely, essentially unfettered by gravitation. If the universe is really ‘matter dominated’ then the galaxies should be slowed by gravity over time so that the universe would actually be younger than this, but it is time to get on with the subject of this book.
+1.2 Linear models in general
+The simple linear model, introduced above, can be generalized by allowing the re- sponse variable to depend on multiple predictor variables (plus an additive constant). These extra predictor variables can themselves be transformations of the original pre- dictors. Here are some examples, for each of which a response variable datum, yi, is treated as an observation on a random variable, Yi, where E(Yi) ≡ μi, the εi are zero mean random variables, and the βj are model parameters, the values of which are unknown and will need to be estimated using data.
+1. μi = β0 + xiβ1, Yi = μi + εi, is a straight line relationship between y and predictor variable, x.
+2. μi = β0 +xiβ1 +x2i β2 +x3i β3, Yi = μi +εi, is a cubic model of the relationship between y and x.
+3. μi = β0 +xiβ1 +ziβ2 +log(xizi)β3, Yi = μi +εi,isamodelinwhichy depends on predictor variables x and z and on the log of their product.
+Each of these is a linear model because the εi terms and the model parameters, βj , enter the model in a linear way. Notice that the predictor variables can enter the model non-linearly. Exactly as for the simple model, the parameters of these models can be estimated by finding the βj values which make the models best fit the observed data, in the sense of minimizing  i(yi −μi)2. The theory for doing this will be developed in section 1.3, and that development is based entirely on re-writing the linear model using using matrices and vectors.
+To see how this re-writing is done, consider the straight line model given above. Writing out the μi equations for all n pairs, (xi,yi), results in a large system of
+    
+    LINEAR MODELS IN GENERAL 11 linear equations:
+μ1 = β0+x1β1 μ2 = β0+x2β1 μ3 = β0+x3β1
+..
+..
+μn = β0+xnβ1
+which can be re-written in matrix-vector form as
+vector form as
+ μ 1   1 x 1 x 21 x 31 
+ μ 2   1 x 2 x 2 2 x 32   β 0 
+μ3 =1 x3 x23 x3 β1 .   .     . . . .    β 2 
+ .   . . . .  β 3 μn 1 xn x2n x3n
+ μ1   1 x1
+ μ2   1 x2
+μ3 =1 x3  .   . .
+ 
+ β0  .  β1
+ .   . .  μn 1 xn
+So the model has the general form μ = Xβ, i.e. the expected value vector μ is given by a model matrix (also known as a design matrix), X, multiplied by a parameter vector, β. All linear models can be written in this general form.
+As a second illustration, the cubic example, given above, can be written in matrix
+Models in which data are divided into different groups, each of which are assumed to have a different mean, are less obviously of the form μ = Xβ, but in fact they can be written in this way, by use of dummy indicator variables. Again, this is most easily seen by example. Consider the model
+μi = βj if observation i is in group j,
+and suppose that there are three groups, each with 2 data. Then the model can be
+re-written
+ μ1   1 0 0  μ2 100β0
+μ3=010β1 . μ4  0 1 0β2 
+ μ 5   0 0 1  μ6 001
+Variables indicating the group to which a response observation belongs, are known as factor variables. Somewhat confusingly, the groups themselves are known as levels
+    
+    12 LINEAR MODELS
+of a factor. So the above model involves one factor, ‘group’, with three levels. Mod- els of this type, involving factors, are commonly used for the analysis of designed experiments. In this case the model matrix depends on the design of the experiment (i.e on which units belong to which groups), and for this reason the terms ‘design matrix’ and ‘model matrix’ are often used interchangeably. Whatever it is called ,X is absolutely central to understanding the theory of linear models, generalized linear models and generalized additive models.
+1.3 The theory of linear models
+This section shows how the parameters, β, of the linear model μ=Xβ, y∼N(μ,Inσ2)
+can be estimated by least squares. It is assumed that X is a matrix, with n rows and p columns. It will be shown that the resulting estimator, βˆ, is unbiased, has the lowest variance of any possible linear estimator of β, and that, given the normality of the data, βˆ ∼ N(β, (XTX)−1σ2). Results are also derived for setting confidence limits on parameters and for testing hypotheses about parameters — in particular the hypothesis that several elements of β are simultaneously zero.
+In this section it is important not to confuse the length of a vector with its dimension. For example (1, 1, 1)T has dimension 3 and length √3. Also note that no distinction has been made notationally between random variables and particular observations of those random variables: it is usually clear from the context which is meant.
+1.3.1 Least squares estimation of β
+Point estimates of the linear model parameters, β, can be obtained by the method of least squares, that is by minimizing
+n
+S =  (yi − μi)2,
+i=1
+with respect to β. To use least squares with a linear model, written in general matrix- vector form, first recall the link between the Euclidean length of a vector and the sum of squares of its elements. If v is any vector of dimension, n, then
+ Hence
+n
+∥ v ∥ 2 ≡ v T v ≡   v i2 .
+i=1
+S =∥y−μ∥2 =∥y−Xβ∥2
+Since this expression is simply the squared (Euclidian) length of the vector y − Xβ, its value will be unchanged if y − Xβ is rotated. This observation is the basis for a
+    
+    THE THEORY OF LINEAR MODELS 13
+practical method for finding βˆ, and for developing the distributional results required to use linear models.
+Specifically, like any real matrix, X can always be decomposed
+X = Q   R0   = Q f R ( 1 . 5 )
+where R is a p × p upper triangular matrix†, and Q is an n × n orthogonal matrix, the first p columns of which form Qf (see A.6). Recall that orthogonal matrices rotate vectors, but do not change their length. Orthogonality also means that QQT = QTQ = In. Applying QT to y − Xβ implies that
+2 T T 2  T  R  2 ∥y−Xβ∥ =∥Q y−Q Xβ∥ = Q y− 0 β  .
+T f   
+Writing Q y = r , where f is vector of dimension p, and hence r is a vector of
+dimension n − p, yields
+   f     R    2
+∥y−Xβ∥2=  r − 0 β  =∥f−Rβ∥2+∥r∥2.‡   2
+The length of r does not depend on β, while ∥f − Rβ∥ can be reduced to zero by choosing β so that Rβ equals f . Hence
+βˆ = R−1f (1.6) is the least squares estimator of β. Notice that ∥r∥2 = ∥y − Xβˆ∥2, the residual sum
+of squares for the model fit.
+1.3.2 The distribution of βˆ
+The distribution of the estimator, βˆ, follows from that of QTy. Multivariate normal- ity of QTy follows from that of y, and since the covariance matrix of y is Inσ2, the covariance matrix of QTy is
+Furthermore
+i.e. we have that
+VQTy = QTInQσ2 = Inσ2.
+E   rf   = E ( Q T y ) = Q T X β =   R0   β
+⇒ E(f) = Rβ and E(r) = 0.
+f ∼ N(Rβ, Ipσ2) and r ∼ N(0, In−pσ2)
+†i.e.Ri,j =0ifi>j.
+‡Ifthelastequalityisn’tobviousrecallthat∥x∥2 = Pix2i,soifx = » wv –,∥x∥2 = Pivi2 +
+P i w i2 = ∥ v ∥ 2 + ∥ w ∥ 2 .
+    
+    14 LINEAR MODELS with both vectors independent of each other.
+Turning to the properties of βˆ itself, unbiasedness follows immediately:
+E(βˆ) = R−1E(f) = R−1Rβ = β.
+Since the covariance matrix of f is Ipσ2, it also follows that the covariance matrix of
+βˆ i s
+Furthermore, since βˆ is just a linear transformation of the normal random variables
+f , it must follow a multivariate normal distribution, βˆ ∼ N ( β , V βˆ ) .
+The forgoing distributional result is not usually directly useful for making inferences about β, since σ2 is generally unknown and must be estimated, thereby introducing an extra component of variability that should be accounted for.
+1 . 3 . 3 ( βˆ i − β i ) / σˆ βˆ i ∼ t n − p
+Since the elements of r are i.i.d. N(0, σ2) random variables,
+1 1n −p
+σ 2 ∥ r ∥ 2 = σ 2 r i2 ∼ χ 2n − p .
+i=1
+The mean of a χ2n−p r.v. is n − p, so this result is sufficient (but not necessary: see
+Vβˆ = R−1IpR−Tσ2 = R−1R−Tσ2. (1.7)
+  exercise 7) to imply that
+is an unbiased estimator of σ2§. The independence of the elements of r and f also
+σˆ2 = ∥r∥2/(n − p) (1.8) implies that βˆ and σˆ2 are independent.
+Now consider a single parameter estimator, βˆi, with standard deviation, σβˆi , given by the square root of element i,i of Vβˆ. An unbiased estimator of Vβˆ is Vˆβˆ = Vβˆσˆ2/σ2 =R−1R−Tσˆ2,soanestimator,σˆβˆi,isgivenbythesquarerootofelement i, i of Vˆ βˆ, and it is clear that σˆβˆi = σβˆi σˆ/σ. Hence
+βˆi −βi
+σˆ
+βˆi −βi (βˆi −βi)/σβˆi = σ σˆ / σ =   1
+N(0,1)
+∼   2 ∼ t n − p
+χn−p/(n − p)
+      βˆi
+βˆi σ2 ∥r∥2/(n − p)
+ (where the independence of βˆi and σˆ2 has been used). This result enables confidence intervals for βi to be found, and is the basis for hypothesis tests about individual βi’s (for example H0 : βi = 0).
+§ Don’t forget that ∥r∥2 = ∥y − Xβˆ∥2.
+    
+    THE THEORY OF LINEAR MODELS 15
+1.3.4 F-ratio results
+It is also of interest to obtain distributional results for testing, for example, the si- multaneous equality to zero of several model parameters. Such tests are particularly useful for making inferences about factor variables and their interactions, since each factor (or interaction) is typically represented by several elements of β.
+First consider partitioning the model matrix into two parts so that X = [X0 : X1], where X0 and X1 have p − q and q columns, respectively. Let β0 and β1 be the corresponding sub-vectors of β.
+QTX0= R0   0
+where R0 is the first p − q rows and columns of R (Q and R are from (1.5)). So rotating y − X0β0 using QT implies that
+∥y − X0β0∥2 = ∥f0 − R0β0∥2 + ∥f1∥2 + ∥r∥2
+where f has been partitioned so that f =   f0   (f1 being of dimension q). Hence
+the model (i.e. setting β1 = 0). Now, under
+H0 :β1 =0,
+E(f1) = 0 (using the facts that E(f) = Rβ and R is upper triangular), and we already know that the elements of f1 are i.i.d. normal r.v.s with variance σ2. Hence,
+f1
+∥f1∥2 is the increase in residual sum of squares that results from dropping X1 from
+if H0 is true,
+So, forming an ‘F-ratio statistic’, F , assuming H0 , and recalling the independence of
+f and r we have
+F = ∥f1∥ /q = σ2 ∥f1∥ /q
+1 ∥ f 1 ∥ 2 ∼ χ 2q . σ2
+ 2122
+    σˆ2 1 ∥r∥2/(n−p) σ2
+∼ χq/q ∼ Fq,n−p χ2 /(n−p)
+n−p
+and this result can be used to test the significance of model terms.
+ In general if β is partitioned into sub-vectors β0, β1 . . . , βm (each usually relating to a different effect), of dimensions q0 , q1 , . . . , qm , then f can also be so partitioned, fT =[f0T,f1T,...,fmT],andtestsof
+H0 : βj = 0 vs. H1 : βj ̸= 0 are conducted using the result that under H0
+F = ∥fj∥2/qj ∼ Fqj,n−p σˆ2
+with F larger than this suggests, if the alternative is true. This is the result used to draw up sequential ANOVA tables for a fitted model, of the sort produced by a single
+     
+    16 LINEAR MODELS
+argument call to anova in R. Note, however, that the hypothesis test about βj is onlyvalidingeneralifβk =0forallksuchthatj<k≤m:thisfollowsfrom the way that the test was derived, and is the reason that the ANOVA tables resulting from such procedures are referred to as ‘sequential’ tables. The practical upshot is that, if models are reduced in a different order, the p-values obtained will be different. The exception to this is if the βˆj’s are mutually independent, in which case the all tests are simultaneously valid, and the ANOVA table for a model is not dependent on the order of model terms: such independent βˆj ’s usually arise only in the context of balanced data, from designed experiments.
+Notice that sequential ANOVA tables are very easy to calculate: once a model has been fitted by the QR method, all the relevant ‘sums of squares’ are easily calculated directly from the elements of f , with the elements of r providing the residual sum of squares.
+1.3.5 The influence matrix
+One matrix which will feature extensively in the discussion of GAMs is the influence matrix (or hat matrix) of a linear model. This is the matrix which yields the fitted value vector, μˆ, when post-multiplied by the data vector, y. Recalling the definition ofQf,asbeingthefirstpcolumnsofQ,f =Qfyandso
+βˆ = R − 1 Q Tf y . F u r t h e r m o r e μˆ = X βˆ a n d X = Q f R s o
+μˆ = Q f R R − 1 Q Tf y = Q f Q Tf y
+i.e. the matrix A ≡ Qf QTf is the influence (hat) matrix such that μˆ = Ay.
+The influence matrix has a couple of interesting properties. Firstly, the trace of the influence matrix is the number of (identifiable) parameters in the model, since
+tr(A) = tr QfQTf   = tr QTf Qf  = tr(Ip) = p.
+Secondly, AA = A, a property known as idempotency . Again the proof is simple:
+AA = QfQTf QfQTf = QfIpQTf = QfQTf = A. 1.3.6 The residuals, εˆ, and fitted values, μˆ
+The influence matrix is helpful in deriving properties of the fitted values, μˆ, and residuals, εˆ. μˆ is unbiased, since E(μˆ) = E(Xβˆ) = XE(βˆ) = Xβ = μ. The covariance matrix of the fitted values is obtained from the fact that μˆ is a linear transformation of the random vector y, which has covariance matrix Inσ2, so that
+Vμˆ = AInATσ2 = Aσ2,
+by the idempotence (and symmetry) of A. The distribution of μˆ is degenerate multi- variate normal.
+    
+    THE THEORY OF LINEAR MODELS 17 Similar arguments apply to the residuals.
+so
+εˆ = ( I − A ) y ,
+E ( εˆ ) = E ( y ) − E ( μˆ ) = μ − μ = 0 .
+As in the fitted value case, we have
+Vεˆ =(In −A)In(In −A)Tσ2 =(In −2A+AA)σ2 =(In −A)σ2
+Again, the distribution of the residuals will be degenerate normal. The results for the residuals are useful for model checking, since they allow the residuals to be stan- dardized, so that they should have constant variance, if the model is correct.
+1.3.7 Results in terms of X
+The presentation so far has been in terms of the method actually used to fit linear models in practice (the QR decomposition approach¶), which also greatly facilitates the derivation of the distributional results required for practical modelling. However, for historical reasons, these results are more usually presented in terms of the model matrix, X, rather than the components of its QR decomposition. For completeness some of the results are restated here, in terms of X.
+Firstly consider the covariance matrix of β. This turns out to be (XTX)−1σ2, which is easily seen to be equivalent to (1.7) as follows:
+Vβˆ = (XTX)−1σ2 =  RTQTf QfR −1 σ2 =  RTR −1 σ2 = R−1R−Tσ2. The expression for the least squares estimates is βˆ = (XTX)−1XTy, which is equiv-
+alent to (1.6):
+βˆ = (XTX)−1XTy = R−1R−TRTQTf y = R−1QTf y = R−1f. Given this last result it is easy to see that the influence matrix can be written:
+A = X(XTX)−1XT.
+These results are of largely historical and theoretical interest: they should not be used for computational purposes, and derivation of the distributional results is much more difficult if one starts from these formulae.
+1.3.8 The Gauss Markov Theorem: what’s special about least squares?
+How good are least squares estimators? In particular, might it be possible to find better estimators, in the sense of having lower variance while still being unbiased?
+¶ A few programs still fit models by solution of XTXβˆ = XTy, but this is less computationally stable than the rotation method described here, although it is a bit faster.
+    
+    18 LINEAR MODELS
+The Gauss Markov theorem shows that least squares estimators have the lowest vari- ance of all unbiased estimators that are linear (meaning that the data only enter the estimation process in a linear way).
+Theorem: Suppose that μ ≡ E(Y) = Xβ and Vy = σ2I, and let φ ̃ = cTY be any unbiased linear estimator of φ = tTβ, where t is an arbitrary vector. Then:
+Var(φ ̃) ≥ Var(φˆ)
+where φˆ = tTβˆ, and βˆ = (XTX)−1XTY is the least squares estimator of β. Notice that, since t is arbitrary, this theorem implies that each element of βˆ is a minimum variance unbiased estimator.
+Proof: Since φ ̃ is a linear transformation of Y, Var(φ ̃) = cTcσ2. To compare vari- ances of φˆ and φ ̃ it is also useful to express Var(φˆ) in terms of c. To do this, note that unbiasedness of φ ̃ implies that
+E(cTY) = tTβ ⇒ cTE(Y) = tTβ ⇒ cTXβ = tTβ ⇒ cTX = tT. So the variance of φˆ can be written as
+Var(φˆ) = Var(tTβˆ) = Var(cTXβˆ).
+This is the variance of a linear transformation of βˆ, and the covariance matrix of βˆ
+is (XTX)−1σ2, so
+Var(φˆ) = Var(cTXβˆ) = cTX(XTX)−1XTcσ2 = cTAcσ2
+(where A is the influence or hat matrix). Now the variances of the two estimators can be directly compared, and it can be seen that
+iff
+Var(φ ̃) ≥ Var(φˆ) cT(I − A)c ≥ 0.
+This condition will always be met, because it is equivalent to:
+[(I − A)c]T(I − A)c ≥ 0
+by the idempotency of (I − A), but this last condition is saying that a sum of squares
+can not be less than 0, which is clearly true. 2
+Notice that this theorem uses independence and equal variance assumptions, but does not assume normality. Of course there is a sense in which the theorem is intuitively rather unsurprising, since it says that the minimum variance estimators are those obtained by seeking to minimize the residual variance.
+1.4 The geometry of linear modelling
+A full understanding of what is happening when models are fitted by least squares is facilitated by taking a geometric view of the fitting process. Some of the results derived in the last few sections become rather obvious when viewed in this way.
+    
+ THE GEOMETRY OF LINEAR MODELLING
+19
+3
+2
+y
+0.0 0.2 0.4 0.6 0.8
+0.0
+0.2 0.4
+0.6 0.8
+1.0
+1
+3
+x
+2
+Figure 1.4 The geometry of least squares. The left panel shows a straight line model fitted to 3 data by least squares. The right panel gives a geometric interpretation of the fitting process. The 3 dimensional space shown is spanned by 3 orthogonal axes: one for each response vari- able. The observed response vector, y, is shown as a point (•) within this space. The columns of the model matrix define two directions within the space: the thick and dashed lines from the origin. The model states that E(y) could be any linear combination of these vectors: i.e. anywhere in the ‘model subspace’ indicated by the grey plane. Least squares fitting finds the closest point in the model sub space to the response data (•): the ‘fitted values’. The short thick line joins the response data to the fitted values: it is the ‘residual vector’.
+1.4.1 Least squares
+Again consider the linear model,
+μ=Xβ, y∼N(μ,Inσ2),
+where X is an n × p model matrix. But now consider an n dimensional Euclidean space, Rn, in which y defines the location of a single point. The space of all possible linear combinations of the columns of X defines a subspace of Rn, the elements of this space being given by Xβ, where β can take any value in Rp: this space will be referred to as the space of X (strictly the column space). So, a linear model states that, μ, the expected value of Y, lies in the space of X. Estimating a linear model, by least squares, amounts to finding the point, μˆ ≡ Xβˆ, in the space of X, that is closest to the observed data y. Equivalently, μˆ is the orthogonal projection of y on to the space of X. An obvious, but important, consequence of this is that the residual vector, εˆ = y − μˆ, is orthogonal to all vectors in the space of X.
+Figure 1.4 illustrates these ideas for the simple case of a straight line regression model for 3 data (shown conventionally in the left hand panel). The response data and model are
+ .04   1 0.2   β1   y=.41andμ=1 1.0 β2 .
+.62 1 0.6
+Since β is unknown, the model simply says that μ could be any linear combination of
+1
+ 20 LINEAR MODELS
+3
+3
+2
+2
+1
+1
+Figure 1.5 The geometry of fitting via orthogonal decompositions. The left panel illustrates the geometry of the simple straight line model of 3 data introduced in figure 1.4. The right hand panel shows how this original problem appears after rotation by QT, the transpose of the orthogonal factor in a QR decomposition of X. Notice that in the rotated problem the model subspace only has non-zero components relative to p axes (2 axes for this example), while the residual vector has only zero components relative to those same axes.
+the vectors [1, 1, 1]T and [.2, 1, .6]T . As the right hand panel of figure 1.4 illustrates, fitting the model by least squares amounts to finding the particular linear combination of the columns of these vectors, that is as close to y as possible (in terms of Euclidean distance).
+1.4.2 Fitting by orthogonal decompositions
+Recall that the actual calculation of least squares estimates involves first forming the QR decomposition of the model matrix, so that
+X = Q   R0   ,
+where Q is an n × n orthogonal matrix and R is a p × p upper triangular matrix. Orthogonal matrices rotate vectors (without changing their length) and the first step in least squares estimation is to rotate both the response vector, y, and the columns of the model matrix, X, in exactly the same way, by pre-multiplication with QT∥.
+Figure 1.5 illustrates this rotation for the example shown in figure 1.4. The left panel shows the response data and model space, for the original problem, while the right
+∥ In fact the QR decomposition is not uniquely defined, in that the sign of rows of Q, and corresponding columns of R, can be switched, without changing X — these sign changes are equivalent to reflections of vectors, and the sign leading to maximum numerical stability is usually selected in practice. These reflections don’t introduce any extra conceptual difficulty, but can make plots less easy to understand, so I have surpressed them in this example.
+ THE GEOMETRY OF LINEAR MODELLING 21
+3
+3
+2
+2
+1
+1
+Figure 1.6 The geometry of nested models.
+hand panel shows the data and space after rotation by QT. Notice that, since the problem has simply been rotated, the relative position of the data and basis vectors (columns of X) has not changed. What has changed is that the problem now has a particularly convenient orientation relative to the axes. The first two components of the fitted value vector can now be read directly from axes 1 and 2, while the third component is simply zero. By contrast, the residual vector has zero components relative to axes 1 and 2, and its non-zero component can be read directly from axis 3.Intermsofsection1.3.1,thesevectorsare[fT,0T]T and[0T,rT]T,respectively.
+The βˆ corresponding to the fitted values is now easily obtained. Of course we usually require fitted values and residuals to be expressed in terms of the un-rotated problem, but this is simply a matter of reversing the rotation using Q. i.e.
+μˆ = Q   0f   , a n d εˆ = Q   0r   . 1.4.3 Comparison of nested models
+A linear model with model matrix X0 is nested within a linear model with model matrix X1 if they are models for the same response data, and the columns of X0 span a subspace of the space spanned by the columns of X1. Usually this simply means that X1 is X0 with some extra columns added.
+The vector of the difference between the fitted values of two nested linear models is entirely within the subspace of the larger model, and is therefore orthogonal to the residual vector for the larger model. This fact is geometrically obvious, as figure 1.6 illustrates, but it is a key reason why F ratio statistics have a relatively simple distribution (under the simpler model).
+Figure 1.6 is again based on the same simple straight line model that forms the ba- sis for figures 1.4 and 1.5, but this time also illustrates the least squares fit of the
+    22
+simplified model
+LINEAR MODELS
+yi = β0 + εi,
+which is nested within the original straight line model. Again, both the original and rotated versions of the model and data are shown. This time the fine continuous line shows the projection of the response data onto the space of the simpler model, while the fine dashed line shows the vector of the difference in fitted values between the two models. Notice how this vector is orthogonal both to the reduced model subspace and the full model residual vector.
+The right panel of figure 1.6 illustrates that the rotation, using the transpose of the orthogonal factor Q, of the full model matrix, has also lined up the problem very conveniently for estimation of the reduced model. The fitted value vector for the reduced model now has only one non-zero component, which is the component of the rotated response data (•) relative to axis 1. The residual vector has gained the component that the fitted value vector has lost, so it has zero component relative to axis one, while its other components are the positions of the rotated response data relative to axes 2 and 3.
+So, much of the work required for estimating the simplified model has already been done, when estimating the full model. Note, however, that if our interest had been in comparing the full model to the model
+yi = β1xi + εi,
+then it would have been necessary to reorder the columns of the full model matrix,
+in order to avoid extra work in this way.
+1.5 Practical linear models
+This section covers practical linear modelling, via an extended example: the analysis of data reported by Baker and Bellis (1993), which they used to support a theory of ‘sperm competition’ in humans. The basic idea is that it is evolutionarily advan- tageous for males to (sub-conciously) increase their sperm count in proportion to the opportunities that their mate may have had for infidelity. Such behaviour has been demonstrated in a wide variety of other animals, and using a sample of student and staff volunteers from Manchester University, Baker and Bellis set out to see if there is evidence for similar behaviour in humans. Two sets of data will be examined: sperm.comp1 contains data on sperm count, time since last copulation and propor- tion of that time spent together, for single copulations, from 15 heterosexual couples; sperm.comp2 contains data on median sperm count, over multiple copulations, for 24 heterosexual couples, along with the weight, height and age of the male and female of each couple, and the volume of one teste of the male. From these data, Baker and Bellis concluded that sperm count increases with the proportion of time, since last copulation, that a couple have spent apart, and that sperm count increases with female weight.
+In general, practical linear modelling is concerned with finding an appropriate model
+    
+    PRACTICAL LINEAR MODELS 23
+ lm
+plot summary
+anova
+AIC
+residuals
+fitted
+predict
+Estimates a linear model by least squares. Returns a fitted model ob- ject of class lm containing parameter estimates plus other auxiliary results for use by other functions.
+Produces model checking plots from a fitted model object. Produces summary information about a fitted model, including pa- rameter estimates, associated standard errors and p-values, r2 etc. Used for model comparison based on F ratio testing.
+Extract Akaike’s information criterion for a model fit.∗∗
+Extract an array of model residuals form a fitted model.
+Extract an array of fitted values from a fitted model object.
+Obtain predicted values from a fitted model, either for new values of the predictor variables, or for the original values. Standard errors of the predictions can also be returned.
+ Table 1.1 Some standard linear modelling functions. Strictly all of these functions except lm itself end .lm, but when calling them with an object of class lm this may be omitted.
+to explain the relationship of a response (random) variable to some predictor vari- ables. Typically, the first step is to decide on a linear model that can reasonably be supposed capable of describing the relationship, in terms of the predictors included and the functional form of their relationship to the response. In the interests of ensur- ing that the model is not too restrictive this ‘full’ model is often more complicated than is necessary, in that the most appropriate value for a number of its parameters may, in fact, be zero. Part of the modelling process is usually concerned with ‘model selection’: that is deciding which parameter values ought to be zero. At each stage of model selection it is necessary to estimate model parameters by least squares fit- ting, and it is equally important to check the model assumptions (particularly equal variance and independence) by examining diagnostic plots. Once a model has been selected and estimated, its parameter estimates can be interpreted, in part with the aid of confidence intervals for the parameters, and possibly with other follow up analy- ses. In R these practical modelling tasks are facilitated by a large number of functions for linear modelling, some of which are listed in table 1.1.
+1.5.1 Model fitting and model checking
+The first thing to do with the sperm competition data is to have a look at it.
+pairs(sperm.comp1[,-1])
+produces the plot shown in figure 1.7. The columns of the data frame are plotted against each other pairwise (with each pairing transposed between lower left and upper right of the plot); the first column has been excluded from the plot as it sim- ply contains subject identification lables. The clearest pattern seems to be of some decrease in sperm count as the proportion of time spent together increases.
+    
+    24
+LINEAR MODELS
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+       time.ipc
+                                              prop.partner
+                                              count
+                                40 60 80 100 120 140 160
+100 200 300 400 500
+Figure 1.7 Pairs plot of the sperm competition data from Baker and Bellis 1993. ‘Count’ is sperm count (millions) from one copulation, ‘time.ipc’ is time (hours) since the previous copulation and ‘prop.partner’ is the proportion of the time since the previous copulation that the couple have spent together.
+Following Baker and Bellis, a reasonable initial model might be,
+yi =β0 +tiβ1 +piβ2 +εi, (1.9)
+where yi is sperm count (count), ti is the time since last inter pair copulation (time.ipc) and pi is the proportion of time, since last copulation, that the pair have spent together (prop.partner). As usual, the βj are unknown parameters and the εi are i.i.d. N(0,σ2) random variables. Really this model defines the class of models thought to be appropriate: it is not immediately clear whether either of β1 and β2 are non-zero.
+The following fits the model (1.9) and stores the results in an object called sc.mod1.
+sc.mod1 <- lm(count ̃time.ipc+prop.partner,sperm.comp1)
+The first argument to lm is a model formula, specifying the structure of the model to be fitted. In this case, the response (to the left of  ̃) is count, and this is to depend on variables time.ipc and prop.partner. By default, the model will include an intercept term, unless it is suppressed by a ‘-1’ in the formula. The second argument to lm supplies a data frame, within which the variables in the formula can be found.
+The terms on the right hand side of the model formula specify how the model matrix, X, is to be specified. In fact, in this example, the terms give the model matrix columns directly. It is possible to check the model matrix of a linear model:
+    100 300 500
+40 80 120 160
+0.0 0.2 0.4 0.6 0.8 1.0
+    PRACTICAL LINEAR MODELS
+Residuals vs Fitted
+100 200 300 400 500
+25
+ 14 1
+                9
+     1
+                  7 9
+             Fitted values Scale−Location plot
+100 200 300 400
+Fitted values
+500
+Normal Q−Q plot
+−1 0 1
+Theoretical Quantiles Cook’s distance plot
+2 4 6 8 10 12 14
+Obs. number
+    9
+    7
+1
+2
+7
+            9
+                                              Figure 1.8 Model checking plots for the linear model fitted to the sperm.comp1 data.
+> model.matrix(sc.mod1)
+(Intercept) time.ipc prop.partner
+1 1 60 0.20 2 1 149 0.98 3 1 70 0.50 4 1 168 0.50 5 1 48 0.20 6 1 32 1.00 7 1 48 0.02 8 1 56 0.37 9 1 31 0.30 10 1 38 0.45 11 1 48 0.75 12 1 54 0.75 13 1 32 0.60 14 1 48 0.80 15 1 44 0.75
+Having fitted the model, it is important to check the plausibility of the assumptions, graphically.
+par(mfrow=c(2,2)) # split the graphics device into 4 panels plot(sc.mod1) # (uses plot.lm as cs.mod1 is class ‘lm’)
+The resulting plots, shown in figure 1.8, require some explanation. Note that, in two of the plots, the residuals have been scaled, by dividing them by their estimated standard deviation (see section 1.3.6). If the model assumptions are met, then this standardization should result in residuals that look like N (0, 1) random deviates.
+    Standardized residuals 0.0 0.4 0.8 1.2
+Residuals
+Cook’s distance
+Standardized residuals
+0.00 0.10 0.20 0.30
+−2.0 −1.0 0.0 1.0
+−200 0 100 200
+    26
+• The upper left plot shows the model residuals, εˆ , against the model fitted values,
+i
+μˆi, where μˆ = Xβˆ and εˆ = y − μˆ. The residuals should be evenly scattered
+above and below zero (the distribution of fitted values is not of interest). A trend in the mean of the residuals would violate the assumption of independent response variables, and usually results from an erroneous model structure: e.g. assuming a linear relationship with a predictor, when a quadratic is required, or omitting an important predictor variable. A trend in the variability of the residuals suggests that the variance of the response is related to its mean, violating the constant variance assumption: transformation of the response or use of a GLM may help, in such cases. The plot shown does not indicate any problem.
+• Thelowerleftplotisascale-locationplot.Thesquarerootoftheabsolutevalueof each standardized residual is plotted against the equivalent fitted value. It can be easier to judge the constant variance assumption from such a plot, and the square root transformation reduces the skew in the distribution, which would otherwise be likely to occur. Again, the plot shown gives no reason to doubt the constant variance assumption.
+• The upper right panel is a normal Q-Q (quantile-quantile) plot. The standardized residuals are sorted and then plotted against the quantiles of a standard normal dis- tribution. If the residuals are normally distributed then the resulting plot should look like a straight line relationship, perturbed by some random scatter. The cur- rent plot fits this description, so the normality assumption seems plausible.
+• The lower left panel shows Cook’s distance for each observation. Cook’s distance
+is a measure of how much influence each observation has on the fitted model. If
+μˆ[k] is the ith fitted value, when the kth datum is omitted from the fit, then Cook’s i
+distance is
+(1.10)
+i=1
+where p is the number of parameters and n the number of data. A very large value
+of dk indicates a point that has a substantial influence on the model results. If the Cook’s distance values indicate that model estimates may be very sensitive to just one or two data, then it usually prudent to repeat any analysis without the offending points, in order to check the robustness of the modelling conclusions. In this case none of the points look wildly out of line.
+By default the ‘most extreme’ three points in each plot are labelled with their row in- dex in the original data frame, so that the corresponding data can be readily checked. The 9th datum is flagged in all 4 plots in figure 1.8. It should be checked:
+> sperm.comp1[9,]
+subject time.ipc prop.partner count
+9 P 31 0.3 76
+This subject has quite a low count, but not the lowest in the frame. Examination of the plot of count against prop.partner indicates that the point adds substantially to the uncertainty surrounding the relationship, but its hard to see a good reason to
+dk =
+1  n
+( p + 1 ) σˆ 2
+(μˆ[k] − μˆi)2, i
+LINEAR MODELS
+     
+    PRACTICAL LINEAR MODELS 27
+remove it, particularly since, if anything, it is obscuring the relationship, rather than exaggerating it.
+Since the assumptions of model (1.9) appear reasonable, we can proceed to examine the fitted model object. Typing the name of an object in R causes the default print method for the object to be invoked (print.lm in this case).
+> sc.mod1
+Call:
+lm(formula=count ̃time.ipc+prop.partner,data=sperm.comp1)
+Coefficients:
+(Intercept) time.ipc prop.partner
+357.418 1.942 -339.560
+The intercept parameter (β0) is estimated to be 357.4. Notionally, this would be the count expected if time.ipc and prop.partner were zero, but the value is bi- ologically implausible if interpreted in this way. Given that the smallest observed time.ipc was 31 hours we cannot really expect to predict the count at zero. The remaining two parameter estimates are βˆ1 and βˆ2, and are labelled by the name of the variable to which they relate. In both cases they give the expected increase in count for a unit increase in their respective predictor variable. Note the important point that the absolute values of the parameter estimates are only interpretable rela- tive to the variable which they multiply. For example, we are not entitled to conclude that the effect of prop.partner is much greater than that of time.ipc, on the basis of the relative magnitudes of the respective parameters: they are measured in completely different units.
+One point to consider, is whether prop.partner is the most appropriate predictor variable. Perhaps the total time spent together (in hours) would be a better predictor.
+sc.mod2 <- lm(count ̃time.ipc+I(prop.partner*time.ipc), sperm.comp1)
+would fit such a model. The term I(prop.partner*time.ipc) indicates that, rather than use proportion of time together as a predictor, total time should be used. The I() function is used to ‘protect’ the product prop.partner*time.ipc within the model formula. This is necessary because symbols like + and * have special meanings within model formulae (see section 1.7): by protecting terms using I(), the usual arithmetic meanings are restored. Examination of diagnostic plots for sc.mod2 shows that two points have much greater influence on the fit than the others, so for the purposes of this section it seems sensible to stick with the biologists’ preferred model structure and use prop.partner.
+    
+    28 LINEAR MODELS
+1.5.2 Modelsummary
+The summary†† function provides a good deal more information about the fitted
+model.
+> summary(sc.mod1)
+Call:
+lm(formula=count ̃time.ipc+prop.partner,data=sperm.comp1)
+Residuals:
+Min 1Q Median 3Q Max
+-239.740 -96.772 2.171 96.837 163.997 Coefficients:
+Estimate Std. Error t value Pr(>|t|) (Intercept) 357.4184 88.0822 4.058 0.00159 **
+time.ipc 1.9416 0.9067 2.141 0.05346 . prop.partner -339.5602 126.2535 -2.690 0.01969 *
+---
+Signif. codes: 0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Residual standard error: 136.6 on 12 degrees of freedom Multiple R-Squared: 0.4573, Adjusted R-squared: 0.3669 F-statistic: 5.056 on 2 and 12 DF, p-value: 0.02554
+The explanation of the parts of this output are as follows:
+Call simply reminds you of the call that generated the object being summarized.
+Residuals gives a five figure summary of the residuals: this should indicate any gross departure from normality, for example a very skewed set of residuals might lead to very different magnitudes for Q1 and Q2, or to the median residual being a long way from 0 (the mean residual is always zero if the model includes an intercept: see exercise 6).
+Coefficients gives a table relating to the estimated parameters of the model. The first two columns are the least squares estimates (βˆj ’s) and the estimated stan- dard errors associated with those estimates (σˆβˆj ), respectively. The standard error calculations follow sections 1.3.2 and 1.3.3. The third column gives the parameter estimates divided by their estimated standard errors:
+Tj ≡ βˆj . σˆβˆj
+†† Note that calling the summary function with a fitted linear model object, x, actually results in the following: summary looks at the class of the x, finds that it is lm and passes it to summary.lm; summary.lm calculates a number of interesting quantities from x which it returns in a list, y, of class lm.summary; unless y is assigned to an object, R prints it, using the print method print.lm.summary.
+     
+    PRACTICAL LINEAR MODELS 29 Tj is a standardized measure of how far each parameter estimate is from zero. It was
+shown, in section 1.3.3, that under H0 : βj = 0,
+Tj ∼ tn−p, (1.11)
+where n is the number of data and p the number of model parameters estimated. i.e. if the null hypothesis is true, then the observed Tj should be consistent with having been drawn from a tn−p distribution. The final Pr(>|t|) column provides the measure of that consistency, namely the probability that the magnitude of a tn−p random variable would be at least as large as the observed Tj . This quantity is known as the p-value of the test of H0 : βj = 0. A large p-value indicates that the data are consistent with the hypothesis, in that the observed Tj is quite a probable value for a tn−p deviate, so that there is no reason to doubt the hypothesis underpinning (1.11). Conversely a small p-value suggests that the hypothesis is wrong, since the observed Tj is a rather improbable observation from the tn−p distribution implied by βj =0.Variousarbitrarysignificancelevelsareoftenusedastheboundaryp-values for deciding whether to accept or reject hypotheses. Some common ones are listed at the foot of the table, and the p-values are flagged according to which, if any, they fall below.
+2 2
+Residual standard error gives σˆ where σˆ = (εˆ )/(n − p) (see section
+1.3.3). n − p is the ‘residual degrees of freedom’.
+Multiple R-squared is an estimate of the proportion of the variance in the data explained by the regression:
+2i
+r =1− (yi−y ̄)2/n
+ 2
+εˆ / n
+i
+ where y ̄ is the mean of the yi. The fraction in this expression is basically an estimate of the proportion variance not explained by the regression.
+Adjusted R-squared. The problem with r2 is that it always increases when a new predictor variable is added to the model, no-matter how useless that variable is for prediction. Part of the reason for this is that the variance estimates used to calculate r2 are biased in a way that tends to inflate r2. If unbiased estimators are used we get the adjusted r2
+ 2
+εˆ / ( n − p )
+2i
+r a d j = 1 −   ( y i − y ̄ ) 2 / ( n − 1 ) .
+ A high value of ra2dj indicates that the model is doing well at explaining the variability in the response variable.
+F-statistic. The final line, giving an F-statistic and p-value, is testing the null hypothesis that the data were generated from a model with only an intercept term, against the alternative that the fitted model generated the data. This line is really about asking if the whole model is of any use. The theory of such tests is covered in section 1.3.4.
+    
+    30 LINEAR MODELS
+So the summary of sc.mod1 suggests that there is evidence that the model is better than one including just a constant (p-value = 0.02554). There is quite clear evidence that prop.partner is important in predicting sperm count (p-value = 0.019), but less evidence that time.ipc matters (p-value = 0.053). Indeed, using the conven- tional significance level of 0.05, we might be tempted to conclude that time.ipc does not affect count at all. Finally note that the model leaves most of the variability in count unexplained, since ra2dj is only 37%.
+1.5.3 Model selection
+From the model summary it appears that time.ipc may not be necessary: the as- sociated p-value of 0.053 does not provide strong evidence that the true value of β1 is non-zero. By the ‘true value’ is meant the value of the parameter in the model imag- ined to have actually generated the data; or equivalently, the value of the parameter applying to the whole population of couples from which, at least conceptually, our particular sample has been randomly drawn. The question then arises of whether a simpler model, without any dependence on time.ipc, might be appropriate. This is a question of model selection. Usually it is a good idea to avoid over-complicated models, dependent on irrelevant predictor variables, for reasons of interpretability and efficiency. Inferences about causality will be made more difficult if a model con- tains spurious predictors, but estimates using such a model will also be less precise, as more parameters than necessary have been estimated from the finite amount of uncertain data available.
+Several approaches to model selection are based on hypothesis tests about model terms, and can be thought of as attempting to find the simplest model consistent with a set of data, where consistency is judged relative to some threshold p-value. For the sperm competition model the p-value for time.ipc is greater than 0.05, so this predictor might be a candidate for dropping.
+> sc.mod3 <- lm(count ̃prop.partner,sperm.comp1) > summary(sc.mod3)
+(edited)
+Coefficients:
+Estimate Std. Error t value Pr(>|t|) (Intercept) 451.50 86.23 5.236 0.000161 *** prop.partner -292.23 140.40 -2.081 0.057727 . ---
+Residual standard error: 154.3 on 13 degrees of freedom Multiple R-Squared: 0.25, Adjusted R-squared: 0.1923 F-statistic: 4.332 on 1 and 13 DF, p-value: 0.05773
+These results provide a good example of why it is dangerous to apply automatic model selection procedures unthinkingly. In his case dropping time.ipc has made the estimate of the parameter multiplying prop.partner less precise: indeed this term also has a p-value greater than 0.05 according to this new fit. Furthermore, the
+    
+    PRACTICAL LINEAR MODELS 31
+new model has a much reduced r2, while the model’s overall p-value does not give strong evidence that it is better than a model containing only an intercept. The only sensible choice here is to revert to sc.mod1. The statistical evidence indicates that it is better than the intercept only model, and dropping its possibly ‘non-significant’ term has lead to a much worse model.
+Hypothesis testing is not the only approach to model selection. One alternative is to try and find the model that gets as close as possible to the true model, rather than to find the simplest model consistent with data. In this case we can attempt to find the model which does the best job of predicting the E(yi). Selecting models in order to minimize Akaike’s Information Criterion (AIC) is one way of trying to do this (see section 1.8.5). In R, the AIC function can be used to calculate the AIC statistic for different models.
+> sc.mod4 <- lm(count ̃1,sperm.comp1) # null model > AIC(sc.mod1,sc.mod3,sc.mod4)
+        df      AIC
+sc.mod1  4 194.7346
+sc.mod3  3 197.5889
+sc.mod4  2 199.9031
+This alternative model selection approach also suggests that the model with both time.ipc and prop.partner is best.
+So, on the basis of sperm.comp1, there seems to be reasonable evidence that sperm count increases with time.ipc but decreases with prop.partner: exactly as Baker and Bellis concluded.
+1.5.4 Another model selection example
+The second dataset from Baker and Bellis (1993) is sperm.comp2. This gives me- dian sperm count for 24 couples, along with ages (years), heights (cm) and weights (kg) for the male and female of each couple and volume (cm3) of one teste for the male of the couple (m.vol). There are quite a number of missing values for the pre- dictors, particularly for m.vol, but, for the 15 couples for which there is an m.vol measurement, the other predictors are also available. The number of copulations over which the median count has been taken varies widely from couple to couple. Ideally one should probably allow within couple and between couple components to the ran- dom variability component of the data, to allow for this, but this will not be done here. Following Baker and Bellis it seems reasonable to start from a model including linear effects of all predictors. i.e.
+counti = β0 + β1 × f.agei + β2 × f.weighti + β3 × f.heighti + β4 × m.agei + β5 ×m.weighti + β6 ×m.heighti + β7 ×m.vol+ εi
+The following estimates and summarizes the model, and plots diagnostics.
+> sc2.mod1<-lm(count ̃f.age+f.height+f.weight+m.age+m.height+
+    
+    32
+LINEAR MODELS
+Residuals vs Fitted
+150 200 250 300 350 400
+Fitted values Scale−Location plot
+150 200 250 300 350 400
+Fitted values
+Normal Q−Q plot
+−1 0 1
+ 9
+               12
+19
+     2
+                 12
+  19
+           Theoretical Quantiles Cook’s distance plot
+2 4 6 8 10 12 14
+Obs. number
+    19
+    2 12
+19
+          2
+           7
+                                  Figure 1.9 Model checking plots for the sperm competition model.
++ m.weight+m.vol,sperm.comp2)
+> plot(sc2.mod1)
+> summary(sc2.mod1)
+[edited]
+Coefficients:
+Estimate Std. Error t value Pr(>|t|)
+(Intercept) -1098.518 1997.984 -0.550 0.600
+f.age
+f.height
+f.weight
+m.age
+m.height
+m.weight
+m.vol
+10.798 22.755 0.475 0.650 -4.639 10.910 -0.425 0.683 19.716 35.709 0.552 0.598 -1.722 10.219 -0.168 0.871
+6.009 10.378 0.579 0.581 -4.619 12.655 -0.365 0.726 5.035 17.652 0.285 0.784
+Residual standard error: 205.1 on 7 degrees of freedom Multiple R-Squared: 0.2192, Adjusted R-squared: -0.5616 F-statistic: 0.2807 on 7 and 7 DF, p-value: 0.9422
+The resulting figure 1.9, looks reasonable, but datum 19 appears to produce the most extreme point on all 4 plots. Checking row 19 of the data frame, shows that the male of this couple is rather heavy (particularly for his height), and has a large m.vol measurement, but a count right near the bottom of the distribution (actually down at the level that might be expected to cause fertility problems, if this is typical). Clearly, whatever we conclude from these data will need to be double checked without this observation. Notice, from the summary, how poorly this model does at explaining
+    Standardized residuals 0.0 0.5 1.0 1.5
+Residuals
+Cook’s distance
+Standardized residuals
+0.0 1.0 2.0 3.0
+−2 −1 0 1 2
+−200 0 100
+    PRACTICAL LINEAR MODELS 33
+the count variability: the adjusted r2 is actually negative, an indication that we have a large number of irrelevant predictors in the model.
+There are only 15 data from which to estimate the 8 parameters of the full model: it would be better to come up with something more parsimonious. In this case using AIC suggests a rather complicated model with only m.weight dropped. It seems quite sensible to switch to hypothesis testing based model selection, and ask whether there is really good evidence that all these terms are necessary? One approach is to perform ‘backwards model selection’, by repeatedly removing the single term with highest p-value, above some threshold (e.g. 0.05), and then refitting the resulting reduced model, until all terms have significant p-values. For example the first step in this process would remove m.age:
+> sc2.mod2<-lm(count ̃f.age+f.height+f.weight+m.height+
++ m.weight+m.vol,sperm.comp2)
+> summary(sc2.mod2)
+[edited]
+Coefficients:
+             Estimate
+(Intercept) -1054.770
+                      Std. Error
+                        1856.843
+                          18.359
+                           9.871
+                          33.334
+                           9.727
+                          11.834
+                          16.281
+Residual
+Multiple
+F-statistic: 0.3674 on 6 and 8 DF, p-value: 0.8805
+Notice how, relative to sc2.mod1, the reduced model has different estimates for each of the remaining parameter, as well as smaller standard error estimates for each parameter, and (consequently) different p-values. This is part of the reason for only dropping one term at a time: when we drop one term from a model, it is quite possible for some remaining terms to have their p-values massively reduced. For example, if two terms are highly correlated it is quite possible for both to be highly significant individually, but both to have very high p-values if present together. This occurs because the terms are to some extent interchangeable predictors: the information provided by one is much the same as the information provided by the other, so that one must be present in the model but both are not needed. If we were to drop several terms from a model at once we might miss such effects.
+Proceeding with backwards selection, we would drop m.vol next. This allows rather more of the couples to be used in the analysis. Continuing in the same way leads to the dropping of m.weight, f.height, m.height and finally f.age before arriving at a final model which includes only f.weight.
+> sc2.mod7<-lm(count ̃f.weight,sperm.comp2)
+f.age
+f.height
+f.weight
+m.height
+m.weight
+m.vol
+ 8.847
+-5.119
+20.259
+ 6.033
+-4.473
+ 4.506
+t value
+ -0.568
+  0.482
+ -0.519
+  0.608
+  0.620
+ -0.378
+  0.277
+Pr(>|t|)
+   0.586
+   0.643
+   0.618
+   0.560
+   0.552
+   0.715
+   0.789
+standard error: 192.3 on 8 degrees
+R-Squared: 0.216, Adjusted R-squared: -0.372
+of freedom
+    
+    34 LINEAR MODELS
+> summary(sc2.mod7)
+[edited]
+Coefficients:
+Estimate Std. Error t value Pr(>|t|) (Intercept) -1002.281 489.352 -2.048 0.0539 . f.weight 22.397 8.629 2.595 0.0173 *
+Residual standard error: 147.3 on 20 degrees of freedom Multiple R-Squared: 0.252, Adjusted R-squared: 0.2146 F-statistic: 6.736 on 1 and 20 DF, p-value: 0.01730
+This model does appear to be better than a model containing only a constant, accord- ing both to a hypothesis test at the 5% level and AIC.
+Apparently then, only female weight influences sperm count. This concurs with the conclusion of Baker and Bellis (1993), who interpreted the findings to suggest that males might ‘invest’ more in females with a higher reproductive potential. However, in the light of the residual plots we need to re-analyze the data without observation 19, before having too much confidence in the conclusions. This is easily done, for example . . .
+> sc <- sperm.comp2[-19,]
+> sc3.mod1<-lm(count ̃f.age+f.height+f.weight+m.age+m.height+
++ m.weight+m.vol,sc)
+> summary(sc3.mod1)
+[edited]
+Coefficients:
+            Estimate
+(Intercept) 1687.406
+f.age         55.248
+Std. Error
+  1251.338
+    15.991
+     8.419
+    31.737
+     6.555
+     6.869
+     7.287
+    13.938
+t value
+  1.348
+  3.455
+  2.540
+ -2.804
+ -2.626
+ -1.648
+  0.945
+  3.515
+Pr(>|t|)
+  0.2262
+  0.0136 *
+  0.0441 *
+  0.0310 *
+  0.0393 *
+  0.1504
+  0.3812
+  0.0126 *
+f.height
+f.weight
+m.age
+m.height
+m.weight
+m.vol         48.996
+--- [edited]
+ 21.381
+-88.992
+-17.210
+-11.321
+6.885
+Notice how m.vol now has the lowest p-value. Repeating the whole backwards selection process, every term now drops out except for m.vol, leading to the much less interesting conclusion that the data only really supply evidence that size of testes influences sperm count. Given the rather tedious plausibility of this conclusion it probably makes sense to prefer it to the conclusion based on the full data set.
+A follow up
+Given the biological conclusions from the analysis of sperm.comp2, it would make sense to revisit the analysis of sperm.comp1. Baker and Bellis do not re- port m.vol values for these data, but the same couples feature in both datasets and are identified by label, so the required values can be obtained:
+    
+    PRACTICAL LINEAR MODELS 35
+sperm.comp1$m.vol <-
+sperm.comp2$m.vol[sperm.comp2$pair%in%sperm.comp1$subject]
+Repeating the same sort of backwards selection we end up selecting a 1 term model:
+> sc1.mod1<-lm(count ̃m.vol,sperm.comp1)
+> summary(sc1.mod1)
+Call:
+lm(formula = count  ̃ m.vol, data = sperm.comp1)
+Residuals:
+Min 1Q Median 3Q Max
+-187.236 -55.028 -8.606 75.928 156.257
+Coefficients:
+Estimate Std. Error t value Pr(>|t|)
+(Intercept) -58.694 121.619 -0.483 0.6465
+m.vol 23.247 7.117 3.266 0.0171 *
+---
+Signif. codes: 0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Residual standard error: 120.8 on 6 degrees of freedom Multiple R-Squared: 0.64, Adjusted R-squared: 0.58 F-statistic: 10.67 on 1 and 6 DF, p-value: 0.01711
+Although based on only 8 couples, this must call into question the original analysis, which concluded that time since last copulation and proportion of time spent together controlled sperm count. There is at least a suggestion that the explanation for sperm count variability may be rather more prosaic than is predicted by sperm competition theory.
+1.5.5 Confidence intervals
+Exactly as in section 1.1.3 the results from section 1.3.3 can be used to obtain con- fidence intervals for the parameters. In general, for a p parameter model of n data, a (1 − 2α)100% confidence interval for the jth parameter is
+βˆ j ± t n − p ( α ) σˆ βˆ j ,
+where tn−p(α) is the value below which a tn−p random variable would lie with
+probability α.
+As an example of its use, the following calculates a 95% confidence interval for the
+mean increase in count per cm3 increase in m.vol.
+> sc.c <- summary(sc1.mod1)$coefficients
+> sc.c # check info extracted from summary
+    
+    36 LINEAR MODELS
+Estimate Std. Error t value Pr(>|t|) (Intercept) -58.69444 121.619433 -0.4826075 0.64647664 m.vol 23.24653 7.117239 3.2662284 0.01711481 > sc.c[2,1]+qt(c(.025,.975),6)*sc.c[2,2]
+[1] 5.831271 40.661784 # 95% CI
+1.5.6 Prediction
+It is possible to predict the expected value of the response at new values of the pre- dictor variables using the predict function. For example: what are the model pre- dicted counts for m.vol values of 10, 15, 20 and 25? The following obtains the answer along with associated standard errors (see section 1.3.6).
+> df <- data.frame(m.vol=c(10,15,20,25))
+> predict(sc1.mod1,df,se=TRUE)
+$fit
+1234 173.7708 290.0035 406.2361 522.4688
+$se.fit 1234
+60.39178 43.29247 51.32314 76.98471
+The first line creates a data frame containing the predictor variable values at which predictions are required. The second line calls predict with the fitted model object and new data from which to predict. se=TRUE tells the function to return standard errors along with the predictions.
+1.6 Practical modelling with factors
+Most of the models covered so far have been for situations in which the predic- tor variables are continuous variables, but there are many situations in which the predictor variables are more qualitative in nature, and serve to divide the responses into groups. Examples might be eye- colour of subjects in a psychology experiment, which of three alternative hospitals were attended by patients in a drug trial, manu- facturers of cars used in crash tests etc. Variables like these, which serve to classify the units on which the response variable has been measured into distinct categories, are known as factor variables, or simply factors. The different categories of the fac- tor are known as levels of the factor. For example levels of the factor ‘eye colour’ might be ‘blue’, ‘brown’, ‘grey’ and ‘green’, so that we would refer to eye colour as a factor with four levels. Note that ‘levels’ is quite confusing terminology: there is not necessarily any natural ordering of the levels of a factor. Hence ‘levels’ of a factor might best be thought of as ‘categories’ of a factor, or ‘groups’ of a factor.
+Factor variables are handled using dummy variables. Each factor variable can be replaced by as many dummy variables as there are levels of the factor — one for each
+    
+    PRACTICAL MODELLING WITH FACTORS 37
+level of the factor. For each response datum, only one of these dummy variables will be non- zero: the dummy variable for the single level that applies to that response. Consider an example to see how this works in practice: 9 laboratory rats are fed too much, so that they divide into 3 groups of 3: ‘fat’, ‘very fat’ and ‘enormous’. Their blood insulin levels are then measured 10 minutes after being fed a standard amount of sugar. The investigators are interested in the relationship between insulin levels and the factor ‘rat size’. Hence a model could be set up in which the predictor variable is the factor ‘rat size’, with the three levels ‘fat’, ‘very fat’ and ‘enormous’. Writing yi for the ith insulin level measurement, a suitable model might be:
+ β0 if rat is fat E(Yi)≡μi = β1 ifratisveryfat
+β2 if rat is enormous
+and this is easily written in linear model form, using a dummy predictor variable for each level of the factor:
+ μ1   1 0 0 
+ μ2   1 0 0 
+μ3  1 0 0
+μ4  0 1 0β0  μ5 =0 1 0β1 .  μ6   0 1 0  β2 μ7  0 0 1
+ μ 8   0 0 1 
+μ9 001
+A key difference between dummy variables and directly measured predictor vari- ables, is that the dummy variables, and parameters associated with a factor, are al- most always treated as a group during model selection — it does not usually make sense for a subset of the dummy variables associated with a factor to be dropped or included on their own: either all are included or none. The F ratio tests derived in section 1.3.4 are designed for hypothesis testing in this situation.
+1.6.1 Identifiability
+When modelling with factor variables, model ‘identifiability’ becomes an important issue. It is quite easy to set up models, involving factors, in which it is impossible to estimate the parameters uniquely, because an infinite set of alternative parameter vectors would give rise to exactly the same expected value vector. A simple exam- ple illustrates the problem. Consider again the fat rat example, but suppose that we wanted to formulate the model in terms of an overall mean insulin level, α, and devi- ations from that level, βj , associated with each level of the factor. The model would be something like:
+μi =α+βj ifratiisratsizelevelj
+    
+    38 LINEAR MODELS
+(where j is 0, 1 or 2, corresponding to ‘fat’, ‘very fat’ or ‘enormous’). The problem with this model is that there is not a one-to-one correspondence between the param- eters and the fitted values, so that the parameters can not be uniquely estimated from the data. This is easy to see. Consider any particular set of α and β values, giving rise to a particular μ value: any constant c could be added to α and simultaneously subtracted from each element of β without changing the value of μ. Hence there is an infinite set of parameters giving rise to each μ value, and therefore the parameters can not be estimated uniquely. The model is not ‘identifiable’.
+This situation can be diagnosed directly from the model matrix. Written out in full the example model is
+ μ1   1 1 0 0 
+ μ2   1 1 0 0  μ3 1100α
+μ4 1 0 1 0 β0 μ5 =1 0 1 0β1 .
+μ6 1010β2  μ7   1 0 0 1 
+ μ 8   1 0 0 1 
+μ9 1001
+But the columns of the model matrix are not independent, and this lack of full column rank means that the formulae for finding the least squares parameter estimates break down‡‡. Identifiable models have model matrices of full column rank, unidentifiable ones are column rank deficient.
+The solution to the identifiability problem is to impose just enough linear constraints on the model parameters, that the model becomes identifiable. For example, in the fat rat model, we could impose the constraint that
+2
+ βj =0. j=0
+This would immediately remove the identifiability problem, but does require use of a linearly constrained least squares method (see sections 1.8.1 and 1.8.2). A simpler constraint is to set one of the unidentifiable parameters to zero, which requires only that the model is re-written, without the zeroed parameter, rather than a modified fitting method. For example, in the fat rat case, we could set α to zero, and recover the original identifiable model. This is perfectly legitimate, since the reduced model is capable of reproducing any expected values that the original model could produce.
+In the one factor case this discussion of identifiability may seem to be un-necessarily complicated, since it is so easy to write down the model directly, in an identifiable form. However, when models involve more than one factor variable, the issue can not
+‡‡ In terms of section 1.3.1, R will not be full rank, and will hence not be invertible; in terms of section 1.3.7, XTX will not be invertible.
+    
+    PRACTICAL MODELLING WITH FACTORS 39
+be avoided. For a more general treatment of identifiability constraints see sections 1.8.1 and 1.8.2.
+1.6.2 Multiple factors
+It is frequently the case that more than one factor variable should be included in a model, and this is straightforward to do. Continuing the fat rat example, it might be that the sex of the rats is also a factor in insulin production, and that the appropriate model is:
+μi =α+βj +γk ifratiisratsizeleveljandsexk
+where k is 0 or 1 for male or female. Written out in full (assuming the rats are
+MMFFFMFMM) the model is
+μ1 110010
+ μ2   1 1 0 0 1 0  α 
+μ3 110001 β0 μ4 1 0 1 0 0 1β1
+μ5 =1 0 1 0 0 1β2 . μ6 1 0 1 0 1 0γ0
+μ7 100101γ1 μ8 100110
+μ9 100110
+It is immediately obvious that the model matrix is of column rank 4, implying that two constraints are required to make the model identifiable. You can see the lack of column independence by noting that column 5 is column 1 minus column 6, while column 2 is column 1 minus columns 3 and 4. An obvious pair of constraints would betosetβ0 =γ0 =0,sothatthefullmodelis
+ μ1   1 0 0 0   μ2   1 0 0 0 
+μ3 1001α μ4 1 1 0 1 β1
+μ5 =1 1 0 1β2 . μ6 1100γ1  μ7   1 0 1 1 
+ μ 8   1 0 1 0 
+μ9 1010
+When you specify models involving factors in R, it will automatically impose iden- tifiability constraints for you, and by default these constraints will be that the param- eter for the ‘first’ level of each factor is zero (‘first’ is essentially arbitrary here — the order of levels of a factor is not important).
+    
+    40 LINEAR MODELS
+1.6.3 ‘Interactions’ of factors
+In the examples considered so far, the effect of factor variables has been purely ad- ditive, but it is possible that a response variable may react differently to the combi- nation of two factors, than would be predicted purely by the effect of the two factors separately. For example, if examining patient blood cholesterol levels, we might con- sider the factors ‘hypertensive’ (yes/no) and ‘diabetic’ (yes/no). Being hypertensive or diabetic would be expected to raise cholesterol levels, but being both is likely to raise cholesterol levels much more than would be predicted from just adding up the apparent effects when only one condition is present. When the effect of two factor variables together differs from the sum of their separate effects, then they are said to interact, and an adequate model in such situations requires interaction terms. Put another way, if the effects of one factor change in response to another factor, then the factors are said to interact.
+Let us continue with the fat rat example, but now suppose that how insulin level depends on size varies with sex. An appropriate model is then
+μi =α+βj +γk +δjk ifratiisratsizeleveljandsexk,
+where the δjk terms are the parameters for the interaction of rat size and sex. Writing
+this model out in full it is clear that it is spectacularly unidentifiable:
+ βα   μ1   1 1 0 0 1 0 1 0 0 0 0 0  0  μ2 1 1 0 0 1 0 1 0 0 0 0 0  β1  μ3 110001010000β2 μ4 101001000100γ0
+ μ5 = 1 0 1 0 0 1 0 0 0 1 0 0  γ1 . μ6 101010001000δ00
+μ7 100101000001δ01 μ8 100110000010δ10
+μ9 100110000010δ11  δ 2 0 
+δ21
+In fact, for this simple example, with rather few rats, we now have more parameters than data. There are of course many ways of constraining this model to achieve iden- tifiability. One possibility (the default in R) is to set β0 = γ0 = δ00 = δ01 = δ10 = δ20 = 0. The resulting model can still produce any fitted value vector that the full model can produce, but all the columns of its model matrix are independent, so that the model is identifiable:
+    
+    PRACTICAL MODELLING WITH FACTORS 41
+μ1 100000
+ μ2   1 0 0 0 0 0  α 
+ μ3   1 0 0 1 0 0  β1 μ4 110110β2
+ μ5 = 1 1 0 1 1 0  γ1 . μ6 1 1 0 0 0 0δ11
+μ7 1 0 1 1 0 1δ21 μ8 101000
+μ9 101000
+Of course, the more factor variables are present, the more interactions are possible, and the higher the order of the possible interactions: for example if three factors are present then each factor could interact with each factor, giving three possible ‘two-way’ interactions, while all the factors could also interact together, giving a three-way interaction (e.g. the way in which insulin levels dependendence on rat size is influenced by sex is itself influenced by blood group — perhaps with interactions beyond two-way, equations are clearer than words.)
+1.6.4 Using factor variables in R
+It is very easy to work with factor variables in R. All that is required is that you let R know that a particular variable is a factor variable. For example, suppose z is a variable declared as follows:
+> z<-c(1,1,1,2,2,1,3,3,3,3,4) >z
+[1] 1 1 1 2 2 1 3 3 3 3 4
+and it is to be treated as a factor with 4 levels. The function as.factor() will
+ensure that z is treated as a factor:
+> z<-as.factor(z) >z
+ [1] 1 1 1 2 2 1 3 3 3 3 4
+Levels: 1 2 3 4
+Notice that, when a factor variable is printed, a list of its levels is also printed — this provides an easy way to tell if a variable is a factor variable. Note also that the digits of z are treated purely as labels: the numbers 1 to 4 could have been any labels. For example, x could be a factor with 3 levels, declared as follows:
+> x<-c("A","A","C","C","C","er","er") >x
+[1] "A" "A" "C" "C" "C" "er" "er" > x<-as.factor(x)
+>x
+[1]A A C C C erer Levels: A C er
+    
+    42 LINEAR MODELS
+Once a variable is declared as a factor variable, then R can process it automati- cally within model formulae, by replacing it with the appropriate number of binary dummy variables (and imposing any necessary identifiability constraints on the spec- ified model).
+As an example of the use of factor variables consider the PlantGrowth data frame supplied with R. These are data on the growth of plants under control conditions and two different treatment conditions. The factor group has three levels cntrl, trt1 and trt2, and it is believed that the growth of the plants depends on this factor. First check that group is already a factor variable:
+> PlantGrowth$group
+[1] ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl trt1
+[12] trt1 trt1 trt1 trt1 trt1 trt1 trt1 trt1 trt1 trt2 trt2 [23] trt2 trt2 trt2 trt2 trt2 trt2 trt2 trt2
+Levels: ctrl trt1 trt2
+. . . since a list of levels is reported, it must be. If it had not been then
+PlantGrowth$group <- as.factor(PlantGrowth$group)
+would have converted it. The response variable for these data is weight of the plants at some set time after planting, and the aim is to investigate whether the group factor controls this, and if so, to what extent.
+> pgm.1 <- lm(weight  ̃ group,data=PlantGrowth) > plot(pgm.1)
+As usual, the first thing to do, after fitting a model, is to check the residual plots shown in figure 1.10. In this case there is some suggestion of decreasing variance with increasing mean, but the effect does not look very pronounced, so it is probably safe to proceed.
+> summary(pgm.1)
+[edited]
+Coefficients:
+Estimate Std. Error t value (Intercept) 5.0320 0.1971 25.527 grouptrt1 -0.3710 0.2788 -1.331 grouptrt2 0.4940 0.2788 1.772
+---
+Signif. codes: 0 ‘***’ 0.001 ‘**’ 0.01
+Pr(>|t|)
+  <2e-16
+  0.1944
+  0.0877
+‘*’ 0.05
+***
+.
+‘.’ 0.1 ‘ ’ 1
+Residual standard error: 0.6234 on 27 degrees of
+Multiple R-Squared: 0.2641, Adjusted R-squared: 0.2096 F-statistic: 4.846 on 2 and 27 DF, p-value: 0.01591
+Notice how R reports an intercept parameter and parameters for the two treatment levels, but, in order to obtain an identifiable model, it has not included a parameter for the control level of the group factor. So the estimated overall mean weight (in the population that these plants represent, given control conditions) is 5.032, while
+freedom
+    
+    PRACTICAL MODELLING WITH FACTORS 43
+   17 15
+17 15
+Residuals vs Fitted 4
+4.8 5.0 5.2 5.4
+Fitted values
+Scale−Location plot 4
+4.8 5.0 5.2 5.4
+Fitted values
+Normal Q−Q plot
+−2 −1 0 1 2
+                                                                Theoretical Quantiles
+Cook’s distance plot 17
+15
+                   4
+                   Figure 1.10 Model checking plots for the plant growth example.
+treatment 1 is estimated to lower this weight by 0.37, and treatment 2 to increase it by 0.49. However, neither parameter individually appears to be significantly different from zero. (Don’t forget that model.matrix(pgm.1) can be used to check up on the form of the model matrix used in the fit.)
+Model selection based on the summary output is very difficult for models containing factors. It makes little sense to drop the dummy variable for just one level of a factor from a model, and if we did, what would we then do about the model identifiability constraints? Usually, it is only of interest to test whether the whole factor variable should be in the model or not, and this amounts to testing whether all its associated parameters are simultaneously zero or not. The F-ratio tests derived in section 1.3.4 are designed for just this purpose, and in R, such tests can be invoked using the anova function. For example, we would compare pgm.1 to a model in which the expected response is given by a single parameter that does not depend on group:
+> pgm.0<-lm(weight ̃1,data=PlantGrowth) > anova(pgm.0,pgm.1)
+Analysis of Variance Table
+Model 1: weight  ̃ 1
+Model 2: weight  ̃ group
+  Res.Df     RSS Df Sum of Sq
+1 29 14.2584
+2 27 10.4921 2 3.7663 4.8461 0.01591 *
+---
+0 5 10 15 20 25 30
+Obs. number
+F Pr(>F)
+17 15
+4
+     Standardized residuals 0.0 0.5 1.0 1.5
+Residuals
+Cook’s distance
+Standardized residuals
+0.00 0.10 0.20
+−1 0 1 2
+−1.0 0.0 1.0
+    44 LINEAR MODELS
+Signif. codes: 0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+The output here gives the F-ratio statistic used to test the null hypothesis that the simpler model is correct, against the alternative that pgm.1 is correct. If the null is true then the probability of obtaining so large an F value is only 0.016, suggesting that the null hypothesis is not very plausible.
+So we see that the data provide evidence for an effect of the group factor variable on weight, which appeared marginal or absent when we examined p-values for the individual model parameters. This comes about because we have, in effect, consid- ered all the parameters associated with the factor simultaneously, thereby obtaining a more powerful test than any of the single parameter tests could be. In the light of this analysis, the most promising treatment to look at is clearly treatment 2, since this gives the largest and ‘most significant’ effect and it is a positive effect.
+1.7 General linear model specification in R
+Having seen several examples of the use of lm, it is worth briefly reviewing the way in which models are specified using model formulae in R. The main components of a formula are all present in the following example
+y  ̃ a*b + x:z -1
+Note the following:
+•  ̃ separates the response variable, on the left, from the ‘linear predictor’, on the
+right. So in the example y is the response and a, b, x and z are the predictors.
+• + indicates that the response depends on what is to the left of + and what is to the right of it. Hence within formulae ‘+’ should be thought of as ‘and’ rather than ‘the sum of’.
+• : indicates that the response depends on the interaction of the variables to the left and right of :. Interactions are obtained by forming the element-wise products of all model matrix columns corresponding to the two terms that are interacting and appending the resulting columns to the model matrix (although, of course, some identifiability constraints may be required).
+• * means that the response depends on whatever is to the left of * and whatever is to the right of it and their interaction. i.e. a*b is just a shorter way of writing a + b + a:b.
+• -1 means that the default intercept term should not be included in the model. Note that, for models involving factor variables, this often has no real impact on the model structure, but simply reduces the number of identifiability constraints by one, while changing the interpretation of some parameters.
+Because of the way that some symbols change their usual meaning in model formu- lae, it is necessary to take special measures if the usual meaning is to be restored to
+    
+    FURTHER LINEAR MODELLING THEORY 45
+arithmetic operations within a formula. This is accomplished by using the identity function I() which simply evaluates its argument and returns it. For example, if we wanted to fit the model:
+yi =β0 +β1(xi +zi)+β2vi +εi then we could do so using the model formula
+y  ̃ I(x+z) + v
+Note that there is no need to ‘protect’ arithmetic operations within arguments to other functions in this way. For example
+yi =β0 +β1log(xi +zi)+β2vi +εi would be fitted correctly by
+y  ̃ log(x+z) + v
+1.8 Further linear modelling theory
+This section covers linear models with constraints on the parameters (including a discussion of contrasts), the connection with maximum likelihood estimation, AIC and Mallows Cp, linear models for non-independent data with non-constant variance and non-linear models.
+1.8.1 Constraints I: general linear constraints
+It is often necessary, particularly when working with factor variables, to impose con- straints on the linear model parameters, of the general form
+Cβ = 0,
+where C is an m × p matrix of known coefficients. The general approach to imposing such constraints is to rewrite the model in terms of p − m unconstrained parameters. There are a number of ways of doing this, but a simple general approach uses the QR decomposition of CT. Let
+C T = U   P0  
+where U is a p × p orthogonal matrix and P is an m × m upper triangular matrix. U
+can be partitioned U ≡ (D : Z) where Z is a p × (p − m) matrix. It turns out that
+β = Zβz
+will meet the constraints for any value of the p − m dimensional vector βz . This is
+easy to see:
+Cβ= PT 0  DT  Zβ = PT 0   0  β =0. ZT z Ip−m z
+    
+    46 LINEAR MODELS
+Hence to minimize ∥y − Xβ∥2 w.r.t. β, subject to Cβ = 0, the following algorithm can be used.
+1. Find the QR decomposition of CT: the final p − m columns of the orthogonal factor define Z.
+2. Minimize the unconstrained sum of squares ∥y − XZβz ∥2 w.r.t. βz to obtain βˆz . 3 . βˆ = Z βˆ z .
+Note that, in practice, it is computationally inefficient to form Z explicitly, when we only need to be able to post-multiply X by it, and pre-multiply βz by it. The reason for this is that Z is completely defined as the product of m ‘Householder rotations’: simple matrix operations that can be applied very rapidly to any vector or matrix. R includes routines for multiplication by the orthogonal factor of a QR decomposition which makes use of these efficiencies. See A.5 and A.6 for further details on QR decomposition.
+1.8.2 Constraints II: ‘contrasts’ and factor variables
+There is another approach to imposing identifiability constraints on models involving factor variables. To explain it, it is worth revisiting the basic identifiability problem with a simple example. Consider the model
+yi =μ+αj +εi ifyi isfromgroupj
+and suppose that there are three groups with two observations in each. The model
+matrix in this case is
+1100
+1100 X=1 0 1 0,
+ 1 0 1 0   1 0 0 1  1001
+but this is not of full column rank: any of its columns could be made up from a linear combination of the other 3. In geometric terms the model space is of dimension 3 and not 4, and this means that we can not estimate all 4 model parameters, but at most 3 parameters. Numerically this problem would manifest itself in the rank deficiency of R in equation (1.6), which implies that R−1 does not exist.
+One approach to this issue is to remove one of the model matrix columns, implic- itly treating the corresponding parameter as zero. This gives the model matrix full column rank, so that the remaining parameters are estimable, but since the model space is unaltered, we have not fundamentally changed the model. It can still predict every set of fitted values that the original model could predict. By default R drops the model matrix column corresponding to the first level of each factor, in order to
+    
+    FURTHER LINEAR MODELLING THEORY 47 impose identifiability on models with factors. For the simple example this results in
+100
+100 X′=1 1 0.
+1 1 0  1 0 1  101
+To generalize this approach, it helps to write out this deletion in a rather general way. For example, if we re-write the original model matrix in partitioned form, X = [1 : X1], where 1 is a column of 1s, then
+0 0 X′ =[1:X1C1] where C1 = 1 0 .
+01
+Now all that C1 has done is to replace the 3 columns of X1 by a 2 column linear combination of them, which cannot be combined to give 1. On reflection, any matrix which did these two things would have served as well as the particular C1 actually given, in terms of making the model identifiable. This observation leads to the idea of choosing alternative matrix elements for C1, in order to enhance the interpretability of the parameters actually estimated, for some models.
+Matrices like C1 are known as contrast matrices† and several different types are available in R. The degree of interpretability of some of the contrasts is open to debate. For the C1 given, suppose that parameters μ, α2′ and α3′ are estimated: μ would now be interpretable as the mean for group 1, while α2′ and α3′ would be the differences between the means for groups 2 and 3, and the mean for group 1.
+With all contrast matrices, the contrast matrix itself can be used to transformed back from the parameters actually estimated, to estimates in the original redundant param- eterization. e.g.
+αˆ = C 1 αˆ ′ .
+The contrast approach generalizes easily to models with multiple factors and their
+interactions. Again a simple example makes things clear. Consider the model:
+yi =μ+αj +βk +γjk +εi ifyi fromgroupsjandk
+The unconstrained model matrix for this might have the form X = [1 : Xα : Xβ : Xα.Xβ], where Xα and Xβ are the columns generated by α and β and Xα.Xβ are the columns corresponding to γ, which are in fact generated by element wise multiplication of all possible pairings of the column from Xα and Xβ .
+To make this model identifiable we would choose contrast matrices Cα and Cβ for α and β respectively, and then form the following identifiable model matrix:
+X′ = [1 : XαCα : XβCβ : (XαCα).(XβCβ)]
+† Actually, in much of the literature on linear models the given C1 would not be called a ‘contrast’, as its columns are not orthogonal to 1, but R makes no terminological distinction.
+    
+    48 LINEAR MODELS
+(in this case γ = Cα ⊗ Cβγ′, where ⊗ is the Kronecker product). Some further information can be found in Venables and Ripley (2004).
+1.8.3 Likelihood
+The theory developed in section 1.3 is quite sufficient to justify the approach of estimating linear models by least squares, but although it doesn’t directly strengthen the case, it is worth understanding the link between the method of least squares and the method of maximum likelihood, for normally distributed data.
+The basic idea of likelihood is that, given some parameter values, a statistical model allows us to write down the probability, or probability density, of any set of data, and in particular of the set actually observed. In some sense, parameter values which cause the model to suggest that the observed data are probable, are more ‘likely’ than parameter values that suggest that what was observed was improbable. In fact it seems reasonable to use as estimates of the parameters, those values which maximize the probability of the data according to the model: these are the ‘maximum likelihood estimates’ of the parameters.
+In the next chapter the properties of maximum likelihood estimation will be covered in greater detail. For the moment consider the likelihood for the parameters of a linear model. According to the model, the joint p.d.f. of the response data is
+fβ,σ2 (y) = (2πσ2)−n/2e−∥y−Xβ∥2/(2σ2).
+Now suppose that the observed data are plugged into this expression and it is treated
+as a function of its parameters β and σ2. This is known as the likelihood function L(β,σ2) = (2πσ2)−n/2e−∥y−Xβ∥2/(2σ2),
+and it is important to note that y is now representing the actual observed data, rather than arguments of a p.d.f. To estimate the parameters, L should be maximized w.r.t. them, and it is immediately apparent that the value of β maximizing L will be the value minimizing
+S = ∥y − Xβ∥2 (irrespective of the value of σ2 or its MLE).
+In itself this connection is of little interest, but it suggests how to estimate linear models when data do not meet the constant variance assumption, and may not even be independent. To this end consider the linear model
+μ=Xβ, y∼N(μ,Vσ2)
+    
+    FURTHER LINEAR MODELLING THEORY 49 where V is any positive definite‡ matrix. In this case the likelihood for β is
+1 −(y−Xβ)T V−1 (y−Xβ)/(2σ2 ) L(β) =  (2πσ2)n|V|e
+and if V is known then maximum likelihood estimation of the β is achieved by minimizing
+Sv = (y − Xβ)TV−1(y − Xβ).
+In fact the likelihood approach can be taken further, since if V depends on unknown parameters then these too can be estimated by maximum likelihood estimation: this is what is done in linear mixed modelling, which is discussed in Chapter 6.
+1.8.4 Non-independent data with variable variance
+In the previous section a modified least squares criterion was developed for linear model parameter estimation, when data follow a general multivariate normal distri- bution, with unknown mean and covariance matrix known to within a constant of proportionality. It turns out to be possible to transform this fitting problem so that it has exactly the form of the fitting problem for independent data with constant vari- ance. Having done this, all inference about the model parameters can proceed using the methods of section 1.3.
+First let L be any matrix such that LTL = V: a Choleski decomposition is usually the easiest way to obtain this (see section A.7). Then
+  (y − Xβ)TV−1(y − Xβ)
+and this least squares objective can be minimized by the methods already met (i.e.
+Sv =
+= (y − Xβ)TL−1L−T(y − Xβ)
+= ∥L−Ty − L−TXβ∥2,
+form a QR decomposition of L−TX etc.)
+It is not just the model fitting that carries over from the theory of section 1.3. Since L−Ty is a linear transformation of a normal random vector, it must have a multi- variate normal distribution, and it is easily seen that E(L−Ty) = L−TXβ while the covariance matrix of L−Ty is
+VL−Ty = L−TVL−1σ2 = L−TLTLL−1 = Iσ2
+i.e. y ∼ N(L−TXβ,Iσ2). In other words, the transformation has resulted in a new linear modelling problem, in which the response data are independent normal random variables with constant variance: exactly the situation which allows all the results from section 1.3 to be used for inference about β.
+‡ A matrix A is positive definite if xTAx > 0 for any non zero vector x. Equivalent to this condition is the condition that all the eigenvalues of A must be strictly positive. Practical tests for positive def- initeness are examination of the eigenvalues of the matrix, or (more efficiently) seeing if a Choleski decomposition of the matrix is possible (this must be performed without pivoting, otherwise only pos- itive semi-definiteness is tested): see A.7.
+    
+ 50
+LINEAR MODELS
+0.0 0.2 0.4
+0.6 0.8 1.0
+0.0 0.2 0.4
+0.6 0.8 1.0
+axis 2
+axis 2
+0.0 0.2 0.4 0.6 0.8 1.0
+axis 1
+0.0 0.2
+0.4 0.6 0.8 1.0
+axis 1
+Figure 1.11 Fitting a linear model to data that are not independent/constant-variance. The example is a straight line through the origin fit to two data. In both panels the response data values give the co-ordinates of the point • and the straight line is the vector defining the ‘model subspace’ (the line along which the fitted values could lie). It is assumed that the data arise from the multivariate normal distribution contoured in the left panel. The right panel shows the fitting problem after transformation in the manner described in section 1.8.4: the response data and model subspace have been transformed and this implies a transformation of the distribution of the response. The transformed data are an observation from a radially symmetric multivariate normal density.
+Figure 1.11 illustrates the geometry of the transformation for a simple linear model,
+yi=βxi+εi, εi∼N(0,V),
+whereyT = (.6,.7),xT = (.3,.7),β = .6andV =   .6 .5  .Theleftpanel
+.5 1.1
+shows the geometry of the original fitting problem, while the right panel shows the
+geometry of the transformed fitting problem.
+1.8.5 AIC and Mallow’s statistic,
+Consider again the problem of selecting between nested models, which is usually equivalent to deciding whether some terms from the model should simply be set to zero. The most natural way to do this would be to select the model with the smallest residual sum of squares or largest likelihood, but this is always the largest model under consideration. Model selection methods based on F-ratio or t-tests address this problem by selecting the simplest model consistent with the data, where consistency is judged using some significance level (threshold p-value), that has to be chosen more or less arbitrarily.
+In this section an alternative approach is developed, based on the idea of trying to select the model that should do the best job of predicting μ ≡ E(y), rather than
+    FURTHER LINEAR MODELLING THEORY 51
+the model that gets as close as possible to y. This can be approached from a least squares or likelihood perspective, with the latter being slightly more satisfactory in the handling of the parameter σ2.
+As discussed in section 1.8.3, a linear model is estimated by finding the βi values maximizing
+21 22 
+f(β,σ )=  √2πσ n exp −∥y−Xβ∥ /(2σ ), (1.12)
+and generally, the more parameters we allow the model, the more closely it will fit y, even if that means fitting the noise component of y. This over-fitting problem would be solved if we could find the model maximizing
+ˆ21 ˆ22 
+K(β, σ ) =  √2πσ n exp −∥μ − Xβ∥ /(2σ ) . (1.13)
+Consider adding terms to the model, so that at some point in the sequence of models the ‘true’ model appears. If we really knew μ then (1.13) would reach a maximum once the model was just large enough to correctly represent μ, and would then stay at that maximum if further (redundant) terms were added. If the model had in fact been estimated by maximizing (1.12) then we would still expect (1.13) to be maximized once the true model is reached, but to decline thereafter, as the model predictions move away from μ, in order to fit the noise component of y increasingly well.
+Clearly (1.13) can not be used directly since μ is unknown, but it can be estimated. First consider the norm in (1.13):
+∥μ−Xβˆ∥2 = ∥μ−Ay∥2 =∥y−Ay−ε∥2
+= ∥y−Ay∥2 +εTε−2εT(y−Ay)
+= ∥y−Ay∥2 +εTε−2εT(μ+ε)+2εTA(μ+ε)
+= ∥y−Ay∥2 −εTε−2εTμ+2εTAμ+2εTAε.
+Now, E(εTε) = E( i ε2i ) = nσ2, E(εTμ) = E(εT)μ = 0 and E(εTAμ) = E(εT)Aμ = 0. The final term is slightly trickier, but using the fact that a scalar is its own trace:
+E[tr  εTAε ] = E[tr  AεεT ] = tr  AE[εεT]  = tr (AI) σ2 = tr (A) σ2. Hence
+E ∥μ−Xβˆ∥2 =E ∥μ−Ay∥2 =E ∥y−Ay∥2 −nσ2 +2tr(A)σ2, (1.14)
+    which can be estimated by
+ 222 ∥μ−Xβˆ∥2 =∥y−Ay∥ −nσ +2tr(A)σ .
+Hence an appropriate estimate of κ = log K is
+κ ̃=−nlog √2πσ − 1 ∥y−Xβˆ∥2 +n/2−tr(A). 2σ2
+(1.15)
+      
+    52 LINEAR MODELS i.e. if l is the log likelihood of the model then
+κ ̃ = l ( βˆ , σ 2 ) − p + n / 2
+where p = tr (A) is the number of identifiable model parameters. This will be max-
+imized by whatever model minimizes
+κ = 2 ( − l ( βˆ , σ 2 ) + p )
+which is known as Akaike’s information criteria (Akaike, 1973) or AIC (the factor
+of -2 is conventional, for reasons that will become apparent in the next chapter). The above derivation assumes that σ2 is known, whereas, in fact, it is usually esti-
+mated. If we use the MLE , σˆ2 = ∥y − Xβˆ∥2/n, then the AIC criteria becomes κ = 2 ( − l ( βˆ , σˆ 2 ) + p ) + 2
+where the extra 2 serves to penalize the extra free parameter in the model: justifi- cation of this is postponed until section 2.4.7, where AIC is derived for any model estimated by likelihood maximization.
+Notice how the above derivation does not involve any assumption that directly im- plies that the models to be compared must be nested: however a more detailed exam- ination of the comparison of models by AIC would suggest that the comparison will be more reliable for nested models, since in that case some of the neglected terms in the approximation of κ cancel. Notice also that if the true model is not in the set of models under consideration then the properties of (1.13) will be less ideal. Indeed in this case (1.13) would itself tend to favour more complex models, since it would be impossible to match μ exactly: as sample size increases and estimates become more precise, this tendency starts to overcome the negative effects of overfitting and leads to more complex models being selected. This tendency for AIC to favour more complex models with increasing sample size is often seen in practice: presumably because the true model is rarely in the set of candidate models.
+If we were to start from a least squares perspective then we could simply try to estimate ∥μ − Xβˆ∥2/σ2. Re-using the derivations given above, this results in an estimate known as Mallow’s Cp (Mallows, 1973)
+Cp =∥y−Xβˆ∥2/σ2 +2p−n.
+Model selection by Cp minimization, works well if σ2 is known, but for most models σ2 must be estimated, and using the estimate derived from the model fit has the unfortunate consequence that Cp ceases to depend on which model has been fitted, in any meaningful way. To avoid this, σ2 is usually fixed at the estimate given by the fit of the largest candidate model (unless it really is known, of course).
+1.8.6 Non-linear least squares
+Some non-linear models can be estimated by iterative approximation by a linear model. At each iterate the fitted approximating linear model suggests improved pa-
+    
+    FURTHER LINEAR MODELLING THEORY
+53
+0.0 0.5 1.0 1.5 2.0
+y1’
+0.0 0.5 1.0 1.5 2.0
+y1
+                      a
+b
+c
+                     0.0 0.5 1.0 1.5 2.0
+y1
+0.0 0.5 1.0 1.5 2.0
+y1’’
+0.0 0.5 1.0 1.5 2.0
+y1
+0.0 0.5 1.0 1.5 2.0
+y1’’
+                     d
+e
+f
+                     Figure1.12 GeometryofasingleiterationoftheGaussNewtonapproachtonon-linearmodel fitting. The example is fitting the model E(yi) = exp(βxi) to xi, yi data (i = 1, 2). (a) plots y2 against y1 (•) with the curve illustrating the possible values for the expected values of the response variable: as the value of β changes E(y) follows this curve - the ‘model manifold’. An initial guess at the parameter gives the fitted values plotted as  . (b) The tangent space to the model manifold is found and illustrated by the dashed line. (c) The model, tangent and data are linearly translated so that the current estimate of the fitted values is at the origin. (d) The model, tangent and data are linearly translated so that Jβˆ[k] gives the location of the current estimate of the fitted values. (e) βˆ[k+1] is estimated by finding the closest point in the tangent space to the response data, by least squares. (f) shows the original model and data, with the next estimate of the fitted values, obtained using βˆ[k+1]. The steps can now be repeated until the estimates converge.
+rameter estimates, and at convergence the parameter estimates are least squares esti- mates. In addition, the approximating linear model at convergence can be used as the basis for approximate inference about the parameters.
+Formally, consider fitting the model:
+E(y) ≡ μ = f(β)
+to response data y, when f is a non-linear vector valued function of β. An obvious fitting objective is:
+n
+S =  {yi − fi(β)}2 = ∥y − f(β)∥2
+i=1
+    y2’’
+y2
+0.0 0.5 1.0 1.5 2.0
+0.0 0.5
+1.0 1.5 2.0
+y2’’
+y2
+0.0 0.5 1.0 1.5 2.0
+0.0 0.5
+1.0 1.5 2.0
+y2
+y2’
+0.0 0.5 1.0 1.5 2.0
+0.0 0.5
+1.0 1.5 2.0
+    54 LINEAR MODELS
+and if the functions, fi, are sufficiently well behaved then this non-linear least squares problem can be solved by iterative linear least squares. To do this, we start from a guess at the best fit parameters, βˆ[k], and then take a first order Taylor expansion of fi around βˆ[k] so that the fitting objective becomes
+S ≈ S[k] = ∥y − f(βˆ[k]) + J[k]βˆ[k] − J[k]β∥2
+where J[k] is the ‘Jacobian’ matrix such that J[k] = ∂fi/∂βj (derivatives evaluated
+ij
+at βˆ[k], of course). Defining a vector of pseudodata,
+z[k] = y − f(βˆ[k]) + J[k]βˆ[k], the objective can be re-written
+S[k] = ∥z[k] − J[k]β∥2,
+and, since this is a linear least squares problem, it can be minimized with respect to β to obtain an improved estimated parameter vector βˆ[k+1]. If f(β) is not too non- linear then this process can be iterated until the βˆ[k] sequence converges, to the final least squares estimate βˆ.
+Figure 1.12 illustrates the geometrical interpretation of this method. Because the non-linear model is being approximated by a linear model, large parts of the theory of linear models carry over as approximations in the current context. For example, under the assumption of equal variance, σ2, and independence of the response variable, the covariance matrix of the parameters is simply: (JTJ)−1σ2, where J is evaluated at convergence.
+If f is sufficiently non linear that convergence does not occur, then a simple ‘step reduction’ approach will stabilize the fitting. The vector ∆ = βˆ[k+1] − βˆ[k] is treated as a trial step. If βˆ[k+1], does not decrease S, then trial steps βˆ[k] + α∆ are taken, with ever decreasing α, until S does decrease (of course, 0 < α < 1). Geometrically, this is equivalent to performing an updating step by fitting to the average yα + (1 − α)f(β[k]), rather than original data y: viewed in this way it is clear that for small enough α, each iteration must decrease S, until a minimum is reached. It is usual to halve α each time that a step is unsuccessful, and to start each iteration with twice the α value which finally succeeded at the previous step (or α = 1 if this is less). If it is necessary to set α < 1 at the final step of the iteration then it is likely that inference based on the final approximating linear model will be somewhat unreliable.
+1.8.7 Further reading
+The literature on linear models is rather large, and there are many book length treat- ments. For a good introduction to linear models with R, see Faraway (2004). Other sources on the linear modelling functionality in R are Chambers (1993) and Ven- ables and Ripley (2003). Numerical estimation of linear models is covered in Golub and van Loan (1996, chapter 5). Dobson (2001), McCullagh and Nelder (1989) and Davison (2003) also consider linear models as part of broader treatments. For R itself see R Development Core Team (2005).
+    
+    EXERCISES 55
+1.9 Exercises
+1. 4 car journeys in London of length 1, 3, 4 and 5 kilometres took 0.1, 0.4, 0.5 and 0.6 hours respectively. Find a least squares estimate of the mean journey speed.
+2. Given n observations xi,yi, find the least squares estimate of β in the linear model:yi =μi +εi,μi =β.
+3. Which, if any, of the following common linear model assumptions are required for βˆ to be unbiased: (i) The Yi are independent, (ii) the Yi all have the same variance, (iii) the Yi are normally distributed?
+4. Write out the following three models in the form y = Xβ + ε, ensuring that all the parameters left in the written out model are identifiable. In all cases y is the response variable, ε the residual “error” and other greek letters indicate model parameters.
+(a) The ‘balanced one-way ANOVA model’:
+yij =α+βi +εij
+where i = 1...3 and j = 1...2.
+(b) Amodelwithtwoexplanatoryfactorvariablesandonly1observationpercom-
+bination of factor variables:
+yij = α + βi + γj + εij
+The first factor (β) has 3 levels and the second factor has 4 levels.
+(c) A model with two explanatory variables: a factor variable and a continuous
+variable, x.
+yi =α+βj +γxi +εi ifobs.iisfromfactorlevelj
+Assume that i = 1 . . . 6, that the first two observations are for factor level 1 and the remaining 4 for factor level 2 and that the xi’s are 0.1, 0.4, 0.5, 0.3, 0.4 and 0.7.
+5. Consider some data for deformation (in mm), yi of 3 different types of alloy, under different loads (in kg), xi. When there is no load, there is no deformation, and the deformation is expected to vary linearly with load, in exactly the same way for all three alloys. However, as the load increases the three alloys deviate from this ideal linear behaviour in slightly different ways, with the relationship becoming slightly curved (possibly suggesting quadratic terms). The loads are known very precisely, so errors in xi’s can by ignored, whereas the deformations, yi are subject to larger measurement errors, that do need to be taken into account. Define a linear model suitable for describing these data, assuming that the same 6 loads are applied to each alloy, and write it out in the form y = Xβ + ε.
+6. Show that for a linear model with model matrix X, fitted to data y, with fitted values μˆ,
+X T μˆ = X T y .
+What implication does this have for the residuals of a model which includes an intercept term?
+    
+    56 7.
+8.
+LINEAR MODELS
+Equation (1.8) in section 1.3.3 gives an unbiased estimator of σ2, but in the text unbiasedness was only demonstrated assuming that the response data were nor- mally distributed. By considering E(ri2) and the independence of the elements of r, show that the estimator (1.8) is unbiased whatever the distribution of the response, provided that the response data are independent with constant variance.
+The MASS library contains a data frame Rubber on wear of tyre rubber. The response loss measures rubber loss in grammes per hour. The predictors are tens, a measure of the the tensile strength of the rubber with units of kgm−2, and hard, the hardness of the rubber in Shore§ units. Modelling interest focuses on predicting wear from hardness and tensile strength.
+(a) Starting with a model in which loss is a polynomial function of tens and hard, with all terms up to 3rd order present, perform backwards model se- lection, based on hypothesis testing, to select an appropriate model for these data.
+(b) Note the AIC scores of the various models that you have considered. It would also be possible to do model selection based on AIC, and the step function in R provides a convenient way of doing this. After reading the step help file, use it to select an appropriate model for the loss data, by AIC.
+(c) Use the contour and predict functions in R to produce a contour plot of model predicted loss, against tens and hard. You may find functions seq and rep helpful, as well.
+9. The R data frame warpbreaks gives the number of breaks per fixed length of wool during weaving, for two different wool types, and 3 different weaving tensions. Using a linear model, establish whether there is evidence that the effect of tension on break rate is dependent on the type of wool. If there is, use interaction.plot to examine the nature of the dependence.
+10. This question is about modelling the relationship between stopping distance of a car and its speed at the moment that the driver is signalled to stop. Data on this are provided in R data frame cars. It takes a more or less fixed ‘reaction time’ for a driver to apply the car’s brakes, so that the car will travel a distance directly proportional to its speed before beginning to slow. A car’s kinetic energy is proportional to the square of its speed, but the brakes can only dissipate that energy, and slow the car, at a roughly constant rate per unit distance travelled: so we expect that once braking starts, the car will travel a distance proportional to the square of its initial speed, before stopping.
+(a) Given the information provided above, fit a model of the form
+disti = β0 + β1speedi + β2speed2i + εi
+to the data in cars, and from this starting model, select the most appropriate model for the data using both AIC, and hypothesis testing methods.
+(b) From your selected model, estimate the average time that it takes a driver to apply the brakes (there are 5280 feet in a mile).
+§ measures hardness as the extent of the rebound of a diamond tipped hammer, dropped on the test object.
+    
+    EXERCISES 57
+(c) When selecting between different polynomial models for a set of data, it is often claimed that one should not leave in higher powers of some continuous predictor, while removing lower powers of that predictor. Is this sensible?
+11. This question relates to the material in sections 1.3.1 to 1.3.4, and it may be use- ful to review sections A.5 and A.6 of Appendix A. R function qr computed the QR decomposition of a matrix, while function qr.qry provides a means of effi- ciently pre-multiplying a vector by the Q matrix of the decomposition and qr.R extracts the R matrix. See ?qr for details.
+The question concerns calculation of estimates and associated quantities for the linearmodel,yi =Xiβ+εi,wheretheεi arei.i.d.N(0,σ2).
+(a) Write an R function which will take a vector of response variables, y, and a model matrix, X, as arguments, and compute the least squares estimates of associated parameters, β, based on QR decomposition of X.
+(b) Test your function by using it to estimate the parameters of the model
+disti = β0 + β1speedi + β2speed2i + εi for the data found in R data frame cars. Note that:
+X <- model.matrix(dist  ̃ speed + I(speedˆ2),cars)
+will produce a suitable model matrix. Check your answers against those pro- duced by the lm function.
+(c) Extend your function to also return the estimated standard errors of the pa- rameter estimators, and the estimated residual variance. Again, check your an- swers against what lm produces, using the cars model. Note that solve(R) or more efficiently backsolve(R,diag(ncol(R))) will produce the in- verse of an upper triangular matrixR.
+(d) UseRfunctionpttoproducep-valuesfortestingthenullhypothesisthateach βi is zero (against a two sided alternative). Again check your answers against a summary of an equivalent lm fit.
+(e) Extend your fitting function again, to produce the p-values associated with a sequential ANOVA table for your model (see section 1.3.4). Again test your results by comparison with the results of applying the anova function to an equivalent lm fit. Note that pf is the function giving the c.d.f. of F-distributions.
+12. RdataframeInsectSprayscontainscountsofinsectsineachofseveralplots. The plots had each been sprayed with one of 6 insecticides. A model for these data might be
+yi = μ + βj if ith observation is for spray j.
+A possible identifiability constraint for this model is that  j βj = 0. In R, con- struct the rank deficient model matrix, for this model, and the coefficient matrix for the sum to zero constraint on the parameters. Using the methods of section 1.8.1, impose the constraint via QR decomposition of the constraint matrix, fit the model (using lm with your constrained model matrix), and then obtain the esti- mates of the original parameters. You will need to use R functions qr, qr.qy
+    
+    58
+13.
+LINEAR MODELS
+and qr.qty as part of this. Confirm that your estimated parameters meet the constraint.
+TheRdataframetreescontainsdataonHeight,GirthandVolumeof31 felled cherry trees. A possible model for these data is
+Volumei = β1Girthβ2Heightβ3 + εi, ii
+which can be fitted by non-linear least squares using the method of section 1.8.6.
+(a) Write an R function to evaluate (i) the vector of E(Volume) estimates given a vector of βj values and vectors of Girth and Height measurements and (ii) the 31 × 3 ‘Jacobian’ matrix with (i, j)th element ∂E(Volumei)/∂βj , re- turning these in a two item list. (Recall that ∂xy/∂y = xy log(x).)
+(b) Write R code to fit the model, to the trees data, using the method of section 1.8.6. Starting values of .002, 2 and 1 are reasonable.
+(c) Evaluate approximate standard error estimates for your estimated model pa- rameters.

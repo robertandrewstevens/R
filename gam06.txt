@@ -1,0 +1,1434 @@
+CHAPTER 6: Mixed models
+
+A different approach to estimation and inference with GAMs is based on represent- ing GAMs as mixed models with the smooth terms as random effects. To facilitate the explanation of this approach, this chapter first introduces linear mixed models, starting with simple mixed models for balanced experimental data and then moving on to general linear mixed models. Note that Pinheiro and Bates (2000) offers fuller coverage of linear mixed modelling in R, while Ruppert et al. (2003) includes a clear explanation of smoothers as mixed model components.
+
+In general, linear mixed models extend the linear model
+
+y = Xβ + ε, ε ∼ N(0, Iσ2) 
+
+to
+
+y=Xβ+Zb+ε, b∼N(0,ψ), ε∼N(0,Λσ2)
+
+where random vector, b, contains random effects, with zero expected value and co- variance matrix ψ, and Z is a model matrix for the random effects. Λ is a positive definite matrix, of simple structure, which is typically used to model residual auto- correlation: its elements are usually determined by some simple model, with few (or no) unknown parameters. Often Λ is simply the identity matrix. This extension al- lows the model a more complex stochastic structure than the ordinary linear model, and, in particular, implies that the elements of the response vector, y, are no longer independent.
+
+6.1 Mixed models for balanced data
+
+Some details of the general, likelihood based, approach to mixed modelling require an understanding of linear mixed models for balanced data, so this section will briefly cover this topic. First consider an example.
+
+6.1.1 A motivating example
+
+Plant leaves have tiny holes, called ‘stomata’ through which they take up air, but also lose water. Most non-tropical plants photosynthesize in such a way that, on sunny days, they are limited by how much carbon dioxide they can obtain through these stomata. The ‘problem’, for a plant, is that if its stomata are too small, it will not be able to get enough carbon dioxide, and if they are too large it will lose too much water on sunny days. Given the importance of this to such plants, it seems likely that stomatal size will depend on the concentration of carbon dioxide in the atmosphere. This may have climate change implications, if increasing the amount of CO2 in the atmosphere causes plants to release less water: water vapour is the most important green house gas.
+
+Consider an experiment [1] in which tree seedlings are grown under two levels of car- bon dioxide concentration, with 3 trees assigned to each treatment, and suppose that after 6 months growth, stomatal area is measured at each of 4 random locations on each plant (the sample sizes here are artificially small). Figure 6.1 shows the experi- mental layout schematically.
+
+Figure 6.1 Schematic diagram of the CO2 experiment.
+
+The wrong approach: a fixed effects linear model
+
+A model of these data should include a (2 level) factor for CO2 treatment, but also a (6 level) factor for individual tree, since we have multiple measurements on each tree and must expect some variability in stomatal area from tree to tree. So a suitable linear model is
+
+yi =αj +βk +εi ifobservationiisforCO2 levelj, plantk,
+
+where yi is the ith stomatal area measurement, αj is the population mean stomatal area at CO2 level j, βk is the deviation of tree k from that mean and the εi are i.i.d. N(0,σ2) random variables. Now if this is a fixed effects model, we have two problems:
+
+1. Theαj’sandβk’sarecompletelyconfounded.Treesare‘nested’withintreatment, with 3 trees in one treatment and 3 in the other: any number you like could be added to α1 and simultaneously subtracted from β1, β2 and β3, without changing the model predictions at all, and the same goes for α2 and the remaining βk’s.
+
+2. Wereallywanttolearnabouttreesingeneral,butthisisnotpossiblewithamodel in which there is a fixed effect for each particular tree: we cannot use the model to predict what happens to a tree other than the 6 in the experiment.
+
+The following R session illustrates problem 1. First compare models with and with- out the tree factor (βk’s):
+
+> m1 <- lm(area  ̃ CO2 + tree,stomata) 
+> m0 <- lm(area  ̃ CO2,stomata)
+> anova(m0,m1)
+Analysis of Variance Table
+Model 1: area  ̃ CO2
+Model 2: area  ̃ CO2 + tree
+Res.Df RSS Df Sum of Sq F Pr(>F)
+1 22 2.1348
+2 18 0.8604 4 1.2744 6.6654 0.001788 **
+
+Clearly, there is strong evidence for tree to tree differences, which means that with this model we can not tell wether CO2 had an effect or not. To re-emphasize this point, here is what happens if we attempt to test for a CO2 effect:
+
+> m2 <- lm(area  ̃ tree,stomata) 
+> anova(m2,m1)
+Analysis of Variance Table
+Model 1: area  ̃ tree
+Model 2: area  ̃ CO2 + tree
+Res.Df RSS Df Sum of Sq F Pr(>F) 
+1 18 0.8604
+2 18 0.8604 0 -2.220e-16
+
+The confounding of the CO2 and tree factors, means that the models being compared here are really the same model: as a result, they give the same residual sum of squares and have the same residual degrees of freedom — ‘comparing’ them tells us nothing about the effect of CO2.
+
+In many ways this problem comes about because our model is simply too flexible. Individual tree effects are allowed to take any value whatsoever, which amounts to saying that each individual tree is completely different to every other individual tree: e.g. having results for 6 trees will tell us nothing whatsoever about a 7th. This is not a sensible starting point for a model aimed at analyzing data like these. We really expect trees of a particular species to behave in broadly similar ways, so that a rep- resentative (preferably random) sample of trees from the wider population of such trees, will allow us to make inferences about that wider population of trees. Treating the individual trees, not as completely unique individuals, but as a random sample from the target population of trees, will allow us to estimate the CO2 effect, and to generalize beyond the six trees in the experiment.
+
+The right approach: a mixed effects model
+
+The key to a establishing whether CO2 has an effect is to recognize that the CO2 factor and tree factors are different in kind. The CO2 effects are fixed characteristics of the whole population of trees that we are trying to learn about. In contrast, the tree effect will vary randomly from tree to tree in the population. We are not pri- marily interested in the values of the tree effect for the particular trees used in the experiment: if we had used a different 6 trees these effects would have taken differ- ent values anyway. But we can not simply ignore the tree effect without inducing dependence between the response observations (area), and hence violating the in- dependence assumption of the linear model. In this circumstance, it makes sense to model the distribution of tree effects across the population of trees, and to suppose that the particular tree effects that occur in the experiment are just independent ob- servations from this distribution. That is, the CO2 effect will be modelled as a fixed effect, but the tree effect will be modelled as a random effect. Here is a model set up in this way:
+
+yi =αj +bk +εi ifobservationiisforCO2 leveljplantk, (6.1)
+
+where bk ∼ N(0,σb2), εi ∼ N(0,σ2) and all the bj and εi are mutually independent random variables. Now testing for tree effects can proceed exactly as it did in the fixed effects case, by comparing the least squares fits of models with and without the tree effects. But this mixed effects model also lets us test CO2 effects, whether or not there is evidence for a tree effect.
+
+All that is required is to average the data at each level of the random effect, i.e. at each tree. For balanced data, such as we have here, the key feature of a mixed effects model is that this ‘averaging out’ of a random effect, automatically implies a simpli- fied mixed effects model for the aggregated data: the random effect is absorbed into the independent residual error term. It is easy to see that the model for the average stomatal area per tree must be,
+
+y ̄k =αj +ek ifplantkisforCO2 levelj, (6.2) 
+
+wheretheek areindependentN(0,σb2 +σ2/4)randomvariables.
+
+Now it is a straightforward matter to test for a CO2 effect in R. First aggregate the data for each tree:
+
+> st <- aggregate(data.matrix(stomata),
++       by=list(tree=stomata$tree),mean)
+> st$CO2 <- as.factor(st$CO2);st
+  tree     area CO2 tree
+1 1 1.623374
+2 2 1.598643
+3 3 1.162961
+4 4 2.789238
+5 5 2.903544
+6 6 2.329761
+1    1
+1    2
+1    3
+2    4
+2    5
+2    6
+
+and then fit the model implied by the aggregation.
+
+> m3 <- lm(area ̃CO2,st)
+> anova(m3)
+Analysis of Variance Table
+Response: area
+Df Sum Sq Mean Sq F value Pr(>F)
+CO2 1 2.20531 2.20531 27.687 0.006247 ** Residuals 4 0.31861 0.07965
+
+There is strong evidence for a CO2 effect here, and we would now proceed to ex- amine the estimate of this fixed effect (e.g. using summary(m3)). Usually, with a mixed model, the variances of the random effects are of more interest than the effects themselves, so in this example σb2 should be estimated.
+
+Let RSSi stand for the residual sum of squares for model i. From the usual theory of linear models we have that:
+
+σˆ 2 = R S S 1 / 1 8
+
+(RSS1 is the residual sum of squares from fitting (6.1)) and
+
+2 2
+σb +σ /4=RSS3/4
+
+(RSS3 is the residual sum of squares from fitting (6.2)). Both estimators are unbiased. Hence, an unbiased estimator for σb2 is
+
+σˆb2 = RSS3/4 − RSS1/72 This can easily be evaluated in R.
+
+> summary(m3)$sigmaˆ2 - summary(m1)$sigmaˆ2/4 
+[1] 0.06770177
+
+6.1.2 General principles
+
+To see how the ideas from the previous section generalize, consider data from a designed experiment and an associated linear mixed model for the data, in which the response variable depends only on factor variables and their interactions (which may be random or fixed). Assume that the data are balanced with respect to the model, meaning that for each factor or interaction in the model, the same number of data have been collected at each of its levels. In this case:
+
+• Aggregateddata,obtainedbyaveragingtheresponseateachlevelofanyfactoror interaction, will be described by a mixed model, derived from the original mixed model by the averaging process.
+
+• Models for different aggregations will enable inferences to be made about differ- ent fixed and random factors, using standard methods for ordinary linear models. Note that not all aggregations will be useful, and the random effects themselves can not be ‘estimated’ in this way.
+
+• The variances of the random effects can be estimated from combinations of the the usual residual variance estimates from models for different aggregations.
+
+These principles are useful for two reasons. Firstly, the classic mixed model analy- ses for designed experiments can be derived using them. Secondly, they provide a straightforward explanation for the degrees of freedom of the reference distributions used in mixed model hypothesis testing: the degrees of freedom are always those that apply to the aggregated model appropriate for testing hypotheses about the ef- fect concerned. For example, in the CO2 analysis, the hypothesis tests about the CO2 effect were conducted with reference to an F1,4 distribution, with these degrees of freedom being those appropriate to the aggregated model, used for the test.
+
+To illustrate and reinforce these ideas, two further simple examples of the analysis of ‘standard designs’ will be covered, before returning to the general mixed models that are of more direct relevance to GAMs.
+
+6.1.3 A single random factor
+
+Consider an experimental design in which you have J measurements from each of I units, illustrated schematically in figure 6.2. Suppose that we are interested in estab- lishing whether there are differences between the units, but are not really interested in the individual unit effects: rather in quantifying how much variability can be as- cribed to differences between units. This would suggest using a random effect term for units.
+
+Figure 6.2 Schematic illustration of the balanced one-way experimental layout discussed in section 6.1.3. Rectangles are experimental units and •’s indicate measurements.
+
+A concrete example comes from animal breeding. For a breeding program to be successful, we need to know that variability in the trait, which is to be modified by the program, has a substantial enough genetic component that we can expect to alter it by selective breeding. Consider a pig breeding experiment in which I pregnant sows are fed a standard diet, and the fat content of J of each of their piglets is measured.
+
+The interesting questions here are: is there evidence for litter to litter variability in fat content (which would be consistent with genetic variation in this trait) and if so how large is this component, in relation to the piglet to piglet variability within a litter? Notice here that we are not interested in how piglet fat content varies from particular sow to particular sow in the experiment, but rather in the variability between sows in general. This suggests using a random effect for sow, in a model for such data.
+
+So, a suitable model is
+
+yij =α+bi +εij, (6.3) 
+
+where α is the fixed parameter for the population mean, i = 1...I, j = 1...J, bi ∼N(0,σb2),εij ∼N(0,σ2)andallthebi andεij termsaremutuallyindependent.
+
+The first question of interest is whether σb2 > 0, i.e. whether there is evidence that the factor variable contributes to the variance of the response. Formally we would liketotestH0 : σb2 = 0againstH1 : σb2 > 0.Todothis,simplynotethatthenull hypothesis is exactly equivalent to H0 : bi = 0 ∀ i, since both formulations of H0 imply that the data follow,
+
+yij =α+εij. (6.4) 
+
+Hence we can test the null hypothesis by using standard linear modelling methods to
+compare (6.4) to (6.3) by using an F-ratio test (ANOVA). 
+
+Fitting (6.3) to the data will also yield the usual estimate of σ2,
+
+σˆ2 = RSS1/(n − I),
+
+where RSS1 is the residual sum of squares from fitting the model to data, n = IJ is the number of data, and n − I is the residual degrees of freedom from this model fit.
+
+So far the analysis with the mixed model has been identical to what would have been done with a fixed effects model, but now consider estimating σb2. The ‘obvious’ method of just using the sample variance of the ˆbi’s, ‘estimated’ by least squares, is not to be recommended, as such estimators are biased. Instead we make use of the model that results from averaging at each level of the factor:
+
+1  J
+y ̄ i · = α + b i + J ε i j .
+j=1 
+
+Now define a new set of I random variables,
+
+1  J
+ei = bi + J εij.
+j=1
+
+The ei’s are clearly mutually independent, since their constituent random variables are independent and no two ei’s share a constituent random variable. They are also zero mean normal random variables, since each is a sum of zero mean normal random variables. It is also clear that
+
+v a r ( e i ) = σ b2 + σ 2 / J .
+      
+Hence, the model for the aggregated data becomes,
+
+y ̄ i · = α + e i , ( 6 . 5 )
+
+where the ei are i.i.d. N(0,σb2 + σ2/J) random variables. If RSS2 is the residual sum of squares when this model is fitted by least squares, then the residual variance estimate gives
+
+RSS2/(I − 1) = σˆb2 + σˆ2/J
+
+Re-arrangement implies that
+
+σˆb2 = RSS2/(I − 1) − σˆ2/J 
+
+is an unbiased estimator of σb2.
+
+Now consider a practical industrial example. An engineering test for longitudinal stress in rails, involves measuring the time it takes certain ultrasonic waves to travel along the rail. To be a useful test, engineers need to know the average travel time for rails, and the variability to expect between rails, as well as the variability in the mea- surementprocess.TheRaildataframeavailablewithR packagenlmeprovides 3 measurements of travel time for each of 6 randomly chosen rails. This provides an obvious application for model (6.3). First examine the data.
+
+> library(nlme) # load nlme ‘library’, which contains data
+> data(Rail)
+> Rail
+Rail travel 1 1 55 2 1 53 3 1 54 4 2 26 5 2 37 ... ... 17 6 85 18 6 83
+# load data
+
+Now fit model (6.3) as a fixed effects model, and use this model to test H0 : σb2 = 0, i.e. to test for evidence of differences between rails.
+
+> m1 <- lm(travel  ̃ Rail,Rail) 
+> anova(m1)
+Analysis of Variance Table
+Response: travel
+          Df Sum Sq Mean Sq F value
+Pr(>F) Rail 5 9310.5 1862.1 115.18 1.033e-09 ***
+Residuals 12 194.0 16.2
+---
+Signif. codes: 0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+So there is strong evidence to reject the null hypothesis and accept rail to rail differ- ences as real. As we saw theoretically, so far the analysis does not differ from that for a fixed effects model, but to estimate σb2 involves averaging at each level of the ran- dom effect and fitting model (6.5) to the resulting averages. R function aggregate will achieve the required averaging.
+
+> rt <- # average over Rail effect
++ aggregate(data.matrix(Rail),by=list(Rail$Rail),mean) > rt
+  Group.1 Rail   travel
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+1 31.66667
+2 50.00000
+3 54.00000
+4 82.66667
+5 84.66667
+6 96.00000
+
+It is now possible to fit (6.5) and calculate σˆb and σˆ, as described above:
+
+> m0 <- lm(travel  ̃ 1,rt) # fit model to aggregated data 
+> sigb <- (summary(m0)$sigmaˆ2-summary(m1)$sigmaˆ2/3)ˆ0.5 
+> # sigbˆ2 is variance component for rail
+> sig <- summary(m1)$sigma # sigˆ2 is resid. var. component 
+> sigb
+[1] 24.80547
+> sig
+[1] 4.020779
+
+So, there is a fairly large amount of rail to rail variability, whereas the measurement error is relatively small. In this case the model intercept, α, is confounded with the random effects, bj , so α must be estimated from the fit of model (6.5).
+
+> summary(m0)
+Coefficients:
+Estimate Std. Error t value Pr(>|t|) (Intercept) 66.50 10.17 6.538 0.00125 **
+
+Model checking proceeds by looking at residual plots, from the fits to both the orig- inal and the aggregated data, since, approximately, these should look like samples of i.i.d. normal random variables. However there would have to be a really grotesque violation of the normality assumption for the bj ’s, before you could hope to pick it up from examination of 6 residuals.
+
+6.1.4 A model with two factors
+
+Now consider an experiment in which each observation is grouped according to two factors. A schematic diagram of such a design is shown in figure 6.3. Suppose that one factor is to be modelled as a fixed effect and one as a random effect. A typical example is a randomized block design, for an agricultural field trial, testing different fertilizer formulations. The response variable would be yield of the crop concerned, 
+
+Figure 6.3 A schematic diagram of a two factor design of the sort discussed in section 6.1.4, with 3 levels of one factor, 4 levels of another and 5 observations for each combination of factor levels. Note that this diagram is not intended to represent the actual physical layout of any experiment.
+
+assessed by harvesting at the end of the experiment. Because crop yields depend on many uncontrolled soil related factors, it is usual to arrange the experiment in blocks, within which it is hoped that the soil will be fairly homogeneous. Treatments are randomly arranged within the blocks. For example, a field site might be split into 4 adjacent blocks, with 15 plots in each block, each plot being randomly assigned one of five replicates of each of 3 fertilizer treatments. The idea is that differences within blocks should be smaller than differences between blocks — i.e. variability in conditions within a block will be smaller than variability across the whole field. A suitable model for the data would include a block effect, to account for this block to block variability, and since we are not in the least interested in the particular values of the block effects, but view them as representing variability in environment with location, it makes sense to treat them as random effects. The treatments, on the other hand, would be modelled as fixed effects, since the values of the treatment effects are fixed properties of the crop population in general. (If we repeated the experiment in a different location, the particular values of the block effects would be unrelated to the block effects in the first experiment, whereas the fertilizer effects should be very similar.)
+
+So, a model for the kth observation at level i of fixed effect A and level j of random effect B is
+
+yijk =μ+αi +bj +(αb)ij +εijk, (6.6)
+
+where bj ∼ N(0,σb2), (αb)ij ∼ N(0,σα2b) and εijk ∼ N(0,σ2), and all these random variables are mutually independent. μ is the overall population mean, the αi ’s are the I fixed effects for factor A, the bj ’s are the J random effects for factor B, and the (αb)ij’s are the IJ interaction terms for the interaction between the factors (an interaction term involving a random effect must also be a random term).
+
+Testing H0 : σα2b = 0 is logically equivalent to testing H0 : (αb)ij = 0 ∀ ij, in a fixed effects framework. Hence this hypothesis can be tested by the usual ANOVA/F-ratio test comparison of models, with and without the interaction terms. If RSS1 now denotes the residual sum of squares from fitting (6.6) then:
+
+σˆ2 = RSS1/(n − IJ)
+
+In a purely fixed effects context it only makes sense to test for main effects if the interaction terms are not significant, and can hence be treated as zero. In the mixed effects case, because the interaction is a random effect, it is possible to make infer- ences about the main effects whether or not the interaction terms are significant. This can be done by averaging the K data at each level of the interaction. The averaging, together with model (6.6), implies the following model for the averages:
+
+1  K
+y ̄ i j · = μ + α i + b j + ( α b ) i j + K
+ε i j k .
+
+Defining
+
+k=1
+1  K
+eij = (αb)ij + K
+εijk,
+ k=1
+
+it is clear that, since the eij ’s are each sums of zero mean normal random variables,
+they are also zero mean normal random variables. Also, since the (αb)ij’s and εijk’s are mutually independent random variables, and no (αb)ij or εijk is a component of more than one eij , the eij ’s are mutually independent. Furthermore
+
+v a r ( e i j ) = σ α2 b + σ 2 / K
+
+Hence the simplified model is,
+
+y ̄ i j · = μ + α i + b j + e i j , ( 6 . 7 )
+
+where the eij’s are i.i.d. N(0,σα2b + σ2/K) random variables. The null hypothesis, H0 : αi = 0 ∀ i, is tested by comparing the least squares fits of (6.7) and y ̄ij· = μ + bj + eij , in the usual way, by F-ratio testing. Similarly H0 : σb2 = 0 is logically equivalent to H0 : bj = 0 ∀ j, and is hence tested by ANOVA comparison of (6.7) and y ̄ij· = μ + αi + eij. The residual sum of squares for model (6.7), RSS2, say, is useful for unbiased estimation of the residual variance.
+
+σˆ α2 b + σˆ 2 / K = R S S 2 / ( I J − I − J + 1 )
+
+and hence,
+
+σˆα2b =RSS2/(IJ−I−J+1)−σˆ2/K
+
+Averaging the data once more, over the levels of factor B, induces the model
+
+y ̄ · j · = μ + I
+i=1
+1  I
+1  I
+α i + b j + I e i j .
+i=1
+
+Definingμ′ =μ+ 1   αi andej =bj + 1   eij thismodelbecomes
+
+    Ii Ii y ̄ · j · = μ ′ + e j , ( 6 . 8 )
+    
+Figure 6.4 Plots of the Machines data discussed in section 6.1.4.
+
+e j ∼ N ( 0 , σ b2 + σ α2 b / I + σ 2 / ( I K ) )
+
+Hence, if RSS3 is the residual sum of squares of model (6.8), an unbiased estimator of σb2 is given by
+
+σˆb2 = RSS3/(J − 1) − σˆα2b/I − σˆ2/(IK)
+
+Now consider a practical example. The Machines data frame from the nlme pack- age, contains data from an industrial experiment comparing 3 different machine types. The aim of the experiment was to determine which machine type resulted in highest worker productivity. 6 workers were randomly selected to take part in the trial, with each worker operating each machine 3 times (presumably after an appro- priate period of training designed to eliminate any ‘learning effect’ from the data). The following produces the plots shown in figure 6.4
+
+> library(nlme) # only needed in R, not S-PLUS 
+> data(Machines) # only needed in R, not S-PLUS 
+> names(Machines)
+[1] "Worker" "Machine" "score"
+> attach(Machines) # make data available without ‘Machines$’ 
+> par(mfrow=c(1,2)) # split graphics window into two
+> plot(Machine,score)
+> plot(Worker,score)
+
+From the experimental aims, it is clear that fixed machine effects and random worker effects are appropriate. We are interested in the effects of these particular machine types, but are only interested in the worker effects in as much as they reflect vari- ability between workers in the population of workers using this type of machine. Put another way, if the experiment were repeated somewhere else (with different workers) we would expect the estimates of the machine effects to be quite close to the results obtained from the current experiment, while the individual worker effects would be quite different (although with similar variability, we hope). So model (6.6) is appropriate, with αi’s representing the fixed machine effects, bj’s representing the random worker effects, and (αb)ij representing the worker machine interaction (i.e. the fact that different workers may work better on different machines).
+
+Fitting the full model, we can immediately test H0 : σα2 b = 0.
+
+> m1 <- lm(score  ̃ Worker*Machine,Machines) 
+> m0 <- lm(score  ̃ Worker + Machine,Machines) 
+> anova(m0,m1)
+Analysis
+Model 1:
+Model 2:
+Res.Df
+1 46 459.82
+2 36 33.29 10 426.53 46.13 < 2.2e-16 ***
+
+We must accept H1 : σα2b ̸= 0. There is very strong evidence for an interaction between machine and worker. σ2 can now be estimated. . .
+
+>summary(m1)$sigmaˆ2
+[1] 0.9246296
+
+To examine the main effects we can aggregate at each level of the interaction,
+
+Mach <- aggregate(data.matrix(Machines),by=
+        list(Machines$Worker,Machines$Machine),mean)
+Mach$Worker <- as.factor(Mach$Worker) Mach$Machine <- as.factor(Mach$Machine)
+
+and fit model (6.7) to the resulting data.
+
+of Variance Table
+score  ̃ Worker + Machine
+score  ̃ Worker + Machine + Worker:Machine
+RSS Df Sum of Sq F Pr(>F)
+> m0 <- lm(score  ̃ Worker + > anova(m0)
+Analysis of Variance Table Response: score
+Df Sum Sq Mean Sq Worker 5 413.96 82.79 Machine 2 585.09 292.54 Residuals 10 142.18 14.22
+Machine,Mach)
+F value    Pr(>F)
+ 5.8232 0.0089495 **
+20.5761 0.0002855 ***
+
+Theverylowp-valuesagainindicatethatH0 :σb2 =0andH0 :α1 =α2 =α3 =0 should be rejected in favour of the obvious alternatives. There is strong evidence for differences between machine types and for variability between workers. Going on to examine the fixed effect estimates, using standard fixed effects methods, indicates that machine 3 leads to substantially increased productivity.
+
+Estimation of σα2b, the interaction variance, is straightforward.
+
+> summary(m0)$sigmaˆ2 - summary(m1)$sigmaˆ2/3 [1] 13.90946
+    
+Finally, aggregate once more and fit (6.8) in order to estimate the worker variance component, σb2.
+
+> M <- aggregate(data.matrix(Mach),by=list(Mach$Worker),mean) 
+> m00 <- lm(score  ̃ 1,M)
+> summary(m00)$sigmaˆ2 - (summary(m0)$sigmaˆ2)/3
+[1] 22.96118
+
+Residual plots should be checked for m1, m0 and m00. 
+
+6.1.5 Discussion
+
+Although practical examples were presented in the preceding subsections, this theory for mixed models of balanced experimental data is primarily of theoretical interest for understanding the results used in classical mixed model ANOVA tables, and for motivating the use of particular reference distributions when conducting hypothe- sis tests for mixed models. In practice, the somewhat cumbersome analysis, based on aggregating data, would usually be eschewed in favour of using specialist mixed modelling software, such as that accessible via R function lme from the nlme li- brary.
+
+Before leaving the topic of balanced data altogether, it is worth noting the reason that ordinary linear model theory can be used for inference with balanced models. The first reason relates to the estimator of the residual variance, σˆ2. In ordinary linear modelling, σˆ2 does not depend in any way on the values of the model parameters β and is independent of βˆ (see section 1.3.3). This fact is not altered if some elements of β are themselves random variables. Hence the usual estimator of σˆ2, based on the least squares estimate of a linear model, remains valid, and unbiased, for a linear mixed model.
+
+The second reason relates to the estimators of the fixed effect parameters. In a fixed effects setting, consider two subsets β1 and β2 of the parameter vector, β, with corre- sponding model matrix columns X1 and X2. If X1 and X2 are orthogonal, meaning that XT1 X2 = 0, then the least squares estimators βˆ1 and βˆ2 will be independent: so inferences about β1 do not depend in any way on the value of β2. This situation is unaltered if we now move to a mixed effects model, and suppose that the β2 is actually a random vector. Hence, in a mixed model context, we can still use fixed effects least squares methods for inferences about any fixed effects whose estimators are independent of all the random effects in the model. So, when successively aggre- gating data (and models), we can use least squares methods to make inferences about a fixed effect as soon as the least squares estimator of that fixed effect becomes inde- pendent of all random effects in the aggregated model. Generally such independence only occurs for balanced data from designed experiments.
+
+Generally, least squares methods are not useful for directly ‘estimating’ the values of random effects. This is, in part, because identifiability constraints are generally required in order to estimate effects, but imposing such constraints on random effects fundamentally modifies the model by changing the random effect distributions.
+
+6.2 Linear mixed models in general
+
+The general linear mixed model can conveniently be written as
+
+y = Xβ + Zb + ε, b ∼ N(0, ψθ), ε ∼ N(0, Λσ2) (6.9)
+
+where ψθ is a positive definite covariance matrix for the random effects b, and Z is a matrix of fixed coefficients describing how the response variable, y, depends on the random effects (it is a model matrix for the random effects). ψθ depends on some parameters, θ, which will be the prime target of statistical inference about the random effects (the exact nature of the dependence is model specific). Finally, Λ is a positive definite matrix which usually has a simple structure depending on few or no unknown parameters: it is sometimes used to model residual correlation, but is often simply an identity matrix.
+
+As a simple example of this general formulation, recall the rails example from section 6.1.3. The model for the jth response on the ith rail is
+
+yij =α+bi +εij, bi ∼N(0,σb2), εij ∼N(0,σ2), (6.10)
+
+with all bi ’s and εij ’s mutually independent. There were 6 rails with 3 measurements on each. In the general linear mixed model form, the model is therefore
+
+y111 y121
+100000 100000 100000 010000 010000
+0 1 0 0 0 0 001000b1 001000b2
+ε11 ε12  ε13   ε21   ε22   ε23 
+y13  1
+y21  1
+y22  1
+y23  1
+y31  1
+y32  1
+y33 =1 α +0 0 1 0 0 0b3 y41  1
+ε31 ε32 +ε33   ε41   ε42 
+0 0 0 1 0 0b4 0 0 0 1 0 0b5 0 0 0 1 0 0 b6 0 0 0 0 1 0
+y42  1
+y43 1
+y51 1
+y52 1
+y53 1
+y61 1
+y62 1 000001 ε62
+y63 1 000001 ε63
+
+where b ∼ N(0, I6σb2) and ε ∼ N(0, I18σ2). In this case the random effects param-
+eter vector, θ, contains the single element σb2.
+
+Returning to the general model, we could combine the residual vector and random effects into a single, non-independent, variable-variance residual vector, e = Zb + ε. It is obvious that e is a zero mean multivariate normal vector, and its covariance
+
+0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 1
+ ε43   ε51   ε52  ε53 ε61
+
+matrix must be ZψθZT + Iσ2. Hence (6.9) can be re-written as:
+
+y = Xβ + e, e ∼ N(0, Σθσ2) (6.11)
+
+where Σθ = ZψθZT/σ2 + I, and the subscript, θ, emphasizes the dependence of Σθ on the covariance parameter vector, θ (a dependence inherited from ψθ ). So if θ were known then we could estimate β using the methods of section 1.8.4.
+
+6.2.1 Estimation of linear mixed models
+
+In general, of course, θ must be estimated, and maximum likelihood estimation pro- vides the basic framework for doing this. As first discussed in section 1.8.3 the like- lihood of β, θ and σ2 will be
+
+2 1   T−1 2 
+L(β, θ, σ ) =  (2πσ2)n|Σθ| exp −(y − Xβ) Σθ (y − Xβ)/(2σ ) (6.12)
+
+and maximizing L w.r.t. β, θ and σ2 will provide βˆ, θˆ and σˆ2. Usually this max- imization can be simplified by profiling the likelihood. The idea is that since we already know, from section 1.8.4, exactly how to find the maximum likelihood esti- mates of β and σ2, for a given θ, these estimators can be plugged into the likelihood as implicit functions of θ, to yield the profile likelihood
+
+1   ˆT−1 ˆ 2  Lp(θ) =  (2πσˆθ2)n|Σθ| exp −(y − Xβθ) Σθ (y − Xβθ)/(2σˆθ)
+
+Here βˆθ is the maximum likelihood/least squares estimate of β for a given θ (calcu- lated as in section 1.8.4) and σˆθ2 is the corresponding m.l.e. of σ2. For purposes of numerical maximization, Lp can then be treated as a function of θ alone: whatever values maximize Lp w.r.t. θ will automatically maximize L, of course. Obviously, the maximum likelihood estimates of the other parameters are simply βˆθˆ and σˆ2ˆ.
+
+θ
+
+Why is profiling useful? Usually we must resort to iterative numerical methods to do the maximization with respect to θ, and while we could use the same iterative methods with all the parameters it would be very computationally slow to do so, relative to using the quick, one-step, methods available for obtaining βˆ and σˆ2, given any particular values for θ.
+
+The iterative method used to maximize Lp (or more usually lp = logLp) is just the multivariate version of Newton’s method, as described at the beginning of sec- tion 4.6.1, for example. Starting with a parameter guess θ0, lp is approximated by a quadratic sharing lp’s value and first and second derivatives at θ0. The value of θ maximizing this approximating quadratic is used as the next estimate of θ, and the process is iterated to convergence, at which point the maxima of the approximating quadratic and lp will coincide.
+
+6.2.2 Directly maximizing a mixed model likelihood in R
+
+Usually linear mixed modelling is performed using specialist routines, but it is worth seeing how straightforward it is to estimate a simple linear mixed model. For exam- ple, it is easy to write an R function to evaluate the log-likelihood of a linear mixed model, and maximize that log likelihood w.r.t. the variance parameters of the model. Consider the mixed model
+
+y = Xβ + Zb + ε
+
+where the εi are i.i.d. N(0, σ2) and the bi are i.i.d. N(0, σb2). For estimation purposes, let us use the parameters γ1 = log(σb) and γ2 = log(σ). The following function will evaluate the log likelihood, profiling out β.
+
+ll <- function(gamma,X,Z,y)
+{ sigma.b <- exp(gamma[1])
+sigma <- exp(gamma[2])
+n <- nrow(Z)
+# evaluate covariance matrix for y
+V <- Z%*%t(Z)*sigma.bˆ2 + diag(n)*sigmaˆ2
+L <- chol(V) # L’L=V
+# transform dependent linear model to indep.
+y <- backsolve(L,y,transpose=TRUE)
+X <- backsolve(L,X,transpose=TRUE)
+b <- coef(lm(y ̃X-1)) # estimate fixed effects
+# evaluate log likelihood
+logLik <- -n/2*log(2*pi) - sum (log(diag(L))) -
+sum((y-X%*%b)ˆ2)/2
+attr(logLik,"fixed") <- b # allow retrieval of beta logLik
+}
+
+Given variance parameters, the routine simply evaluates the covariance matrix of the response data, finds its square root, and then uses the inverse transpose of this square root to transform the dependent data linear modelling problem, to a linear modelling problem for independent data, with constant variance: this allows βˆ (given the variance parameters) to be found immediately. Then all that remains is to evaluate the log likelihood.
+The routine can easily be employed with a general purpose function optimizer, such as optim in R. As an example, the parameters of model (6.10) from sections 6.1.3 and 6.2 can be estimates as follows.
+
+> options(contrasts=c("contr.treatment","contr.treatment"))
+> Z <- model.matrix( ̃Rail$Rail-1)
+> X <- matrix(1,18,1)
+>
+> rail.mod <- optim(c(0,0),ll,control=list(fnscale=-1), X=X,Z=Z,y=Rail$travel)
+>
+> exp(rail.mod$par) # variance components
+[1] 22.629166  4.024072
+> attr(ll(rail.mod$par,X,Z,Rail$travel),"fixed")
+   X
+66.5   # fixed effect estimate
+
+See ?optim for details about the operation of optim. Notice that these maximum likelihood estimates are similar to those obtained in section 6.1.3, but that the vari- ance component estimates are reduced, particularly that for σb. This is because max- imum likelihood estimates are not always unbiased, and those for variance compo- nents tend to be biased downwards. This issue will be revisited in the subsequent sections.
+
+6.2.3 Inference with linear mixed models
+
+Except in the balanced data case, inference about the fixed effects and random effects is approximate. For fixed effects it is usual to condition on the random effects, and then use fixed effect methods for inference. Inference about the random effects is based on likelihood theory, but in the case of hypothesis testing is ‘very approximate’.
+
+Fixed effects
+
+Since linear mixed models are fitted using maximum likelihood estimation, we could, in principle, use generalized likelihood ratio tests for all model comparison/hypothesis testing (see section 2.4). In practice, however, it is usually better to perform tests about model fixed effects by conditioning on θˆ (i.e. treating the θ estimates as if they were known parameters). Then our model can usefully be treated as a fixed ef- fects model for non-independent data with variable variance, of the form (6.11). This fixed effects model, and the corresponding data, can be transformed to an equivalent model for independent data, as described in section 1.8.4, at which point all the stan- dard fixed effects theory, described in chapter 1, can be applied to drawing inferences about the fixed effect parameters, β.
+
+The reason that this conditional approach is usually preferable to an approach based on asymptotic likelihood theory, is that the approximations involved in conditioning on θˆ are usually better than those involved in using the large sample likelihood results at finite sample sizes. In fact, for balanced designs, where θˆ is independent of the other estimators, exact tests can be obtained by the conditional approach.
+
+If the, θˆ conditional, ordinary linear model approach, is used for inference about the fixed effects, then there is an approximation that can improve it somewhat. When F-ratio testing the significance of model terms, the denominator (lower) degrees of freedom for the F distribution would at first sight seem to be given by the residual degrees of freedom from the fit of the θˆ conditional linear model. This is perfectly valid as an approximation, and is fine in the large sample limit, but if an alternative scheme is used, it is possible to partly compensate for the variability neglected by conditioning on θˆ. Specifically, it is better to use a method for approximating the denominator degrees of freedom which, in the balanced data case, will coincide with the denominator degrees of freedom that would have been used in the classical mixed modelling approach, described in section 6.1. The justification for this is provided by the fact that in the balanced data cases the REML (see section 6.2.5) and classical estimators of the fixed effects and variance components coincide, and must therefore follow the same distributions. But, of course, these distributions are known exactly in the balanced case. There is more than one method for approximating the denominator degrees of freedom which will meet the given criteria: see section 2.4 of Pinheiro and Bates (2000) for the one used in R package nlme (which is covered in section 6.2.5).
+
+Inference about the random effects
+
+Inference about the random effects is more difficult, and does rely on large sample likelihood results (see section 2.4). In particular, in the large sample limit
+
+where
+
+(6.13)
+· · · ·
+· ·  ·····
+  logσˆ  ∼ ̇ N    logσ  ,I−1  θˆ θσ,θ
+ ∂2lp ∂(log σ)2
+ ∂2lp
+∂2lp
+∂ log σ∂θ1 ∂2lp
+∂2lp
+∂ log σ∂θ2 ∂2lp ∂θ1∂θ2 ∂2lp
+∂θ2
+       ∂logσ∂θ1 Iσ,θ = ∂2lp
+∂θ12 ∂2lp ∂θ1∂θ2
+ 
+    ∂logσ∂θ2 ·····
+
+— the empirical information matrix (i.e. it is evaluated at the parameter estimators). The parameterization in terms of log σ tends to give better finite sample results than using the un-logged variance. (6.13) allows approximate confidence intervals for the variance parameters to be found.
+
+Models differing in their random effects structure can be compared using generalized likelihood ratio tests. Specifically, if l1 is the maximized log likelihood of a model with p1 parameters, and l0 is the maximized log likelihood of a reduced version of the model (i.e. one with a simplified random effects structure) with p0 parameters, then if the reduced model is correct
+
+2(l1 − l0)∼ ̇ χ2p1−p0 . (6.14)
+
+Unfortunately there is a problem with this approach, which undermines the utility of this large sample approximation. Namely, the null hypothesis specified by the smaller model will typically restrict some of the variance parameters to the edge of the feasible parameter space (i.e. the null hypotheses involve assumptions that some variance components are zero). This violates the conditions under which the log of the likelihood ratio will have the stated distribution.
+
+In practice, the most sensible approach is to treat the p-values from the log-ratio tests as “very approximate”. If the p-value is very large, or very small, there is no practical difficulty about interpreting it, but on the borderline of significance, more care is needed. Pinheiro and Bates (2000) give a simulation approach which could be used in such cases.
+
+For practical work, some other points of view can also be useful:
+
+1. The assumptions underpinning the asymptotic distribution of the log likelihood ratio test statistic are not violated when using this result to find confidence inter- vals for parameters (by test inversion). Hence, if you can sensibly define the size of a variance component that would count as ‘practically negligible’, there is no problem in assessing whether this value is inside or outside the confidence inter- val for the parameters. Put another way: if you have confidence intervals for the parameters, it is rather seldom that inability to exactly test a variance component, for precise equality to zero, is likely to be a serious practical problem.
+
+2. In a sense, a p-value is just a way of measuring whether a test statistic is ‘large’ or ‘small’. When testing whether variance components should be zero, there is nothing fundamentally wrong with the log likelihood ratio test statistic itself: it is calculating a p-value from it that is problematic. But suppose we obtained a p-value of 0.7 using (6.14) to compare two mixed models. What this means is that the log-likelihood ratio statistic is so small, that if it occurred in a test where all the GLRT assumptions were met, the p-value would be 0.7: this small a log likelihood ratio can not possibly provide any evidence for the alternative model, even though the p-value itself is not right for our test. Similar arguments apply for very high log-likelihood ratio statistics.
+
+These points are not made in order to imply that there is no problem with conducting hypothesis tests about variance components, but merely to point out that the situation is very far from hopeless.
+
+6.2.4 Predicting the random effects
+
+Since the bi’s are random effects, we do not estimate them, as we would fixed param- eters, but we may want to predict them. The usual way to do this is to evaluate the expected value of b, given the data, y (obviously the unconditional expected value is 0, by construction of the model). The most straightforward derivation of E(b|y) uses the following general result from probability.
+
+If x and z are random vectors, with the joint normal distribution   
+
+x  ∼N   μx  ,  Σxx Σxz   
+z μz ΣzxΣzz 
+
+(where Σxz = ΣTzx), then the mean of x given z is
+
+E(x|z)=μ +Σ Σ−1(z−μ ) x xzzz z
+(6.15)
+    
+and the covariance matrix of x given z is
+
+Σ =Σ −Σ Σ−1Σ . (6.16) x|z xx xzzzzx
+
+Now consider the general linear mixed effects model. We have that
+
+ b ∼N   0  ,  ψ Σby2    y XβΣybΣθσ
+
+where Σθ = ZψZT/σ2 + I (the subscript serving as a reminder of the dependence of this matrix on the variance parameters θ). From (6.15) we have E(y|b) = Xβ + Σybψ−1(b − 0), while the original model structure gives E(y|b) = Xβ + Zb. Hence
+
+Zb = Σybψ−1b
+
+and for this to hold for all b requires that
+
+Σyb = Zψ.
+
+Now we can use (6.15), once more, to obtain the mean for b given y,
+
+E(b|y) = ψZTΣ−1(y − Xβ)/σ2, θ
+
+which is estimated by plugging the estimates of the parameters β, θ and σ2 into the expression on the r.h.s. to obtain:
+
+bˆ = ψˆZTΣ−1(y − Xβˆ)/σˆ2 (6.17) θˆ
+
+(where ψˆ follows from θˆ.)
+
+For completeness, note that from the general result (6.16), the covariance matrix for b given y is
+
+Σb|y =  ψ − ψZTΣ−1Zψ/σ2  θ
+
+and the distribution of b conditional on y is multivariate normal, of course.
+
+Model ‘fitted values’ are predicted as
+ 
+yˆ = E(y|bˆ) = Xβˆ + Zbˆ
+
+and residuals as
+
+εˆ = y − yˆ .
+
+Both are useful for model checking.
+
+Note that, in practice, computation of bˆ often uses the results of section 6.2.6.
+
+6.2.5 REML
+
+To complete the theoretical treatment of mixed effects linear models, we should con- sider one more issue. The maximum likelihood estimators of variance parameters, tend to become quite badly biased, as the number of fixed parameters in a model in- creases, particularly if sample sizes are not large. The problem is best seen in the con- text of estimating a single variance component, by maximum likelihood estimation: consider estimating the residual variance of a fixed effect linear model by maximum likelihood.
+
+The likelihood of the parameters σ and β of the model y = Xβ + ε, ε ∼ N(0, Iσ2) is
+
+L(β, σ) = 1 exp   −∥y − Xβ∥2   , (2πσ2)n/2 2σ2
+
+so that the log-likelihood is
+
+l(β, σ) = log(L(β, σ)) = −n log(2π) − n log(σ) − ∥y − Xβ∥2/(2σ2). 2
+
+Differentiating l w.r.t. σ, and setting the result to zero, yields the m.l.e. 
+
+∂l/∂σ = −n+∥y−Xβ∥2/σ3 =0⇒σˆ2 =∥y−Xβˆ∥2/n.
+
+Comparing this with the unbiased estimator (1.8), derived in section 1.3.3, it is clear that
+
+E(σˆ2) = (n − p) σ^2/n
+
+σ
+
+where p is the dimension of β, and n the dimension of y. Unfortunately this ten- dency to underestimate variance components, increasingly badly as p increases, is a general feature of maximum likelihood estimators (from normal distribution derived likelihoods). The difficulty is that the estimators take no account of the degrees of freedom ‘lost’ by estimating the fixed effects.
+
+One way of alleviating this problem is to estimate the variance components, not by maximizing the likelihood, but by maximizing the so called ‘REML’ criterion, where ‘REML’ sometimes stands for ‘REstricted Maximum Likelihood’ (Patterson and Thompson, 1971). The REML approach measures the fit of the variance param- eters, not from the joint likelihood of the variance parameters and β, but rather by the (scaled) average of the likelihood over all the possible values of β. This average likelihood is the REML criterion, and it is maximised to find the variance parame- ters. Since this approach does not ‘lose’ any degrees of freedom by estimating fixed effects, it tends not to suffer the under-estimation problems of maximum likelihood variance component estimation. Formally, if L(β, θ, σ2) is the likelihood for the pa- rameters of a mixed effects linear model, then
+
+LR(θ,σ2)=  L(β,θ,σ2)dβ 
+
+is the equivalent REML criterion.
+
+The numerical methods for maximizing LR are similar to those used for maximizing the profiled likelihood under maximum likelihood estimation. Once variance com- ponents have been estimated by REML, we can condition on the estimated θ and σ2, write the mixed model as (6.11), and use the methods of sections 1.8.4 to estimate the fixed parameters β. Given estimates of all the model parameters, inference about the fixed effects proceeds as for the MLE case.
+
+Some care is needed for inference about the random effects. It turns out that LR be- haves much like the likelihood, L, from the point of view of inference. Specifically, the expressions for the asymptotic distributions θˆ and σˆ2 are similar to the expres- sions under MLE, but with the log of LR, lR, replacing the log-likelihood, l. The one major difference is that generalized likelihood ratio testing, with lR replacing l, only works if the models being compared have identical fixed effects structures.
+
+The explicit form of the REML criterion
+
+At first sight, the integral in the REML criterion, LR, appears a little intimidating, but in fact it is straightforward to obtain LR in closed form. Purely for notational com- pactness define Σ = Σθσ2. Then plugging the likelihood (6.12) into the expression for LR, we have
+
+2 1   T−1   LR(θ,σ )=  (2π)n|Σ| exp −(y−Xβ) Σ (y−Xβ)/2 dβ
+
+The quadratic form can be expanded as
+
+  (y−Xβ)TΣ−1(y−Xβ) = =
+(y−Xβˆ+Xβˆ−Xβ)TΣ−1(y−Xβˆ+Xβˆ−Xβ) (y − Xβˆ)T Σ−1 (y − Xβˆ)
++ (Xβˆ − Xβ)TΣ−1(Xβˆ − Xβ)
++ 2(y − Xβˆ)TΣ−1(Xβˆ − Xβ)
+(y − Xβˆ)TΣ−1(y − Xβˆ) + (βˆ − β)TXTΣ−1X(βˆ − β) 
+
+where the least squares estimate of β, given Σ, is βˆ = (XTΣ−1X)−1XTΣ−1y, and the final equality results from the fact that
+
+(y − Xβˆ)TΣ−1(Xβˆ − Xβ) = (y − X(XTΣ−1X)−1XTΣ−1y)TΣ−1X(βˆ − β) = (yTΣ−1X − yTΣ−1X)(βˆ − β) = 0.
+
+Hence
+
+Now if the expression inside the integral were divided by (2π)p/2|XTΣ−1X|−1/2 (where p is the dimension of β), then it would be immediately recognizable as a multivariate normal p.d.f., and the integral would be 1. Hence the integral is in fact (2π)p/2|XTΣ−1X|−1/2, and
+
+2 e−(y−Xβˆ)TΣ−1(y−Xβˆ)/2   (2π)p LR(θ,σ ) =  (2π)n|Σ| |XTΣ−1X|.
+
+Clearly the log REML criterion is therefore
+
+lR = p−nlog(2π)−1log|Σ|−1log|XTΣ−1X|−1(y−Xβˆ)TΣ−1(y−Xβˆ). 2222
+=
+2 e−(y−Xβˆ)TΣ−1(y−Xβˆ)/2   −(β−βˆ)TXTΣ−1X(β−βˆ)/2 LR(θ,σ )=  (2π)n|Σ| e dβ
+
+6.2.6 A link with penalized regression
+
+If ψ and σ2 are known, or we condition on their estimates, then it turns out that the predicted values of the random effects, bˆ, (see equation 6.17) and the maximum likelihood estimates of the parameters, βˆ, are the values minimizing the penalized sum of squares
+
+1 ∥y−Xβ−Zb∥2 +bTψ−1b. σ2 θ
+
+This was proven by Harville (1976, 1977), but a much simpler proof follows Pinheiro and Bates (2000).
+
+Start by writing down, fβ,θ,σ2 (y, b) = fβ,σ2 (y|b)fθ (b), the joint p.d.f. of y and b, from which the marginal p.d.f. of y can be obtained by integration w.r.t. b:
+
+− 1 ∥y−Xβ−Zb∥2 1 −1bTψ−1b e 2σ2 e 2 θ .
+ 1 (2πσ2)n/2
+fβ,θ,σ2(y,b)=
+
+Finding any matrix square root, B, such that BTB = ψ−1σ2, we then have
+
+    | B | − 1 ∥ y ̃ − X ̃ β − Z ̃ b ∥ 2 fβ,θ,σ2(y,b)= 2 n+q e 2σ2
+,
+(2π)q/2|ψθ|1/2 θ
+  (2πσ ) 2
+
+where y ̃ =   y0   , X ̃ =   X0   a n d Z ̃ =   BZ   . N o w l e t bˆ β = ( Z ̃ T Z ̃ ) − 1 Z ̃ T ( y ̃ −
+X ̃ β), be the value of b maximizing fβ,θ,σ2 (y, b) for any given β. Since f (b|y) = f(y,b)/f(y) it is clear that f(b|y) is also maximized by bˆβ. i.e. these are the ‘posterior modes’ of the random effects. Furthermore, since f(b|y) is a normal dis- tribution, its mean is the same as its mode, so bˆβ = E(b|y), assuming β is known.
+
+Now turning to the fixed effects, β, it helps to re-write the norm in the joint p.d.f. as 
+
+∥y ̃−X ̃β−Z ̃b∥2 = ∥y ̃−X ̃β−Z ̃bˆβ +Z ̃bˆβ −Z ̃bˆ∥2
+= ∥y ̃−X ̃β−Z ̃bˆβ∥2+∥Z ̃(bˆβ−b)∥2
+
+The final equality above is geometrically obvious, since the residual vector, from regressing y ̃ − X ̃ β on the columns of Z ̃ , is clearly orthogonal to Z ̃ , but in any case it follows from:
+
+(bˆβ − b)TZ ̃T[y ̃ − X ̃ β − Z ̃bˆβ ] = (bˆβ − b)TZ ̃T[y ̃ − X ̃ β − Z ̃(Z ̃TZ ̃)−1Z ̃T(y ̃ − X ̃ β)] = (bˆβ − b)T[Z ̃Ty ̃ − Z ̃TX ̃ β − Z ̃T(y ̃ − X ̃ β)]
+= (bˆβ−b)T0=0. 
+
+Hence the joint p.d.f. of y and b can be written
+
+(2πσ ) 2 
+
+
+ a b s | B | − 1 ∥ y ̃ − X ̃ β − Z ̃ bˆ β ∥ 2 − fβ,θ,σ2(y,b)= 2 n+q e 2σ2
+1 ( b − bˆ β ) T Z ̃ T Z ̃ ( b − bˆ β ) 2σ2
+.
+
+Now the marginal p.d.f. of y is fβ,θ,σ2 (y) =   fβ,θ,σ2 (y, b)db and from the prop-erties of a normal p.d.f. we have that
+
+    | Z ̃ T Z ̃ | 1 / 2   − 1 ( b − bˆ β ) T Z ̃ T Z ̃ ( b − bˆ β )
+  (2πσ2)q/2
+e 2σ2 db=1
+
+so that
+
+a b s | B | − 1 ∥ y ̃ − X ̃ β − Z ̃ bˆ β ∥ 2 fβ,θ,σ2(y)= 2n  ̃T ̃1e2σ2
+  (2πσ )2 |Z Z|2
+
+which, when treated as a function of the parameters, is the likelihood of β, θ and σ2. Clearly the likelihood is maximized by the values of β minimizing 
+
+∥ y ̃ − X ̃ β − Z ̃ bˆ β ∥ 2 ,
+
+and hence the posterior modes bˆ and the maximum likelihood estimates βˆ are the values of b and β simultaneously minimizing
+
+∥y ̃−X ̃β−Z ̃b∥2= 1∥y−Xβ−Zb∥2+bTψ−1b. σ2 θ
+
+6.3 Linear mixed models in R
+
+There are several packages for linear mixed modelling in R, of which nlme and latterly lme4 are particularly noteworthy. In this section I will concentrate on the nlme package: actually this package provides much more than just linear mixed models, but the rest is beyond the scope of this book (see Pinheiro and Bates, 2000).
+
+The main model fitting function of interest is called lme. A call to the lme function is similar to a call to lm, except that an extra argument specifying the random effects structure must also be supplied to the model. By default, lme works with a slightly more restricted structure for linear mixed models than the very general form (6.9), given in section 6.2. Specifically lme assumes that your data are grouped according to the levels of some factor(s), and that the same random effects structure is required for each group, with random effects independent between groups. Assuming just one level of grouping, the model for the data in the ith group is then
+
+yi =Xiβ+Zibi +εi, bi ∼N(0,ψ), εi ∼N(0,Λσ2). (6.18)
+
+Careful attention should be paid to which terms have an i subscript, and hence de- pend on group, and which are common to all groups. Note, in particular, that β, ψ and Λ, the unknowns for the fixed effects and random effects respectively, are as- sumed to be the same for all groups, as is the residual variance, σ2. This form of mixed effects model, which was introduced by Laird and Ware (1982), is a sensible default, because it is very common in practical applications, and because model fit- ting for this structure is more efficient than for the general form (6.9). However it is important to realize that (6.18) is only a special form of (6.9). Indeed if we treat all the data as belonging to a single group then (6.18) is exactly (6.9), with no special structure imposed.
+
+Because of lme’s default behaviour you need to provide two parts to the random effects specification: a part that specifies Zi and a part specifying the grouping fac- tor(s). By default, ψ is assumed to be a general positive definite matrix to be esti- mated, but it is also possible to specify that it should have a more restricted form (for example Iσb2). The simplest way to specify the random effects structure is with a one sided formula. For example  ̃x|g would set up Zi according to the  ̃x part of the formula while the levels of the factor variable, g, would be used to split the data into groups (i.e. the levels of g are effectively the group index, i). The random effects formula is one sided, because there is no choice about the response variable — it must be whatever was specified in the fixed effects formula. So an example call to lme looks something like this:
+
+> lme(y ̃x+z,dat, ̃x|g)
+
+where the response is y, the fixed effects depend on x and z, the random effects depend only on x, the data are grouped according to factor g, and all data are in data frame dat. An alternative way of specifying the same model is:
+
+> lme(y ̃x+z,dat,list(g= ̃x))
+
+and in fact this latter form is the one we will eventually use with GAMMs. 
+
+As an example, model (6.10), from sections 6.1.3 and 6.2, can easily be fitted.
+
+> library(nlme)
+> lme(travel ̃1,Rail,list(Rail= ̃1)) Linear mixed-effects model fit by REML
+Data: Rail Log-restricted-likelihood: -61.0885 Fixed: travel  ̃ 1
+(Intercept)
+       66.5
+Random effects:
+ Formula:  ̃1 | Rail
+        (Intercept) Residual
+StdDev:    24.80547 4.020779
+Number of Observations: 18 Number of Groups: 6
+
+Note that, because REML has been used for estimation, the results are identical to those obtained in section 6.1.3. If we had used MLE, by specifying method="ML" in the call to lme, then the results would have corresponded to those obtained in section 6.2.2.
+
+6.3.1 Tree Growth: an example using lme
+
+The nlme package includes a data frame called Loblolly, containing growth data on Loblolly pine trees. height, in feet (data are from the US), and age, in years, are recorded for 14 individual trees. A factor variable Seed, with 14 levels, indicates the identity of individual trees. Interest lies in characterizing the, population level, mean growth trajectory of the Loblolly Pines, but it is clear that we would expect a good deal of tree to tree variation, and probably also some degree of autocorrelation in the random component of height.
+
+Figure 6.5 Default residual plots for models m0, m1 and m2 (left to right). There is a clear trend in the mean of the residuals for the first two models, which model m2 eliminates.
+
+From examination of data plots, the following initial model might be appropriate for the ith measurement on the jth tree:
+
+heightji = β0 + β1ageji + β2age2ji + β3age3ji
++ b0 + bj1ageji + bj2age2ji + bj3age3ji + εji
+
+where the εji are zero mean normal random variables, with correlation given by ρ(εji,εjk) = φ|ageji−agejk|, and φ is an unknown parameter: this εji model is a continuous autoregressive model of order 1. The ε terms are independent between different trees. As usual β denotes the fixed effects and bj ∼ N(0,ψ) denotes the random effects.
+
+This model is easily estimated using lme as follows.
+
+m0 <- lme(height  ̃ age + I(ageˆ2) + I(ageˆ3),Loblolly, random=list(Seed= ̃age+I(ageˆ2)+I(ageˆ3)), correlation=corCAR1(form= ̃age|Seed))
+
+The random argument specifies that there should be a different cubic term for each tree, while the correlation argument specifies a continuous autoregres- sive model for the residuals for each tree. form= ̃age|Seed indicates that age is the continuous variable determining the degree of correlation between residuals, and that the correlation applies within measurements made on one tree, but not between measurements made on different trees.
+
+The command
+
+plot(m0)
+
+produces the default residual plot shown in the left panel of figure 6.5. The plot shows a clear trend in the mean of the residuals: the model seems to underestimate the first group of measurements, made at age 5, and then overestimate the next group, made at age 10, before somewhat underestimating the next group, which correspond to year 15. This suggests a need for a more flexible model, so fourth and fifth order polynomials were also tried.
+
+Figure6.6 Furtherresidualplotsformodelm2.Theleftpanelshowsboxplotsoftheresiduals for each tree, while the right plot is a normal QQ plot for the residuals.
+
+m1 <- lme(height  ̃ age+I(ageˆ2)+I(ageˆ3)+I(ageˆ4),Loblolly, list(Seed= ̃age+I(ageˆ2)+I(ageˆ3)),cor=corCAR1(form= ̃age|Seed)) plot(m1) m2<-lme(height ̃age+I(ageˆ2)+I(ageˆ3)+I(ageˆ4)+I(ageˆ5),Loblolly ,list(Seed= ̃age+I(ageˆ2)+I(ageˆ3)),cor=corCAR1(form= ̃age|Seed)) plot(m2)
+
+The resulting residuals plots are shown in the middle and right panels of figure 6.5. m1 does lead to a slight improvement, but only m2 is really satisfactory. Further model checking plots can now be produced for m2.
+
+plot(m2,Seed ̃resid(.))
+qqnorm(m2, ̃resid(.))
+qqnorm(m2, ̃ranef(.))
+
+The resulting plots are shown in figures 6.6 and 6.7, and suggest that the model is reasonable.
+
+An obvious question is whether the elaborate model structure, with random cubic and autocorrelated within tree errors, is really required. First try dropping the auto- correlation component.
+
+> m3<-lme(height ̃age+I(ageˆ2)+I(ageˆ3)+I(ageˆ4)+I(ageˆ5),
++         Loblolly,list(Seed= ̃age+I(ageˆ2)+I(ageˆ3)))
+> anova(m3,m2)
+Model df AIC BIC logLik Test L.Ratio p-value m3 1 17 262.347 302.411 -114.173
+m2 2 18 258.145 300.566 -111.072 1 vs 2 6.20156 0.0128
+
+The anova command is actually conducting a generalized likelihood ratio test here, which rejects m3 in favour of m2. anova also reports the AIC for the models, which also suggest that m2 is preferable. There seems to be reasonable evidence for auto- correlation in the within tree residuals.
+
+Figure6.7 NormalQQplotsforthepredictedrandomeffectsfrommodelm2.Theplotsshould look like random scatters around straight lines, if the normality assumptions for the random effects are reasonable: only ˆb1 shows any suggestion of any problem, but it is not enough to cause serious concern.
+
+Perhaps the random effects model could be simplified, by dropping the dependence of tree specific growth on the cube of age.
+
+> m4<-lme(height ̃age+I(ageˆ2)+I(ageˆ3)+I(ageˆ4)+I(ageˆ5),
++         Loblolly,list(Seed= ̃age+I(ageˆ2)),
++         correlation=corCAR1(form= ̃age|Seed))
+>
+> anova(m4,m2)
+Model df AIC BIC logLik Test L.Ratio p-value
+m4 1 14 247.981 280.975 -109.991
+m2 2 18 258.145 300.566 -111.073 1 vs 2 2.16397 0.7056
+
+Recall that the GLRT test is somewhat problematic here, since m4 is m2 with some variance parameters set to the edge of the feasible parameter space: however a like- lihood ratio statistic so small that it would have given rise to a p-value of .7, for a standard GLRT, is certainly not going to provide any grounds for rejecting m4 in favour of m2 in the current case. Comparison of AIC scores (which could also have been obtained using AIC(m4,m2)) suggests quite emphatically that m4 is the better model.
+
+Figure 6.8 Model predictions from m4 at the individual tree level, overlaid on individual Loblolly pine growth data. The panel titles are the value of the Seed individual tree iden- tifier.
+
+Going further, and dropping the quadratic term from the random effects model is firmly rejected by approximate GRLT testing, and by comparison of AIC scores. Another obvious model to try is one with a less general random effects structure. The models so far have allowed the random effects for any tree to be correlated in a verygeneralway:ithassimplybeenassumedthatbj ∼N(0,ψ),wheretheonlyre- striction on the matrix ψ, is that it should be positive definite. Perhaps a less flexible model would suffice: for example, ψ might be a diagonal matrix (with positive diag- onal elements). Such a structure (and indeed many other structures) can be specified in the call to lme.
+
+> m6 <- lme(height  ̃ age+I(ageˆ2)+I(ageˆ3)+I(ageˆ4)+I(ageˆ5),
++           Loblolly,list(Seed=pdDiag( ̃age+I(ageˆ2))),
++           correlation=corCAR1(form= ̃age|Seed))
+> anova(m6,m4)
+Model df AIC BIC logLik Test L.Ratio p-value m6 1 11 264.740 290.664 -121.370
+m4 2 14 247.981 280.975 -109.991 1 vs 2 22.7591 <.0001
+
+Again, both approximate GLRT test and AIC comparison favours the more general model m4. The nlme package includes very many useful utilities for examining and plotting grouped data, one of which is the following, for plotting data and model predictions together on a unit by unit basis. See figure 6.8.
+
+plot(augPred(m4))
+
+6.3.2 Several levels of nesting
+
+It is quite common, when using mixed models, to have several levels of nesting present in a model. For example, in the machine type and worker productivity model (6.6), of section 6.1.4, there are random effects for worker and each worker-machine combination. lme can accommodate such structures as follows
+
+> lme(score ̃Machine,Machines,list(Worker= ̃1,Machine= ̃1)) Linear mixed-effects model fit by REML
+Data: Machines Log-restricted-likelihood: -107.8438 Fixed: score  ̃ Machine
+(Intercept) MachineB MachineC 52.355556 7.966667 13.916667
+Random effects:
+ Formula:  ̃1 | Worker
+        (Intercept)
+StdDev:    4.781049
+Formula:  ̃1 | Machine %in% Worker (Intercept) Residual StdDev: 3.729536 0.9615768
+Number of Observations: 54 
+Number of Groups:
+Worker Machine %in% Worker 6 18
+
+Notice how any grouping factor in the random effects list is assumed to be nested within the grouping factors to its left.
+
+This section can only hope to scratch the surface of what is possible with lme: for a much fuller account, see Pinheiro and Bates (2000).
+
+6.4 Generalized linear mixed models
+
+Generalized linear mixed models follow from linear mixed models, as GLMs fol- lowed from linear models. Let μb ≡ E(y|b). Then a GLMM has the form
+
+g(μbi) = Xiβ+Zib, b ∼ N(0,ψ) and yi|b ∼ exponential family distribution
+
+where g is a monotonic link function, and the covariance matrix, ψ, of the random effects, is usually parameterized in terms of a parameter vector θ. The yi|b are inde- pendent.
+
+The likelihood for a GLMM is most helpfully obtained by considering the joint dis- tribution of the response and the random effects:
+
+fβ,θ,φ(y,b)∝|ψ|exp logf(y|b)− 1bTψ−1b  2
+
+where f(y|b) is the joint distribution of the response conditional on the random effects, which is of the form given in chapter 2 for the GLM. Now the marginal distribution of y, and hence the likelihood, is obtained by integrating out the random effects. i.e.
+
+L(β,θ,φ)∝|ψ|  exp l(β,b)−1bTψ−1b db 2
+
+where l(β, b) is f (y|b) with the observed y plugged in, considered as a function of β and b, i.e. the log likelihood of the GLM that would result from treating both β and b as fixed effects (see section 2.1.2). Unfortunately, this integral generally has to be either approximated, or evaluated numerically, with the latter becoming increasingly impractical as the dimension of b increases.
+
+A simple approximation is obtained by replacing lp = l(β, b) − bTψ−1b/2 by a quadratic approximation about estimated values, βˆ and bˆ, that maximize lp. The resulting integral can be evaluated, and the approximation is usually reasonable, since the integrand decays rapidly to zero away from bˆ: this is a Laplace approximation to the integral.
+
+Following this prescription, l(β, b) can be approximated by Sm = −∥W1/2(z − Xβ − Zb)∥2/(2φ), to within an additive constant, where
+
+zi =g′(μbi)(yi −μbi)+Xiβ+Zib Wii= 1 .
+
+and
+
+V ( μ bi ) g ′ ( μ bi ) 2
+
+Intheseexpressions,μbi =g−1(Xiβ+Zib),φisthe‘scaleparameter’oftheexpo- nential family distribution concerned and V is the function characterizing the mean variance relationship for the distribution.
+
+From the results of section 2.1.3, it follows that Sm has the same first derivatives w.r.t. β and b as l(β, b), and its Hessian matrix with respect to these parameters is the expected hessian of l(β, b), so that the quadratic approximation is justified by the law of large numbers. Hence the approximate likelihood of the model is given by
+
+L∗(β,θ,φ)∝|ψ|  exp −1∥W1/2(z−Xβ−Zb)∥2−1bTψ−1b db, 2φ 2
+
+which is simply the likelihood of a weighted linear mixed model.
+
+Hence L may be maximized approximately by iteratively maximizing approximate likelihoods, L∗, using the methods already discussed for linear mixed models. Notice that the results are only approximately maximum likelihood estimates now, even as the sample size tends to infinity. The approximation depends on how good the Laplace approximation to the integral is, and also on the Wii’s varying only slowly with β and b.
+
+So the recipe for fitting a GLMM is:
+
+1. Obtain initial estimates βˆ[1] and bˆ[1], for example by setting bˆ[1] = 0 and fitting
+the resulting GLM to get βˆ[1].
+
+2. Set k = 1 and iterate the following steps until convergence.
+
+3. Given βˆ[k] and bˆ[k], find z and W as defined above.
+
+4. Estimate the linear mixed effects model
+
+z=Xβ+Zb+ε, b∼N(0,ψ), ε∼N(0,W−1φ)
+
+to obtain estimates βˆ[k+1], θˆ[k+1] and φˆ[k+1], and predictions bˆ[k+1]. Increment k by one.
+
+This approximate method is usually known as Penalized Quasi Likelihood (PQL), as a result of the way in which Breslow and Clayton (1993) sought to justify it theoret- ically.
+
+While approximate parameter estimator distributions for GLMMs are easily ob- tained, it is not clear whether general likelihood based inferential procedures can be made to work with the approximate likelihood used in estimation, or some variant of it. The development of theory for AIC or GLRT like statistics for these models is still an open research topic, but it is tempting to use the AIC of the working linear mixed model at convergence as a rough guide for model selection.
+
+6.5 GLMMs with R
+
+GLMMs as described in section 6.4 are implemented by routine glmmPQL supplied with Venables and Ripley’s MASS library. glmmPQL calls are much like lme calls except that it is now necessary to supply a family. Also glmmPQL will accept offsets, unlike lme (at time of writing). As you would expect from section 6.4, glmmPQL operates by iteratively calling lme, and it returns the fitted lme model object for the working model at convergence.
+
+To illustrate its use, consider again the Sole egg modelling undertaken in section 2.3.4. One issue with the data used in that exercise, is that, at any sampling station, the counts for the four different egg stages are all taken from the same net sample. It is therefore very likely that there is a ‘sampling station’ component to the variance of the data, which effectively means that the data for different stages at a station can not be treated as independent. This effect can easily be checked by examining the residuals from the final model in section 2.3.4 for evidence of a ‘station effect’.
+
+> rf <- residuals(b4,type="d") # extract deviance residuals
+> ## create an identifier for each sampling station
+> solr$station <- factor(with(solr,paste(-la,-lo,-t,sep=""))) >
+> ## is there evidence of a station effect in the residuals? > solr$rf <-rf
+> rm <- lme(rf ̃1,solr,random= ̃1|station)
+> rm0 <- lm(rf ̃1,solr)
+> anova(rm,rm0)
+Model df AIC BIC logLik Test L.Ratio p-value
+rm 1 3 3319.57 3335.66 -1656.79
+rm0 2 2 3582.79 3593.52 -1789.40 1 vs 2 265.220 <.0001
+
+The above output compares two models for the residuals. rm0 models them as i.i.d. normal random variables, with some unknown mean, while rm models the residuals as having a mean depending on a station dependent random effect. The GLRT test, performed by the anova function, clearly rejects the i.i.d. model, suggesting that there is a real sampling station effect.
+
+One way of modelling the sampling station effect would be to suppose that the mean of each stage count, at each station, is multiplied by a log-normal random variable, exp(bi ), where bi ∼ N (0, σb2 ) is a station specific random effect. The resulting GLMM can be estimated as follows.
+
+> b <- glmmPQL(eggs  ̃ offset(off)+lo+la+t+I(lo*la)+I(loˆ2)+ I(laˆ2)+I(tˆ2)+I(lo*t)+I(la*t)+I(loˆ3)+I(laˆ3)+
+I(tˆ3)+I(lo*la*t)+I(loˆ2*la)+I(lo*laˆ2)+I(loˆ2*t)+ I(laˆ2*t)+I(la*tˆ2)+I(lo*tˆ2) # end log spawn
++ a +I(a*t)+I(tˆ2*a),random=list(station= ̃1), family=quasi(link=log,variance="mu"),data=solr)
+> summary(b)
+[edited]
+(Intercept)
+lo
+la
+t
+Value Std.Error DF 0.025506 0.1813214 1178 4.643018 0.5179583 374
+   t-value p-value
+  0.140665  0.8882
+  8.964077  0.0000
+ -7.727375  0.0000
+ -6.796872  0.0000
+  5.137342  0.0000
+-10.702480  0.0000
+ -6.856415  0.0000
+ -7.492220  0.0000
+ -0.677197  0.4987
+  3.448376  0.0006
+ -5.996567  0.0000
+  3.640490  0.0003
+  4.655593  0.0000
+ -0.046826  0.9627
+  6.122175  0.0000
+ -7.440717  0.0000
+  0.860770  0.3899
+  4.724001  0.0000
+ -1.336623  0.1822
+  2.299635  0.0220
+ -9.669168  0.0000
+  3.430218  0.0006
+ -5.171498  0.0000
+I(lo * la)
+I(loˆ2)
+I(laˆ2)
+I(tˆ2)
+I(lo *
+I(la *
+I(loˆ3)
+I(laˆ3)
+I(tˆ3)
+I(lo *
+I(loˆ2
+I(lo *
+I(loˆ2
+I(laˆ2
+I(la *
+I(lo *
+a
+I(a * t)
+I(tˆ2 * a)
+[edited]
+-4.878785 0.6313637 374 -2.101037 0.3091183 374 4.221226 0.8216752 374 -4.895147 0.4573844 374 -5.187457 0.7565845 374 -1.469416 0.1961255 374 -0.246946 0.3646591 374 1.578309 0.4576964 374 -3.956541 0.6598010 374 5.524490 1.5175128 374 0.633109 0.1359888 374 -0.040474 0.8643458 374 6.700204 1.0944157 374 laˆ2) -11.539919 1.5509149 374
+t) t)
+la * t) * la)
+* t)
+* t)
+tˆ2)
+tˆ2)
+0.517189 0.6008440 374
+4.879013 1.0328137 374 -0.548011 0.4099971 374 0.822542 0.3576837 374 -0.121312 0.0125463 1178 0.092769 0.0270447 1178 -0.187472 0.0362511 1178
+
+Figure 6.9 Model checking plots for the GLMM of the Bristol Channel Sole data. The left panel shows the relationship between raw data and fitted values. The middle panel plots Pear- son residuals against fitted values: there are a handful of rather high residuals at low predicted densities. The right panel shows raw residuals against fitted values, with reference lines il- lustrating where 1 residual standard deviation and 2 residual standard deviations from the residual mean should lie, for each fitted value.
+
+The summary [†] suggests dropping I(lo * la * t). Refitting without this term, and then examining the significance of terms in the resulting model, suggests drop- ping I(lo*t). Continuing in the same way we drop I(loˆ2*t) and I(la*tˆ2), before all terms register as significant at the 5% level. Note that GLR testing is not possible with models estimated in this way — we do not actually know the value of the maximized likelihood for the model. Supposing that the final fitted model is again called b4, some residual plots can now be produced.
+
+fv <- exp(fitted(b)+solr$off) # note need to add offset
+eggs 01234
+scaled residuals
+−2 0 2 4
+raw residuals
+−5 0 5
+resid <- solr$egg-fv
+plot(fvˆ.5,solr$eggsˆ.5)
+abline(0,1,lwd=2)
+plot(fvˆ.5,resid/fvˆ.5)
+plot(fvˆ.5,resid)
+fl<-sort(fvˆ.5)
+# raw residuals
+## add 1 s.d. and 2 s.d. reference lines lines(fl,fl);lines(fl,-fl);lines(fl,2*fl,lty=2) lines(fl,-2*fl,lty=2)
+
+The resulting plots are shown in figure 6.9. Comparison of these plots with the equiv- alent plots in section 2.3.4 highlights how substantial the station effect appears to be, and this is emphazized by exaimining the estimated size effect.
+
+> intervals(b4,which="var-cov") 
+Approximate 95% confidence intervals
+
+Figure6.10 PredictedspawningdistributionsofBristolChannelSoleaccordingtotheGLMM of section 6.5. Notice how the spawning distributions are less peaked than those shown in figure 2.16.
+
+ Random Effects:
+  Level: station
+lower est. upper sd((Intercept)) 0.8398715 0.9599066 1.097097
+Within-group standard error: lower est. upper 0.5565463 0.5777919 0.5998485
+
+Clearly the station effect is somewhat larger than the variability in the working resid- uals.
+
+Figure 6.10 shows the predicted spawning rates over the Bristol Channel, at various times of year. Note that, relative to the predictions made using GLMs, in section 2.3.4, the peak spawning densities are slightly lower for this model, however, given the clear evidence for a station effect, the current model is probably better supported than the GLM.
+
+6.6 Generalized Additive Mixed Models
+
+A GAMM is just a GLMM in which part of the linear predictor is specified in terms of smooth functions of covariates (see e.g. Lin and Zhang, 1999). For example, an Additive Mixed Model has a structure something like
+
+yi =Xiβ+f1(x1i)+f2(x2i,x3i)+...+Zib+εi (6.19)
+
+where yi is a univariate response; θ is a vector of fixed parameters; Xi is a row of a fixed effects model matrix; the fjs are smooth functions of covariates xk; Zi is a row of a random effects model matrix; b ∼ N(0,ψ) is a vector of random effects coefficients, with unknown positive definite covariance matrix ψ; ε ∼ N (0, Λ) is a residual error vector, with ith element εi, and covariance matrix Λ, which is usually assumed to have some simple pattern.
+
+The generalization from GLMs to GAMs required the development of theory for penalized regression, in order to avoid overfitting, but GLMM methods require no adjustment in order to cope with GAMMs: it is possible to write any of the penal- ized regression smoothers considered in this book, as components of a mixed model, while treating their smoothing parameters as variance component parameters, to be estimated by Likelihood, REML or PQL methods.
+
+For example, (6.19) can be turned into a regular linear mixed model, by making use of the Bayesian model of smoothing covered in section 4.8.1, and in particular the ma- terial in section 4.8.2. Each smooth is treated as having a fixed effects (unpenalized) component, which can be absorbed into Xiβ, and a random effects effects (penal- ized) component, which can be absorbed into Zib. The random effects component of the smooth also has an associated Gaussian distributional assumption, based on the wiggliness measure for the smooth, and having an unknown variance parameter, which is related to the smoothing parameter, as in section 4.8.2.
+
+6.6.1 Smooths as mixed model components
+
+This section explains, in more detail, how any quadratically penalized smooth can be used as a conventional component of a linear mixed model. The material here is closely related to that in section 4.8.2. Smooths with a single smoothing parameter are considered first, followed by the tensor product smooths of section 4.1.8.
+
+First consider a smooth with a single smoothing parameter. For example,
+J
+f(x) =  bj(x)βj j=1
+
+with associated wiggliness measure, J(f) = βTSβ, where S is a positive semi- definite matrix of coefficients (only semi-definite because most penalties treat some space of functions as having zero wiggliness). Given (yi,xi) data, it is straightfor-
+ward to produce a model matrix Xf, where Xf = bj(xi), so that Xfβ is a vector
+of f(xi) values.
+ij
+
+Following section 4.8.1, the mixed model approach to estimating f, starts from the premise that, by stating that f is smooth, we really believe that it is more probable that f is smooth than that f is wiggly. This can be formalized by specifying a prior for the wiggliness of the model which is ∝ exp(−λβTSβ/2), say. Such a prior implies an improper Gaussian prior for β itself, but an improper distribution for β does not fit easily into standard linear mixed modelling approaches (e.g. Pinheiro and Bates, 2000). Some re-parameterization is therefore needed, so that the new parameters di- vide into a set with a proper distribution, to be treated as random effects, and a set (of size M ) with an improper uniform distribution, which can be treated as fixed effects. In general, this can be achieved by using the eigen-decomposition, S = UDUT, where U is an orthogonal matrix, the columns of which are the eigenvectors of S, and D is a diagonal matrix, with the corresponding eigenvalues arranged in descend- ing order on the leading diagonal. Let D+ denote the smallest sub-matrix of D con- taining all the strictly positive eigenvalues. Now re-parameterize, so that the new coefficient vector can be written (bTR,βFT)T ≡ UTβ, where βF is of dimension M. ItisclearthatβTSβ=bTRD+bR,andthatthecoefficientsβF areunpenalized.Par- titioning the eigenvector matrix so that U ≡ [UR : UF ], where UF has M columns, and defining XF ≡ Xf UF , while XR = Xf UR , the mixed model representation of the smooth, in terms of a linear predictor and random effects distribution is now
+
+X β +X b where b ∼N(0,D−1/λ) FFRRR+
+
+whereλandβF arefixedparameterstobeestimated.Forconvenientestimationwith standard software, a further re-parameterization is useful. Defining b =  D−1b
+its covariate values is
+
+XFβF +Zb where b∼N(0,I/λ)
+
+Including such a term in a standard GLMM is simply a matter of appending the columns of XF to the fixed effect model matrix, appending the columns of Z to the random effects model matrix, and specifying the given random effects covari- ance matrix. Obviously, the multiple smooth terms of an additive model are easily combined (although centering constraints are then required, which can most conve- niently be absorbed into the basis before any of this section’s re-parameterizations as in section 4.2).
+
+When representing tensor product smooths (see section 4.1.8), which have multiple smoothing parameters, the only change is that the positive semi-definite pseudoin- verse of the covariance matrix for β is now of the form  di=1 λiS ̃i, where S ̃i is defined in section 4.1.8. The degree of rank deficiency of this matrix, MT , is readily shown to be given by the product of the dimensions of the null spaces of the marginal penaltymatrices,Si,(providedthatλi >0∀i).Againre-parameterizationisneeded, this time by forming,
+
+d
+  S ̃ i = U D U T i=1
+
+where U is an orthogonal matrix of eigenvectors, and D is a diagonal matrix of
+ +R and Z = XR D+, then the mixed model representation of the term, evaluated at
+
+eigenvalues,withMT zeroelementsattheendoftheleadingdiagonal.Noticethat there are no λi parameters in the sum that is decomposed: this is reasonable since the null space of the penalty does not depend on these parameters (however given finite precision arithmetic it might be necessary to scale the S ̃i matrices in some cases).
+
+It is not now possible to achieve the sort of simple representation of a term that was obtained with a single penalty, so the re-parameterization is actually simpler. Partitioning the eigenvector matrix so that U ≡ [UR : UF ] where UF has MT columns, it is necessary to define XF ≡ Xf UF , Z ≡ Xf UR and Si = UTRS ̃iUR. A mixed model representation of the tensor product term (i.e. the linear predictor and random effects distribution) is now
+
+XFβF +Zb where b∼N 0,  λiSi −1 ,
+
+where the λi and βF parameters have to be estimated. This covariance matrix struc- ture is not a form that is available in standard software, but it turns out to be possible to implement, at least in the nlme software of Pinheiro and Bates (2000): R package mgcv provides an appropriate ‘pdMat’ class for lme called ‘pdTens’. Given such a class, incorporation of one or more tensor product terms into a (generalized) linear mixed model is straightforward.
+
+6.6.2 Inference with GAMMs
+
+When using GAMMs, it is often desirable to be able to calculate confidence/credible intervals, exactly as for a GAM. In particular, credible regions for the smooth compo- nents are required. To do this, let β now contain all the fixed effects and the random effects for the smooth terms (only), and let X ̄ be the corresponding model matrix. Let Z ̄ be the random effects model matrix excluding the columns relating to smooths, and let ψ ̄ be the corresponding random effects covariance matrix. Now define a co- variance matrix
+
+V = Z ̄ ψ ̄ Z ̄ T + Λ σ 2 . 
+
+Essentially the Bayesian approach of section 4.8.1 implies that
+β ∼ N ( βˆ , ( X ̄ T V − 1 X ̄ + S ) − 1 ) 
+
+where S =   λi/σ2Si. 
+
+Similarly the leading diagonal of
+F = (X ̄ TV−1X ̄ + S)−1(X ̄ TV−1X ̄ ) gives the effective degrees of freedom for each element of β.
+In the AMM case, the usual inferential framework for linear mixed models applies exactly, and can be used for model comparison: for example AIC based model selec- tion is straightforward. In the GAMM case, model comparison is not so straightfor- ward, since these issues are still somewhat open for GLMMs.
+
+6.7 GAMMs with R
+
+R library mgcv includes a gamm function which fits GAMMs based on linear mixed models, as implemented in the nlme library. The function is basically a wrapper function for lme, or the GLMM fitting routine glmmPQL, from the MASS library: its purpose is to perform the re-parameterizations detailed in section 6.6.1, call lme, or glmmPQL, to actually estimate the model, and then unscramble the returned object so that (i) it looks like a gam object and (ii) the posterior covariance matrix of section 6.6.2 is readily calculated. This section presents some examples of its use.
+
+It should be noted that gamm seems to work lme quite hard, and it is not difficult to specify models which cause numerical problems in estimation, or failure of the PQL iterations in the generalized case. This seems to be particularly true when explicitly modelling correlation in the data, probably because of the inherent difficulty in sep- arating correlation from trend, when the trend model is itself rather complex. Note also that changes in the underlying optimization methods may lead to slight differ- ences between the results obtained with different mgcv and nlme versions: these should not be statistically important.
+
+6.7.1 A GAMM for sole eggs
+
+To start with, let us revisit the Bristol Channel Sole data, one more time. The GLMs and GLMMs considered in sections 2.3.4 and 6.5 were rather unwieldy, as a result of the large number of polynomial terms involved in specifying the models. If nothing else, a GAMM offers a way of reducing the clumsiness of the model formulation. It is straightforward to write the basic sole model (2.13), plus random effect, as a GAMM,
+
+log(μi) = log(∆i) + f1(loi,lai,ti) − f2(ti)a ̄i + bk,
+
+if observation i is from sampling station k. Here f1 and f2 are smooth functions, bk ∼ N (0, σb2 ) are the i.i.d. random effects for station, and, as before, μi is the expected value for the ith observation, while ∆i and a ̄i are the the width and average age of the corresponding egg class. lo, la and t are location and time variables. Notice that, for simplicity, the mortality rate term, f2 is assumed to depend only on time: this assumption could be relaxed, but it is unlikely that the data really contain enough information to say much about spatial variation in mortality rate.
+
+We need to decide what sort of smooths to use to represent f1 and f2. For f1, a tensor product of a thin plate regression spline of lo and la, with a thin plate regression spline (or any other spline) of t, is probably appropriate: isototropy is a reasonable assumption for spatial dependence (although in that case we should really use a more isotropic co-ordinate system than longitude and latitude), but not for the space-time interaction. Anything could be used for f2 and the default TPRS suffices.
+
+The multiplication of f2 by a ̄i is achieved using the by variable mechanism. We need to bear in mind that f2 will be subject to centering constraints, when estimated as part of a GAM: this means that we will need to add an extra a ̄i term into the right-hand
+
+Figure 6.11 Model checking plots for the GAMM of the Bristol Channel Sole data. The left panel shows the relationship between raw data and fitted values. The middle panel plots Pear- son residuals against fitted values: there are a handful of rather high residuals at low predicted densities. The right panel shows raw residuals against fitted values, with reference lines il- lustrating where 1 residual standard deviation and 2 residual standard deviations from the residual mean should lie, for each fitted value. Note how plots are very similar to those from figure 6.9, although the residuals at low densities are less extreme in the current plots.
+
+side of the model, to allow for the fact that such a constraint is not required in the current case.
+
+Here is the call used to fit the model. Note that, unlike lme gamm will only accept the list form of the random argument.
+
+bam<-gamm(eggs  ̃ te(lo,la,t,bs=c("tp","tp"),k=c(25,5),d=c(2,1)) +a+s(t,k=5,by=a)+offset(off),family=quasi(link=log, variance="mu"),data=solr,random=list(station= ̃1))
+
+gamm returns a list with two components: lme is the object returned by lme or glmmPQL; gam is an incomplete object of class gam, which can be treated like a gam object for prediction, plotting etc. For example,
+
+> bam$gam
+Family: quasi
+Link function: log
+Formula:
+eggs  ̃ offset(off) + te(lo, la, t, bs = c("tp", "tp"), k = c(25,
+5), d = c(2, 1)) + a + s(t, k = 5, by = a)
+Estimated degrees of freedom:
+49.96516 3.409959 total = 55.37512.
+
+Residual plots for the model are shown in figure 6.11, these have been calculated from bam$lme so that the predictions of the random effects are included in fitted
+
+Figure 6.12 Predicted spawning rates at various times, using the GAMM of Bristol Channel sole eggs, presented in section 6.7. Note how plots are peakier and of rather different shape to those from figure 6.10.
+
+values and excluded from residuals, as is appropriate for model checking. The plots show a slight improvement relative to the equivalent plots from section 6.5. Figure 6.12 shows why some improvement in residual plots may be possible: the greater flexibility of the GAM allows more complicated shapes for the distributions, and allows a higher (and sharper) peak abundance.
+
+6.7.2 The Temperature in Cairo
+
+Figure 6.13 shows daily temperature in Cairo over nearly a decade. The data are from http://www.engr.udayton.edu/weather/citylistWorld.htm. It is clear that the data contain a good deal of noisy short term auto-correlation, and a strong yearly cycle. Much less clear, given these other sources of variation, is whether there is evidence for any increase in average mean temperature over the period: this is the sort of uncertainty that allows climate change skeptics to get away with it. A reasonable model of these data might therefore be
+tempi = f1(time.of.yeari) + f2(timei) + ei (6.20)
+where ei = φei−1 + εi, the εi being i.i.d. N(0,σ2) random variables. f1 should be a ‘cyclic’ function, with value and first 2 derivatives matching at the year ends.
+
+Figure 6.13 Daily air temperature in Cairo, Egypt from January 1st 1995.
+
+The basic idea is that if we model time of year and autocorrelation properly, then we should be in a good position to establish whether there is a significant overall temperature trend.
+
+Model (6.20) is easily fitted.
+
+ctamm<-gamm(temp ̃s(day.of.year,bs="cc",k=20)+s(time,bs="cr"),
+         data=cairo,correlation=corAR1(form= ̃1|year))
+
+Note a couple of details: the data run includes some leap years, where day.of.year runs from 1 to 366. This means that by default the cyclic smooth matches at day 1 and 366, which is correct in non-leap years, but not quite right in the leap years themselves: a very fussy analysis might deal more carefully with this. Secondly, I have nested the AR model for the residuals within year: this vastly speeds up com- putation, but is somewhat arbitrary.
+
+Examining the gam part of the fitted model first 
+
+> summary(ctamm$gam)
+Family: gaussian
+Link function: identity
+Formula:
+temp  ̃ s(day.of.year, bs = "cc", k = 20) + s(time, bs = "cr")
+Parametric coefficients:
+Estimate std. err. t ratio Pr(>|t|)
+(Intercept) 71.641 0.1527 469.2 < 2.22e-16
+Approximate significance of smooth terms:
+edf chi.sq p-value
+   temperature (F) 50 60 70 80 90
+ s(day.of.year) 8.504 s(time) 1.514
+4016.4     < 2.22e-16
+16.976     0.030618
+    
+    316 MIXED MODELS: GAMMS
+R-sq.(adj) = 0.849 Scale est. = 16.56 n = 3780
+
+it seems that there is some evidence for a long term trend in temperature, and that the model fits fairly closely. We can also extract things from the lme representation of the fitted model, for example 95% confidence intervals for the variance parameters.
+
+> intervals(ctamm$lme,which="var-cov") Approximate 95% confidence intervals
+ Random Effects:
+  Level: g.1
+sd(Xr.1 - 1)
+  Level: g.2
+sd(Xr.2 - 1)
+lower est. upper 0.01066380 0.01660477 0.02923367
+lower est. upper 2.070215e-06 1.184291e-05 12962.93
+ Correlation structure:
+        lower      est.     upper
+Phi 0.6605867 0.6847904 0.7075721 attr(,"label")
+[1] "Correlation structure:"
+Within-group standard error: lower est. upper 3.918120 4.069355 4.226427
+
+The confidence interval for φ is easily picked out, and provides very strong evidence that the AR1 model is preferable to an independence model (φ = 0), while the inter- val for σ is (3.92,4.23). Note that confidence intervals for the smoothing parameters are also available. Under the Random Effects heading the interval for g.1 re- lates to the smoothing parameter for the first smooth, while that for g.2 relates to the second smooth√. The parameterization is not completely obvious: the reported parameters are σ/ λi, as the following confirms
+
+> sqrt(ctamm$gam$sig2/ctamm$gam$sp)
+[1] 1.660477e-02 1.184291e-05
+
+This ability to quantify the uncertainty associated with the smoothing parameters is a nice bonus from use of the mixed model approach.
+
+The approximate p-values from the summary command suggested evidence for a long term temperature trend, but since this model is just a linear mixed model and we hence have access to its full likelihood, we can use likelihood based methods for testing, as well. For example
+
+> ctamm0<-gamm(temp ̃s(day.of.year,bs="cc",k=20),data=cairo,
++ correlation=corAR1(form= ̃1|year))
+> ctamm0$gam
+
+Figure 6.14 GAMM terms for daily air temperature in Cairo, Egypt from January 1st 1995. The left panel is the estimated annual cycle: note that it has a fatter peak and thinner trough than a sinusoid. The right pattern is the estimated long term trend: there appears to have been a rise of around 1.5 F over the period of the data.
+
+Family: gaussian
+Link function: identity
+Formula:
+temp  ̃ s(day.of.year, bs = "cc", k = 20)
+Estimated degrees of freedom: 8.42289 total = 9.42289
+
+> anova(ctamm0$lme,ctamm$lme)
+Model df AIC BIC logLik Test L.Ratio p-value
+ctamm0$lme 1 5 18991.6 19022.8 -9490.8
+ctamm$lme 2 7 18983.8 19027.5 -9484.9 1 vs 2 11.8189 0.0027
+
+The hypothesis testing is again approximate here, but still suggests clear evidence for the trend. The AIC also clearly support the model with a long term trend.
+
+To finish this short example, we can plot the estimated model terms
+
+plot(ctamm$gam)
+
+which results in figure 6.14. The temperature increase appears to be quite marked. The simulation techniques covered in Chapter 5 can be used to simulate from the posterior distribtion of the modelled temperature rise, if required.
+
+6.8 Exercises
+
+1. Apigbreedingcompanywasinterestedininvestigatinglittertolittervariabilityin piglet weight (after a fixed growth period). 6 sows were selected randomly from the companies breeding stock, impregnated and 5 (randomly selected) piglets from each resulting litter were then weighed at the end of a growth period. The data were entered into an R data frame, pig, with weights recorded in column w and a column, sow, containing a factor variable indicating which litter the piglet came from. The following R session is part of the analysis of these data using a simple mixed model for piglet weight.
+
+> pig$w
+[1] 9.6 10.1 11.2 11.1 10.5 9.5 9.6 9.4 9.5 9.5 11.5 [12] 10.9 10.8 10.7 11.7 10.7 11.2 11.2 10.9 10.5 12.3 12.1 [23] 11.2 12.3 11.7 11.2 10.3 9.9 11.1 10.5
+> pig$sow
+[1] 111112222233333444445555566 [28] 6 6 6
+Levels: 1 2 3 4 5 6
+> m1<-lm(w ̃sow,data=pig) > anova(m1)
+Analysis of Variance Table
+Response: w
+          Df  Sum Sq Mean Sq F value
+Pr(>F) sow 5 15.8777 3.1755 14.897 1.086e-06 ***
+Residuals 24 5.1160 0.2132
+  > piggy<-aggregate(data.matrix(pig),
+  +                  by=list(sow=pig$sow),mean)
+  > m0<-lm(w ̃1,data=piggy)
+  > summary(m1)$sigmaˆ2
+  [1] 0.2131667
+  > summary(m0)$sigmaˆ2
+  [1] 0.6351067
+
+(a) The full mixed model being used in the R session has a random effect for litter/sow and a fixed mean. Write down a full mathematical specification of the model.
+
+(b) Specify the hypothesis being tested by the anova function, both in terms of the parameters of the mixed model, and in words.
+
+(c) What conclusion would you draw from the printed ANOVA table. Again state your conclusions both in terms of the model parameters and in terms of what this tells you about pigs.
+
+(d) Using the given output, obtain an (unbiased) estimate of the between litter variance in weight, in the wider population of pigs.
+
+2. Consider a model with 2 random effects of the form:
+
+yij = α + bi + cj + εij
+
+where i = 1,...,I, j = 1,...,J, bi ∼ N(0,σb2), cj ∼ N(0,σc2) and εij ∼ N(0,σ2) and all these r.v.’s are mutually independent. If the model is fitted by least squares then
+
+σˆ2 =RSS/(IJ−I−J+1)
+
+is an unbiased estimator of σ2, where RSS is the residual sum of squares from
+the model fit.
+
+(a) Show that, if the above model is correct, the averages y ̄i· =  j yij/J are governed by the model:
+
+y ̄ i · = a + e i
+
+wheretheei arei.i.d.N(0,σb2+σ2/J)andaisarandominterceptterm.Hence
+suggest how to estimate σb2.
+
+(b) Show that the averages y ̄·j =  i yij /I are governed by the model:
+
+y ̄·j = a′ + e′j
+
+wherethee′j arei.i.d.N(0,σc2+σ2/I)anda′ isarandominterceptparameter.
+
+Suggest an estimator for σc2.
+
+3. Data were collected on blood cholesterol levels and blood pressure for a group of patients regularly attending an outpatient clinic for a non heart disease related condition. Measurements were taken each time the patient attended the clinic. A possible model for the resulting data is,
+
+yij =μ+ai +βxij +εij, ai ∼N(0,σa2) and εij ∼N(0,σ2),
+
+where yij is the jth blood pressure measurement for the ith patient and xij is the corresponding cholesterol measurement. β is a fixed parameter relating blood pressure to cholesterol concentration and ai is a random coefficient for the ith patient. Assume (somewhat improbably) that the same number of measurements are available for each patient.
+
+(a) ExplainhowyouwouldtestH0 :σa2 =0vs.H1 :σa2 >0andtestH0 :β=0 vs H1 : β ̸= 0, using standard software for ordinary linear modelling.
+
+(b) Explain how β and σa2 could be estimated. You should write down the models involved, but should assume that these would be fitted using standard linear modelling software.
+
+4. Write out the following 3 models in the general form,
+
+y=Xβ+Zb+ε, b∼N(0,ψ) and ε∼N(0,Iσ2),
+
+where Z is a matrix containing known coefficients which determine how the re- sponse, y, depends on the random effects b (i.e. it is a ‘model matrix’ for the random effects). ψ is the covariance matrix of the random effects b. You should ensure that X is specified so that the fixed effects are identifiable (you don’t need to do this for Z) and don’t forget to specify ψ.
+
+(a) The model from question 3, assuming 4 patients and 2 measurements per pa- tient.
+
+(b) Themixedeffectsmodelfromsection6.1.1,assumingonlytwomeasurements per tree.
+
+(c) Model (6.6) from section 6.1.4, assuming that I = 2, J = 3 and K = 3.
+
+5.
+
+(a) Show that if X and Z are independent random vectors, both of the same di- mension, and with covariance matrices Σx and Σz , then the covariance matrix ofX+ZisΣx +Σz.
+
+(b) Consider a study examining patients blood insulin levels 30 minutes after eat- ing, y, in relation to sugar content, x, of the meal eaten. Suppose that each of 3 patients had their insulin levels measured for each of 3 sugar levels, and that an appropriate linear mixed model for the jth measurement on the ith patient is,
+
+yij =α+βxij +bi +εij, bi ∼N(0,σ2), and εij ∼N(0,σ2), 
+
+where all the random effects and residuals are mutually independent.
+
+i. Write this model out in matrix vector form.
+
+ii. Find the covariance matrix for the response vector y.
+
+6. The R data frame Oxide from the nlme library contains data from a quality control exercise in the semiconductor industry. The object of the exercise was to investigate sources of variability in the thickness of oxide layers in silicon wafers. The dataframe contains the following columns:
+
+Thickness is the thickness of the oxide layer (in nanometres, as far as I can tell).
+
+Source is a two level factor indicating which of two possible suppliers the sam- ple came from.
+
+Site is a 3 level factor, indicating which of three sites on the silicon wafer the thickness was measured.
+
+Lot is a factor variable with levels indicating which particular batch of Silicon wafers this measurement comes from.
+
+Wafer is a factor variable with levels labelling the individual wafers examined.
+
+The investigators are interested in finding out if there are systematic differences between the two sources, and expect that thickness may vary systematically across the three sites; they are only interested in the lots and wafers in as much as they are representative of a wider population of lots and wafers.
+
+(a) Identifywhichfactorsyouwouldtreatasrandomandwhichasfixed,inalinear mixed model analysis of these data.
+
+(b) Write down a model that might form a suitable basis for beginning to analyze the Oxide data.
+
+(c) Perform a complete analysis of the data, including model checking. Your aim should be to identify the sources of thickness variability in the data and any fixed effects causing thickness variability.
+
+7. Starting from model (6.6) in section 6.1.4, re-analyse the Machines data using lme. Try to find the most appropriate model, taking care to examine appropriate model checking plots. Make sure that you test whether the interaction in (6.6) is appropriate. Similarly test whether a more complex random effects structure would be appropriate: specifically one in which the machine-worker interaction is correlated within worker. If any data appear particularly problematic in the check- ing plots, repeat the analysis, and see if the conclusions change.
+
+8. This question follows on from question 7. Follow up multiple comparisons are a desirable part of some analyses. This question is about how to do this in practice. In the analysis of the Machines data the ANOVA table for the fixed effects indi- cates that there are significant differences between machine types, so an obvious follow up analysis would attempt to assess exactly where these differences lie. Obtaining Bonferroni corrected intervals for each of the 3 machine to machine differences would be one way to proceed, and this is easy to do.
+
+First note that provided you have set up the default contrasts using
+
+options(contrasts=c("contr.treatment","contr.treatment"))
+
+(before calling lme, of course) then lme will set your model up in such away that the coefficients associated with the Machine effect correspond to the difference
+between the second and first machines, and between the third and first machines. Hence the intervals function can produce two of the required comparisons automatically. However, by default the intervals function uses the 95% con- fidence level, which needs to be modified if you wish to Bonferroni correct for the fact that 3 comparisons are being made. If your model object is m1 then
+
+intervals(m1,level=1-0.05/3,which="fixed")
+
+will produce 2 of the required intervals. Note the Bonferroni correction ‘3’. The option which="fixed" indicates that only fixed effect intervals are required. The third comparison, between machines B and C can easily be obtained by changing the way that the factor variable Machine is treated, so that machine type B or C count as the ‘first machine’ when setting up the model. The MASS library provides a function, relevel, for doing this.
+
+library(MASS) # load MASS library 
+levels(Machines$Machine) # check the level names 
+## reset levels so that ‘first level’ is "B" ... Machines$Machine <- relevel(Machines$Machine,"B")
+
+Now refit the model and re-run the intervals function for the new fit. This will yield the interval for the remaining comparison (plus one of the intervals you already have, of course). What are the Bonferroni corrected 95% intervals for the 3 possible comparisons? How would you interpret them?
+
+9. The data frame Gun (library nlme) is from a trial examining methods for firing naval guns. Two firing methods were compared, with each of a number of teams of 3 gunners; the gunners in each team were matched to have similar physique (Slight, Average or Heavy). The response variable rounds is rounds fired per minute, and there are 3 explanatory factor variables, Physique (levels Slight, Medium and Heavy); Method (levels M1 and M2) and Team with 9 levels. The main interest is in determining which method and or physique results in the highest firing rate, and in quantifying team-to-team variability in firing rate.
+
+(a) Identify which factors should be treated as random and which as fixed, in the analysis of these data.
+
+(b) Write out a suitable mixed model as a starting point for the analysis of these data.
+
+(c) Analyse the data using lme in order to answer the main questions of inter- est. Include any necessary follow up multiple comparisons (as in the previous question) and report your conclusions.
+
+10. In an experiment comparing two varieties of Soybeans, plants were grown on 48 plots and measurements of leaf weight were taken at regular intervals as the plants grew. The nlme data frame Soybean contains the resulting data and has the following columns:
+
+Plot is a factor variable with levels for each of the 48 plots.
+
+weight is the leaf weight in grammes.
+
+Time is the time in days since planting.
+
+Variety is either F or P indicating the variety of Soybean.
+
+There is one observation for each variety in each plot at each time. Interest focuses on modelling the growth of Soybeans over time and on establishing whether or not this differs between the varieties.
+
+(a) A possible model for the weights is
+
+wijk =αi +βitk +γit2k +δit3k +aj +bjtk +εijk
+
+where wijk is the weight measurement for the ith variety in the jth plot at the kth time; [aj,bj]T ∼ N(0,ψ) where ψ is a covariance matrix, and εijk ∼ N(0, σ2). The random effects are independent of the residuals and independent of random effects with different j. The residuals are i.i.d.
+
+Fit this model using lme and confirm that the residual variance appears to increase with the (random effect conditional) mean.
+
+(b) To deal with the mean variance relationship, it might be appropriate to model the weights as being Gamma distributed, so that the model becomes a GLMM. e.g.
+
+log(μijk) = αi + βitk + γit2k + δit3k + aj + bjtk
+
+where μijk ≡ E(wijk) and wijk ∼ Gamma. Fit this GLMM, usingglmmPQL from the MASS package, and confirm the improvement in residual plots that results.
+
+(c) Explore the whether further improvements to the model could be made by modifications of the random or fixed effects model structures.
+
+11. This question follows on from question 10, on Soybean modelling.
+
+(a) Using gamm, replace the cubic function of time in the GLMM of question 10, with a smooth function of time. You should allow for the possibility that the varieties depend differently on time, and examine appropriate model checking plots.
+
+(b) Evaluate whether a model with or without a variety effect is more appropriate, and what kind of variety effect is most appropriate.
+
+(c) Explain why a model with separate smooths for the two different varieties is different to a model with a smooth for one variety and a smooth correction for the other variety.
+
+[1] One important part of the design of such an experiment would be to ensure that the trees are grown under natural, variable light levels. At constant average light levels the plants are not CO2 limited.
+
+[†] summary(b) could have been replaced by anova(b, type = "marginal"), the latter being the more useful function for models with factors.

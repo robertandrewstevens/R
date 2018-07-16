@@ -1,0 +1,1404 @@
+
+    
+     CHAPTER 2
+Generalized Linear Models
+Generalized linear models∗ (Nelder and Wedderburn, 1972) allow for response dis- tributions other than normal, and for a degree of non-linearity in the model structure. A GLM has the basic structure
+g(μi) = Xiβ,
+where μi ≡ E(Yi), g is a smooth monotonic ‘link function’, Xi is the ith row of a model matrix, X, and β is a vector of unknown parameters. In addition, a GLM usually makes the distributional assumptions that the Yi are independent and
+Yi ∼ some exponential family distribution.
+The exponential family of distributions includes many distributions that are useful for practical modelling, such as the Poisson, Binomial, Gamma and Normal distri- butions. The comprehensive reference for GLMs is McCullagh and Nelder (1989), while Dobson (2001) provides a thorough introduction.
+Because generalized linear models are specified in terms of the ‘linear predictor’, Xβ, many of the general ideas and concepts of linear modelling carry over, with a little modification, to generalized linear modelling. Basic model formulation is much the same as for linear models, except that a link function and distribution must be chosen. Of course, if the identity function is chosen as the link, along with the normal distribution, then ordinary linear models are recovered as a special case.
+The generalization comes at some cost however: model fitting now has to be done iteratively, and distributional results, used for inference, are now approximate and justified by large sample limiting results, rather than being exact. But before going further into these issues, consider a couple of simple examples.
+Example 1: In the early stages of a disease epidemic, the rate at which new cases occur can often increase exponentially through time. Hence, if μi is the expected number of new cases on day ti, a model of the form
+μi = c exp(bti),
+∗ Note that there is a distinction between ‘generalized’ and ‘general’ linear models - the latter term being
+sometimes used to refer to all linear models other than simple straight lines. 59
+     
+    60 GENERALIZED LINEAR MODELS
+might be appropriate, where c and b are unknown parameters. Such a model can be turned into GLM form, by using a log link so that
+log(μi) = log(c) + bti = β0 + tiβ1
+(by definition of β0 = log c and β1 = b). Note that the right hand side of the model is now linear in the parameters. The response variable is the number of new cases per day and, since this is a count, the Poisson distribution is probably a reasonable distribution to try. So the GLM for this situation uses a Poisson response distribution, log link, and linear predictor β0 + tiβ1.
+Example 2: The rate of capture of prey items, yi, by a hunting animal, tends to increase with increasing density of prey, xi, but to eventually level off, when the predator is catching as much as it can cope with. A suitable model for this situation might be
+μi= axi , h+xi
+where a is an unknown parameter, representing the maximum capture rate, and h is an unknown parameter, representing the prey density at which the capture rate is half the maximum rate. Obviously this model is non-linear in its parameters, but, by using a reciprocal link, the right hand side can be made linear in the parameters:
+1 = 1 + h 1 = β0 + 1 β1 μiaaxi xi
+(here β0 ≡ 1/a and β1 ≡ h/a). In this case the standard deviation of prey capture rate might be approximately proportional to the mean rate, suggesting the use of a Gamma distribution for the response, and completing the model specification.
+Of course we are not restricted to the simple straight line forms of the examples, but can have any structure for the linear predictor that was possible for linear models.
+2.1 The theory of GLMs
+Estimation and inference with GLMs is based on the theory of maximum likelihood estimation, although the maximization of the likelihood turns out to require an it- erative least squares approach, related to the method of section 1.8.6. This section begins by introducing the exponential family of distributions, which allows a gen- eral method to be developed for maximizing the likelihood of a GLM. Inference for GLMs is then discussed, based on general results of likelihood theory (which are derived at the end of the chapter). In this section it is sometimes useful to distinguish between the response data, y, and the random variable that it is an observation of, Y , so they are distinguished notationally: this has not been done for estimates and estimators.
+          
+    THE THEORY OF GLMS 61
+                                         f(y) Range θ
+1 exp −(y−μ)2   σ√2π 2σ2
+μy exp(−μ) y!
+ n  μ y  1− μ n−y y n n
+1  ν ν yν−1 exp −νy  Γ(ν) μ μ
+ 
+γ 2πy3
+exp −γ(y−μ)2   2μ2y
+Normal
+Poisson
+Binomial
+Gamma
+Inverse Gaussian
+−∞ < y < ∞ μ
+y = 0, 1, 2, . . . log(μ)
+y = 0, 1, . . . , n log  μ  
+y > 0 −1
+y > 0 −1
+2μ2 φ σ2 1 1 1 1
+b(θ) θ2 exp(θ) n log  1 + eθ   − log(−θ) −√−2θ 2
+n−μ
+μ
+a(φ) φ(=σ2) φ(=1) φ(=1) φ = 1  φ = 1  νγ
+−1  y2 +log(2πφ)  −log(y!) log n  νlog(νy)−log(yΓ(ν))
+2φ y 2φy
+c(y,φ)
+V(μ) 1 μ μ(1−μ/n) μ2
+−1  log(2πy3φ)+ 1   μ3
+g (μ) μ c
+1
+log(μ) μ 1
+n−μ μ μ2
+2ylog y − 2 ylog y + 2 y−μˆ −log y   (y−μˆ)2 μˆ μˆ μˆ μˆ μˆ2y
+D(y,μˆ) (y−μˆ)2
+Table 2.1 Some Exponential Family Distributions. Note that when y = 0, y log(y/μˆ) is replaced by zero (its limit as y → 0).
+2 ( y − μˆ ) ( n − y ) l o g   n − y     n−μˆ
+νγ
+    62 GENERALIZED LINEAR MODELS
+2.1.1 The exponential family of distributions
+The response variable in a GLM can have any distribution from the exponential fam- ily. A distribution belongs to the exponential family of distributions if its probability density function, or probability mass function, can be written as
+fθ (y) = exp [{yθ − b(θ)}/a(φ) + c(y, φ)] ,
+where b, a and c are arbitrary functions, φ an arbitrary ‘scale’ parameter, and θ is known as the ‘canonical parameter’ of the distribution (in the GLM context, θ will completely depend on the model parameters β, but it is not necessary to make this explicit yet).
+For example, it is easy to see that the normal distribution is a member of the expo- nential family since
+1   (y−μ)2  fμ(y) = σ√2π exp − 2σ2
+   √   = exp 2σ2 − log(σ 2π)
+ −y2 +2yμ−μ2
+ yμ−μ2/2 y2 √  
+   = exp σ2 −2σ2 −log(σ 2π) ,
+  which is of exponential form, with θ = μ, b(θ) = θ2/2 ≡ μ2/2, a(φ) = φ = σ2 and c(φ, y) = −y2/(2φ) − log(√φ2π) ≡ −y2/(2σ2) − log(σ√2π). Table 2.1 gives a similar breakdown for the members of the exponential family implemented for GLMs in R.
+It is possible to obtain general expressions for the the mean and variance of expo- nential family distributions, in terms of a, b and φ. The log likelihood of θ, given a particular y, is simply log[fθ(y)] considered as a function of θ. That is
+  l(θ) = [yθ − b(θ)]/a(φ) + c(y, φ) ∂l = [y − b′(θ)]/a(φ).
+and so
+Treating l as a random variable, by replacing the particular observation y by the
+ ∂θ
+random variable Y , enables the expected value of ∂l/∂θ to be evaluated:
+E   ∂l   = [E(Y ) − b′(θ)]/a(φ). ∂θ
+Using the general result that E(∂l/∂θ) = 0 (at the true value of θ, see (2.14) in section 2.4) and re-arranging implies that
+E(Y ) = b′(θ). (2.1)
+i.e. the mean, of any exponential family random variable, is given by the first deriva- tive of b w.r.t. θ, where the form of b depends on the particular distribution. This equation is the key to linking the model parameters, β, of a GLM to the canonical
+     
+    THE THEORY OF GLMS 63
+parameters of the exponential family. In a GLM, the parameters β determine the mean of the response variable, and, via (2.1), they thereby determine the canonical parameter for each response observation.
+Differentiating the likelihood once more yields
+∂2l = −b′′(θ)/a(φ), ∂θ2
+and plugging this into the general result, E(∂2l/∂θ2) = −E[(∂l/∂θ)2] (the deriva- tives are evaluated at the true θ value, see result (2.16), section 2.4), gives
+b′′(θ)/a(φ) = E  (Y − b′(θ))2  /a(φ)2, which re-arranges to the second useful general result:
+var(Y ) = b′′(θ)a(φ).
+a could in principle be any function of φ, and when working with GLMs there is no difficulty in handling any form of a, if φ is known. However, when φ is unknown matters become awkward, unless we can write a(φ) = φ/ω, where ω is a known constant. This restricted form in fact covers all the cases of practical interest here (see e.g. table 2.1). a(φ) = φ/ω allows the possibility of, for example, unequal variances in models based on the normal distribution, but in most cases ω is simply 1. Hence we now have
+var(Y ) = b′′(θ)φ/ω. (2.2)
+In subsequent sections it will often be convenient to consider var(Y ) as a function of μ ≡ E(Y ), and, since μ and θ are linked via (2.1), we can always define a function V (μ) = b′′(θ)/ω, such that var(Y ) = V (μ)φ. Several such functions are listed in table 2.1.
+2.1.2 Fitting Generalized Linear Models
+Recall that a GLM models an n−vector of independent response variables, Y, where
+ μ ≡ E(Y), via
+and
+g(μi) = Xiβ Yi ∼fθi(yi),
+where fθi (yi) indicates an exponential family distribution, with canonical parameter
+θi, which is determined by μi (via equation 2.1) and hence ultimately by β. Given vector y, an observation of Y, maximum likelihood estimation of β is possible. Since the Yi are mutually independent, the likelihood of β is
+n
+L(β) =   fθi (yi), i=1
+    
+    64 GENERALIZED LINEAR MODELS
+and hence the log-likelihood of β is n
+  log[fθi (yi)] i=1
+l(β) =
+=  [yiθi − bi(θi)]/ai(φ) + ci(φ, yi),
+where the dependence of the right hand side on β is through the dependence of the θi on β. Notice that the functions a, b and c may vary with i — this allows different binomial denominators, ni, for each observation of a binomial response, or different (but known to within a constant) variances for normal responses, for example. φ, on the other hand, is assumed to be the same for all i. As discussed in the previous section, for practical work it suffices to consider only cases where we can write ai(φ) = φ/ωi, where ωi is a known constant (usually 1), in which case
+n
+l(β) =   ωi[yiθi − bi(θi)]/φ + ci(φ, yi).
+i=1
+Maximization proceeds by partially differentiating l w.r.t. each element of β, setting
+the resulting expressions to zero and solving for β.
+and by the chain rule
+∂ l 1  n   ∂ θ i ′ ∂ θ i   ∂β =φ ωi yi∂β −bi(θi)∂β ,
+j i=1 j j
+∂θi = ∂θi ∂μi ,
+n i=1
+       ∂βj ∂μi ∂βj so that differentiating (2.1), we get
+∂μi=b′′(θ)⇒∂θi= 1 , ∂θi i i ∂μi b′′(θi)
+∂ l = 1  n [ y i − b ′ i ( θ i ) ] ∂ μ i . ∂βj φ b′′(θi)/ωi ∂βj
+   which then implies that
+i
+    i=1 i
+Substituting from (2.1) and (2.2), into this last equation, implies that the equations to
+solve for β are
+ n (yi−μi)∂μi=0∀j. (2.3) i=1 V(μi) ∂βj
+  However, these equations are exactly the equations that would have to be solved in order to find β by non-linear weighted least squares, if the weights V (μi) were known in advance and were independent of β. In this case the least squares objective would be
+ n ( y i − μ i ) 2
+S= V(μi) , (2.4)
+ i=1
+    
+    THE THEORY OF GLMS 65
+where μi depends non-linearly on β, but the weights V (μi) are treated as fixed. To find the least squares estimates involves solving ∂S/∂βj = 0 ∀ j, but this system of equations is easily seen to be (2.3), when the V (μi) terms are treated as fixed.
+This correspondence immediately suggests an iterative method for solving (2.3). Let
+βˆ[k] denote the estimated parameter vector at the kth iterate and let η[k] and μ[k] be
+the vectors with elements η[k] = Xiβˆ[k] and μ[k] = g−1(η[k]), respectively, where iii
+g−1(·) is the inverse function of the link. Starting with a parameter guesstimate, βˆ[0], the following steps are iterated until the sequence of βˆ[k]’s converges:
+1. Calculate the V (μ[k]) terms implied by the current βˆ[k]. i
+2. Given these estimates use the method of section 1.8.6 to minimize (2.4) with respect to β, in order to obtain βˆ[k+1] (the V (μ[k]) being treated as fixed and not
+as functions of β).
+3. Setktok+1.
+In fact this method is slower than it need be. Step 2 itself involves iteration, but there
+is little point in actually iterating the non-linear least squares method to convergence
+before the V (μ[k]) have converged. Hence step 2 is usually replaced by: i
+2. Usingβˆ[k]asthestartingvalues,performoneiterationonly,oftheiterativemethod of solving (2.4) given in section 1.8.6, to obtain βˆ[k+1].
+Applying this approach results in a rather compact and neat scheme. To see this let us
+write the non-linear least squares problem in matrix form. Defining diagonal matrix
+V where V = V (μ[k]), (2.4) becomes [k] [k]ii i
+   −1  2 S =   V[k] [y − μ(β)] 
+and, following the method of section 1.8.6, μ is replaced by its first order Taylor expansion around βˆ[k] so that
+   −1  [k]   ˆ[k]   2 S≈  V[k] y−μ −J β−β  
+i
+  where J is the ‘Jacobian’ matrix, with elements Jij = ∂μi/∂βj |βˆ[k] . Now g(μi)=Xiβ⇒g′(μi)∂μi =Xij
+ and hence
+∂βj
+∂μi   ′ [k]
+Jij = =Xij/g(μ ). ∂ β j   βˆ [ k ] i
+ So defining G as the diagonal matrix with elements Gii = g′(μ[k]), J = G−1X. i
+Hence, without further approximation,
+   −1 −1  [k]
+S ≈   V[k]G G(y−μ )+η −Xβ  
+   [k]   [k]   2 = W z−Xβ 
+[k]   2
+      
+    66 GENERALIZED LINEAR MODELS by definition of ‘pseudodata’
+z[k] = g′(μ[k])(yi − μ[k]) + η[k] iii
+and diagonal weight matrix, W[k], with elements
+W[k] = 1 .
+ii V (μ[k])g′(μ[k])2 ii
+The following steps are therefore iterated to convergence
+1. Using the current μ[k] and η[k] calculate pseudodata z[k] and iterative weights
+W[k].
+ √ [k] [k]   2
+2. Minimize the sum of squares   W z − Xβ   with respect to β, in order
+to obtain βˆ[k+1], and hence η[k+1] = Xβˆ[k+1] and μ[k+1]. Increment k by one.
+The converged βˆ solves (2.3), and is hence the maximum likelihood estimate of β†. The algorithm converges in most practical circumstances, although there are excep- tions (for example poor or overly flexible models of binomial data).
+Notice that to start the iteration we only need μ[0] and η[0] values, but not βˆ[0]. Hence the iteration is usually started by setting μ[0] = yi and η[0] = g(μ[0]), with
+  slight adjustment of μ[0], as required, to avoid infinite η[0]’s (e.g. if yi = 0 with a ii
+log link). The method is known as Iteratively Re-weighted Least Squares (IRLS) for obvious reasons, and is due, in this context, to Nelder and Wedderburn (1972).
+2.1.3 The IRLS objective is a quadratic approximation to the log-likelihood
+The working linear model in the IRLS iteration is not simply a means of finding the maximum likelihood estimates of the parameters. To within an additive constant
+1  √  2 S=−2φ  W(z−Xβ) 
+(at convergence) is also a quadratic approximation to the log likelihood of the model in the vicinity of βˆ. Clearly the first derivatives w.r.t. the βj match between the log- likelihood and S: in fact they are all zero. The second derivative matrix of S is −XWX/φ and this turns out to match the expected second derivative matrix of the log likelihood, and hence, by the law of large numbers, the second derivative matrix itself, in the large sample limit.
+To prove this, first define u as the vector of derivatives of the log -likelihood w.r.t. the model parameters, so that ui = ∂l/∂βi, and then re-write the derivatives in (2.3) in matrix vector form as
+u = XTG−1V−1(y − μ)/φ.
+† Note that the algorithm would not minimize (2.4) if V(μi) was treated as a function of β, since in that case equating the derivatives to zero would not yield (2.3). i.e. the likelihood maximization is fundamentally different to least squares with a mean variance relationship.
+iii
+      
+    THE THEORY OF GLMS 67 Then
+XTG−1V−1E[(Y − μ)(Y − μ)T]V−1G−1X/φ2 = XT WX/φ
+E(uuT) =
+= XT G−1 V−1 VV−1 G−1 X/φ
+since E[(Y − μ)(Y − μ)T] = Vφ. By the general likelihood result (2.19), in section 2.4.2, −E(uuT) is also the expected second derivative matrix of the log likelihood.
+This correspondence of derivatives is sufficient to demonstrate that S is a quadratic approximation to the log-likelihood in the vicinity of the βˆ, and, by consistency of MLEs, in the vicinity of the true parameter values.
+2.1.4 AIC for GLMs
+Model selection by direct comparison of likelihoods suffers from the problem that, if redundant parameters are added to a correct model, the likelihood almost always increases (and never decreases), because the extra parameters let the model get closer to the data, even though that only means ‘modelling the noise’ component of the data. As in the linear model case, this problem would be alleviated if we were somehow able to choose models on the basis of their ability to fit the mean of the data, μ, rather than the data, y. In a GLM context, a reasonable approach would be to choose between models on the basis of their ability to maximize l(β; μ), rather than l(β; y), but to do so we have to be able to estimate l(β; μ).
+Actually this estimation is straightforward. From section 2.1.3 we have that
+ˆ 1 √ ˆ  2 l(β;y)≃k−2φ  W z−Xβ   ,
+and since this must also hold true if y = μ
+ˆ 1 √ ˆ  2
+l(β;μ)≃k−2φ  W η−Xβ   .
+Then the argument leading to (1.15) in section 1.8.5 (modified only to include weights) yields the estimator
+           1√2
+ˆˆ
+l(β;μ) = k−2φ  W z−Xβ   +n/2−tr(A)
+  ≃ l(βˆ;y)−tr(A)+n/2
+where A = X(XTWX)−1XTW and hence tr(A) = p, the number of (identifi-
+able) model parameters.
+Hence, when choosing between models, we would choose whichever model had the highest value of l(βˆ) − p, which is equivalent to choosing the model with the lowest value of Akaike’s Information Criterion (Akaike, 1973),
+AIC = 2[−l(βˆ) + p].
+    
+    68 GENERALIZED LINEAR MODELS
+The forgoing argument assumes that φ is known. If it is not then an estimate‡, φˆ, will be needed in order to evaluate the AIC, and as a result the penalty term p in the AIC will become p + 1. This generalization is justified in section 2.4.7.
+2.1.5 Large sample distribution of βˆ
+Distributional results for GLMs are not exact, but are based instead on large sample approximations, making use of general properties of maximum likelihood estimators including consistency (see section 2.4). From the general properties of maximum likelihood estimators, we have that, in the large sample limit,
+βˆ ∼ N ( β , I − 1 ) ,
+where I = E(uuT) is the information matrix of the model parameters, and u is the vector of derivatives of the log -likelihood w.r.t. the model parameters, so that ui = ∂l/∂βi (see (2.20) and (2.19) in section 2.4). In section 2.1.3 it was shown that E(uuT) = XTWX/φ and hence in the large sample limit
+βˆ ∼ N(β,(XTWX)−1φ).
+For distributions with known scale parameter, φ, this result can be used directly to find confidence intervals for the parameters, but if the scale parameter is unknown (e.g. for the normal distribution), then it must be estimated, and intervals must be based on an appropriate t distribution. Scale parameter estimation is covered in sec- tion 2.1.7.
+2.1.6 Comparing models by hypothesis testing
+Consider testing
+against
+H0 : g(μ) = X0β0
+H1 : g(μ) = X1β1,
+where μ is the expectation of a response vector, Y, whose elements are independent
+random variables from the same member of the exponential family of distributions, and where X0 ⊂ X1. If we have an observation, y, of the response vector, then a generalized likelihood ratio test can be performed. Let l(βˆ0) and l(βˆ1) be the maxi- mized likelihoods of the two models. If H0 is true then in the large sample limit,
+2 [ l ( βˆ 1 ) − l ( βˆ 0 ) ] ∼ χ 2p 1 − p 0 , ( 2 . 5 )
+where pi is the number of (identifiable) parameters (βi) in model i (see sections 2.4.5 and 2.4.6 for the derivation of this result). If the null hypothesis is false, then model 1 will tend to have a substantially higher likelihood than model 0, so that twice the
+‡ which should strictly be a maximum likelihood estimate, or an estimator tending to the MLE in large sample limit.
+    
+    THE THEORY OF GLMS 69
+difference in log likelihoods would be too large for consistency with the relevant χ2 distribution.
+The approximate result (2.5) is only directly useful if the log likelihoods of the mod- els concerned can be calculated. In the case of GLMs estimated by IRLS, this is only the case if the scale parameter, φ, is known. Hence the result can be used directly with Poisson and binomial models, but not with the normal§, gamma or inverse Gaussian distributions, where the scale parameter is not known. What to do in these latter cases will be discussed shortly.
+Deviance
+When working with GLMs in practice, it is useful to have a quantity that can be inter- preted in a similar way to the residual sum of squares, in ordinary linear modelling. This quantity is the deviance of the model and is defined as
+D = 2[l(βˆmax) − l(βˆ)]φ n
+=  2ω  y (θ ̃ −θˆ)−b(θ ̃)+b(θˆ) , iiiiii
+i=1
+(2.6) (2.7)
+where l(βˆmax) indicates the maximized likelihood of the saturated model: the model with one parameter per data point. l(βˆmax) is the highest value that the likelihood
+could possibly have, given the data, and is evaluated by simply setting μˆ = y and evaluating the likelihood. θ ̃ and θˆ denote the maximum likelihood estimates of canonical parameters, for the saturated model and model of interest, respectively. Notice how the deviance is defined to be independent of φ. Table 2.1 lists the con- tributions of a single datum to the deviance, for several distributions — these are the terms inside the summation in the definition of the deviance.
+Related to the deviance is the scaled deviance, D∗ = D/φ,
+which does depend on the scale parameter. For the Binomial and Poisson distribu- tions, where φ = 1, the deviance and scaled deviance are the same, but this is not the case more generally.
+By the generalized likelihood ratio test result (2.5), we might expect that, if the model is correct, then approximately
+D ∗ ∼ χ 2n − p , ( 2 . 8 )
+in the large sample limit. Actually such an argument is bogus, since the limiting argu- ment justifying (2.5) relies on the number of parameters in the model staying fixed, while the sample size tends to infinity, but the saturated model has as many param- eters as data. Asymptotic results are available for some of the distributions in table 2.1, to justify (2.8) as a large sample approximation under many circumstances (see
+§ Of course for normal distribution and identity link we use the results of chapter 1.
+    
+    70 GENERALIZED LINEAR MODELS
+McCullagh and Nelder, 1989), and it is exact for the Normal case. Note, however, that it breaks down entirely for the binomial with binary data.
+Given the definition of deviance, it is easy to see that the likelihood ratio test, with which this section started, can be performed by re-expressing the twice log-likelihood ratio statistic as D0∗ − D1∗ . Then under H0
+D 0∗ − D 1∗ ∼ χ 2p 1 − p 0 ( 2 . 9 )
+(in the large sample limit), where Di∗ is the deviance of model i which has pi iden- tifiable parameters. But again, this is only useful if the scale parameter is known so that D∗ can be calculated.
+Model comparison with unknown φ
+Under H0 we have the approximate results
+D0∗ − D1∗ ∼ χ2p1−p0 and D1∗ ∼ χ2n−p,
+and, if D0∗ − D1∗ and D1∗ are treated as asymptotically independent, this implies that F = (D0∗ − D1∗)/(p1 − p0) ∼ Fp1−p0,n−p1 ,
+D1∗/(n−p1)
+in the large sample limit (a result which is exactly true in the ordinary linear model special case, of course). The useful property of F is that it can be calculated without knowing φ, which can be cancelled from top and bottom of the ratio yielding, under H0, the approximate result that
+F = (D0 − D1)/(p1 − p0)∼ ̇ Fp1−p0,n−p1 . (2.10) D1/(n − p1)
+The advantage of this result is that it can be used for hypothesis testing based model comparison, when φ is unknown. The disadvantages are the dubious distributional assumption for D1∗ , and the independence approximation, on which it is based.
+Of course an obvious alternative approach would be to use an estimate, φˆ, to obtain an estimate, Dˆi∗ = Diφˆ, for each model, and then to use (2.9) for hypothesis testing. However if we use the estimate (2.11) for this purpose then it is readily seen that Dˆ0∗ −Dˆ1∗ is simply (n−p1)×F, so our test would be exactly equivalent to using the F ratio result (2.10), but with Fp1−p0,∞ as the reference distribution. Clearly direct use of (2.10) is a more conservative approach, and hence usually to be preferred: it at least makes some allowance for the uncertainty in estimating the scale parameter.
+2.1.7 φˆ and Pearson’s statistic
+As we have seen, the MLEs of the parameters, β, can be obtained without knowing the scale parameter, φ, but, in those cases in which this parameter is unknown, it must usually be estimated. Approximate result (2.8) provides one obvious estimator.
+      
+    THE THEORY OF GLMS 71 The expected value of a χ2n−p random variable is n − p, so equating the observed
+D∗ = D/φ to its approximate expected value we have
+φˆ D = Dˆ / ( n − p ) . ( 2 . 1 1 )
+A second estimator is based on the Pearson statistic , which is defined as X2= n (yi−μˆi)2
+i = 1 V ( μˆ i )
+Clearly X2/φ would be the sum of squares of a set of zero mean, unit variance, random variables, having n − p degrees of freedom, suggesting ¶ that if the model is adequate then approximately X2/φ ∼ χ2n−p: this approximation turns out to be well founded. Setting the observed Pearson statistic to its expected value we get
+φˆ = Xˆ 2 / ( n − p ) . Note, that it is straightforward to show that
+X2 = ∥√W(z − Xβˆ)∥2,
+where W and z are the IRLS weights and pseudodata, evaluated at convergence.
+2.1.8 Canonical link functions
+The canonical link, gc, for a distribution, is the link function such that gc(μi) = θi, where θi is the canonical parameter of the distribution. For example, for the Poisson distribution the canonical link is the log function (see table 2.1 for other examples). Use of the canonical link means that θi = Xiβ (where Xi is the ith row of X).
+Canonical links tend to have some nice properties, such as ensuring that μ stays within the range of the response variable, but they also have more subtle advantages, one of which is derived here. Recall that likelihood maximization involves differen- tiating the log likelihood with respect to each βj , and setting the results to zero, to obtain the system of equations
+∂l n ∂θi ∂θi 
+∂β= ωi yi∂β−μi∂β =0∀j.
+ji=1 j j
+But if the canonical link is being used then ∂θi/∂βj = Xij, and if, as is often the
+case, wi = 1 ∀ i this system of equations reduces to X T y − X T μˆ = 0 ,
+i.e. to XTy = XTμˆ. Now consider the case in which X contains a column of 1’s: this implies that one of the equations in this system is simply  i yi =  i μˆi. Sim- ilarly any other weighted summation, where the weights are given by model matrix
+¶ Recall that if {Zi : i = 1...n} are a set of i.i.d. N(0,1) r.v.’s then PZi2 ∼ χ2n.
+         
+    72 GENERALIZED LINEAR MODELS
+columns (or a linear combination of these), is conserved between the raw data and the fitted values.
+One practical upshot of this is that, for any GLM with an intercept term and canoni- cal link, the residuals will sum to zero: this ‘observed unbiasedness’ is a reassuring property. Another practical use of the result is in categorical data analysis using log- linear models, where it provides a means of ensuring, via specification of the model, that totals which were built into the design of a study can be preserved in any model.
+2.1.9 Residuals
+Model checking is perhaps the most important part of applied statistical modelling. In the case of ordinary linear models, this is based on examination of the model residuals, which contain all the information in the data, not explained by the sys- tematic part of the model. Examination of residuals is also the chief means for model checking in the case of GLMs, but in this case the standardization of residuals is both necessary and a little more difficult.
+For GLMs the main reason for not simply examining the raw residuals, εˆ = y − μˆ , iii
+is the difficulty of checking the validity of the assumed mean variance relationship from the raw residuals. For example, if a Poisson model is employed, then the vari- ance of the residuals should increase in direct proportion to the size of the fitted values (μˆi). However if raw residuals are plotted against fitted values it takes an extra-ordinary ability to judge whether the residual variability is increasing in pro- portion to the mean, as opposed to, say, the square root or square of the mean. For this reason it is usual to standardize GLM residuals, in such a way that, if the model assumptions are correct, the standardized residuals should have approximately equal variance, and behave, as far as possible, like residuals from an ordinary linear model (although see figure 6.9 in section 6.5 for an alternative plotting approach).
+Pearson Residuals
+The most obvious way to standardize the residuals is to divide them by a quantity proportional to their standard deviation according to the fitted model. This gives rise
+to the Pearson residuals
+εˆ=  ,
+V ( μˆ i )
+which should have approximately zero mean and variance φ, if the model is correct.
+These residuals should not display any trend in mean or variance when plotted against the fitted values, or any covariates (whether included in the model or not). The name ‘Pearson residuals’ relates to the fact that the sum of squares of the Pearson residuals gives the Pearson statistic discussed in section 2.1.7.
+Note that the Pearson residuals are the residuals of the working linear model from the converged IRLS method, divided by the square roots of the converged IRLS weights.
+p y i − μˆ i
+ i
+     
+    THE THEORY OF GLMS 73
+Deviance Residuals
+In practice the distribution of the Pearson residuals can be quite asymmetric around zero, so that their behaviour is not as close to ordinary linear model residuals as might be hoped for. The deviance residuals are often preferable in this respect. The deviance residuals are arrived at by noting that the deviance plays much the same role for GLMs that the residual sum of squares plays for ordinary linear models: indeed for an ordinary linear model the deviance is the residual sum of squares. In the ordinary linear model case, the deviance is made up of the sum of the squared residuals. That is the residuals are the square roots of the components of the deviance with the appropriate sign attached.
+So, writing di as the component of the deviance contributed by the ith datum (i.e. the ith term in the summation in (2.7)) we have
+n
+D =   di
+i=1
+and, by analogy with the ordinary linear model, we can define
+d 
+εˆ = s i g n ( y − μˆ ) d .
+As required the sum of squares of these ‘deviance residuals’ gives the deviance itself.
+Now if the deviance were calculated for a model where all the parameters were known, then (2.8) would become D∗ ∼ χ2n, and this might suggest that for a sin- gle datum di ∼ χ21 , implying that εdi ∼ N (0, 1). Of course (2.8) can not reasonably be applied to a single datum, but non the less it suggests that we might expect the deviance residuals to behave something like N(0,1) random variables, for a well fitting model, especially in cases for which (2.8) is expected to be a reasonable ap- proximation.
+2.1.10 Quasi-likelihood
+The treatment of GLMs has so far assumed that the distribution of the response vari- able is a known member of the exponential family. If there is a good reason to sup- pose that the response follows a particular distribution then it is appealing to base models on that distribution, but in many cases the nature of the response distribution is not known so precisely, and it is only possible to specify what the relationship between the variance of the response and its mean should be. That is, the function V (μ) can be specified, but little more. The question then arises of whether it is possi- ble to develop theory for fitting and inference with GLMs, starting from the position of specifying only the mean variance relationship.
+It turns out that it is possible to develop satisfactory methods, based on the notion of quasi-likelihood. Consider an observation, yi, of a random variable with mean μi and known variance function, V (μi). Then the log quasi likelihood for μi given yi is
+ i iii
+    
+    74 definedtobe
+GENERALIZED LINEAR MODELS
+qi(μi) =
+  μi yi −z
+φV (z)dz. (2.12)
+ yi
+As we will see, the key feature of this function is that it shares many useful proper-
+ties of li, the log-likelihood corresponding to a single observation, but only requires knowledge of V rather than the full distribution of Yi. Provided that the data are ob- servations of independent random variables, we can define a log quasi likelihood for the mean vector, μ, of all the response data, or any parameter vector defining μ as
+n
+q(μ) =   qi(μi). i=1
+The key property of q is that, for the purposes of inference with GLMs, it behaves in a very similar manner to the log-likelihood, but only requires knowledge of the variance function in order to define it.
+Consider, for example, obtaining maximum quasi-likelihood parameter estimates of the GLM parameters β. Differentiating q w.r.t. βj yields
+∂ q =  n y i − μ i ∂ μ i , ∂βj i=1 φV(μi)∂βj
+so that the parameter estimates are solutions to the equations
+ n ( y i − μ i ) ∂ μ i = 0 ∀ j , i=1 V(μi) ∂βj
+but this is exactly the system (2.3), that must be solved to find the m.l.e.s for a GLM. Hence the maximum quasi-likelihood parameter estimates can be found by the usual GLM IRLS method, which in any case only requires knowledge of V (μ).
+Furthermore, the log-quasi likelihood shares just enough properties with the log- likelihood that the results on the large sample distribution of the parameter estima- tors, given in section 2.1.5, also hold for the maximum quasi-likelihood estimators of the parameters. Similarly, the large sample distributional results of section 2.1.6, underpinning hypothesis testing with GLMs, hold when the log-likelihood, l, is re- placed by the log quasi-likelihood, q. The theoretical basis for these assertions is provided in section 2.4.8.
+Note that the log quasi-likelihood of the saturated model is always zero, so the quasi- deviance of a GLM is simply
+Dq = −2q(μˆ)φ.
+Obviously the discussion of residuals and scale parameter estimation also carries over from the likelihood to the quasi-likelihood case, again with no more than the replacement of l by q.
+The practical use of the quasi-likelihood approach requires that the integral in (2.12) be evaluated, but this is possible for most practically useful forms of V : McCullagh
+         
+    GEOMETRY OF GLMS 75
+and Nelder (1989) give examples, or in R you can type e.g. quasi(variance="muˆ3")$dev.resids
+to access the form of qi for any particular mean variance relationship there imple- mented. For mean variance relationships corresponding to an exponential family dis- tribution from table 2.1, the form of the quasi-deviance corresponds exactly to the form of the deviance for that family.
+One major practical use of quasi-likelihood is to provide a means of modelling count data that are more variable than the Poisson or binomial distributions (with their fixed scale parameters) predict: the quasi-likelihood approach assumes that φ is unknown. Such ‘over-dispersed’ data are common in practice. Another practical use is to pro- vide a means of modelling data with a mean variance relationship for which there is no obvious exponential family distribution: for example continuous data for which the variance is expected to be proportional to the mean.
+2.2 Geometry of GLMs
+The geometry of GLMs and GLM fitting is less straightforward than the geometry of ordinary linear models, since the likelihood used to judge model fit does not generally mean that the fit can be judged by Euclidian distance between model and data. Figure 2.1 illustrates the geometric situation that prevails for GLMs, using the example of the fit to 3 data of a 2 parameter GLM with a Gamma distribution and a log link. The flat model subspace of section 1.4 is now replaced by a curved ‘model manifold’, consisting of all the possible fitted value vectors predictable by the model. Since Euclidean distance between model manifold and data is no longer the measure of fit being used then different means must be employed to illustrate the geometry of estimation. The black lines, in the right panel of figure 2.1, show all the combinations of the response variables, which give rise to the same estimated model. Notice how these lines are not generally parallel, and are not generally orthogonal to the model manifold.
+To fully understand figure 2.1, it may help to consider what the figure would look like for some different 2 parameter models.
+1. For an ordinary linear model, the model manifold would be a flat plane, to which all the lines of equal fit would be orthogonal (and hence parallel to each other).
+2. For a GLM assuming a normal distribution (but non-identity link) the lines of equal fit would be orthogonal to the (tangent space of the) model manifold where they meet it.
+3. For a 2 parameter fit to 4 data, the lines of equal fit would become planes of equal fit.
+In general, the geometric picture presented in figure 2.1 applies to any GLM. With more data the lines of equal fit become n − p dimensional planes of equal fit, where n and p are the number of data and parameters respectively: for any fixed β, equa- tion (2.3) gives the restrictions on y defining such a plane. Note that these planes
+    
+ 76 GENERALIZED LINEAR MODELS
+y
+0.2 0.3 0.4 0.5 0.6 0.7 0.8
+2
+0.0 0.2 0.4 0.6 0.8 1.0 1.2
+x
+Figure 2.1 The geometry of GLMs. The left panel illustrates the best fit of the generalized linear model E(y) ≡ μ = exp(β0 + β1x) to the three x, y data shown, assuming that each yi is an observation of a Gamma distributed random variable with mean given by the model. The right panel illustrates the geometry of GLM fitting using this model as an example. The unit cube shown, represents a space within which the vector (y1 , y2 , y3 )T defines a single point, •. The grey surface shows all possible predicted values (within the unit cube) according to the model, i.e. it represents all possible (μ1,μ2,μ3)T values. As the parameters β0 and β1 are allowed to vary, over all their possible values, this is the surface that the corresponding model ‘fitted values’ trace out: the ‘model manifold’. The continuous lines, which each start at one face of the cube and leave at another, are lines of equivalent fit: the values of the response data (y1 , y2 , y3 )T lying on such a line, each result in the same maximum likelihood estimates of β0,β1 and hence the same (μ1,μ2,μ3)T. Notice how the equivalent fit lines are neither parallel to each other nor orthogonal to the model manifold.
+can intersect — a point which will be returned to later. For discrete response data the pictures are no different, although the lines of equal fit strictly make sense only under continuous generalizations of the likelihoods (generally obtainable by replac- ing factorials by appropriate gamma functions in the probability functions). Only for the normal distribution are the lines/planes of equal fit orthogonal to the model manifold where-ever they meet it. For other distributions the lines/planes of equal fit may sometimes be parallel to each other, but are never all orthogonal to the model manifold.
+2.2.1 The geometry of IRLS
+The geometry of the IRLS estimation algorithm is most easily appreciated by con- sidering the fit of a one parameter model to 2 response data. Figure 2.2 illustrates the geometry of such a model: in this case a GLM with a log link and Gamma errors,
+1
+     GEOMETRY OF GLMS 77
+                        0.0 0.5 1.0 1.5 2.0
+x
+      Figure 2.2 Geometry of the GLM E(yi) ≡ μi = 20exp(−βxi) where yi ∼ Gamma and i = 1, 2. The left panel illustrates the maximum likelihood estimate of the model (continuous line) fitted to the 2 x, y data shown as •. The right panel illustrates the fitting geometry. The 15 × 15 square is part of the space R2 in which (y1 , y2 ) defines a single point, •. The bold curve is the ‘model manifold’: it consists of all possible points (μ1 , μ2 ) according to the model (i.e. as β varies (μ1 , μ2 ) traces out this curve). The fine lines are examples of lines of equal fit. All points (y1,y2) lying on one of these lines share the same MLE of β and hence (μ1,μ2): this MLE is where the equal fit line cuts the model manifold. The lines of equal fit are plotted forβ =.1,.2,.3,.4,.5,.6,.7,.8,.9,1,1.2,1.5,2,3,4.(β =.1,.7and2arerepresented by unbroken lines, with the β = 2 line being near the bottom of the plot. The β = .1 line is outside the plotting region in this plot, but appears in subsequent plots.)
+but similar pictures can be constructed for a GLM with any combination of link and distributional assumption.
+Now the key problems in fitting a GLM are that the model manifold is not flat, and that the lines of equal fit are not orthogonal to the model manifold where they meet it. The IRLS method linearly translates and rescales the fitting problem, so that at the current estimate of μ, the model manifold and intersecting line of equal fit are orthogonal, and, in the rescaled space, the location of the current estimate of μ is given by X multiplied by the current β estimate. This rescaling results in a fitting problem that can be treated as locally linear, so that the β estimate can be updated by least squares.
+Figure 2.3 illustrates how the IRLS steps involved in forming pseudodata and weight- ing it, effectively transform the fitting problem into one that can be approximately solved by linear least squares. The figure illustrates the transformations involved in one IRLS step, which are redone repeatedly, as the IRLS method is iterated to con- vergence.
+0 5 10 15
+1
+    y
+8 10 12 14 16 18 20
+2
+0 5 10 15
+               78
+GENERALIZED LINEAR MODELS
+(b)
+0 5 10 15
+(a)
+                        0 5 10 15
+11
+(c) (d)
+0.0 0.5 1.0 1.5 2.0 2.5 3.0 0.0 0.5 1.0 1.5 2.0 2.5 3.0
+11
+                                 Figure 2.3 Geometry of the IRLS estimation of a GLM, based on the example shown in figure
+2.2. (a) shows the geometry of the fitting problem — the model manifold is the thick black
+curve, the equal fit lines are the thin lines (as figure 2.2), the data are at • and the current
+estimates of the fitted values, μ[k], are at  . (b) The problem is re-centred around the current
+fitted values (y is replaced by y − μ[k]). (c) The problem is linearly re-scaled so that the iii
+columns of X now span the tangent space to the model manifold at  . The tangent space is illustrated by the grey line (this step replaces y −μ[k] by g′(μ[k])(y −μ[k])). (d) The problem
+ii iii
+is linearly translated so that the location of   is now given by Xβ[k]. For most GLMs the problem√would now have to be rescaled again by multiplying the components relative to each axis by Wi , where the Wi are the iterative weights: this would ensure that the equal estimate line through  , is orthogonal to the tangent space. In the current example these weights are all 1, so that the required orthogonality already holds. Now for the transformed problem, in the vicinity of  , the model manifold can be approximated by the tangent space, to which the equal fit lines are approximately orthogonal: hence an updated estimate of μ and β can be obtained by finding the least squares projection of the transformed data, •, onto the tangent
+ space (grey line).
+    22
+0.0 0.5 1.0 1.5 2.0 2.5 3.0 0 5 10 15
+22
+0.0 0.5 1.0 1.5 2.0 2.5 3.0 0 5 10 15
+    GEOMETRY OF GLMS
+79
+                0.0 0.2 0.4
+0.6 0.8 1.0
+Figure 2.4 Geometry of fitting and convergence problems. The geometry of a 1 parameter GLM with a log link and normal errors is illustrated. The thick curve is the model manifold — within the unit square, it contains all the possible fitted values of the data, according to the model. The thin lines are the equal fit lines (levels as in figure 2.2). Notice how the lines of equal fit meet and cross each other at the top left of the plot. Data in this overlap region will yield model likelihoods having local minima at more than one parameter value. Consideration of the operation of the IRLS fitting method reveals that, in this situation, it may converge to different estimates depending on the initial values used to start the fitting process. • illustrates the location of a problematic response vector, used to illustrate non-unique convergence in the text.
+2.2.2 Geometry and IRLS convergence
+Figure 2.4 illustrates the geometry of fitting a model, E(yi) ≡ μi = exp(−βxi), where the yi are normally distributed and there are two data, yi, to fit, for which x1 = .6 and x2 = 1.5. As in the previous two sections, lines of equal fit are shown on a plot in which a response vector (y1 , y2 )T would define a single point and the set of all possible fitted values (μ1, μ2)T, according to the model, is shown as a thick curve. In this example, the lines of equal fit intersect and cross in the top left hand corner of the plot (corresponding to very poor model fit). This crossing is problematic: in particular, the results of IRLS fitting to data lying in the upper left corner will depend on the initial parameter estimate from which the IRLS process is started, since each such data point lies on the intersection of two equal fit lines. If the IRLS iteration is started from fitted values in the top right of the plot then fitted values nearer the top right will be estimated, while starting the iteration with fitted values at the bottom left of the plot will result in estimated fitted values that are different, and closer to the bottom left of the plot.
+That this indeed happens, in practice, is easily demonstrated in R, by fitting to the data y1 = .02, y2 = .9, illustrated as • in figure 2.4.
+> ms<-exp(-x*4) # set initial values at lower left
+1
+    0.0 0.2 0.4
+0.6 0.8 1.0
+2
+    80 GENERALIZED LINEAR MODELS
+> glm(y ̃X-1,family=gaussian(link=log),mustart=ms) Coefficients:
+5.618
+Residual Deviance: 0.8098 AIC: 7.868
+> ms <- exp(-x*0.1) # set initial values at upper right > glm(y ̃X-1,family=gaussian(link=log),mustart=ms) Coefficients:
+0.544
+Residual Deviance: 0.7017 AIC: 7.581
+Notice that the second fit here actually has higher likelihood (lower deviance) — the fits are not equivalent in terms of likelihood. The type of fitting geometry that gives rise to these ambiguities does not always occur: for example some models have parallel lines/planes of equal fit, but for any model with intersecting lines/planes of equal fit there is some scope for ambiguity. Fortunately, if the model is a good model, it is often the case that data lying in the region of ambiguity is rather improbable. In the example in figure 2.4, the problematic region consists entirely of data that the model can only fit very poorly. It follows that very poor models of data may yield estimation problems of this sort: but it is not uncommon for very poor models to be a feature of early attempts to model any complex set of data. If such problems are encountered then it can be better to proceed by linear modelling of transformed response data, until good enough candidate models have been identified to switch back to GLMs.
+Of course, if reasonable starting values are chosen, then the ambiguity in the fitting process is unlikely to cause major problems when fitting GLMs: the algorithm will converge to one of the local minima of the likelihood, after all. However the ambi- guity can cause more serious convergence problems for GAM estimation by “per- formance iteration”, when it becomes possible to cycle between alternative minima without ever converging.
+2.3 GLMs with R
+The glm function provides the means for using GLMs in R. Its use is similar to that of the lm function but with two differences. The right hand side of the model formula, specifying the form for the linear predictor, now gives the link function of the mean of the response, rather than the mean of the response directly. Also glm takes a family argument, which is used to specify the distribution from the exponential family to use, and the link function that is to go with it. In this section the use of the glm function with a variety of simple GLMs will be presented, to illustrate the wide variety of model structures that the GLM encompasses.
+2.3.1 Binomial models and heart disease
+Early diagnosis of heart attack is important if the best care is to be given to patients. One suggested diagnostic aid is the level of the enzyme creatinine kinase (CK) in
+    
+    GLMS WITH R
+81
+ CK value Patients with Heart attack
+Patients without heart attack
+ 20 2 88
+60 13 26 100 30 8 140 30 5 180 21 0 220 19 1 260 18 1 300 13 1 340 19 1 380 15 0 420 7 0 460 8 0
+ Table 2.2 Data (from Hand et al., 1994) on heart attack probability as a function of CK level.
+the blood stream. A study was conducted (Smith, 1967) in which the level of CK was measured for 360 patients suspected of suffering from a heart attack. Whether or not each patient had really suffered a heart attack was established later, after more prolonged medical investigation. The data are given in table 2.2. The original paper classified patients according to ranges of CK level, but in the table only midpoints of the range have been given.
+It would be good to be able to base diagnostic criteria on data like these, so that CK level can be used to estimate the probability that a patient has had a heart attack. We can go some way towards such a goal, by constructing a model which tries to explain the proportion of patients suffering a heart attack, from the CK levels. In the following the data were read into a data.frame called heart. It contains variables ha, ok and ck, giving numbers of patients who subsequently turned out to have had, or not to have had, heart attacks, at each CK level. It makes sense to plot the observed proportions against CK level first.
+p<-heart$ha/(heart$ha+heart$ok) plot(heart$ck,p,xlab="Creatinine kinase level",
+lab="Proportion Heart Attack")
+The resulting plot is figure 2.5.
+A particularly convenient model for describing these proportions is
+eβ0 +β1 xi E(pi) = 1 + eβ0+β1xi ,
+where pi is the proportion with heart attacks at CK level xi. This curve is sigmoid in
+     
+    82 GENERALIZED LINEAR MODELS
+                         100 200 300 400 Creatinine kinase level
+Figure 2.5 Observed proportion of patients subsequently diagnosed as having had a heart attack, against CK level at admittance .
+shape, and bounded between 0 and 1. (Obviously the heart data do not show the lower tail of this proposed sigmoid curve.) This means that the expected number of heart attack sufferers is given by
+eβ0 +β1 xi
+μi ≡ E(piNi) = 1 + eβ0+β1xi Ni,
+where Ni is the known total number of patients at each CK level. This model is somewhat non-linear in its parameters, but if the ‘logit’ link,
+g(μi) = log   μi   , Ni − μi
+  is applied to it we obtain
+the r.h.s. of which is linear in the model parameters. The logit link is the canonical
+g(μi) = β0 + β1xi, link for binomial models, and hence the default in R.
+In R there are two ways of specifying binomial models with glm.
+1. The response variable can be the observed proportion of successful binomial tri- als, in which case an array giving the number of trials must be supplied as the weights argument to glm. For binary data, no weights vector need be supplied, as the default weights of 1 suffice.
+2. The response variable can be supplied as a two column array, in which the first column gives the number of binomial ‘successes’, and the second column is the number of binomial ‘failures’.
+For the current example the second method will be used. Supplying 2 arrays of the
+    Proportion Heart Attack
+0.0 0.2 0.4 0.6 0.8 1.0
+    GLMS WITH R
+83
+Residuals vs Fitted
+Normal Q−Q plot
+−0.5 0.0 0.5 1.0 1.5
+Theoretical Quantiles
+Cook’s distance plot
+ 3
+             1
+9
+   3
+               1
+9
+                  −2 0 2 4 6 8 10
+Predicted values
+Scale−Location plot
+12
+−1.5
+    1
+      3
+1
+   9
+           3
+5
+                                −2 0 2 4 6 8 10 12
+Predicted values
+2 4 6 8 10 12
+Obs. number
+Figure 2.6 Model checking plots for the first attempt to fit the CK data.
+r.h.s. of the model formula involves using cbind. Here is a glm call which will fit
+the heart attack model:
+> mod.0<-glm(cbind(ha,ok) ̃ck,family=binomial(link=logit),
++ data=heart)
+or we could have used
+mod.0<-glm(cbind(ha,ok) ̃ck,family=binomial,data=heart)
+since the logit link is canonical for the binomial and hence the R default. Here is the default information printed about the model:
+> mod.0
+Call: glm(formula=cbind(ha,ok) ̃ck,family=binomial,data=heart)
+Coefficients: (Intercept) ck
+   -2.75834      0.03124
+Degrees of Freedom: 11 Total (i.e. Null); 10 Residual Null Deviance: 271.7
+Residual Deviance: 36.93 AIC: 62.33
+The Null deviance is the deviance for a model with just a constant term, while
+    Std. deviance resid. 0 1 2 3 4 5
+Residuals
+Cook’s distance
+Std. deviance resid.
+0 2 4 6 8
+−20 −10 0 10
+−3 −1 1 2 3
+    84 GENERALIZED LINEAR MODELS
+the Residual deviance is the deviance of the fitted model (and also the scaled deviance in the case of a binomial model). These can be combined to give the pro- portion deviance explained, a generalization of r2, as follows:
+> (271.7-36.93)/271.7
+[1] 0.864078
+AIC is the Akaike Information Criteria for the model, discussed in sections 2.1.4 and 2.4.7 (it could also have been extracted using AIC(mod.)) ).
+Notice that the deviance is quite high for the χ210 random variable that it should approximate if the model is fitting well. In fact
+> 1-pchisq(36.93,10)
+[1] 5.819325e-05
+shows that there is a very small probability of a χ210 random variable being as large as 36.93. The residual plots (shown in figure 2.6) also suggest a poor fit.
+> op<-par(mfrow=c(2,2))
+> plot(mod.0)
+The plots have the same interpretation as the model checking plots for an ordinary linear model, discussed in detail in section 1.5.1, except that it is now the deviance residuals that are plotted, the Predicted values are on the scale of the linear predictor rather than the response, and some departure from a straight line relation- ship in the Normal QQ plot is often to be expected. The plots are not easy to interpret when there are so few data, but there appears to be a trend in the mean of the residuals plotted against fitted value, which would cause concern. Furthermore, the first point appears to have rather high influence. Note that the interpretation of the residuals would be much more difficult for binary data: exercise 2 explores simple approaches that can be taken in the binary case.
+Notice how the problems do not stand out so clearly from a plot of the fitted values overlayed on the raw estimated probabilities (see figure 2.7):
+> plot(heart$ck,p,xlab="Creatinine kinase level", + ylab="Proportion Heart Attack")
+> lines(heart$ck,fitted(mod.0))
+Note also that the fitted values provided by glm for binomial models are the esti- mated pi’s, rather than the estimated μi’s.
+The residual plots suggest trying a cubic linear predictor, rather than the initial straight line.
+> mod.2<-glm(cbind(ha,ok) ̃ck+I(ckˆ2)+I(ckˆ3),family=binomial,
++ data=heart)
+> mod.2
+Call: glm(formula=cbind(ha,ok) ̃ck+I(ckˆ2)+I(ckˆ3),
+    
+    GLMS WITH R 85
+                         100 200 300 400 Creatinine kinase level
+Figure 2.7 Predicted and observed probability of heart attack against CK level. family=binomial,data=heart)
+Coefficients:
+(Intercept) ck I(ckˆ2) I(ckˆ3)
+-5.786e+00 1.102e-01 -4.648e-04 6.448e-07
+Degrees of Freedom: 11 Total (i.e. Null); 8 Residual Null Deviance: 271.7
+Residual Deviance: 4.252 AIC: 33.66
+> par(mfrow=c(2,2))
+> plot(mod.2)
+Clearly 4.252 is not too large for consistency with a χ28 distribution (it is less than the expected value, in fact) and the AIC has improved substantially. The residual plots (figure 2.8) now show less clear patterns than for the previous model, although if we had more data then such a departure from constant variance would be a cause for concern. Furthermore the fit is clearly closer to the data now (see figure 2.9):
+par(mfrow=c(1,1)) plot(heart$ck,p,xlab="Creatinine kinase level",
+ylab="Proportion Heart Attack") lines(heart$ck,fitted(mod.2))
+We can also get R to test the null hypothesis that mod.0 is correct against the alter- native that mod.2 is required. Somewhat confusingly the anova function is used to do this, although it is an analysis of deviance (i.e. a generalized likelihood ratio test) that is being performed, and not an analysis of variance.
+> anova(mod.0,mod.2,test="Chisq") Analysis of Deviance Table
+    Proportion Heart Attack
+0.0 0.2 0.4 0.6 0.8 1.0
+    86
+GENERALIZED LINEAR MODELS
+Residuals vs Fitted
+−4 −2 0 2 4 6 8
+Predicted values
+Scale−Location plot
+−4 −2 0 2 4 6 8
+Predicted values
+−1.5
+Normal Q−Q plot
+−0.5 0.5 1.0 1.5
+Theoretical Quantiles
+Cook’s distance plot
+ 5
+10
+            4
+                                                              Figure 2.8 Model checking plots for the second attempt to fit the CK data.
+100 200 300 400 Creatinine kinase level
+Figure 2.9 Predicted and observed probability of heart attack against CK level.
+4
+5
+4 10
+2 4 6 8 10 12
+Obs. number
+5 10
+    5 4
+10
+                                                        Proportion Heart Attack
+0.0 0.2 0.4 0.6 0.8 1.0
+Std. deviance resid. 0.0 1.0 2.0 3.0
+Residuals
+Cook’s distance
+Std. deviance resid.
+0.00 0.15 0.30
+−10 0 5 10
+−1.0 0.0 1.0
+    GLMS WITH R
+87
+                            Model 1: cbind(ha, ok)
+Model 2: cbind(ha, ok)
+  Resid. Df Resid. Dev
+1        10     36.929
+2         8      4.252
+ ̃ ck
+ ̃ ck + I(ckˆ2) + I(ckˆ3)
+Df Deviance P(>|Chi|)
+ 2   32.676 8.025e-08
+1982 1984 1986 1988 1990 1992 Year
+Figure 2.10 AIDS cases per year in Belgium
+A p-value this low indicates very strong evidence against the null hypothesis - we really do need model 2. Recall that this comparison of models has a much firmer theoretical basis than the examination of the individual deviances had.
+2.3.2 A Poisson regression epidemic model
+The introduction to this chapter included a simple model for the early stages of an epidemic. Venables and Ripley (2003) provide some data on the number of new AIDS cases each year, in Belgium, from 1981 onwards. The data can be entered into R and plotted as follows.
+y<- c(12,14,33,50,67,74,123,141,165,204,253,246,240)
+t<-1:13
+plot(t+1980,y,xlab="Year",ylab="New AIDS cases",ylim=c(0,280))
+Figure 2.10 shows the resulting plot. The scientifically interesting question, relating to such data, is whether they provide any evidence that the increase in the underly- ing rate of new case generation is slowing. The simple model from the introduction might provide a plausible model from which to start investigating this question. The model assumes that the underlying expected number of cases per year, μi, increases according to:
+μi = c exp(bti)
+where c and b are unknown parameters, and ti is time in years since the start of the
+    New AIDS cases 050 150 250
+    88
+GENERALIZED LINEAR MODELS
+Residuals vs Fitted
+4.0 4.5 5.0
+Predicted values
+Scale−Location plot
+1
+Normal Q−Q plot
+−0.5 0.5 1.0 1.5
+Theoretical Quantiles
+Cook’s distance plot
+             1
+2
+  13
+                   1 2
+    3
+              3.5
+5.5
+−1.5
+  13
+      2 1
+13
+                     12
+                           3.5 4.0 4.5 5.0 5.5
+Predicted values
+2 4 6 8 10 12
+Obs. number
+Figure2.11 Residualplotsform0fittedtotheAIDSdata.
+data. A log link turns this into a GLM,
+log(μi) = log(c) + bti = β0 + tiβ1,
+and we assume that yi ∼ Poi(μi) where yi is the observed number of new cases in year ti. The yi are assumed independent. This is essentially a model of unchecked spread of the disease.
+The following fits the model (the log link is canonical for the Poisson distribution, and hence the R default) and checks it.
+> m0 <- glm(y ̃t,poisson)
+> m0
+Call: glm(formula = y  ̃ t, family = poisson)
+Coefficients: (Intercept) t
+     3.1406       0.2021
+Degrees of Freedom: 12 Total (i.e. Null); 11 Residual Null Deviance: 872.2
+Residual Deviance: 80.69 AIC: 166.4
+> par(mfrow=c(2,2))
+> plot(m0)
+The deviance is very high for the observation of a χ211 random variable that it ought
+    Std. deviance resid. 0.0 0.5 1.0 1.5
+Residuals
+Cook’s distance
+Std. deviance resid.
+02468 12
+−2.0 −0.5 0.5
+−4 −2 0 2
+    GLMS WITH R 89
+Residuals vs Fitted
+2.5 3.0 3.5 4.0 4.5 5.0 5.5
+Predicted values
+Scale−Location plot
+2.5 3.0 3.5 4.0 4.5 5.0 5.5
+Predicted values
+Normal Q−Q plot
+−1.5 −0.5 0.5 1.0 1.5
+Theoretical Quantiles
+Cook’s distance plot
+2 4 6 8 10 12
+Obs. number
+ 11
+             2
+ 6
+    11
+               2 6
+                      6
+11
+    2
+        11
+13
+           2
+                                Figure2.12 Residualplotsform1fittedtotheAIDSdata.
+to approximate, if the model is a good fit. The residual plots shown in figure 2.11 are also worrying. In particular the clear pattern in the mean of the residuals, plotted against the fitted values, shows violation of the independence assumption, and prob- ably results from omission of something important from the model. Since, for this model, the fitted values increase monotonically with time, we would get the same sort of pattern if residuals were plotted against time — i.e. it appears that a quadratic term in time could usefully be added to the model. The very high influence of the final year’s data, evident in the Cook’s distance plot, is also worrying. Note that the interpretation of residual plots can become difficult if the Poisson mean is low, so that the data are mostly zeroes and ones. In such cases the simulation approaches covered in exercise 2 can prove useful, if adapted to the Poisson case.
+It seems sensible to amend the model by adding a quadratic term to obtain:
+μi = exp(β0 + β1ti + β2t2i ).
+This model allows situations other than unrestricted spread of the disease to be rep-
+resented. The following fits and checks it:
+> m1 <- glm(y ̃t+I(tˆ2),poisson)
+> plot(m1)
+> summary(m1)
+Call:
+glm(formula = y  ̃ t + I(tˆ2), family = poisson)
+    Std. deviance resid. 0.0 0.4 0.8 1.2
+Residuals
+Cook’s distance
+Std. deviance resid.
+0.0 0.2 0.4 0.6
+−1 0 1 2
+−1.5 −0.5 0.5 1.5
+    90 GENERALIZED LINEAR MODELS
+Deviance Residuals:
+Min 1Q Median 3Q Max
+-1.45903 -0.64491 0.08927 0.67117 1.54596
+Coefficients:
+Estimate Std. Error z value Pr(>|z|)
+(Intercept) 1.901459 0.186877 10.175 < 2e-16 *** t 0.556003 0.045780 12.145 < 2e-16 *** I(tˆ2) -0.021346 0.002659 -8.029 9.82e-16 *** ---
+Signif. codes: 0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 (Dispersion parameter for poisson family taken to be 1)
+Null deviance: 872.2058 on 12 degrees of freedom Residual deviance: 9.2402 on 10 degrees of freedom AIC: 96.924
+Number of Fisher Scoring iterations: 4
+Notice how the residual plots shown in figure 2.12 are now much improved: the clear trend in the mean has gone, the (vertical) spread of the residuals is reasonably even, the influence of point 13 is much reduced and the QQ plot is straighter. The fuller model summary shown for this model also indicates improvement: the deviance is now quite reasonable, i.e. close to what is expected for a χ210 r.v., and the AIC has dropped massively. All in all this model appears to be quite reasonable.
+Notice also, how the structure of the glm summary is similar to an lm summary. The standard errors and p-values in the table of coefficient estimates is now based on the large sample distribution of the parameter estimators given in section 2.1.5. The z value column simply reports the parameter estimates divided by their es- timated standard deviations. Since no dispersion parameter estimate is required for the Poisson, these z-values should be observations of N(0,1) r.v.s, if the true value of the corresponding parameter is zero (at least in the large sample limit), and the re- ported p-value is based on this distributional approximation. For mod.1 the reported p-values are very low: i.e for each parameter there is clear evidence that it is not zero. Note that Fisher Scoring iterations are another name for IRLS iterations in the GLM context.
+Examination of the coefficient summary table indicates that the hypothesis that β2 = 0 can be firmly rejected, providing clear evidence that mod.1 is preferable to mod.0. The same question can also be addressed using a generalized likelihood ratio test:
+> anova(m0,m1,test="Chisq") Analysis of Deviance Table
+Model 1: y  ̃ t
+Model 2: y  ̃ t + I(tˆ2)
+    
+    GLMS WITH R 91
+Resid. Df Resid. Dev Df Deviance P(>|Chi|) 1 11 80.686
+2 10 9.240 1 71.446 2.849e-17
+The conclusion is the same as before: the tiny p-value indicates that mod.0 should be firmly rejected in favour of mod.1. Notice that the p-value from the summary and the analysis of deviance table are different, since they are based on fundamen- tally different approximate distributional results. The test="Chisq" argument to anova is justified because the scale parameter is known for this model, had it been estimated it would be preferable to set test to "F".
+The hypothesis testing approach to model selection is appropriate here, as the main question of interest is whether there is evidence, from these data, that the epidemic is spreading un-checked, or not. It would be prudent not to declare that things are improving if the evidence is not quite firm that this is true. If we had been more interested in simply finding the best model for predicting the data then comparison of AIC would be more appropriate, but leads to the same conclusion for these data.
+The parameter β1 can be interpreted as the rate of spread of the disease at the epi- demic start: that is, as a sort of intrinsic rate of increase of the disease in a new population where no control measures are in place. Notice how the estimate of this parameter has actually increased substantially between the first and second models: it would have been possible to be quite badly misled if we had stuck with the first poorly fitting model. An approximate confidence interval for β1 can be obtained in the usual manner, based on the large sample results from section 2.1.5. The required estimate and standard error are easily extracted using the summary function, as the following illustrates:
+> beta.1 <- summary(m1)$coefficients[2,]
+> ci <- c(beta.1[1]-1.96*beta.1[2],beta.1[1]+1.96*beta.1[2])
+> ci # print 95% CI for beta_1
+0.4662750 0.6457316
+The use of the critical points of the standard normal distribution is appropriate, be- cause the scale parameter is known for this model. Had it been estimated, then we would have had to use critical points from the t distribution, with degrees of freedom set to the residual degrees of freedom of the model (i.e number of data less number of estimated β parameters).
+Another obvious thing to want to do, is to use the model to find a confidence interval for the underlying rate of case generation at any time. The following R code illus- trates how to use the predict.glm function to find CI’s for the underlying rate, over the whole period of the data, and plot these.
+new.t<-seq(1,13,length=100)
+fv <- predict(m1,data.frame(t=new.t),se=TRUE) plot(t+1980,y,xlab="Year",ylab="New AIDS cases",ylim=c(0,280)) lines(new.t+1980,exp(fv$fit)) lines(new.t+1980,exp(fv$fit+2*fv$se.fit),lty=2) lines(new.t+1980,exp(fv$fit-2*fv$se.fit),lty=2)
+    
+    92 GENERALIZED LINEAR MODELS
+1982 1984 1986 1988 1990 1992 Year
+Figure 2.13 Underlying AIDS case rate according to model m1 shown as a continuous curve with 95% confidence limits shown as dashed curves.
+The plot is shown in figure 2.13. Notice that by default the predict.glm function predicts on the scale of the linear predictor: we have to apply the inverse of the link function to get back onto the original response scale.
+So the data provide quite firm evidence to suggest that the unfettered exponential increase model is overly pessimistic: by the end of the data there is good evidence that the rate of increase is slowing. Of course this model contains no mechanistic content — it says nothing about how or why the slowing might be occurring: as such it is entirely in-appropriate for prediction beyond the range of the data. The model allows us to be reasonably confident that the apparent slowing in the rate of increase in new cases is real, and not just the result of chance variation, but it says little or nothing about what may happen later.
+2.3.3 Log-linear models for categorical data
+The following table classifies a sample of women and men according to their belief in the afterlife:
+Believer Non-Believer
+Female 435 147 Male 375 134
+The data (reported in Agresti, 1996) come from the US General Social Survey (1991), and the ‘non-believer’ category includes ‘undecideds’. Are there differences between males and females in the holding of this belief? We can address this question by us- ing analysis of deviance to compare the fit of 2 competing models of these data: one in which belief is modelled as independent of gender, and a second in which there is some interaction between belief and gender. First consider the model of indepen-
+                                   New AIDS cases 050 150 250
+    GLMS WITH R 93 dence. If yi is an observation of the counts in one of the cells of the table, then we
+could model the expected number of counts as
+μi ≡ E(Yi) = nγkαj if yi is data for gender k, and faith j
+where n is the total number of people surveyed, α1 the proportion of believers, α2 the proportion of non-believers and γ1 and γ2 the proportions of women and men respectively. Taking logs of this model yields
+ηi ≡ log(μi) = log(n) + log(γk) + log(αj).
+So defining n ̃ = log(n), γ ̃k = log(γk) and α ̃j = log(αj) the model can be written
+as
+ η 1   1 1 0 0 1   γ ̃n ̃   η2   1 1 0 1 0  1   η 3  =  1 0 1 0 1   γ ̃ 2 
+ η 4   1 0 1 1 0   α ̃ 1  α ̃2
+This is clearly a GLM structure, but is obviously not identifiable. Dropping γ ̃1 and α ̃1 solves the identifiability problem yielding
+ η 1   1 0 1   n ̃  η2=100γ ̃2 .
+ η 3   1 1 1   α ̃ 2  η4 110
+Note how gender and faith are both factor variables with two levels in this model.
+If the counts in the contingency table occurred independently at random, then the obvious distribution to use would be Poisson. In fact even when the total number of subjects in the table, or even some other marginal totals are fixed, then it can be shown that the correct likelihood can be written as a product of Poisson p.m.f.s, conditional on the various fixed quantities. Hence provided that the fitted model is forced to match the fixed total, and any fixed marginal totals, the Poisson is still the distribution to use. As was shown in section 2.1.8, forcing the model to match certain fixed totals in the data is simply a matter of insisting on certain terms being retained in the model.
+The simple ‘independence’ model is easily estimated in R. First enter the data and check it:
+> al<-data.frame(y=c(435,147,375,134),
++ gender=as.factor(c("F","F","M","M")),
++ faith=as.factor(c(1,0,1,0)))
+> al
+y gender faith 1435 F 1 2147 F 0 3375 M 1 4134 M 0
+    
+    94 GENERALIZED LINEAR MODELS
+Since gender and faith are both factor variables, model specification is very easy. The following fits the model and checks that the model matrix is as expected:
+> mod.0<-glm(y ̃gender+faith,data=al,family=poisson)
+> model.matrix(mod.0)
+(Intercept) genderM faith1 1101 2100 3111 4110
+Now look at the fitted model object mod.0
+> mod.0
+Call:  glm(formula=y ̃gender+faith,family=poisson,data=al)
+Coefficients:
+(Intercept) genderM faith1
+5.0100 -0.1340 1.0587
+Degrees of Freedom: 3 Total (i.e. Null); 1 Residual Null Deviance: 272.7
+Residual Deviance: 0.162 AIC: 35.41
+> fitted(mod.0) 1234
+432.099 149.901 377.901 131.099
+The fit appears to be quite close, and it would be somewhat surprising if a model with interactions between faith and gender did significantly better. Never the less such a model could be:
+η ≡log(μ)=n ̃+γ ̃ +α ̃ +ζ ̃ ify isdataforgenderkandbeliefj i i kjkji
+where ζkj is an ‘interaction parameter’. This model allows each combination of faith and gender to vary independently. As written, the model has rather a large number of un-identifiable terms.
+ γ ̃n ̃  1
+   γ ̃ 2   α ̃1
+ η 1   1 1 0 0 1 0 1 0 0 η2 110101000
+    α ̃ 2   .  ζ ̃
+11 ζ ̃ 
+ ζ ̃  21
+ζ ̃ 22
+3 
+  η   =   1 0 1 0 1 0 0 0 1
+η 101100010 4
+12
+    
+    GLMS WITH R 95 But this is easily reduced to something identifiable:
+ η 1   1 0 1 0   n ̃   η 2  =  1 0 0 0   γ ̃ 2  .
+ η 3   1 1 1 1   α ̃ 2  η 1100ζ ̃
+The following fits the model, checks the model matrix and prints the fitted model object:
+> mod.1<-glm(y ̃gender*faith,data=al,family=poisson)
+> model.matrix(mod.1)
+(Intercept) genderM faith1 genderM:faith1 11010 21000 31111 41100 > mod.1
+Call:  glm(formula=y ̃gender*faith,family=poisson,data=al)
+Coefficients:
+(Intercept) genderM faith1 genderM:faith1
+4.99043 -0.09259 1.08491 -0.05583
+Degrees of Freedom: 3 Total (i.e. Null); 0 Residual Null Deviance: 272.7
+Residual Deviance: 9.659e-14 AIC: 37.25
+To test whether there is evidence for an interaction between gender and faith the null hypothesis that mod.0 is correct is tested against the more general alternative that mod.1 is correct, using analysis of deviance.
+> anova(mod.0,mod.1,test="Chisq") Analysis of Deviance Table
+Model 1: y  ̃ gender + faith
+Model 2: y  ̃ gender * faith
+Resid. Df Resid. Dev Df Deviance P(>|Chi|) 1 1 0.16200
+2 0 9.659e-14 1 0.16200 0.68733
+A p-value of 0.69 suggests that there is no evidence to reject model 0 and the hypoth- esis of no association between gender and belief in the afterlife.
+Notice that, in fact, the model with the interaction is the saturated model, which is why its deviance is numerically zero, and there was not really any need to fit it and compare it with the independence model explicitly — in this case we could just as well have examined the deviance of the independence model. However the general approach taken for this simple 2 way contingency table can easily be generalized to
+4 22
+    
+    96 GENERALIZED LINEAR MODELS
+multi-way tables and to arbitrary number of groups. In other words, the approach outlined here can be extended to produce a rather general approach for analyzing categorical data using log-linear GLMs.
+Finally, note that the fitted values for mod.0 had the odd property that although the fitted values and original data are different, the total number of men and women is conserved between data and fitted values, as is the total number of believers and non-believers. This results from the fact that the log link is canonical for the Poisson distribution, so by the results of section 2.1.8 XTy = XTμˆ. The summations equated on the two sides of this last equation are the total number of subjects, the total number of males and the total number of believers: this explains the match between fitted values and data in respect of these totals.
+2.3.4 Sole eggs in the Bristol channel
+Fish stock assessment is difficult because adult fish are not easy to survey: they tend to actively avoid fishing gear, so that turning number caught into an assessment of the number in the sea is rather difficult. To get around this problem, fisheries biolo- gists sometimes try and count fish eggs, and work back to the number of adult fish required to produce the estimated egg population. These ‘egg production methods’ are appealing because eggs are straightforward to sample. This section concerns a simple attempt to model data on sole eggs in the Bristol channel. The data (available in Dixon, 2003) are measurements of density of eggs per square metre of sea surface in each of 4 identifiable egg developmental stages, at each of a number of sampling stations in the Bristol channel on the west coast of England. The samples were taken during 5 cruises spaced out over the spawning season. Figure 2.14 shows the sur- vey locations and egg densities for stage I eggs for each of the 5 surveys. Similar plots could be produced for stages II-IV. For further information on this stock, see Horwood (1993) and Horwood and Walker (1990).
+The biologists’ chief interest is in estimating the rate at which eggs are spawned at any time and place within the survey arena, so this is the quantity that needs to be estimated from the data. To this end it helps that the durations of the egg stages are known (they vary somewhat with temperature, but temperature is known for each sample). Basic demography suggests that a reasonable model for the density of eggs (per day per square metre of sea surface), at any age a and location-time with covari- ates x, would be
+d(a, x) = S(x)e−δ(x)a.
+That is, the density of eggs of age a is given by the product of the local spawning rate S and the local survival rate. δ is the per capita mortality rate, and, given this rate, we expect a proportion exp(−δa) of eggs to reach age a. Both S and δ are assumed to be functions of some covariates.
+What we actually observe are not egg densities per unit age, per m2 sea surface, but egg densities in stages per m2 sea surface: yi, say. To relate the model to the data we need to integrate the model egg density over the age range to which any particular
+    
+ GLMS WITH R day 49.5
+−6.5 −6.0 −5.5 −5.0 −4.5 −4.0
+97
+day 70
+−6.5 −6.0 −5.5 −5.0 −4.5 −4.0
+day 93.5
+lo lo lo
+day 110.5
+−6.5 −6.0 −5.5 −5.0 −4.5 −4.0
+lo
+day 140.5
+−6.5 −6.0 −5.5 −5.0 −4.5 −4.0
+lo
+50.0 50.5
+51.0 51.5
+50.0 50.5
+51.0 51.5
+50.0 50.5
+51.0 51.5
+50.0 50.5
+51.0 51.5
+la
+la
+la
+la
+50.0 50.5
+51.0 51.5
+la
+Figure 2.14 Density per m2 sea surface of stage I sole eggs in the Bristol channel. The days given are the Julian day of the survey midpoint (day 1 is January 1). The symbol sizes are proportional to egg density and a simple dot indicates a station where no eggs were found.
+datum relates. That is, if a−i and a+i are the lower and upper age limits for the egg stage to which yi relates, then the model should be
+E(yi) ≡ μi =   a+i d(z, xi)dz. a−i
+Evaluation of the integral would be straightforward, but does not enable the model to be expressed in the form of a GLM. However, if the integral is approximated so that the model becomes
+μi = ∆id(a ̄i, xi)),
+where ∆i = a+i − a−i and a ̄i = (a+i + a−i )/2, then progress can be made, since in
+that case
+log(μi) = log(∆i) + log(S(x)) − δ(x)a ̄i. (2.13)
+The right hand side of this model can be expressed as the linear predictor of a GLM, with terms representing log(S) and δ as functions of covariates and with log(∆) treated as an ‘offset’ term — essentially a column of the model matrix with associated parameter fixed at 1.
+For the sole eggs, a reasonable starting model might represent log(S) as a cubic function of longitude, lo, latitude, la, and time, t. Mortality might be modelled by
+−6.5 −6.0 −5.5 −5.0 −4.5 −4.0
+ 98 GENERALIZED LINEAR MODELS
+0123 0123
+fitted(b4)^0.5 fitted(b4)^0.5
+Figure 2.15 Residual plots for the final Sole egg model.
+a simpler function — say a quadratic in t. It remains only to decide on a distributional assumption. The eggs are sampled by hauling a net vertically through the water and counting the number of eggs caught in it. This might suggest a Poisson model, but most such data display overdispersion relative to Poisson, and additionally, the data are not available as raw counts but rather as densities per m2 sea surface. These considerations suggest using quasi-likelihood, with the variance proportional to the mean.
+The following R code takes the sole data frame, calculates the mean ages and offset terms required, and fits the suggested model. Since polynomial models can lead to numerical stability problems, if not handled carefully, the covariates are all translated and scaled before fitting.
+> sole$off <- log(sole$a.1-sole$a.0)# model offset term
+solr$eggs^0.5
+01234
+residuals(b4)
+−4 −2 0 2 4 6
+> sole$a<-(sole$a.1+sole$a.0)/2
+> solr<-sole
+> solr$t<-solr$t-mean(sole$t)
+> solr$t<-solr$t/var(sole$t)ˆ0.5
+> solr$la<-solr$la-mean(sole$la)
+> solr$lo<-solr$lo-mean(sole$lo)
+Call:
+glm(formula = eggs ̃offset(off)+lo+la+t+I(lo*la)+
+I(loˆ2)+I(laˆ2)+I(tˆ2)+I(lo*t)+I(la*t)+I(loˆ3)+ I(laˆ3)+I(tˆ3)+I(lo*la*t)+I(loˆ2*la)+I(lo*laˆ2) +I(loˆ2*t)+I(laˆ2*t)+I(la*tˆ2)+I(lo*tˆ2)+ a+I(a*t)+I(tˆ2*a),family = quasi(link=log,
+b <- glm(eggs  ̃ offset(off)+lo+la+t+I(lo*la)+I(loˆ2)+I(laˆ2) +I(tˆ2)+I(lo*t)+I(la*t)+I(loˆ3)+I(laˆ3)+I(tˆ3)+ I(lo*la*t)+I(loˆ2*la)+I(lo*laˆ2)+I(loˆ2*t)+ I(laˆ2*t)+I(la*tˆ2)+I(lo*tˆ2)+ a +I(a*t)+I(tˆ2*a), family=quasi(link=log,variance="mu"),data=solr)
+>
++
++
++
++
+> summary(b)
+# mean stage age
+# make copy for rescaling
+    GLMS WITH R
+variance = "mu"), data = solr)
+Deviance Residuals:
+Min 1Q Median 3Q Max
+-4.10474 -0.35127 -0.10418 -0.01289 5.66956 Coefficients:
+99
+(Intercept)
+lo
+la
+t
+***
+***
+***
+***
+***
+***
+***
+***
+***
+***
+***
+*** ***
+*** *
+.
+*** * **
+I(lo * la) I(loˆ2) I(laˆ2) I(tˆ2) I(lo *
+I(la * I(loˆ3) I(laˆ3) I(tˆ3) I(lo * I(loˆ2 I(lo * I(loˆ2 *t) I(laˆ2 *t) I(la * tˆ2) I(lo * tˆ2) a
+I(a * t)
+I(tˆ2 * a)
+---
+Sig. codes:
+(Dispersion
+         Estimate
+         -0.03836
+          5.22548
+         -5.94345
+         -2.43222
+          3.38576
+         -3.98406
+         -4.21517
+         -1.77607
+          0.20029
+          1.82637
+         -3.46452
+          8.53152
+          0.70085
+         -1.10150
+          5.20779
+laˆ2)   -12.87497
+Std. Error
+   0.14560
+   0.39436
+   0.50135
+   0.25761
+   0.61797
+   0.36744
+   0.56228
+   0.26279
+   0.35117
+   0.47332
+   0.49554
+   1.28587
+   0.12397
+   0.90738
+   0.88873
+   1.24298
+   0.54238
+   1.08911
+   0.46440
+   0.36929
+   0.02184
+   0.04615
+   0.05998
+t value Pr(>|t|)
+ -0.263 0.792202
+ 13.251  < 2e-16
+-11.855  < 2e-16
+ -9.442  < 2e-16
+  5.479 4.99e-08
+-10.843  < 2e-16
+ -7.497 1.10e-13
+ -6.758 1.97e-11
+  0.570 0.568518
+  3.859 0.000119
+ -6.991 4.03e-12
+  6.635 4.48e-11
+  5.653 1.87e-08
+ -1.214 0.224959
+  5.860 5.65e-09
+-10.358  < 2e-16
+  1.474 0.140774
+  4.978 7.14e-07
+ -2.459 0.014021
+  1.783 0.074705
+ -5.624 2.21e-08
+  2.049 0.040635
+ -3.053 0.002306
+t) t)
+la*t) * la)
+0.79928
+ 5.42159
+-1.14220
+ 0.65862
+-0.12285
+ 0.09456
+-0.18310
+0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 parameter for quasi family taken to be 1.051635)
+Null deviance: 3108.86 on 1574 degrees of freedom Residual deviance: 913.75 on 1552 degrees of freedom AIC: NA
+Number of Fisher Scoring iterations: 7
+The summary information suggests dropping the lo*t term (it seems unreasonable to drop the constant altogether). Rather than re-type the whole glm command again it is easier to use:
+b1<-update(b, ̃.-I(lo*t))
+which re-fits the model, dropping the term specified. Repeating the process, suggests
+    
+ 100
+GENERALIZED LINEAR MODELS
+day 50
+day 68
+−6.5 −6.0 −5.5 −5.0 −4.5 −4.0
+day 122
+−6.5 −6.0 −5.5 −5.0 −4.5 −4.0
+day 86
+−6.5 −6.0 −5.5 −5.0 −4.5 −4.0
+day 140
+−6.5 −6.0 −5.5 −5.0 −4.5 −4.0
+−6.5 −6.0 −5.5 −5.0 −4.5 −4.0
+day 104
+−6.5 −6.0 −5.5 −5.0 −4.5 −4.0
+50.0 50.5 51.0 51.5
+50.0 50.5
+51.0 51.5
+50.0 50.5 51.0 51.5
+50.0 50.5
+51.0 51.5
+50.0 50.5 51.0 51.5
+50.0 50.5
+51.0 51.5
+Figure 2.16 Model predicted Sole spawning rates in the Bristol Channel at various times in the spawning season.
+dropping lo*la*t, lo*tˆ2 and finally loˆ2*t, after which all the remaining terms are significant at the 5% level. If b4 is the final reduced model, then it can be tested against the full model:
+> anova(b,b4,test="F") Analysis of Deviance Table [edited]
+Resid. Df Resid. Dev Df Deviance
+1 1552 913.75
+2 1556 919.28 -4 -5.54 1.3161 0.2618
+which gives no reason not to accept the simplified model.
+The default residual plots are unhelpful for this model, because of the large number of zeroes in the data, corresponding to areas where there really are no eggs. This tends to lead to some very small values for the linear predictor, corresponding to zero predictions which in turn lead to rather distorted plots. The following residual plots are perhaps more useful.
+> par(mfrow=c(1,2)) # split graph window into 4 panels
+> plot(fitted(b4),solr$eggs) # fitted vs. data plot
+> plot(fitted(b4)ˆ0.5,residuals(b4)) # resids vs. sqrt(fitted)
+The plots are shown in figure 2.15. The most noticeable features of both plots relate
+F Pr(>F)
+    LIKELIHOOD 101
+to the large number of zeros in the data, with the lower boundary line in the right hand plot corresponding entirely to zeros, for which the raw residual is simply the negative of the fitted value. The plots are clearly far from perfect, but it is unlikely that great improvements can be made to them, with models of this general type.
+The fitted model can be used for prediction of the spawning rate over the Bristol channel, by setting up a data frame containing the times and locations at which pre- dictions are required, the age at which prediction is required — always zero — and the offset required — zero if spawning rate per square metre is the desired output. The time and location co-ordinates must be scaled in the same way as was done for fitting, of course. Figure 2.16 shows model predicted spawning rates produced in this way from model b4. It has been possible to get surprisingly far with the analysis of these data using a simple GLM approach, but the fitting did become somewhat un- wieldy when it came to specifying that spawning rate should be a smooth function of location and time. For a less convenient spatial spawning distribution, it is doubtful that a satisfactory model could have been produced in this manner. This is part of the motivation for seeking to extend the way in which GLMs are specified, to allow a more compact and flexible way of specifying smooth functional relationships within the models: i.e. part of the motivation for developing GAMs.
+2.4 Likelihood
+This final, slightly more advanced, section covers the general theory of likelihood and quasi-likelihood, used for inference with GLMs. In particular the results invoked in section 2.1 are derived here. The emphasis is on explaining the key ideas as simply as possible, so some of the results are proved only for the simple case of a single parameter and i.i.d. data with the generalizations merely stated. To emphasize that the results given here apply much more widely than GLMs, the parameter that is the object of inference is denoted by θ in this section: for GLMs this will usually be β. Good references on the topics covered here are Cox and Hinkley (1974) and Silvey (1970), which are followed quite closely below.
+Proofs are only given in outline and two general statistical results are used repeatedly: the ‘law of large numbers’ (LOLN) and the ‘central limit theorem’ CLT. In the i.i.d. context these are as follows. Let X1, X2, . . . , Xn be i.i.d. random variables with mean μ and variance σ2 (both of which are finite). The LOLN states that as n → ∞ X ̄ → μ (in probability)∥. The CLT states that as n → ∞ the distribution of X ̄ tends to N(μ,σ2/n) whatever the distribution of the Xi. Both results generalize to multivariate and non i.i.d. settings.
+∥ tending to a limit in probability basically means that the probability of being further than any positive constant ε from the limit tends to zero.
+    
+    102 GENERALIZED LINEAR MODELS
+2.4.1 Invariance
+Consider an observation, y = [y1 , y2 , . . . , yn ]T , of a vector of random variables, with joint p.m.f. or p.d.f. f (y, θ), where θ is a parameter with m.l.e. θˆ. If γ is a parameter such that γ = g(θ), where g is any function, then the maximum likelihood estimate of γ is γˆ = g(θˆ), and this property is known as invariance.
+Invariance holds for any g, but a proof is easiest for the case in which g is a one to one function, so that g−1 is well defined. In this case θ = g−1(γ) and maximum likelihood estimation would proceed by maximizing the likelihood
+L(γ) = f(y,g−1(γ)) w.r.t.γ.Butweknowthatthemaximumoff occursatf(y,θˆ),bydefinitionofθˆ,so
+i t m u s t b e t h e c a s e t h a t L ’ s m a x i m u m w . r . t . γ o c c u r s w h e n θˆ = g − 1 ( γˆ ) . i . e . γˆ = g ( θˆ )
+is the m.l.e. of γ. So, when working with maximum likelihood estimation, we can adopt whatever parameterization is most convenient for performing calculations, and simply transform back to the most interpretable parameterization at the end. Note that invariance holds for vector parameters as well.
+2.4.2 Properties of the expected log-likelihood
+The key to proving and understanding the large sample properties of maximum likelihood estimators lies in obtaining some results for the expectation of the log- likelihood, and then using the convergence in probability of the log-likelihood to its expected value, which results from the law of large numbers. In this section, some simple properties of the expected log likelihood are derived.
+Let y1, y2, . . . , yn be independent observations from a p.d.f. f(y, θ), where θ is an unknown parameter with true value θ0. Treating θ as unknown, the log-likelihood for
+θ is
+nn
+l(θ) =   log[f(yi, θ)] =   li(θ),
+i=1 i=1
+where li is the log-likelihood, given only the single observation yi. Treating l as a
+function of random variables, Y1 , Y2 , . . . , Yn , means that l is itself a random variable (and the li are independent random variables). Hence we can consider expectations of l and its derivatives.
+Result 1:
+E ∂l ̨ !=0 (2.14) 0 ∂θ ̨θ0
+ The subscript on the expectation is to emphasize that the expectation is w.r.t. f(y, θ0). The proof goes as follows (where it is to be taken that all derivatives are evaluated at
+    
+    LIKELIHOOD 103
+θ0, and there is sufficient regularity that the order of differentiation and integration can be exchanged)
+E0 ∂li  = E0 ∂ log[f(Y,θ)] =  1 ∂ff(y,θ0)dy ∂θ ∂θ f(y,θ0) ∂θ
+=  ∂fdy=∂ fdy=∂1=0. ∂θ ∂θ ∂θ
+That the same holds for l follows immediately. Result 1 has the following obvious consequence:
+       Result 2:
+var ∂l ̨ !=E02 ∂l ̨ !23.
+∂θ ̨θ0 4 ∂θ ̨θ0 5 It can further be shown that
+(2.15)
+(2.16)
+  Result 3:
+I≡E02 ∂l ̨ !23=−E0"∂2l ̨ # 4 ∂θ ̨θ0 5 ∂θ2 ̨θ0
+  where I is referred to as the information about θ contained in the data. The terminol- ogy refers to the fact that, if the data tie down θ very closely (and accurately), then the log likelihood will be sharply peaked in the in the vicinity θ0 (i.e. high I), whereas data containing little information about θ will lead to an almost flat likelihood, and low I.
+The proof of result 3 is simple. For a single observation, result 1 says that
+∂ log(f)fdy = 0. ∂θ
+Differentiating again w.r.t. θ yields
+∂2 log(f)f + ∂ log(f) ∂f dy = 0
+ 
+  
+  ∂2log(f) ∂θ2
+E0 ∂2li   =−E0 ∂li   2. ∂θ2  θ0 ∂θ  θ0
+   but and so
+which is
+∂θ fdy = −
+f ∂θ
+   ∂log(f) 2
+∂θ fdy
+∂θ2
+∂θ ∂θ ∂ log(f) = 1 ∂f
+       The result follows very easily (given the independence of the li).
+    
+    104
+GENERALIZED LINEAR MODELS
+  C[E(Y)] E(C[Y])
+  E(Y)
+Figure 2.17 Schematic illustration of Jensen’s inequality which says that if c is a concave function then E[c(Y )] ≤ c(E[Y ]). The curve shows a concave function, while the lines connect the values of a discrete uniform random variable Y on the horizontal axis to the values of the discrete random variable c(Y ) on the vertical axis. It is immediately clear that the way that c spreads out c(Y ) values corresponding to low Y values, while bunching together c(Y ) values corresponding to high Y values implies Jensen’s inequality. Further reflection suggests (correctly) that Jensen’s inequality holds for any distribution.
+Note that by result 1 the expected log likelihood has a turning point at θ0, and since I is positive, result 3 indicates that this turning point is a maximum. So the expected log likelihood has a maximum at the true parameter value. Unfortunately results 1 and 3 don’t establish that this maximum is a global maximum, but a slightly more involved proof shows that this is in fact the case.
+Result 4:
+E0[l(θ0)] ≥ E0[l(θ)] ∀ θ (2.17) The proof is based on Jensen’s inequality, which says that if c is a concave function
+(i.e. has negative second derivative) and Y is a random variable, then E[c(Y )] ≤ c(E[Y ]).
+The inequality is almost a statement of the obvious as figure 2.17 illustrates. Now consider the concave function, log, and the random variable, f(Y, θ)/f(Y, θ0). Jensen’s inequality implies that
+E0  log  f(Y,θ)    ≤ log E0   f(Y,θ)   . f(Y,θ0) f(Y,θ0)
+Consider the right hand side of the inequality.
+E0   f(Y,θ)   =   f(y,θ) f(y,θ0)dy =   f(y,θ)dy = 1. f(Y,θ0) f(y,θ0)
+        
+    LIKELIHOOD 105 So, since log(1) = 0 the inequality becomes
+E0  log  f(Y,θ)    ≤ 0 f(Y,θ0)
+⇒ E0[log(f(Y, θ))] ≤ E0[log(f(Y, θ0))] from which the result follows immediately.
+The above results were derived for continuous Y , but also hold for discrete Y : the proofsarealmostidentical,butwith allyi replacing dy.Notealsothat,although the results presented here were derived assuming that the data were independent observations from the same distribution, this is in fact much more restrictive than is necessary, and the results hold more generally.
+Similarly, the results generalize to vector parameters. Let u be the vector such that ui = ∂l/∂θi, and H be the hessian matrix of the log-likelihood w.r.t. the parameters so that Hi,j = ∂2l/∂θi∂θj. Then
+ Result 1 (vector parameter)
+and
+Result 3 (vector parameter)
+2.4.3 Consistency
+E0(u) = 0
+I ≡ E0(uuT) = −E0(H).
+(2.18)
+(2.19)
+Maximum likelihood estimators are often not unbiased, but under quite mild regu- larity conditions they are consistent. This means that as the sample size, on which the estimate is based, tends to infinity, the maximum likelihood estimator tends in probability to the true parameter value. Consistency therefore implies asymptotic∗∗ unbiasedness, but it actually implies slightly more than this — for example that the variance of the estimator is decreasing with sample size.
+Formally, if θ0 is the true value of parameter θ, and θˆn is its m.l.e. based on n obser- vations, y1 , y2 , . . . , yn , then consistency means that
+Pr[|θˆn − θ0| < ε] → 1 as n → ∞ for any positive ε.
+To see why m.l.e.s are consistent, consider an outline proof for the case of a single parameter, θ, estimated from independent observations y1, y2, . . . , yn on a random variable with p.m.f. or p.d.f. f(y, θ0). The log-likelihood in this case will be
+1  n
+l(θ) ∝ n log(f(yi,θ))
+i=1
+∗∗ ‘asymptotic’ here meaning ‘as sample size tends to infinity’.
+     
+    106
+GENERALIZED LINEAR MODELS
+ E0(log(f(Y, θ)))
+1n
+∑ log(f(yi, θ))
+ni=1
+     θ^ θ0
+Figure 2.18 Illustration of the idea behind the derivation of consistency of MLEs. The dashed curve is proportional to the log likelihood while the solid curve is the expectation of the log likelihood. The solid curve has a maximum at the true parameter value, and as sample size tends to infinity the dashed curve tends to the solid curve by the LOLN, hence in the large sample limit the log likelihood has a maximum at the true parameter value, and we expect θˆ n → θ 0 a s n → ∞ .
+where the factor of 1/n is introduced purely for later convenience. We need to show that in the large sample limit l(θ) achieves its maximum at the true param- eter value θ0, but in the previous section it was shown that the expected value of the log likelihood for a single observation attains its maximum at θ0. The law of large numbers tells us that as n → ∞,  ni=1 log[f(Yi,θ)]/n tends (in probability) to E0[log(f(Y, θ))]. So in the large sample limit we have that
+i.e. that θˆ is θ0.
+l(θ0) ≥ l(θ)
+To show that θˆ → θ0 in some well ordered manner as n → ∞ requires that we assume some regularity (for example, at minimum, we need to be able to assume that if θ1 and θ2 are ‘close’ then so are l(θ1) and l(θ2)), but in the vast majority of practical situations such conditions hold. Figure 2.18 can help illustrate how the argument works: as the sample size tends to infinity the dashed curve, proportional to the log likelihood, tends in probability to the solid curve, E0[log(f(Y, θ))], which has its maximum at θ0, hence θˆ → θ0.
+For simplicity of presentation, the above argument dealt only with a single param- eter and data that were independent observations of a random variable from one distribution. In fact consistency holds in much more general circumstance: for vector parameters, and non-independent data that do not necessarily all come from the same distribution.
+    
+    LIKELIHOOD 107
+2.4.4 Large sample distribution of θˆ
+To obtain the large sample distribution of the m.l.e., θˆ, we make a Taylor expansion of the derivative of the log likelihood around the true parameter, θ0, and evaluate this
+a t θˆ .
+and from the definition of the m.l.e. the left hand side must be zero, so we have that
+∂l  ∂l      ∂2l   ≃  +θˆ−θ0  
+   ∂ θ   θˆ ∂ θ   θ 0 ∂ θ 2   θ 0   θˆ − θ 0   ≃ − ∂ l / ∂ θ | θ 0 ,
+ ∂2l/∂θ2|θ0
+with equality in the large sample limit (by consistency of θˆ). Now the top of this fraction has expected value zero and variance I (see results (2.14) and (2.15)), but it is also made up of a sum of i.i.d. random variables, li = log[f(xi, θ)], so that by the central limit theorem, as n → ∞, its distribution will  tend to N (0, I ). By the law of large numbers we also have that, as n → ∞, ∂2l/∂θ2 θ0 → I (in probability). So in
+the large sample limit (θˆ − θ0 ) is distributed as an N (0, I ) r.v. divided by I . i.e. in
+t h e l i m i t a s n → ∞   θˆ − θ 0   ∼ N ( 0 , I − 1 ) .
+The result generalizes to vector parameters:
+θˆ ∼ N ( θ 0 , I − 1 ) ( 2 . 2 0 )
+in the large sample limit. Again the result holds generally and not just for the some- what restricted form of the likelihood which we have assumed here.
+Usually I will not be known, any more than θ is, and will have to be estimated by plugging θˆ into the expression for I. Often this empirical information matrix, which is just the negative of the hessian (−H) of the log-likelihood evaluated at the m.l.e., is an adequate approximation to the information matrix I itself (this follows from the law of large numbers).
+2.4.5 The generalized likelihood ratio test (GLRT)
+Consider an observation, y, on a random vector of dimension n with p.d.f. (or p.m.f.) f (y, θ), where θ is a parameter vector. Suppose that we want to test:
+H0 :R(θ)=0 vs. H1 :R(θ)̸=0,
+where R is a vector valued function of θ, such that H0 imposes r restrictions on the
+parameter vector. If H0 is true then in the limit as n → ∞
+2λ = 2(l(θˆH1 ) − l(θˆH0 )) ∼ χ2r , (2.21)
+where l is the log-likelihood function and θˆH1 is the m.l.e. of θ. θˆH0 is the value of θ satisfying R(θ) = 0, which maximizes the likelihood (i.e. the restricted m.l.e.). This result is used to calculate approximate p-values for the test.
+    
+    108 GENERALIZED LINEAR MODELS
+Tests performed in this way are known as ‘generalized likelihood ratio tests’, since λ is the log of the ratio of the maximized likelihoods under each hypothesis. In the context of GLMs, the null hypothesis is usually that the correct model is a simplified version of the model under the alternative hypothesis.
+2.4.6 Derivation of 2λ ∼ χ2r under H0
+To simplify matters, first suppose that the parameterization is such that θ =   ψγ  ,
+where ψ is r dimensional, and the null hypothesis can be written H0 : ψ = ψ0. In principle it is always possible to re-parameterize a model so that the null has this form†† .
+Now let the unrestricted m.l.e. be   ψˆ  , and let   ψ0   be the m.l.e. under the γˆ γˆ0
+restrictions defining the null hypothesis. The key to making progress is to be able to express γˆ0 in terms of ψˆ, γˆ and ψ0. This is possible, in general, in the large sample limit, provided that the null hypothesis is true, so that ψˆ is close to ψ0. Taking a Taylor expansion of the log likelihood around the unrestricted m.l.e. θˆ yields
+ˆ 1  ˆ T   ˆ 
+l(θ)≃l(θ)−2 θ−θ H θ−θ (2.22)
+where Hi,j = − ∂2l/∂θi∂θj θˆ (note the factor of −1 introduced here). Exponenti- ating this expression, the likelihood can be written
+ˆ     ˆ T   ˆ    L(θ)≃L(θ)exp − θ−θ H θ−θ /2 .
+i.e. the likelihood can be approximated by a function proportional to the p.d.f. of an N(θˆ,H−1) random variable. By standard properties of the multivariate normal p.d.f., if
+  ψ  ∼N   ψˆ  ,  Σψψ Σψγ    γ γˆΣγψΣγγ
+ then
+Hence if ψ is fixed at ψ0 by hypothesis, then the approximation to the likelihood will
+γ|ψ∼N(γˆ+ΣγψΣ−1(ψ−ψˆ),Σγγ −ΣγψΣ−1Σψγ). ψψ ψψ
+be maximized when γ takes the value
+γˆ 0 = γˆ + Σ γ ψ Σ − 1 ( ψ 0 − ψˆ ) . ( 2 . 2 3 )
+If the null hypothesis is true, then in the large sample limit ψˆ → ψ0 (in probability) so that the approximate likelihood tends to the true likelihood, and we can expect (2.23) to hold for the maximizers of the exact likelihood.
+†† Of course, to use the result no re-parameterization is necessary — it’s only being done here for theo- retical convenience when deriving the result. Invariance ensures that reparameterization is a legitimate thing to do.
+ψψ
+    
+    LIKELIHOOD 109
+Expressing (2.23) in terms of a partitioning of Σ = H−1, is not as useful as having the results in terms of the equivalent partitioning of H itself. Writing ΣH = I in partitioned form
+ Σψψ Σψγ   Hψψ Hψγ  = I 0 , Σγψ Σγγ Hγψ Hγγ 0 I
+and multiplying out, results in four matrix equations, of which two are useful:
+ΣψψHψψ +ΣψγHγψ =I,
+ΣψψHψγ +ΣψγHγγ =0.
+Re-arranging (2.25) while noting that, by symmetry, HTψγ = Hγψ and ΣTψγ =
+Σγψ‡‡, yields and hence
+−H−1H =Σ Σ−1 γγ γψ γψ ψψ
+γˆ =γˆ+H−1H (ψˆ−ψ). 0 γγγψ 0
+For later use it is also worth eliminating Σψγ from (2.24) and (2.25), which results in
+Σ−1 =H −H H−1H . (2.27) ψψ ψψ ψγ γγ γψ
+Now provided that the null hypothesis is true, so that ψˆ is close to ψ0, we can re-use the expansion (2.22) and write the log-likelihood at the restricted m.l.e. as
+ˆ 1   ψ 0 − ψˆ   T   ψ 0 − ψˆ   l ( ψ 0 , γˆ 0 ) ≃ l ( ψ , γˆ ) − 2 γˆ 0 − γˆ H γˆ 0 − γˆ .
+(2.24) (2.25)
+(2.26)
+ Hence
+Substituting for γˆ0 from (2.26) and writing out H in partitioned form gives
+ˆ   ψ 0 − ψˆ   T   ψ 0 − ψˆ   2λ=2(l(ψ,γˆ)−l(ψ0,γˆ0))≃ γˆ0 −γˆ H γˆ0 −γˆ .
+2λ≃  ψ0−ψˆ H−1H (ψˆ−ψ )
+ T Hψψ Hψγ    Hγψ Hγγ
+ψ0−ψˆ H−1H (ψˆ−ψ )
+ 
+γγ γψ 0 and a short routine slog results in
+γγ γψ 0
+2λ≃(ψˆ−ψ )T H −H H−1H  (ψˆ−ψ ). 0ψψψγγγγψ 0
+But given (2.27), this means that
+2λ ≃ (ψˆ − ψ0)TΣ−1 (ψˆ − ψ0). (2.28)
+Now if H0 is true, then as n → ∞ this expression will tend towards exactness as ψˆ → ψ0. Furthermore, by the law of large numbers and (2.19), H → I as n → ∞ (recall that in this section H is the negative second derivative matrix), which means
+‡‡ and of course remembering that (AB)T = BTAT.
+ψψ
+    
+    110 GENERALIZED LINEAR MODELS that Σ tends to I−1, and hence Σψψ tends to the covariance matrix of ψˆ (see result
+2.20). Hence, by the asymptotic normality of the m.l.e. ψˆ, 2 λ ∼ χ 2r
+under H0. Having proved the asymptotic distribution of λ under H0, you might be wondering why it was worth bothering, when we could simply have used the right hand side of (2.28) directly as the test statistic. This approach is indeed possible, and is known as the Wald test, but it suffers from the disadvantage that at finite sample sizes the magnitude of the test statistic depends on how we choose to parameterize the model. The GLRT, on the other hand, is invariant to the parameterization we choose to use, irrespective of sample size. This invariance seems much more satisfactory — we do not generally want our statistical conclusions to depend on details of how we set up the model, if those details could never be detected by observing data from the model.
+2.4.7 AIC in general
+As we have seen, selecting between (nested) models on the basis of which has higher likelihood is generally unsatisfactory, because the model with more parameters al- ways has the higher likelihood. Indeed, the previous section shows that, if we add a redundant parameter to an already correct model, the expected increase in likelihood is ≃ 1/2. This problem arises because each additional parameter allows the model to get a little closer to the observed data, by fitting the noise component of the data, as well as the signal. If we were to judge between models on the basis of their fit to new data, not used in estimation, then this problem would not arise. The Akaike Information Criterion (AIC) is an attempt to provide a way of doing this.
+The derivation of AIC basically has two parts:
+i) The average ability of a maximum likelihood estimated model to predict new data is measured by the expected Kulbeck-Leibler (K-L) discrepancy between the estimated model and the true model. This can be shown to be approximately the minimum K-L discrepancy that the model could possibly achieve, for any parameter values, plus an estimable constant.
+ii) Theexpectednegativeloglikelihoodofthemodelcanbeapproximatelyexpressed as the minimum K-L distance that could possibly be achieved minus the same es- timable constant (and another ignorable constant). This immediately suggests an estimator for the expected KL discrepancy in terms of the negative log likelihood and the constant.
+Superficially similar looking expectations appear to evaluate to rather different quan- tities in parts (i) and (ii), which can cause confusion. The key difference is that in part (i) we are interested in the estimated model’s ability to predict new data, so that the parameter estimators are not functions of the data over whose distribution the ex- pectations are taken. In part (ii), when examining the expected log likelihood, the parameter estimators are most definitely functions of the data.
+    
+    LIKELIHOOD 111
+Suppose then, that our data were really generated from a density f0(y) and that our model density is fθ(y), where θ denotes the parameter(s) of fθ, and y and θ will generally be vectors, with θ having dimension p.
+K(fθ,f0)=  {log[f0(y)]−log[fθ(y)]}f0(y)dy (2.29)
+provides a measure of how badly fθ matches the truth, known as the Kullbeck-Leibler discrepancy. So, if θˆ is the m.l.e. of θ, then K(fθˆ, f0) could be used to provide a measure of how well our model is expected to fit a new set of data, not used to estimate θˆ. Note that because we are interested in new data, θˆ is treated as fixed and not as a function of y when evaluating (2.29).
+Of course, (2.29) can not be used directly, since we are not sure of f0, but progress can be made by considering a truncated Taylor expansion of fθ about the (unknown) parameters θK which would minimize (2.29).
+log[fθˆ(y)] ≃ log[fθK (y)] + (θˆ− θK)Tg + 1(θˆ− θK)TH(θˆ− θK) (2.30) 2
+where g and H are the gradient vector and Hessian matrix of first and second deriva- tives of fθ w.r.t. θ evaluated at θK . It is easy to see that if θK minimizes (2.29) then   gf0dy = 0, so that substituting (2.30) into (2.29) yields
+K ( f θˆ , f 0 ) ≃ K ( f θ K , f 0 ) + 1 ( θˆ − θ K ) T I K ( θˆ − θ K ) ( 2 . 3 1 ) 2
+where IK is the information matrix at θK . The dependence on θK is not helpful here, but can be removed by taking expectations over the distribution of θˆ, which yields
+E  K(fθˆ, f0)  ≃ K(fθK , f0) + p/2, (2.32)
+where it has been assumed that the model is close enough to correct that consistency ensures closeness of θˆ and θK and the large sample distribution of θˆ implies that twice the last term in (2.31) has a χ2p distribution.
+Now (2.32) still depends on f0, and we need to be able to estimate it using what we have available, which does not include knowledge of f0. A useful estimator of K(fθK , f0) can be based on −l(θˆ) = − log[fθˆ(y)], but to ensure that it is approxi- mately unbiased, we need to consider E[−l(θˆ)], where the expectation is now taken allowing for the fact that θˆ is a function of y.
+  E{−l(θˆ)} =
+≃ − log[fθK (y)]f0(y)dy − p/2
+E{ −l(θK ) − [l(θˆ) − l(θK )]}
+= K(fθK , f0) − p/2 −   log[f0(y)]f0(y)dy
+where again it has been assumed that the model is close enough to correct that we can u s e t h e l a r g e s a m p l e r e s u l t [ l ( θˆ ) − l ( θ K ) ] ∼ χ 2p . R e - a r r a n g e m e n t y i e l d s t h e e s t i m a t o r
+ ˆ 
+K(fθK , f0) = −l(θ) + p/2 + log[f0(y)]f0(y)dy,
+    
+    112 GENERALIZED LINEAR MODELS which can be substituted into (2.31) to obtain the estimator
+   ˆ 
+E K(fθˆ, f0) ≃ −l(θ) + p + log[f0(y)]f0(y)dy.
+The final term on the RHS depends only on the unknown true model, and will be the same for any set of models to be compared using a given data set. Hence, it can safely be dropped, and −l(θˆ) + p can be used for model comparison purposes. Twice this quantity is known as the Akaike Information Criterion,
+AIC = 2[−l(θˆ) + p]. (2.33)
+Generally we expect estimated models with lower AIC scores to be closer to the true model, in the K-L sense, than models with higher AIC scores. The p term in the AIC score penalizes models with more parameters than necessary, thereby counteracting the tendency of the likelihood to favour ever larger models.
+The forgoing derivation assumes that the estimated model is ‘close’ to the true model. If a sequence of nested models includes a model that is acceptably close, then all larger models will also be close. On the other hand if we start to violate this assump- tion, by oversimplifying a model, then the resulting decrease in l(θˆ) will typically be much larger than the decrease in p, resulting in a substantial drop in AIC score: basically the likelihood part of the AIC score is well able to discriminate between models that are over-simplified, and those that are not.
+A derivation of AIC which deals more carefully with the case in which the model is ‘wrong’ is given in Davison (2003), from which the above derivation borrows heav- ily. A more careful accounting makes more precise the nature of the approximation made by using the penalty term, p, when the model is incorrect: but it doesn’t make p any less approximate in that case.
+2.4.8 Quasi-likelihood results
+The results of sections 2.4.3 to 2.4.6 also apply if the log likelihood l is replaced by the log quasi-likelihood q. The key to demonstrating this lies in deriving equivalents to results 1 to 4 of section 2.4.2, for the log quasi likelihood function. Again, for clarity, only a single parameter θ will be considered, but the results generalize.
+Consider observations y1,y2,...,yn on independent random variables, each with expectation μi. Given a single yi, let the log quasi likelihood of μi be qi(μi) (as defined by (2.12) in section 2.1.10), and suppose that all the μi depend on a parameter θ, which therefore has log quasi likelihood function
+n
+q(θ) =   qi(μi). i=1
+Let θ0 denote the true parameter value, E0 denote the expectation operator given that parametervalue,andletμ0i denotethetrueexpectedvalueofyi.
+    
+    LIKELIHOOD
+Result 1:
+The proof is simple:
+E ∂q ̨ !=0 0 ∂θ ̨θ0
+113 (2.34)
+(2.35)
+(2.36)
+ E0 ∂qi   =E0 ∂qi   ∂μi  =E0(Yi)−μ0i ∂μi  =0, ∂ θ   θ 0 ∂ μ i   μ 0i ∂ θ   θ 0 φ V ( μ 0i ) ∂ θ   θ 0
+from which the result follows immediately. Given result 1 it is clear that,
+     Result 2:
+var ∂q ̨ !=E02 ∂q ̨ !23. ∂θ ̨θ0 4 ∂θ ̨θ0 5
+  Furthermore it can be shown that
+Result 3:
+Iq ≡E02 ∂q ̨ !23=−E0"∂2q ̨ # 4 ∂θ ̨θ0 5 ∂θ2 ̨θ0
+  where Iq might be termed the quasi- information about θ. The proof is straightfor- ward.
+E0   ∂qi    2 = E0   ∂qi    2  ∂μi    2 ∂θ ∂μ0 ∂θ
+    θ0
+Which can be shown to be equal to −E0  ∂2qi/∂θ2 θ0   as follows
+i  μi    θ0 = E0 (Yi−μ0i)2  ∂μi   2
+  =
+φ2V (μ0i )2   ∂θ  θ0 1  ∂μi   2
+  0   φV(μi) ∂θ θ0
+  ∂μi   2   ∂qi     ∂2μi  ∂θ2  θ0 ∂μ2i  μ0i ∂θ  θ0 ∂μi  μ0i ∂θ2  θ0
+ ∂2qi     ∂2qi 
+E0  =E0    +E0    
+     = E0 ∂2qi    ∂μi   2 ∂ μ 2i   μ 0i ∂ θ   θ 0
+= E0  −1 − Yi−μ0i ∂V    ∂μi   2
+φV(μ0i)  φ2V(μ0i)2 ∂μ μ0i ∂θ θ0
+−1  ∂μi   2 φ V ( μ 0i ) ∂ θ   θ 0
+      =
+      
+    114 GENERALIZED LINEAR MODELS The result now follows easily given the independence of the Yi and hence of the qi. Finally we have
+Result 4:
+E0[q(θ0)] ≥ E0[q(θ)] ∀ θ (2.37)
+Proof is considerably easier than was the case for the equivalent likelihood result. By result 1 we know that E0(q) has a turning point at θ0. Furthermore
+nn
+E 0   ∂ q   =   E 0   ∂ q i   ∂ μ i =   μ 0i − μ i ∂ μ i
+∂θ i=1 ∂μi ∂θ i=1 φV(μi) ∂θ
+implying that q decreases monotonically away from θ0 provided that each ∂μi/∂θ has the same sign for all θ (different μi can have derivatives of different sign, of course). The restriction is always the met for a GLM (since the signs of these deriva- tives are controlled by the signs of the corresponding elements of the model matrix, which are fixed).
+As in the likelihood case, these quasi-likelihood results can be generalized to vector parameters.
+The consistency, large sample distribution and GLRT results of sections 2.4.3 to 2.4.6 can now be re-derived for models estimated by quasi-likelihood maximization. The arguments of sections 2.4.3 to 2.4.6 are unchanged except for the replacement of l by q,li byqi,I byIq andresults1to4ofsection2.4.2byresults1to4ofthecurrent section.
+2.5 Exercises
+1. A Bernoulli random variable, Y , takes the value 1 with probability p and 0 with probability 1 − p, so that its probability function is:
+     f(y)=py(1−p)1−y, y=0or1
+(b) Show that the Bernoulli distribution is a member of the exponential family of
+distributions, by showing that its probability function can be written as
+f (y) = exp [{yθ − b(θ)}/a(φ) + c(y, φ)] ,
+for appropriately defined θ, b(θ), φ, a and c. (See section 2.1.1.) (c) What will the canonical link be for the Bernoulli distribution?
+2. Residualcheckingfornon-Gaussianerrormodelsisnotalwaysasstraightforward as it is in the Gaussian case, and the problems are particularly acute in the case of binary data. This question explores this issue.
+(a) ThefollowingcodefitsaGLMtodatasimulatedfromasimplebinomialmodel and examines the default residual plots.
+(a) Findμ≡E(Y).
+    
+    EXERCISES 115
+     n<-100;m<-10
+     x <- runif(n)
+     lp <- 3*x-1
+     mu <- binomial()$linkinv(lp)
+     y <- rbinom(1:n,m,mu)
+     par(mfrow=c(2,2))
+     plot(glm(y/m ̃x,family=binomial,weights=rep(m,n)))
+Run the code several times to get a feel for the range of results that are possible even when the model is correct (as it clearly is in this case).
+(b) Explore how the plots change as m (the number of binomial trials) is reduced to 1. Also examine the effect of sample size n.
+(c) By repeatedly simulating data from a fitted model, and then refitting to the simulated data, you can build up a picture of how the residuals should behave when the distributional assumption is correct, and the data are really indepen- dent. Write code to take a glm object fitted to binary data, simulate binary data given the model fitted values, refit the model to the resulting data, and extract residuals from the resulting fits. Functions fitted and rbinom are useful here.
+(d) Ifrsdcontainsyourresidualvectorthen plot(sort(rsd),(1:length(rsd)-.5)/length(rsd))
+produces a plot of the ‘empirical CDF’ of the residuals, which can be useful for characterizing their distribution. By repeatedly simulating residuals, as in the previous part, you can produce a ‘simulation envelope’ showing e.g. where the middle 95% of these ‘empirical CDFs’ should lie, if the model assumptions are met: such envelopes provide a guide to whether an observed ‘real’ residual distribution is reasonable, or not. Based on your answer to the previous part, write code to do this.
+(e) Plots of the residuals against fitted values, or predictors, are also hard to inter- pret for models of binary data. A simple check for lack of independence in the residuals can be obtained by ordering the residuals according the the values of the fitted values or a predictor, and checking whether these ordered residuals show fewer (or more) runs of values above and below zero than they should if independent. The command
+rsd <- rsd[sort(fv,return.index=TRUE)$ix] will put rsd into the order corresponding to increasing fv. It is possible to simulate from the distri- bution of runs of residuals that should occur, under independence, as part of the simulation loop used in the previous part: modify your code to check whether the residuals appear non-independent with respect to fitted values.
+3. This question looks at data covering guilty verdicts involving multiple murders in Florida between 1976 and 1987. The data are classified by skin ‘colour’ of victim and defendant and by whether or not the sentence was death.
+    
+    116
+GENERALIZED LINEAR MODELS
+Death No Death Penalty Penalty
+53 414 11 37 0 16
+4 139
+ Victim’s Race
+White Black
+Defendant’s Race
+White Black White Black
+  Data are from Radelet and Pierce Florida Law Review:431-34 (1991), as reported in Agresti (1996).
+(a) What proportion of black defendants and what proportion of white defendants were sentenced to death?
+(b) Find the log-linear model which best explains these data.
+(c) How would you interpret your best fit model?
+4. If a random variable, Yi, has expected value μi, and variance φV (μi), where φ is a scale parameter and V (μi) = μi, then find the the quasi-likelihood of μi, given an observation yi, by evaluation (2.12). Confirm that the corresponding deviance is equivalent to the deviance obtained if Yi ∼ Poi(μi ).
+5. If a linear model is to be estimated by minimizing i wi(yi − Xiβ)2 w.r.t. β, show that the formal expression for the resulting parameter estimates is βˆ = (XTWX)−1XTWy where W is a diagonal matrix such that Wi,i = wi. (Note that the expression is theoretically useful, but would not be used for practical computation).
+6. This question relates to the IRLS method of section 2.1.2, and gives an alternative insight into the distribution of the parameter estimators βˆ. Let yi be independent random variables with mean μi, such that g(μi) = ηi ≡ Xiβ, where g is a link function, X a model matrix and β a parameter vector. Let the variance of yi be V (μi)φ, where V is a known function, and φ a scale parameter. Define
+zi = g′(μi)(yi − μi) + ηi and wi =  V (μi)g′(μi)2 −1 .
+(a) Show that E(zi) = Xiβ.
+(b) Show that the covariance matrix of z is W−1φ, where W is a diagonal matrix
+with Wi,i = wi.
+(c) If β is estimated by minimization of  i wi(zi − Xiβ)2 show that the covari-
+ance matrix of the resulting estimates, βˆ, is (XTWX)−1φ, and find E(βˆ).
+(d) The multivariate version of the central limit theorem implies that as the di- mension of z tends to infinity, XTWz will tend to multivariate gaussian. What
+does this imply about the large sample distribution of βˆ?
+7. Write R code to implement an IRLS scheme to fit the GLM defined in section 2.3.2 to the data given there. Use the lm function to fit the working linear model at each iteration.
+8. This question is about GLMs for quite unusual models, handling non-linear pa- rameters, and direct likelihood maximization as a flexible alternative to using
+    
+    EXERCISES 117
+GLMs. Data frame harrier has 2 columns: Consumption.Rate of Grouse by Hen Harriers (per day), and the corresponding Grouse.Density (per km2 ). They have been digitized from figure 1 of Asseburg et al. (2005). Ecological the- ory suggests that the the expected consumption rate, c, should be related to grouse density, d, by the model,
+E(ci)= admi , 1 + atdmi
+where a, t and m are unknown parameters. It is expected that the variance in consumption rate is proportional to the mean consumption rate.
+(a) Show that, for fixed m, a GLM relating ci and di can be obtained by use of the reciprocal link.
+(b) Form=1estimatethemodelusingglmwiththequasifamily.
+(c) Plot the model residuals against Grouse density, and interpret the plot.
+(d) Search for the approximate value of m which minimizes the model deviance, by repeatedly re-fitting the model with alternative trial values.
+(e) For your best fit model, with the optimal m, produce a plot showing the curve of predicted consumption against density overlaid on the raw data. Using the R function predict, with the se argument set to TRUE, add approximate 95% confidence limits to the plot.
+(f) A more systematic way fitting this model is to write a function, which takes the model parameters, and the consumption and density vectors as arguments, and evaluates the model likelihood (or quasi-likelihood in the current context). This likelihood can then be maximized using the R built in optimizer, optim. Write R code to do this (see question 4 for the quasi-likelihood).
+Note that the optim will optionally return the approximate Hessian of a likeli- hood, so this general approach gives you easy access to everything you need for approximate inference about the parameters of the model, using the results cov- ered in section 2.4. The approach is very general: it would be easy to estimate the full model discussed in Asseburg et al. (2005) in the same way.
+9. R data frame ldeaths contains monthly death rates from 3 lung diseases in the UK over a period of several years (see ?ldeaths for details and reference). One possible model for the data is that they can be treated as Poisson random variables with a seasonal component and a long term trend component, as follows:
+E(deathsi) = β0 + β1ti + α sin(2πtoyi/12 + φ),
+where β0 , β1 , α and φ are parameters ti is time since the start of the data, and toy
+is time of year, in months (January being month 1).
+(a) By making use of basic properties of sines and cosines, get this model into a form suitable for fitting using glm, and fit it. Use as.numeric(ldeaths) to treat ldeaths as a regular numeric vector rather than a time series object.
+(b) Plot the raw data time series on a plot, with the predicted timeseries overlaid.
+(c) Is the model an adequate fit?
+     
+    118 GENERALIZED LINEAR MODELS
+10. In 2.3.2 an approximate confidence interval for β1 was found using the large sam- ple distribution of the GLM parameter estimators. An alternative method of con- fidence interval calculation is sometimes useful, based on inversion of the gen- eralized likelihood ratio test (see sections 2.1.6, 2.4.5 and 2.4.6). This works by finding the range of values of β1 that would have been accepted as null hypotheses about β1, using a GLRT. If the threshold for acceptance is 5% the resulting range gives a 95% confidence interval, if the threshold is 1% we get a 99% interval, and so on.
+(a) Usingglm,refittheAIDsmodel,withthequadratictimedependence,andsave the resulting object.
+(b) Write a loop which refits the same model for a sequence of fixed β1 values cen- tered on the MLE from part (a) and stores the resulting model log likelihoods. In this step you are fitting the model under a sequence of null hypotheses about β1 . The way to fix β1 in the model fit is to use an offset term in your model. e.g. if you want to fix β1 at 0.5, you would replace the t term in your model formula, with the term, offset(.5*t).
+(c) Plot the log likelihoods from the last part against the corresponding β1 values, and add to your plot the line above which the log-likelihoods are high enough that the corresponding β1 values would be included in a 95% confidence inter- val. From your plot, read off the 95% CI for β1 and compare it to the interval obtained previously.

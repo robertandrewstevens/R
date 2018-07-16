@@ -1,0 +1,371 @@
+
+    
+     Index
+ χ2 test, 70, 191
+additive model, 131–135 fitting, 133
+model matrix, 132
+penalty, 132 age of Universe, 5 aggregate, 276 AIC, 182
+GLMs, 67, 84
+in general , 110–112 linear model, 50
+AIC, 226
+analysis of deviance, 68, 70, 85, 95 ANOVA, 15, 43, 55, 57, 279
+decomposition of function, 202–204 anova, 43, 226
+augmented linear model, 127, 133, 205, 216 autocorrelation, 315
+B-spline, 148 basis, 148
+backfitting, 209–211 basis, 142
+B-spline, 148
+choice of dimension, 157, 220 cubic regression, 123
+cubic regression spline, 146 expansion, 120, 163 polynomial, 120
+tensor product, 158–160
+thin plate spline, 152 truncated power, 269
+Bayesian covariance matrix, 181, 207 Bayesian smoothing model, 185–187, 309,
+310
+prior structure, 187
+simulation from posterior, 190, 242, 256 unconditional posterior simulation, 257
+binary data, 257
+residual checking, 114
+binomial distribution, 258 binomial family, 258 Bonferroni correction, 321 by variable, 165, 235, 238
+and centering constraints, 312
+canonical parameter, 62, 71 central limit theorem, 101, 188 Chebyshev’s inequality, 189 Choleski decomposition, 127, 328 concurvity, 176
+confidence interval
+and transformation, 10
+Bayesian, 190
+Bayesian unconditional, 198–200, 202 definition, 9
+for smoothing parameter, 316
+GLM, 68, 91
+GLRT inversion, 118
+linear model, 9, 14, 35
+performance for GAM, 192–198 Wilk’s, 118
+confounding, 176, 274 contingency tables, 92 contour, 56
+contrast matrix, 47 Cook’s distance, 26 covariance matrix, 326
+of linear transformation, 326 cross validation, 130
+failure of, 214 general, see GCV ordinary, see OCV
+cubic regression spline, 146, 222 fitting, 127
+model matrix, 124, 125 penalty, 146
+penalty matrix, 127
+    
+    INDEX
+cubic spline, 122, 211 approximation properties, 144 natural, 142
+penalty, 126, 144
+quadratic penalty, 126
+r.k. basis, 124
+smoothest interpolant, 143
+cyclic spline, 147, 222, 315 penalty, 147
+daily temperature, 314 Datasets
+AIDS in Belgium, 87, 118 belief in afterlife, 92 bird, 259
+blowfly, 269
+brain, 226
+cairo, 315
+chicago, 243
+chl, 270
+co2s, 267
+engine wear, 124
+Florida death penalty, 116 harrier, 117
+heart attacks and CK, 81 hubble, 5, 265
+ipo, 267
+mack, 250
+MASS
+mcycle, 139, 265 Rubber, 56
+nlme Gun, 321
+379
+Loblolly, 298 Machines, 284, 303, 320 Oxide, 320
+Rail, 280, 289, 298 Soybean, 322
+R
+sole, 96, 305, 313 sperm.comp1, 22 sperm.comp2, 22, 31 wine, 268
+design matrix, 11
+F-ratio statistic, 15, 29, 70
+F-test, 15, 43, 70, 191, 202, 233, 236, 279,
+283
+factor variables, 11, 36, 43
+contrasts, 46
+dummy variables, 11, 37 identifiability, 37 interactions, 40
+use in R, 41–44
+follow up comparisons, 321 formula, 44
+I(), 27, 45
+GAM, 119, 135–137, 163
+as penalized GLM , 163–164 backfit, 208–211
+Bayesian model, 185–187
+non-linear functions, 190 posterior, 185, 187–190 prior, 187
+bias, 214
+coefficient estimators, 166, 181 confidence interval, 190
+performance, 192–198
+termwise, 195–198, 204 constraints, 181
+InsectSprays, 57 ldeaths, 117 PlantGrowth, 42 trees, 58, 134, 137, 217 warpbreaks, 56
+deviance, 69
+approximate distribution, 69 null, 83
+proportion explained, 84 residual, 84
+scaled, 69
+EDF, 167, 200, 207
+and basis dimension, 157, 220 matrix, 167
+effective degrees of freedom, see EDF eigen decomposition, 153, 329 eigenvalue, 329
+eigenvector, 329
+Euclidean norm, 12 exclude.too.far, 265 exponential family, 59, 62–63
+mean, 62
+variance, 63 extrapolation
+dangers of, 267, 357, 362
+    
+    380
+identifiability, 203–204
+degrees of freedom, 166–167 distributional results, 185–191
+fitting, 166
+frequentist approximation, 185 hypothesis testing, 190, 200–202, 233,
+236
+unpenalized, 191, 202 influence matrix, 179 interation
+smooth with factor, 165
+large sample results, 187–190
+model matrix, 164
+motivation, 101
+penalized log likelihood, 164, 165 proximity of penalized and unpenalized
+versions, 201
+scale estimation, 167–168
+termwise p-values, 190–191, 226, 236
+gam, 217, 220, 228, 230, 232, 233, 235, 238, 244, 245, 248, 251, 253, 255, 261 anova.gam, 225, 233, 235, 236, 239,
+255
+arguments, 227 controlling, 219–221
+fitting, 227
+gamma argument, 220, 252 knots, 258
+knots argument, 258 parametric terms, 224 plot.gam, 218, 221–223
+all.terms, 225
+contour plot interpretation, 223 n argument, 244
+too.far, 223
+predict.gam, 239, 240, 242, 256, 261 lpmatrix, 241
+print.gam, 218, 223 scale argument, 252 summary.gam, 226, 261 tensor product smooths, 222 TPRS terms, 221
+user defined smoothers, 268 gam package, 261–263
+gam, 261 plot.gam, 263 summary.gam, 261
+gam.check, 229, 230, 244
+INDEX
+centering, 163
+gam.method, 230 GAMM, 309–317
+and AIC, 311 inference, 311 with R, 312–317
+gamm
+correlation structures, 315 random argument, 298, 313 use of, 312–317
+gamma distribution, 221, 232 Gamma family, 221, 232 Gauss Markov theorem, 17 Gauss-Newton method, 53 GCV, 129, 171–174
+derivatives, 179–184
+for GLM, 173–174, 216 GAM case, 136
+Pearson based, 174, 213 score, 178, 182
+single penalty case, 216 stable optimization, 178–184
+generalized additive mixed model, see GAMM
+generalized additive model, see GAM generalized cross validation, see GCV generalized likelihood ratio test, 68, 85,
+107–110, 200
+generalized linear mixed model, see GLMM generalized linear model, see GLM generalized smoothing splines, 211–213 geometry
+generalized linear model , 75–80 IRLS, 76
+IRLS convergence, 79
+least squares, 19
+linear model, 18
+general covariance structure, 50
+nested models, 21
+non-linear least squares, 53 orthogonal fitting, 20
+penalized least squares, 204–205
+geoR package, 259 GLM, 59
+estimation, 63
+estimator distribution, 68 fitted values
+properties, 72 hypothesis testing, 68 in R, 80–96, 98–101
+    
+    INDEX
+likelihood, 64 quasi-likelihood, 73–75 residuals, 72
+deviance, 73 Pearson, 72 working, 72
+theory, 60–75
+glm, 80, 83, 85, 88, 89, 94, 95, 98
+AIC, 84
+anova, 95, 100 summary.glm, 98 update, 99
+GLMM, 303–308 PQL, 304
+glmmPQL, 305
+gss package, 263–265
+predict.ssanova1, 264 ssanova1, 263
+hat matrix, 16 Householder matrix, 327 Hubble’s law, 1 hypothesis testing
+and model selection, 191
+GAM, 190, 200–202, 235–239
+GLM, 68, 85, 90, 95
+GLRT, 107–110
+linear model, 7–9, 14, 15, 43 unpenalized GAM, 191, 202, 239, 271
+idempotency, 16
+influence matrix, 16, 127, 179
+properties, 16, 266 information, 103 information matrix, 68, 105
+empirical or observed, 107 interaction
+factors, 40
+smooth, 158, 202 smooth with factor, 165
+invariance, 224
+and cross validation, 170–173 GLRT, 110
+of MLEs, 102
+rotational, 156, 158, 221, 258 scale, 158, 221, 263
+IRLS algorithm, 66
+381
+convergence, 79 derivation, 63–66 divergence, 176 geometry, 76 initalization, 66
+iterative weights, 66 penalized, 136 properties, 66 pseudodata, 66, 166, 188 weights, 166, 188
+iteratively re-weighted least squares, see IRLS
+Jacobian, 54, 65 Jensen’s inequality, 104
+knots, 122, 125, 133, 156 Kronecker product, 327 Kullbeck-Leibler discrepancy, 111
+Lanczos iteration, 154, 331 Laplace approximation, 108, 304 law of large numbers, 101
+least squares, 12
+estimators, 12
+non-independent data, 49 non-linear, 52
+residual variance estimation, 56
+likelihood
+consistency of MLEs, 105 distribution of estimators, 107 linear model, 48
+properties of expected log, 102 theory , 101–114
+linear constraints, 38, 45, 57 linear contrasts, 46
+linear mixed model, 273
+general case, 287–303
+and penalized regression, 296–297 estimation, 288–290
+grouped data, 297
+likelihood, 288
+predicting random effects, 292–293,
+296–297
+R functions, see also lme, 297–303 response covariance matrix, 288, 289
+simple balanced case, 273–286 2 way design, 281–286
+    
+    382
+INDEX
+aggregated model, 276, 280, 283 estimation in R, 280, 284 general principles, 277–278, 286 hypothesis testing, 285 interactions, 282
+oneway ANOVA, 278–281
+variance components, 277, 280, 284,
+Mallow’s statistic, 50, 168 matrix
+square root, 289 determinant, 330 differentiating, 327 efficient computation, 325 positive definite, 330 positive semi-definite, 330 square root, 127
+trace, 330
+matrix square root, 179 mean square error, 128, 168 mgcv, 217
+mixed effects model
+general case, 299
+model formula, see formula model matrix, 11, 287
+multiple comparisons, 321
+285
+why bother, 273–278
+linear model, 2, 10 ANOVA, 15
+checking, 25 coefficients, 27 estimator distribution, 13 F-ratio, 15
+fitted values, 16 properties, 55 formula, 5, 44
+likelihood, 48
+model matrix, 11, 24 model selection, 30–35
+stepwise, 56 polynomial, 56 prediction, 36 residuals, 16
+t-ratio, 14, 28
+theory , 12–18 traditional results, 17
+linear predictor, 59 link function, 59 canonical, 71
+lm, 5, 6, 24, 27, 30–35, 42, 44, 125, 128, 134, 137
+associated functions, 23 for mixed models, 275 plot.lm, 25 print.lm, 27
+step, 56 summary.lm, 28 use of, 24
+lme
+correlation argument, 299 form of model, 297 intervals, 316 plot.lme, 299
+use of, 298
+log-linear models, 92 lpmatrix, 241
+natural spline, 142
+negative binomial distribution, 254 negative.binomial family, 254 nesting, 202, 234, 274
+Newton’s method, 178, 288
+nlme package, 297
+normal distribution
+joint distribution results, 292
+OCV, 129, 169–171 not invariant, 170
+offset, 97
+offset, 118, 251
+optim, 290
+ordinary cross validation, see OCV orthogonal matrix, 327
+outer iteration, 175, 182–184 outliers
+dealing with, 27, 32, 228, 244–248 overdispersion, 75, 98
+overfitting
+checking for, 270
+P-IRLS, 136, 165–166, 215 differentiation of, 182–184 divergence, 176
+P-spline, 148, 215, 222 penalty, 150
+p-value, 29, 95
+    
+    INDEX
+and model selection, 191 for GAM term, 190–191 interpretation, 29 properties, 271
+partial residuals, see residuals, partial Pearson statistic, 71, 168, 174
+penalized IRLS, see P-IRLS
+penalized quasi-likelihood, see GLMM, PQL performance iteration, 176–182
+convergence failure, 176 pivoting, 331
+Poisson distribution, 250 poisson family, 251 polynomial, 120, 299 posterior simulation, 190, 242 PQL, 305, 309
+prediction lpmatrix, 241 response scale, 240 term-wise, 240
+prediction error, 128, 169 propagation of errors, 326
+QQ plot, 26
+QR decomposition, 13, 57, 204, 328 quasi family, 306 quasi-information, 113 quasi-likelihood, 73
+theory , 112–114
+R model formulae, 44 R2, 29
+adjusted, 29, 226
+random effects, 273, 276
+rank deficiency, 179, 184, 203–204 reflector matrix, see Householder matrix REML, 293–295, 309
+and inference, 295 explicit form, 295 motivation, 294 restrictions on use, 295
+reproducing kernel, 124, 212 residual plots
+against fitted values, 26 Cook’s distance, 26 GLMM, 307
+GLMs, 84
+linear mixed model, 286
+383
+linear model, 5 QQ-plot, 26 scale location, 26 zero line, 101
+residual sum of squares, 13 residuals
+autocorrelation, 267, 315 checking binary, 114 deviance, 73
+distribution, 73
+GAM, 229, 244
+GLMs, 72
+improvement by transformation, 228–231 linear model, 16
+partial, 218 Pearson, 72 properties, 55
+s, 221
+bs argument, 220, 222 fx argument, 271
+k argument, 220
+choice of, 157
+scale parameter, 62, 70, 213
+estimation, 70, 167
+scope of statistics, 2 semi-parametric models, 224–226 shrinkage smoother, 156, 222, 251 singular value decomposition, 330 singularity, 179, 184
+smoothing bias, 168, 185 smoothing parameter, 126, 144
+as variance component, 310
+confidence interval, 316
+smoothing parameter estimation, 128–131,
+134, 175–184, 215
+criteria, 168–174
+efficiently for single smooth, 216 numerical strategy, 175
+outer iteration, 175, 182–184 performance iteration, 176–182
+smoothing spline ANOVA, see SS-ANOVA smooths, see also spline
+as mixed model terms, 309–311 built into mgcv, 222
+of several variables, 221–224 running mean, 267
+Sole eggs, 96
+    
+    384
+spectral decomposition, see eigen decomposition
+sperm competition , 22–36 spline
+B-spline, 148
+basis size choice, 157
+built into mgcv, 222
+cubic, 122, 213
+cubic regression, 122, 146
+cubic smoothing, 144, 211
+cyclic, 147
+equivalent kernel, 266
+fitting, 127
+natural parameterization, 205–208, 214,
+215
+P-spline, 148, 215
+truncated power, 269
+penalized regression, 126, 145 penalized regression estimator, 126 reproducing kernel approach, 211–213 tensor product, 158
+theoretical properties, 142–145
+thin plate, 150
+thin plate regression (TPRS), 150
+SS-ANOVA, 202, 263
+summary gam, 226
+glm, 90, 91 lm, 28
+te, 221, 233
+bs argument, 313
+k argument, 222, 248
+tensor product smooth, 158–163 alternative penalties, 162
+as mixed model term, 310–311 basis , 158–160
+comparison with TPRS, 224, 233–235 marginal bases, 158
+marginal penalties, 161
+penalty, 161, 162
+penalty re-parameterization, 162 tensor product smooth penalty , 161–163 thin plate regression splines, see TPRS thin plate spline, 150, 216
+basis, 152
+penalty, 151 TPRS, 150–156, 222
+basis, 153, 155
+INDEX
+comparison with tensor product, 224, 233–235
+construction, 153 knot based, 156, 216 properties, 154, 266 speeding up, 258
+transformation
+to reduce leverage, 252
+to stabilize variance, 26, 228–231
+UBRE, 168–169
+derivatives, 179–184 equivalence to AIC, 174
+for GLM, 174
+score, 178, 182
+stable optimization, 178–184
+unbiased risk estimator, see UBRE
+validation set, 270
+Variable coefficient model, 164–165 variable coefficient model, 235
+mixed effects version, 312 variance function, 63 variogram, 259
+vis.gam, 231, 234, 237
+Wald test, 110, 191, 236
+weighted constrained penalized least
+squares, 181 wiggliness penalty, 144
+    

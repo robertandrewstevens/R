@@ -1,0 +1,1261 @@
+
+     
+     CHAPTER 5
+GAMs in practice: mgcv
+This chapter covers use of the generalized additive modelling functions provided by R package mgcv: the design of these functions is based largely on Hastie (1993), although to facilitate smoothing parameter estimation, their details have been mod- ified. It is also well worth being aware of other packages available for GAM type modelling in R. At time of writing, two other packages stand out: gss, written by Chong Gu and gam, written by Trevor Hastie. There is not space in this book to cover these in detail, but section 5.6 offers brief introductions to both. Packages assist and gamlss are also available at cran.r-project.org, and the vgam package is also worth seeking out.
+The gam function from library mgcv is very much like the glm function covered in chapter 2. The main difference is that the gam model formula can include smooth terms, s() and te(), and there are a number of options available for controlling automatic smoothness selection, or for directly controlling model smoothness. Some simple examples are helpful for introducing the main features, so this chapter starts with the cherry tree data from chapter 3, before moving on to some more realistic examples. When reading this chapter note that R and the mgcv package are subject to continuing efforts to improve them. Sometimes this may involve modifications of numerical optimization behaviour, which may result in noticeable, but (hopefully) statistically unimportant, differences between the output given in this chapter, and the corresponding results with more recent versions. Sometimes the exact formatting of output can also change a little.
+5.1 Cherry trees again
+The example with which chapter 3 ended is easily re-done.
+library(mgcv)
+data(trees)
+ct1<-gam(Volume ̃s(Height)+s(Girth),
+         family=Gamma(link=log),data=trees)
+This fits the Generalized additive model
+log(E[Volumei]) = f1(Heighti) + f2(Girthi) where Volumei ∼ Gamma 217
+     
+    218 GAMS IN PRACTICE: MGCV
+and the fj are smooth functions. The degree of smoothness (within certain limits) of the fj is estimated by GCV. The results can be checked by typing the name of the fitted model object to invoke the print.gam print method, and by plotting the fitted model object. For example
+> ct1
+Family: Gamma
+Link function: log
+Formula:
+Volume  ̃ s(Height) + s(Girth)
+Estimated degrees of freedom: 1.076070 2.408379 total = 4.484449
+GCV score:  0.008103299
+> plot(ct1,residuals=TRUE)
+The resulting plot is displayed in the upper two panels of figure 5.1. Notice that the default print method reports the model distribution family, link function and formula, before displaying the effective degrees of freedom for each term (in the order that the terms appear in the model formula) and the whole model: in this case a straight line, corresponding to one degree of freedom, is estimated for the effect of height, while the effect of Girth is a estimated as a smooth curve with 2.4 degrees of freedom; the total degrees of freedom is the sum of these two, plus one degree of freedom for the model intercept. Finally the GCV score for the fitted model is reported.
+The plots show the estimated effects as solid lines/curves, with 95% confidence lim- its (strictly Bayesian credible intervals, based on section 4.8) shown as dashed lines. The coincidence of the confidence limits and the estimated straight line, at the point where the line passes through zero on the vertical axis, is a result of the identifiability constraints applied to the smooth terms∗. The points shown on the plots are partial residuals. These are simply the Pearson residuals added to the smooth terms evalu- ated at the appropriate covariate values. For example, the residuals plotted in the top left panel of figure 5.1 are given by
+partial p εˆ = f1(Heighti) + εˆ 1i i
+plotted against Heighti. For a well fitting model the partial residuals should be evenly scattered around the curve to which they relate. The ‘rug plots’, along the bottom of each plot, show the values of the covariates of each smooth, while the number in each y-axis caption is the effective degrees of freedom of the term being plotted.
+∗ The identifiability constraint is that the sum of the values of each curve, at the observed covariate values, must be zero: for a straight line, this condition exactly determines where the line must pass through zero, so there can be no uncertainty about this point.
+    
+    CHERRY TREES AGAIN
+65 70 75
+Height
+65 70 75
+Height
+219
+                                             80
+80
+85
+85
+8 10 12 14 16 18 20
+Girth
+8 10 12 14 16 18 20
+Girth
+                                             Figure 5.1 Components of GAM model fits to the cherry tree data. The upper two panels are from ct1 and the lower 2 from ct4.
+5.1.1 Finercontrolofgam
+The simple form of the gam call producing ct1 hides a number of options that have been set to default values. The first of these is the choice of basis used to represent the smooth terms. The default is to use thin plate regression splines, which have some appealing properties, but can be computationally costly for large data sets. In the following this is modified by using s(...,bs="cr") to select penalized cubic regression splines to represent the same cherry tree model.
+> ct2<-gam(Volume ̃s(Height,bs="cr")+s(Girth,bs="cr"),
++ family=Gamma(link=log),data=trees)
+> ct2
+Family: Gamma
+Link function: log
+Formula:
+Volume  ̃ s(Height, bs = "cr") + s(Girth, bs = "cr")
+Estimated degrees of freedom: 1.000126 2.418591 total = 4.418718
+GCV score:  0.008080546
+    s(Height,1)
+s(Height,1.08)
+−0.5 0.0 0.5 1.0
+−0.5 0.0 0.5 1.0
+s(Girth,2.17)
+s(Girth,2.41)
+−0.5 0.0 0.5 1.0
+−0.5 0.0 0.5 1.0
+    220 GAMS IN PRACTICE: MGCV
+As you can see, the change in basis has made very little difference to the fit. Plots are in fact indistinguishable to those for ct1. This is re-assuring: it would be unfortunate if the model depended very strongly on details like the exact choice of basis. How- ever, larger changes to the basis, such as using P-splines, can make an appreciable difference.
+Another choice hidden, in the previous two model fits, is the choice of the dimension, k, of the basis used to represent smooth terms. In the previous two fits, the default, k = 10, was used. The choice of basis dimensions amounts to setting the maximum possible degrees of freedom allowed for each model term. The actual effective de- grees of freedom, for each term, will usually be estimated from the data, by GCV or UBRE, but the upper limit on this estimate is k − 1: the basis dimension, less one degree of freedom due to the identifiability constraint on each smooth term. The following example sets k to 20 for the smooth of Girth (and illustrates, by the way, that there is no problem in mixing different bases).
+> ct3 <- gam(Volume  ̃ s(Height)+s(Girth,bs="cr",k=20), + family=Gamma(link=log),data=trees)
+> ct3
+Family: Gamma
+Link function: log
+Formula:
+Volume  ̃ s(Height) + s(Girth, bs = "cr", k = 20)
+Estimated degrees of freedom: 1.000003 2.424226 total = 4.424229
+GCV score:  0.00808297
+Again, this change makes boringly little difference in this case, and the plots (not shown) are indistinguishable from those for ct1. This insensitivity to basis dimen- sion is not universal, of course, and one quite subtle point is worth being aware of. This is that a space of functions of dimension 20, will contain a larger subspace of functions with effective degrees of freedom 5, than will a function space of dimen- sion 10 (the particular numbers being arbitrary here). Hence it is often the case that increasing k will change the effective degrees of freedom estimated for a term, even though both old and new estimated degrees of freedom are lower that the original k − 1.
+A final default choice, that it is worth being aware of, is the value for γ in the GCV or UBRE scores (expressions (4.28) or (4.29), respectively) optimized in order to select the degree of smoothness of each term. The default value is 1, but GCV is known to have some tendency to overfitting on occasion, and it has been suggested that using γ ≈ 1.4 can largely correct this without compromising model fit (Kim and Gu, 2004). Applying this idea to the current model, results in the bottom row of figure 5.1 and the following output.
+    
+    CHERRY TREES AGAIN 221
+> ct4 <- gam(Volume  ̃ s(Height) + s(Girth),
++
+> ct4
+family=Gamma(link=log),data=trees,gamma=1.4)
+Family: Gamma
+Link function: log
+Formula:
+Volume  ̃ s(Height) + s(Girth)
+Estimated degrees of freedom: 1.00011 2.169248 total = 4.169358
+GCV score:  0.00922805
+> plot(ct4,residuals=TRUE)
+Clearly the heavier penalty on each degree of freedom in the GCV score has resulted in a model with fewer degrees of freedom, but the figure indicates that the change in estimates that this produces is barely perceptible.
+5.1.2 Smooths of several variables
+gam is not restricted to models containing only smooths of one predictor. In prin- ciple, smooths of any number of predictors are possible via two types of smooth. Within a model formula, s(), terms using the "tp" or "ts" bases, produce isotropic smooths of multiple predictors, while te() terms produce smooths of multiple pre- dictors from tensor products of any bases available for use with s() (including mix- tures of different bases). The tensor product smooths are invariant to linear rescaling of covariates, and can be quite computationally efficient.
+The following code fragments both fit the model
+log(E[Volumei]) = f(Heighti,Girthi) where Volumei ∼ Gamma,
+and f is a smooth function. Firstly an isotropic thin plate regression spline is used:
+> ct5 <- gam(Volume  ̃ s(Height,Girth,k=25),
++
+> ct5
+family=Gamma(link=log),data=trees)
+Family: Gamma
+Link function: log
+Formula:
+Volume  ̃ s(Height, Girth, k = 25)
+Estimated degrees of freedom: 4.668129 total = 5.668129
+    
+    222
+bs Description
+"tp" Thin plate re- gression splines.
+Advantages
+GAMS IN PRACTICE: MGCV Disadvantages
+   (TPRS)
+"ts" TPRS shrinkage
+with
+Can smooth w.r.t. any number of covariates. Invariant to rotation of covariate axes.
+Can select penalty order No ‘knots’ and some op- timality properties.
+As TPRS, but smooth- ness selection can zero term completely
+Computationally cheap
+Directly interpretable parameters
+As CRS, but smoothness selection can zero term completely.
+As CRS, but start point same as end point
+Any combination of ba- sis and penalty order possible
+Perform well in tensor products
+Computationally costly for large data sets.
+Not invariant to covari- ate rescaling.
+as TPRS
+Can only smooth w.r.t 1 covariate.
+Knot based
+Doesn’t have TPRS opti- mality.
+As CRS
+As CRS
+Based on equally spaced knots
+Penalties awkward to in- terpret.
+No optimality properties available.
+  "cr" cubic regression spline (CRS)
+"cs" CRS with shrinkage
+"cc" cyclic CRS "ps" P-splines
+    Table5.1 Smoothingbasesbuiltintopackagemgcv,andasummaryoftheiradvantagesand disadvantages. (To use P-splines see ?p.spline.)
+GCV score:  0.009358786
+> plot(ct5,too.far=0.15)
+yielding the left hand panel of figure 5.2. Secondly a tensor product smooth is used. Note that the k argument to te specifies the dimension for each marginal basis: if different dimensions are required for the marginal bases then k can also be supplied as an array.
+    
+ CHERRY TREES AGAIN
+s(Height,Girth,4.72)
+223
+Girth
+8 10 12 14 16 18 20
+Girth
+8 10 12 14 16 18 20
+65 70 75 80 85 Height
+65 70 75 80 85 Height
+Figure 5.2 Smooth functions of height and girth fitted to the cherry tree data, with degree of smoothing chosen by GCV. The left hand panel shows a thin plate regression spline fit (ct5), while the right panel shows a tensor product spline fit (ct6). For both plots the bold contours show the estimate of the smooth; the dashed contours show the smooth plus the standard error of the smooth and the dotted contours show the smooth less its standard error. The symbols show the locations of the covariate values on the height - girth plane. Parts of the smooths that are far away from covariate values have been excluded from the plots using the too.far argument to plot.gam.
+> ct6 <- gam(Volume  ̃ te(Height,Girth,k=5),
++ family=Gamma(link=log),data=trees) > ct6
+Family: Gamma
+Link function: log
+Formula:
+Volume  ̃ te(Height, Girth, k = 5)
+Estimated degrees of freedom: 3.000175 total = 4.000175
+GCV score:  0.008197151
+> plot(ct6,too.far=0.15)
+Notice how the tensor product model has fewer degrees of freedom and a lower GCV score, than the TPRS smooth here. In fact, with just 3 degrees of freedom, the tensor
+te(Height,Girth,3)
+    224
+Tensor product, te
+Invariant to linear rescaling of covari- ates, but not to rotation of covariate space.
+Good for smooth interactions of quan- tities measured in different units, or where very different degrees of smoothness appropriate relative to dif- ferent covariates.
+Computationally inexpensive, provided TPRS bases are not used as marginal bases.
+Apart from scale invariance, not much supporting theory.
+GAMS IN PRACTICE: MGCV
+TPRS, s(...,bs="tp")
+Invariant to rotation of covariate space (isotropic), but not to rescaling of co- variates.
+Good for smooth interactions of quan- tities measured in same units, such as spatial co-ordinates, where isotropy is appropriate.
+Computational cost can be high as it in- creases with square of number of data (can be avoided by approximation). Some optimality results available.
+    Table 5.2 Comparison of the tensor product (te) and thin plate regression spline (s(...,bs="tp") or s(...,bs="ts")) approaches to smoothing with respect to mul- tiple covariates.
+product smooth model amounts to
+log(E[Volumei]) = β0 + β1Heighti + β2Girthi + β3HeightiGirthi, the ‘wiggly’ components of the model having been penalized away altogether.
+5.1.3 Parametric model terms
+So far, only models consisting of smooth terms have been considered, but there is no difficulty in mixing smooth and parametric model components. For example, given that the smooth of height, in model ct1, is estimated to be a straight line, we might as well fit the model:
+gam(Volume ̃Height+s(Girth),family=Gamma(link=log),data=trees)
+but to make the example more informative, let us instead suppose that the Height is actually only measured as a categorical variable. This can easily be arranged, by creating a factor variable which simply labels each tree as small, medium or large:
+trees$Hclass <- factor(floor(trees$Height/10)-5, labels=c("small","medium","large"))
+Now we can fit a generalized additive model to these data, using the Hclass variable as a factor variable.
+ct7 <- gam(Volume  ̃ Hclass+s(Girth),
+           family=Gamma(link=log),data=trees)
+    
+    CHERRY TREES AGAIN
+225
+                                                                 8 10 12 14
+Girth
+16
+18
+20
+small
+medium large
+Hclass
+Figure 5.3 Plot of model ct7, a semi-parametric model of cherry tree volume, with a factor for height and a smooth term for the dependence on Girth. The left plot shows the smooth of Girth, with 95% confidence interval, while the right panel shows the estimated effect, for each level of factor Hclass. The effect of being in the small height class is shown as zero, because the default contrasts have been used here, which set the parameter for the first level of each factor to zero.
+par(mfrow=c(1,2))
+plot(ct7,all.terms=T)
+The resulting plot is shown in figure 5.3
+Often, more information about a fitted model is required than is supplied by plots or the default print method, and various utility functions exist to provide this. For example the anova function can be used to investigate the approximate significance of model terms.
+> anova(ct7)
+Family: Gamma
+Link function: log
+Formula:
+Volume  ̃ Hclass + s(Girth)
+Parametric Terms:
+       df     F p-value
+Hclass  2 7.076 0.00358
+Approximate significance of smooth terms: edf Est.rank F p-value s(Girth) 2.414 9.000 54.43 1.98e-14
+    s(Girth,2.41)
+−1.0 −0.5 0.0 0.5 1.0
+Partial for Hclass
+0.0 0.1 0.2 0.3
+    226 GAMS IN PRACTICE: MGCV
+Clearly there is quite strong evidence that both Height and Girth matter (see section 4.8.5, for information on the p-value calculations for the smooth terms). Similarly, an approximate AIC value can be obtained for the model:
+> AIC(ct7)
+[1] 154.9411
+The summary method provides considerable detail. > summary(ct7)
+Family: Gamma
+Link function: log
+Formula:
+Volume  ̃ Hclass + s(Girth)
+Parametric coefficients:
+Estimate Std. Error t value Pr(>|t|)
+(Intercept) 3.12693 0.04814 64.949 < 2e-16 ***
+Hclassmedium 0.13459 0.05428 Hclasslarge 0.23024 0.06137 ---
+Signif. codes: 0 ’***’ 0.001 ’**’
+Approximate significance of smooth edf Est.rank F p-value
+s(Girth) 2.414 9.000 54.43 1.98e-14 ***
+---
+Signif. codes: 0 ’***’ 0.001 ’**’ 0.01 ’*’ 0.05 ’.’ 0.1 ’ ’ 1
+R-sq.(adj) = 0.967 Deviance explained = 96.9%
+GCV score = 0.012076 Scale est. = 0.0099671 n = 31
+Notice that, in this case, the significance of individual parameters of the parametric terms is given, rather than whole term significance. Other measures of fit are also reported, such as the adjusted r2 and percentage deviance explained, along with the GCV score, an estimate of the scale parameter of the model, and the number of data fitted.
+5.2 Brain Imaging Example
+This section examines a more substantial example, in particular covering issues of model selection and checking in more detail. The data are from brain imaging by functional magnetic resonance scanning, and were reported in Landau et al. (2003). The data are available in data frame brain, and are shown in figure 5.4. Each row
+2.479 0.020085 *
+3.752 0.000908 ***
+0.01 ’*’ 0.05 ’.’ 0.1 ’ ’ 1
+terms:
+    
+    BRAIN IMAGING EXAMPLE 227
+ scale
+gamma
+sp
+min.sp
+method
+Controls whether to use UBRE or GCV for smoothness esti- mation.
+scale > 0 is taken as known scale parameter:UBRE used. scale < 0 ⇒ scale parameter unknown: GCV used.
+scale = 0 ⇒ UBRE for Poisson or binomial, otherwise GCV.
+This multiplies the model degrees of freedom in the GCV or UBRE criteria. Hence as gamma is increased from 1 the ‘penalty’ per degree of freedom increases in the GCV or UBRE criterion and increasingly smooth models are produced. In- creasing gamma to around 1.4 can usually reduce over-fitting, without much degradation in prediction error performance. An array of supplied smoothing parameters. When this array is non null, a negative element signals that a smoothing parameter should be estimated, while a non-negative value is used as the smoothing parameter for the corresponding term. This is useful for directly controlling the smoothness of some terms. Minimum values for smoothing parameters can be supplied here.
+An argument usually set with gam.method, which controls the numerical method used to estimate smoothing parameters. The most important choice is between ‘outer’, and ‘perfor- mance’ iteration in the generalized additive modelling case.
+ Table 5.3 Main arguments to gam for controlling the smoothness estimation process.
+of the data frame corresponds to one voxel. The columns are: X and Y, giving the lo- cations of each voxel; medFPQ, the brain activity level measurement (median ‘Fun- damental Power Quotient’ over three measurements); region, a code indicating which region the voxel belongs to (0 for ‘base’ region; 1 for region of experimental interest and 2 for region subjected to direct stimulation) — there are some NA’s in this column; meanTheta is the average phase shift at each voxel, which we will not consider further. This section will consider models for medFPQ as a function of X and Y.
+Clearly the medFPQ data are quite noisy, and the main purpose of the modelling in this section is simply to partition this very variable signal into a smooth trend component and a ‘random variability’ component, so that the pattern in the image becomes a bit clearer. For data such as these, where the discretization (into voxels) is essentially arbitrary, there is clearly a case to be made for employing a model which includes local correlation in the ‘error’ terms. Chapter 6 covers methods for doing this, but for the moment we will proceed by treating the randomness as being inde- pendent between voxels, and letting all between voxel correlation be modelled by the trend. This is not simply a matter of convenience, but relates closely to the purpose of
+    
+ 228
+GAMS IN PRACTICE: MGCV
+regions of interest
+10 20 30 40 50
+medFPQ brain image
+X
+50 60 70 80
+X
+50 60 70 80
+10 20 30 40 50
+YY
+Figure5.4 Therawdataforthebrainimagingdatadiscussedinsection5.2.Thelefthandplot shows the median of 3 measurements of Fundamental Power Quotient values at each voxel making up this slice of the scan: these are the measurements of brain activity. The right hand panel shows the regions of interest: the ‘base region’ is the darkest shade, the region directly stimulated experimentally is shown in light grey and the region of experimental interest is show as dark grey. Unclassified voxels are white.
+the analysis: for these data the main interest lies in cleaning up this particular image, that is in removing the component of variability that appears to be nothing more than random variation, at the level of the individual voxel. The fact that the underlying mechanism generating features in the image, may include a component attributable to correlated noise across voxels, is only something that need be built into the model if the objective is to be able to remove this component of the pattern from the image, in addition to removing the un-correlated noise component.
+5.2.1 Preliminary Modelling
+An appropriate initial model structure would probably involve modelling medFPQ as a smooth function of X and Y, but before attempting to fit models, it is worth examining the data itself to look for possible problems. When this is done, 2 voxels appear problematic. These voxels have medFPQ values recorded as 3 × 10−6 and 4 × 10−7, while the remaining 1565 voxels have values in the range 0.003 to 20. Residual plots from all attempts to model the data set, including these two voxels, consistently show them as grotesque outliers. For these reasons, these two voxels were excluded from the following analysis:
+brain <- brain[brain$medFPQ>5e-3,] # exclude 2 outliers
+The fairly skewed nature of the response data, medFPQ, and the fact that it is a necessarily positive quantity, suggest that some transformation may be required if a Gaussian error model is to be used. Attempting to use a Gaussian model without transformation confirms this:
+ BRAIN IMAGING EXAMPLE 229
+Normal Q−Q Plot Resids vs. linear pred.
+−3−2−10123 0246810
+Theoretical Quantiles
+Histogram of residuals
+−5 0 5 10
+Residuals
+linear predictor
+Response vs. Fitted Values
+0 2 4 6 8 10
+Fitted Values
+Frequency
+Sample Quantiles
+0 200 400 600 800
+−5 0 5 10
+Response
+residuals
+0 5 10 15 20
+−5 0 5 10
+Figure 5.5 Some basic model checking plots for model m0 fitted to the brain scan data. The upper left normal QQ plot clearly shows a problem with the Gaussian assumption. This is unsurprising when the upper right plot of residuals versus fitted values (linear predictor) is examined: the constant variance assumption is clearly untenable. The lower left histogram of residuals confirms the pattern evident in the QQ plot: there are too many residuals in the tails and centre of the distribution relative to its shoulders. In this case the plot of response variable against fitted values, shown in the lower right panel, emphasizes the failure of the constant variance assumption.
+> m0 <- gam(medFPQ ̃s(Y,X,k=100),data=brain)
+> gam.check(m0)
+Smoothing parameter selection converged after 6 iterations. The RMS GCV score gradiant at convergence was 6.460904e-06 . The Hessian was positive definite.
+The estimated model rank was 100 (maximum possible: 100)
+gam.check is a routine that produces some basic residual plots, and a little further information about the success or otherwise of the fitting process. The plots produced for m0 are shown in figure 5.5. As explained in the caption of that figure, there are clear problems with the constant variance assumption: variance is increasing with the mean here. From the plots it is not easy to gauge the rate at which the variance of the data is increasing with the mean, but, in the absence of a good physical model of the mechanism underlying the relationship, some guidance can be obtained by a simple informal approach. If we assume that var(yi) ∝ μβi , where μi = E(yi) and β is some parameter, then a simple regression estimate of β can be obtained as follows:
+    230 GAMS IN PRACTICE: MGCV
+> lm(log(eˆ2) ̃log(fv))
+Call:
+lm(formula = log(eˆ2)  ̃ log(fv))
+Coefficients:
+(Intercept)      log(fv)
+-1.961 1.912
+i.e. β ≈ 2. That is, from the residuals of the simple fit, it appears that the variance of the data increases with the square of the mean. This in turn suggests using the Gamma distribution, which has this mean variance relationship, or of treating the 4th root of medFPQ as the response for a Gaussian model (since such a transformation should approximately stabilize the variance, given the apparent mean-variance relationship on the original scale). With the Gamma model, it might also be appropriate to use a log link, in order to ensure that all model predicted FPQ values are positive.
+The following fits models based first on transforming the data, and then on use of the Gamma distribution.
+m1<-gam(medFPQˆ.25 ̃s(Y,X,k=100),data=brain)
+gam.check(m1)
+gm <- gam.method(gam="perf.magic")
+m2<-gam(medFPQ ̃s(Y,X,k=100),data=brain,family=Gamma(link=log),
+method=gm)
+The plots from gam.check are shown in figure 5.6, and now show nothing prob- lematic. gam.check plots for m2 are equally good (but not shown). Note that, for this example, I have used the performance iteration to estimate smoothing param- eters, rather than outer iteration. The two methods are unlikely to differ greatly, in this case, since for the Gamma distribution with a log link the iterative weights are simply 1: hence the computationally quicker performance iteration is preferable.
+The major difference between m1 and m2 is in their biased-ness on different scales. The model of the transformed data is approximately unbiased on the 4th root of the response scale (approximately because the variance stabilization can only be approx- imate): this means that it is biased downwards on the response scale itself. The log- Gamma model is approximately unbiased on the response scale (only approximately because maximum penalized likelihood estimation is not generally unbiased, but is consistent). This can be seen if we look at the mean of the fitted values (response scale) for the two models, and compare this to the mean of the raw data:
+> mean(fitted(m1)ˆ4);mean(fitted(m2));mean(brain$medFPQ) [1] 0.985554 # m1 tends to under-estimate
+[1] 1.212545 # m2 substantially better
+[1] 1.250302
+Clearly, if the response scale is the scale of prime interest, then the Gamma model is to be preferred to the a model based on normality of the transformed data. So far,
+    
+ BRAIN IMAGING EXAMPLE
+Normal Q−Q Plot
+−3 −2 −1 0 1 2 3
+Theoretical Quantiles
+Histogram of residuals
+−0.6 −0.4 −0.2 0.0 0.2 0.4 0.6
+Residuals
+231
+Frequency
+Sample Quantiles
+0 50 100 200 300
+−0.6 −0.2 0.2 0.4 0.6
+Response
+residuals
+0.5 1.0 1.5 2.0
+−0.6 −0.2 0.2 0.4 0.6
+Figure 5.6 Some basic model checking plots for model m1 fitted to the transformed brain scan data. The upper left normal QQ plot is very close to a straight line, suggesting that the distributional assumption is reasonable. The upper right plot suggests that variance is approximately constant as the mean increases. The histogram of residuals at lower left appears approximately consistent with normality. The lower right plot of response against fitted values shows a positive linear relationship with a good deal of scatter: nothing problematic.
+then, the best model seems to be the Gamma log-link model m2, which should be examined a little further.
+> m2
+Family: Gamma
+Link function: log
+Formula:
+medFPQ  ̃ s(Y, X, k = 100)
+Estimated degrees of freedom: 63.17224 total = 64.17224
+GCV score:  0.5994399
+> vis.gam(m2,plot.type="contour",too.far=0.03,
++ color="gray",n.grid=60,zlim=c(-1,2))
+Resids vs. linear pred.
+1.0 1.2 1.4 1.6
+linear predictor
+Response vs. Fitted Values
+1.0 1.2 1.4 1.6
+Fitted Values
+    232 GAMS IN PRACTICE: MGCV
+So a relatively complex fitted surface has been estimated, with 64 degrees of freedom. The function vis.gam provides quite useful facilities for plotting predictions from a gam fit against pairs of covariates, either as coloured perspective plots, or as coloured contour plots. The plot it produces for m2 is shown in figure 5.7(a). Notice how the activity in the directly stimulated region and the region of interest stand out clearly in this plot.
+5.2.2 Would an additive structure be better?
+Given the large number of degrees of freedom, employed by the model m2, the ques- tion naturally arises of whether a different, simpler, model structure might achieve a more parsimonious fit. Since this is a book about GAMs, the obvious candidate is the additive model,
+log(E[medFPQi]) = f1(Yi) + f2(Xi), medFPQi ∼ Gamma.
+> m3 <- gam(medFPQ ̃s(Y,k=30)+s(X,k=30),data=brain,
++ family=Gamma(link=log),method=gm)
+> m3
+Family: Gamma
+Link function: log
+Formula:
+medFPQ  ̃ s(Y, k = 30) + s(X, k = 30)
+Estimated degrees of freedom: 9.50822 19.56363 total = 30.07185
+GCV score:  0.6817362
+Clearly the GCV score is higher for this model, suggesting that it is not an im- provement, and a comparison of explained deviances using summary(m2) and summary(m3) also suggests that the additive model is substantially worse.
+It is also possible to test whether m3 generated the data against the alternative that m2 did using
+> anova(m3,m2,test="F") Analysis of Deviance Table
+Model 1: medFPQ  ̃ s(Y,
+Model 2: medFPQ  ̃ s(Y,
+  Resid. Df Resid. Dev
+1  1533.928     970.91
+2  1499.828     894.27
+k = 30) + s(X, k = 30)
+X, k = 100)
+Df Deviance F
+34.100 76.64 3.9098 5.727e-13 ***
+---
+Signif. codes: 0 ’***’ 0.001 ’**’ 0.01 ’*’ 0.05 ’.’ 0.1 ’ ’ 1
+Pr(>F)
+    
+    BRAIN IMAGING EXAMPLE 233
+which suggests that the additive structure can be firmly rejected. Note that the test performed here involves three types of approximation (in addition to the usual use of asymptotic results). Firstly the test is based on treating the penalized fits as if they were un-penalized fits, with degrees of freedom given my the effective degrees of freedom of the models; secondly, the tests are conditional on smoothing parameters that have in fact been estimated; and thirdly, although, conceptually the smooth func- tionf1(Y)+f2(X)isnestedwithinthesmoothfunctionf(Y,X),thisisnotexactly true, given the bases actually used to represent the smooth functions. Given the clear cut nature of the rejection of the additive model, these approximations need not cause much concern here, but care would be needed if the p-value was anywhere near some pre-defined significance level for acceptance or rejection.
+The fact that the models are not strictly nested can be addressed by replacing m2 by m4 <- gam(medFPQ ̃s(Y,k=30)+s(X,k=30)+s(Y,X,k=100),data=brain,
+      family=Gamma(link=log),method=gm)
+but the additive structure is still firmly rejected, if this is done.
+Perhaps the most persuasive argument against the additive structure is provided by the plot of the predicted log activity levels provided in figure 5.7 (b): the additive structure produces horizontal and vertical ‘stripes’ in the plot that have no real sup- port from the data.
+5.2.3 Isotropic or tensor product smooths?
+As discussed in chapter 4, isotropic smooths, of the sort produced by s(Y,X) terms, are usually good choices when the covariates of the smooth are naturally on the same scale, and we expect that the same degree of smoothness is appropriate with respect to both covariate axes. For the brain scan data these conditions probably hold, so the isotropic smooths are probably a good choice.
+Nevertheless, it is worth checking what the results look like if we use a scale invariant tensor product smooth of Y and X, in place of the isotropic smooth (see section 4.1.8). Such smooths are computationally rather efficient (if the marginal bases of a tensor product smooth are cheap to construct, then so is the tensor product basis itself). Additionally, as discussed in section 4.10.2, there is always at least one additive model structure which is strictly nested within a tensor product smooth.
+For example
+tm<-gam(medFPQ ̃te(Y,X,k=10),data=brain,family=Gamma(link=log),
+        method=gm)
+tm1<-gam(medFPQ ̃s(Y,k=10,bs="cr")+s(X,bs="cr",k=10),
+         data=brain,family=Gamma(link=log),method=gm)
+fits a tensor product smooth to the FPQ data, storing the result in tm, and then fits a purely additive model to the same data, storing the result in tm1. The smooth in tm
+    
+ 234
+GAMS IN PRACTICE: MGCV
+(b)
+10 20 30 40 50
+10 20 30 40 50
+(a)
+YY
+(c) (d)
+10 20 30 40 50 10 20 30 40 50
+YY
+XX
+50 60 70 80 50 60 70 80
+XX
+50 60 70 80 50 60 70 80
+Figure 5.7 Comparison of 4 models of the brain scan data. All plots show image plots and overlaid contour plots, on the scale of the linear predictor. (a) is model m2 based on an isotropic smooth of Y and X. (b) is model m3 based on a sum of smooth functions of Y and X. Notice the apparent artefacts in (b), relating to the assumption of an additive structure. (c) plots model tm and is basically as (a), but using a rank 100 tensor product smooth in place of the isotropic smooth. (d) is for model tm1, which is as model m3 except that the bases used ensure that this model is strictly nested within tm. All plots were produced with something like: vis.gam(m2,plot.type="contour",too.far=0.03,color="gray", n.grid=60,zlim=c(-1,2),main="(a)")
+is a tensor product of two cubic regression spline bases, each of rank 10, and is hence of rank 100. The bases for the two rank 10 cubic regression splines, used in tm1, are also part of the tensor product basis used in tm, so tm1 is strictly nested within tm, thereby removing one potential difficulty in model comparison.
+As with the previous models, a comparison of GCV scores suggests that the additive model is not the best.
+> tm1
+[edited]
+Estimated degrees of freedom:
+8.44507 8.081686 total = 17.52676
+    BRAIN IMAGING EXAMPLE 235
+GCV score: 0.7390905
+> tm
+[edited]
+Estimated degrees of freedom:
+57.88622 total = 58.88622 GCV score: 0.6166449
+Similarly, an approximate test of the null hypothesis that the additive structure is appropriate, strongly suggests accepting tm.
+> anova(tm1,tm,test="F") Analysis of Deviance Table
+Model 1: medFPQ ̃s(Y,k=10,bs="cr")+s(X,bs="cr",k=10)
+Model 2: medFPQ ̃te(Y,X,k=10)
+Resid. Df Resid. Dev Df Deviance F Pr(>F)
+1 1546.473 1004.34
+2 1505.114 906.04 41.359 98.31 4.0053 9.882e-16 ***
+Plots of tm and tm1 are shown in figure 5.7 (c) and (d). The plot for tm (c) is rather similar to the plot for m2, while once again the additive model, tm1, produces a plot with horizontal and vertical stipes, which are almost certainly artefacts (the stripes are less pronounced than for m3 because tm1 has been forced to be a smoother model).
+5.2.4 Detectingsymmetry(withbyvariables)
+It is sometimes of interest to test whether the image underlying some noisy data is symmetric, and this is quite straightforward to accomplish, with the methods covered here. For the brain data we might want to test whether the underlying activity levels are symmetric about the mean X value of 64.5. The symmetry model in this case would be
+log(E[medFPQi])=f(Yi,|Xi −64.5|), medFPQi ∼Gamma
+and this could be compared with model m2, which does not assume symmetry, al- though for strict nested of models we would need to be slightly more sophisticated and use an asymmetry model with a form such as,
+log(E[medFPQi])=f(Yi,|Xi −64.5|)+fr(Yi,|Xi −64.5|).righti,
+where fr is represented using the same basis as f , and righti is a dummy variable, taking the values 1 or 0, depending on whether medFPQi is from the right or left side of the brain.
+The following code creates variables required to fit these two model, estimates them, and prints the results.
+> brain$Xc <- abs(brain$X - 64.5)
+    
+    236 GAMS IN PRACTICE: MGCV
+> brain$right <- as.numeric(brain$X<64.5)
+> m.sy <- gam(medFPQ ̃s(Y,Xc,k=100),data=brain,
++ family=Gamma(link=log),method=gm)
+> m.as <- gam(medFPQ ̃s(Y,Xc,k=100)+s(Y,Xc,k=100,by=right), + data=brain,family=Gamma(link=log),method=gm)
+> m.sy
+[edited]
+Estimated degrees of freedom:
+52.54246 total = 53.54246 GCV score: 0.6498528
+> m.as
+[edited]
+Estimated degrees of freedom: 59.80448 46.20071 total = 107.0052
+GCV score:  0.5967997
+The GCV scores suggest that the asymmetric model is better. Approximate hypoth- esis testing can proceed either by comparing the two models using an F test (see section 4.10.1), or by the Wald testing approach (section 4.8.5):
+> anova(m.sy,m.as,test="F") Analysis of Deviance Table
+Model 1: medFPQ ̃s(Y,Xc,k=100)
+Model 2: medFPQ ̃s(Y,Xc,k=100)+s(Y,Xc,k=100,by=right)
+Resid. Df Resid. Dev Df Deviance F Pr(>F)
+1 1510.458 946.71
+2 1456.995 857.57 53.463 89.14 2.999 8.677e-12 *** > anova(m.as)
+Family: Gamma
+Link function: log
+Formula:
+medFPQ  ̃ s(Y, Xc, k = 100) + s(Y, Xc, k = 100, by = right)
+Approximate significance of smooth terms: edf Est.rank F p-value s(Y,Xc) 59.8 99.0 4.172 < 2e-16 s(Y,Xc):right 46.2 99.0 2.104 6.19e-09
+The two approaches are in agreement that there is very strong evidence against sym- metry, but the approximate p-values are not in very close numerical agreement. This is unsurprising, given that each is obtained from rather extreme tails of different dis- tributional approximations. At the cost of another ‘nesting approximation’ we could also have compared m.sy with m2, in which case the reported p-value is of the order of 10−14.
+Note that, as mentioned in sections 4.8.5 and 4.10.1, the p-values produced by this
+    
+    BRAIN IMAGING EXAMPLE 237
+analysis ignore the fact that we have selected the model effective degrees of free- dom. As a result, the distribution of the p-values, under the null, deviates a little from the uniform distribution that p-values should follow. This problem can be fixed, at the cost of some loss of power, by working with un-penalized models for hypothe- sis testing purposes. Using model terms of the form s(...,fx=TRUE) is the way to achieve this. If the above analysis is repeated without penalization the p-values change somewhat, but, unsurprisingly, still firmly reject the null hypothesis of sym- metry. It is important to be aware that the un-penalized approach is not a panacea: more care is needed in the choice of the k argument of s() when it is used, since excessively high k will lead to low testing power. Also, penalization definitely is required for CI calculation and point estimation.
+Plots of the different model predictions help to show why symmetry is so clearly rejected (figure 5.8).
+vis.gam(m.sy,plot.type="contour",view=c("Xc","Y"),too.far=.03, color="gray",n.grid=60,zlim=c(-1,2),main="both sides")
+vis.gam(m.as,plot.type="contour",view=c("Xc","Y"), cond=list(right=0),too.far=.03,color="gray",n.grid=60, zlim=c(-1,2),main="left side")
+vis.gam(m.as,plot.type="contour",view=c("Xc","Y"), cond=list(right=1),too.far=.03,color="gray",n.grid=60, zlim=c(-1,2),main="right side")
+5.2.5 Comparing two surfaces
+The symmetry testing, considered in the last section, is an example of comparing surfaces — in that case one half of an image, with a mirror image of the other half. In some circumstances, it is also interesting to compare completely independent sur- faces in a similar way. To see how this might work, a second set of brain scan data can be simulated, using the fitted model m2, and perturbed, somewhat, as follows.
+brain1 <- brain
+mu <- fitted(m2)
+n<-length(mu)
+ind <- brain1$X<60 & brain1$Y<20 mu[ind] <- mu[ind]/3 set.seed(1)
+brain1$medFPQ <- rgamma(rep(1,n),mu/m2$sig2,scale=m2$sig2)
+Now the data sets can be combined, and dummy variables created to identify which dataset each row of the combined data frame relates to.
+brain2=rbind(brain,brain1) brain2$sample1 <- c(rep(1,n),rep(0,n)) brain2$sample0 <- 1 - brain2$sample1
+After which it is straightforward to fit a model with a single combined surface for
+    
+ 238
+GAMS IN PRACTICE: MGCV
+left side right side
+both sides
+10 20 30 40 50
+10 20 30 40 50
+10 20 30 40 50
+Y
+Y
+Y
+5 10 15 20
+5 10 15 20 5 10 15 20
+Xc Xc Xc
+Figure 5.8 Half brain images for the two models involved in examining possible symmetry in the brain image data. The left panel shows the predictions of log activity for the symmetry model: the left side of the image would be a mirror image of this plot. The middle plot shows a mirror image of the left side brain image under the asymmetry model, while the right plot shows the right side image under the asymmetry model. Clearly the asymmetry model suggests rather different activity levels in the two sides of the image.
+both data sets, and a second model where the surfaces are allowed to differ. Note that in the latter case a single common surface is estimated, with a difference surface for the second sample. This approach is often preferable to a model with two com- pletely separate surfaces, for reasons of parsimony. If there is no difference between the surfaces, it will still be necessary to estimate two quite complex surfaces, if we adopt separate surfaces for each data set. With the common surface plus difference approach, only one complex surface need be estimated: the difference being close to flat. Similarly, any time that the surfaces are likely to differ in a fairly simply way, it makes sense to use the common surface plus difference model, thereby reducing the number of degrees of freedom needed by the model.
+m.same<-gam(medFPQ ̃s(Y,X,k=100),data=brain2,
+            family=Gamma(link=log),method=gm)
+m.diff<-gam(medFPQ ̃s(Y,X,k=100)+s(Y,X,by=sample1,k=100),
+            data=brain2,family=Gamma(link=log),method=gm)
+Examination of the GCV scores for the two models suggests that the second model m.diff is slightly preferable to m.same, as do the AIC values, and an approxi- mate test of the hypothesis that a single surface is correct, against the two surface alternative, tends to confirm this:
+    BRAIN IMAGING EXAMPLE 239
+> anova(m.same,m.diff,test="F") Analysis of Deviance Table
+Model 1: medFPQ ̃s(Y,X,k=100)
+Model 2: medFPQ ̃s(Y,X,k=100)+s(Y,X,by=sample1,k=100)
+Resid. Df Resid. Dev Df Deviance F Pr(>F)
+1 3058.646 1937.36
+2 3044.218 1906.11 14.428 31.25 3.7877 1.575e-06 ***
+Repeating this analysis without penalization still suggests rejecting the null of no difference, but with a much increased p-value. This emphasizes the price paid for the well behaved p-values that come from not penalizing. The fact that the difference term is estimated to have only 14 degrees of freedom in the penalized fit means that using a basis dimension of 100 in the un-penalized fit was really excessive: and this degree of over-specification leads to greatly reduced power. Repeating the analysis again with a basis dimension of 50 for the difference smooth gives a much reduced p-value, but of course this p-value is no longer strictly valid, since the model has been modified in the light of an initial fit.
+In this example, the data for the two surfaces was available on exactly the same regular mesh, but the approach is equally applicable for irregular data where the data are not at the same covariate values for the two surfaces (although of course the regions of covariate space covered should overlap, for a comparison of this sort to be meaningful).
+5.2.6 Predictionwithpredict.gam
+The predict method function, predict.gam, enables a gam fitted model ob- ject to be used for prediction at new values of the model covariates. It is also used to provide estimates of the uncertainty of those predictions, and the user can spec- ify whether predictions should be made on the scale of the response or of the linear predictor. For predictions on the scale of the linear predictor, predict.gam also allows predictions to be decomposed into their component terms, and it is also pos- sible to extract the matrix, which when multiplied by the model parameter vector, yields the vector of predictions at the given set of covariate values.
+Usually the covariate values, at which predictions are required, are supplied as a data frame in argument newdata, but if this argument is not supplied then pre- dictions/fitted values are returned for the original covariate values, used for model estimation. Here are some examples. Firstly on the scale of the linear predictor.
+> predict(m2)[1:5] 12356
+0.3024547 0.3418227 0.3474573 0.2769854 0.4541785 > pv <- predict(m2,se=TRUE)
+> pv$fit[1:5]
+12356
+    
+    240 GAMS IN PRACTICE: MGCV
+0.3024547 0.3418227 0.3474573 0.2769854 0.4541785 > pv$se[1:5]
+12356 0.2640762 0.2164298 0.2158971 0.2237674 0.2275705
+and then on the response scale
+> predict(m2,type="response")[1:5] 12356
+1.353176 1.407511 1.415464 1.319147 1.574879 > pv <- predict(m2,type="response",se=TRUE) > pv$se[1:5]
+12356 0.3573416 0.3046273 0.3055945 0.2951821 0.3583961
+For both sets of examples, predictions are produced for all 1564 voxels, but I have only printed the first 5. Note that the standard errors provided on the response scale are approximate, being obtained by the usual Taylor expansion approach.
+Usually, predictions are required for new covariate values, rather than simply for the values used in fitting. Suppose, for example, that we are interested in two points in the brain scan image, firstly in the directly stimulate area, (X = 80.1, Y = 41.8), and secondly in the region of experimental interest, (X = 68.3, Y = 41.8). A data frame can be created, containing the covariate values for which predictions are required, and this can be passed to predict.gam, as the following couple of examples show.
+> pd <- data.frame(X=c(80.1,68.3),Y=c(41.8,41.8))
+> predict(m2,newdata=pd)
+12 1.2931442 0.6116455
+> predict(m2,newdata=pd,type="response",se=TRUE)
+$fit
+12 3.644227 1.843462
+$se.fit
+0.5444432 0.2693135
+It is also possible to obtain the contributions that each model term, excluding the intercept, makes to the linear predictor, as the following example shows. The additive model m3 has been used to illustrate this, since it has more than one term.
+> predict(m3,newdata=pd,type="terms",se=TRUE)
+$fit
+       s(Y)         s(X)
+1 0.2496231  0.521442293
+2 0.2496231 -0.007236053
+$se.fit
+        s(Y)       s(X)
+1 0.05841173 0.09677576
+2 0.05841173 0.08109702
+12
+    
+    BRAIN IMAGING EXAMPLE 241
+As you can see, named arrays have been returned, the columns of which correspond to each model term. There is one array for the predicted values, and a second for the corresponding standard errors.
+Prediction with lpmatrix
+Because the GAMs discussed in this book have an underlying parametric represen- tation, it is possible to obtain a ‘prediction matrix’, Xp, say, which maps the model parameters, βˆ, to the predictions of the linear predictor, ηˆp, say. That is, to find the Xp such that
+ηˆ p = X p βˆ .
+predict.gam can return Xp , if its type argument is set to "lpmatrix".
+The following example illustrates this. Since the returned matrix is of dimension 2 × 101, it has not been printed out, but rather it is demonstrated that it does indeed give the required linear predictor values, when multiplied by the coefficients of the fitted model.
+> Xp <- predict(m2,newdata=pd,type="lpmatrix")
+> fv <- Xp%*%coef(m2)
+> fv
+       [,1]
+1 1.2931442
+2 0.6116455
+Why is Xp useful? A major use, is in the calculation of variances for combinations of linear predictor values. Clearly, if Vˆ β is the estimate of the parameter covariance matrix, then from standard probability theory, the estimated covariance matrix of ηp must be:
+Vˆ η p = X p Vˆ β X Tp .
+Now suppose that we are really interested in, for example, the difference, δ, between the linear predictor values at the points in the two regions. This difference could be written as, δ = dTηp, where dT = [1, −1]T. In that case, standard theory says that:
+ TˆTˆT var(δ)=d Vηpd=d XpVβXpd
+The following code illustrates this.
+> d<-t(c(1,-1))
+> d%*%fv
+          [,1]
+[1,] 0.6814987
+> d%*%Xp%*%m2$Vp%*%t(Xp)%*%t(d)
+           [,1]
+[1,] 0.04321413
+So, the ability to obtain an explicit ‘predictor matrix’, makes some variance calcu- lations rather straightforward. Of course the neat linear theory, facilitating these cal- culations, is only applicable if we are interested in inference about linear functions
+    
+    242 GAMS IN PRACTICE: MGCV
+Histogram of mean.FPQ
+1.4 1.6 1.8 2.0 2.2 2.4
+mean.FPQ
+Figure 5.9 Histogram of 1000 draws from the posterior distribution of average medFPQ in the region of experimental interest in the brain scan example.
+of the linear predictor. As soon as the functions of interest become non-linear, as is generally the case when working on the response scale, we need different methods, which are covered next.
+5.2.7 Variances of non-linear functions of the fitted model
+Prediction matrices, in conjunction with simulation from the posterior distribution of the parameters, β, give a simple and general method for obtaining variance estimates (or indeed distribution estimates), for any quantity derived from the fitted model, not simply those quantities that are linear in β. The idea of this sort of posterior simulation was discussed in section 4.8.4.
+As an example, suppose that we would like to estimate the posterior distribution of the average medFPQ, in the region of experimental interest. Since the quantity of interest is on the response scale, and not the scale of the linear predictor, it is not linear in β, and the simple approach, taken at the end of the last section, is not applicable.
+To approach this problem, a prediction matrix is first obtained, which will map the parameters to the values of the linear predictor that will be needed to form the aver- age.
+ind <- brain$region==1& ! is.na(brain$region)
+Xp <- predict(m2,newdata=brain[ind,],type="lpmatrix")
+Next, a large number of replicate parameter sets are simulated from the posterior distribution of β, using the mvrnorm function from the MASS library.
+library(MASS)
+br <- mvrnorm(n=1000,coef(m2),m2$Vp) # simulate from posterior
+               Frequency
+0 50 100 150 200
+    AIR POLLUTION IN CHICAGO EXAMPLE 243
+Each column of the matrix br, is a replicate parameter vector, drawn from the pos- terior distribution of β. Given these replicate parameter vectors, and the matrix Xp, it is a simple matter to obtain the linear predictor implied by each replicate, from which the required averages can easily be obtained, as follows.
+mean.FPQ<-rep(0,1000)
+for (i in 1:1000)
+{ lp <- Xp%*%br[i,] # replicate linear predictor
+mean.FPQ[i] <- mean(exp(lp)) # replicate region 1 mean FPQ }
+or more efficiently, but less readably
+mean.FPQ <- colMeans(exp(Xp%*%t(br)))
+So mean.FPQ now contains 1000 replicates from the posterior distribution of the mean FPQ measurement in region 1. The results of hist(mean.FPQ) are shown in figure 5.9.
+Clearly, this simulation approach is rather general: samples from the posterior distri- bution of any quantity that can be predicted from the fitted model, are rather easily obtained. Notice also that, in comparison to bootstrapping, the approach is very com- putationally efficient. The only real disadvantage is that the results are conditional on the estimated smoothing parameters, but this is something that can be addressed us- ing the ideas discussed in section 4.9.3: a practical implementation of that approach is given in section 5.4.2.
+5.3 Air Pollution in Chicago Example
+The relationship between air-pollution and health is a moderately controversial topic, and there is a great deal of epidemiological work attempting to elucidate the links. In this section a variant of a type of analysis that has become quite prevalent in air-pollution epidemiology is presented. The data are from Peng and Welty (2004) and are contained in a data frame chicago. The response of interest is the daily death rate in Chicago, death, over a number of years. Possible explanatory variable for the observed death rate are levels of ozone, o3median, levels of sulpher diox- ide, so2median, mean daily temperature, tmpd, and levels of particulate matter, pm10median, (as generated by diesel exhaust, for example). In addition to these air quality variables, the underlying death rate tends to vary with time (in particular throughout the year), for reasons having little or nothing to do with air quality.
+A conventional approach to modelling these data would be to assume that the ob- served numbers of deaths are Poisson random variables, with an underlying mean that is the product of a basic, time varying, death rate, modified through multiplica- tion by pollution dependent effects. That is, the model would be
+log(E[deathi]) = f(timei) + β1pm10mediani + β2so2mediani
++ β3o3mediani + β4tmpdi,
+    
+ 244
+GAMS IN PRACTICE: MGCV
+Resids vs. linear pred.
+4.6 4.7 4.8 4.9 5.0
+linear predictor
+Response vs. Fitted Values
+100 110 120 130 140 150
+Fitted Values
+−4
+Normal Q−Q Plot
+−2 0
+Theoretical Quantiles
+2 4
+Histogram of residuals
+0 5 10 15 20
+Residuals
+Frequency
+Sample Quantiles
+0 500 1500
+0 5 10 15
+Response
+residuals
+100 200 300 400
+0 5 10 15
+Figure5.10 Basicmodelcheckingplotsfortheap0airpollutionmortalitymodel.ForPossion data with moderately high means the distribution of the standardized residuals should be quite close to normal, so that the QQ-plot is obviously problematic. As all the plots make clear there are a few gross outliers that are very problematic in this fit.
+where deathi follows a Poisson distribution, and f is a smooth function. The model is easily fitted and checked.
+ap0 <- gam(death ̃s(time,bs="cr",k=200)+pm10median+so2median+
+           o3median+tmpd,data=chicago,family=poisson)
+gam.check(ap0)
+A cubic regression spline has been used for f, since 5000 observations is too many for straightforward use of the TPRS basis. The checking plots are shown in figure 5.10, and show clear problems as a result of some substantial outliers. Plotting the estimated smooth, with and without partial residuals, emphasizes the size of the out- liers.
+par(mfrow=c(2,1))
+plot(ap0,n=1000) # n increased to make plot smooth plot(ap0,residuals=TRUE,n=1000)
+The plots are shown in figure 5.11, and 4 gross outliers, in close proximity to each other, are clearly visible. Examination of the data indicates that the outliers are the four highest daily death rates occurring in the data, and that they occurred on con- secutive days,
+> chicago$death[3111:3125]
+[1] 112 97 122 119 116 121 226 411 287 228 159 142 123 102 94
+ AIR POLLUTION IN CHICAGO EXAMPLE 245
+s(time,168.64) s(time,168.64)
+0 5 10 15 20 −0.2 0.0 0.2
+−2000 −1000 0
+time
+−2000 −1000 0
+time
+1000 2000
+1000 2000
+Figure5.11 Theestimateofthesmoothfrommodelap0shownwithandwithoutpartialresid- uals. Note the 4 enormous outliers apparently in close proximity to each other.
+Plotting this section of data also indicates that this peak is associated with a period of very high temperatures and high ozone. One immediate possibility is that the model is simply too inflexible, and that some non-linear response of death rate to temperature and ozone is required. This might suggest replacing the linear dependencies on the air quality covariates, with smooth functions, so that the model structure becomes:
+log(E[deathi]) = f1(timei) + f2(pm10mediani) + f3(so2mediani)
++ f4(o3mediani) + f5(tmpdi)
+where the fj are smooth functions. This model is easily fitted
+ap1<-gam(death ̃s(time,bs="cr",k=200)+s(pm10median,bs="cr")+
+     s(so2median,bs="cr")+s(o3median,bs="cr")+s(tmpd,bs="cr"),
+     data=chicago,family=poisson)
+but the gam.check plots are almost indistinguishable from those shown in figure 5.10. Figure 5.12 shows the estimated smooths, and indicates a problem with the distribution of pm10median values, in particular, which might be expected to cause leverage problems. Similar plots, with partial residuals, again indicate a severe failure to fit the 4 day run of record death rates.
+More detailed examination of the data, surrounding the 4 day mortality surge, shows
+ 246
+GAMS IN PRACTICE: MGCV
+−2000 −1000 0
+1000 2000
+−50 0 50 100 150 200 250 300
+pm10median
+−20 −10 0 10 20 30 40
+o3median
+0 10
+so2median
+20 40
+tmpd
+20
+30
+s(o3median,1.58)
+s(pm10median,6.86) s(time,167.94)
+−0.2 0.0 0.2
+−0.2 0.0 0.2 −0.2 0.0 0.2
+s(tmpd,8.27)
+s(so2median,7.38)
+−0.2 0.0 0.2
+−0.2 0.0 0.2
+Figure5.12 Theestimateofthesmoothfrommodelap1shownwithoutpartialresiduals.Note the gap in the pm10median values. Similar plots with partial residuals highlight exactly the same gross outliers as were evident in figure 5.11.
+that the highest temperatures in the temperature record where recorded in the few days preceding the high mortalities, when there were also high ozone levels recorded. This suggests that average temperature and pollution levels, over the few days pre- ceding a given mortality rate, might better predict it than the temperature and levels only on the day itself. On reflection, such a model might be more sensible on biolog- ical/medical grounds: the pollution levels and temperatures recorded in the data are no where near high enough to cause immediate acute disease and mortality, and it seems more plausible that any effects would take some time to manifest themselves via, for example, the aggravation of existing medical conditions.
+The high mortality episode provides a useful way of trying to identify appropriate aggregations and lags for the predictor variable. If the extremely high mortalities are related to the pollutants, then, presumably, these high mortalities lie at the extreme of some combination of predictors. Some experimentation with aggregating the pre- dictor variables in different ways suggests that the sum (or mean) of the predictors on the day in question, and the three preceding days, might be appropriate. Figure 5.13 illustrates this.
+Given these considerations the following simple function was used to sum the pollu- tant and temperature levels over the 4 days up to and including each daily mortality reading. Corresponding portions of the time and death rate vectors were also selected.
+time
+−20 0
+60
+80
+ AIR POLLUTION IN CHICAGO EXAMPLE 247
+0 100
+200 300
+tmp
+−50 0 50 100 o3
+Figure5.13 Plotsofallobservedcombinationsoftemperatureandozone,summedover4day periods. The large symbols show the 4 day periods ending in each of the 4 extreme mortality events. The suggestion is that a combination of persistent high temperatures and high ozone over several days might lead to higher mortality risk
+lag.sum <- function(a,l0,l1)
+## l0 is the smallest lag, l1 the largest { n<-length(a)
+b<-rep(0,n-l1)
+for (i in 0:(l1-l0)) b <- b + a[(i+1):(n-l1+i)] b
+}
+death<-chicago$death[4:5114]
+time<-chicago$time[4:5114]
+o3 <- lag.sum(chicago$o3median,0,3)
+tmp <- lag.sum(chicago$tmpd,0,3)
+pm10 <- lag.sum(log(chicago$pm10median+40),0,3)
+so2 <- lag.sum(log(chicago$so2median+10),0,3)
+So, for example, the aggregate variable,
+i
+o3i =   o3medianj
+j =i−3
+is to be used as the predictor for deathi, with similar definitions for the other pre-
+dictor variables (except time, of course).
+Given the suggestion, from examination of the data, that a combination of high ozone and high temperature might lead to very high death rates, the following model was tried next,
+log(E[deathi]) = f1(timei) + f2(o3i,tmpi,pm10i),
+where f1 and f2 are smooth functions. Isotropy is probably not an appropriate as- sumption for f2, so it was represented by a tensor product smooth as follows
+ 248
+GAMS IN PRACTICE: MGCV
+Resids vs. linear pred.
+4.6 4.8 5.0 5.2 5.4 5.6
+linear predictor
+Response vs. Fitted Values
+100 150 200 250 300
+Fitted Values
+Normal Q−Q Plot
+−2 0
+Theoretical Quantiles
+2
+Histogram of residuals
+−6 −4 −2 0 2 4 6
+Residuals
+Frequency
+Sample Quantiles
+0 500 1000 1500
+−4 0 2 4
+Response
+residuals
+100 200 300 400
+−4 0 2 4
+Figure 5.14 Basic checking plots for model ap2. Note the substantial improvement in com- parison to Figure 5.10.
+ap2 <- gam(death  ̃ s(time,bs="cr",k=200) + te(o3,tmp,pm10,k=c(8,8,6)),family=poisson)
+(This model is slow to converge, and fails to converge altogether if performance iteration is used).
+The default checking plots, for this model, are shown in figure 5.14, and are now greatly improved. Having reached the stage of having a model that is not obviously wrong, it is worth proceeding to see if it can be simplified, and one obvious simplifi- cation to try is,
+log(E[deathi]) = f1(timei) + f2(o3i,tmpi) + f3(pm10i).
+ap3 <- gam(death  ̃ s(time,bs="cr",k=200) + te(o3,tmp,k=8) +
+                   s(pm10,bs="cr",k=6),family=poisson)
+fits the model, and the gam.check plots are very similar to figure 5.14. By default, smoothness selection for these models has been performed using UBRE, and the simpler model, ap3, has a slightly lower UBRE score, suggesting that it is to be pre- ferred. In this case UBRE is effectively AIC, so a comparison of AIC scores leads to the same conclusion (although in this example approximate hypothesis testing points in the other direction). Further simplification, to an additive structure in smooths of each covariate separately, worsens the fit quite radically, since the model is again un- able to fit the peak death rates. Adding so2 improves the model marginally, in that the UBRE score is reduced a little, but the estimated effect if of small magnitude,
+ MACKEREL EGG SURVEY EXAMPLE
+−2000 −1000
+−1se te(o3,tmp,38.63) +1se
+249
+tmp
+0 100 200 300 −0.1 0.0 0.1 0.2
+s(pm10,3.42)
+−0.1 0.0 0.1 0.2
+s(time,136.85)
+−50 0
+50 100
+10 12 14 16 18
+pm10
+o3
+Figure5.15 AreasonablemodelfortheChicagoair-pollutionmortalitydata.Thepanelsshow the estimates of the terms in model ap3. The upper panel is the smooth function of time; the lower left panel is the smooth function of aggregated lagged temperature and ozone; the lower right panel is the function of (transformed) aggregated lagged particulate matter.
+with only one degree of freedom and a confidence interval that barely excludes 0. Further experimentation with alternative additive decompositions only worsens the model fit.
+Estimates of the components of model ap3 are shown in figure 5.15. Clearly the notion that several days of high ozone and temperature can cause elevated death rates can explain these data, but given the way that the data have been used to develop a model, we would really need to see if the same model works well in other locations, or time periods, before giving it too much credence.
+5.4 Mackerel egg survey example
+World wide, most commercially exploitable fish stocks are over exploited, with some stocks, such as Newfoundland Cod, having famously collapsed. Effective manage- ment of stocks rests on sound fish stock assessment, but this is not easy to achieve.
+0
+time
+1000 2000
+    250 GAMS IN PRACTICE: MGCV
+The main difficulty is that counting the number of catchable fish of any given species is all but impossible. A standard statistical sampling approach, based on trying to catch fish, fails because, for large mobile organisms, there is no way of relating what is caught to what was available to catch, in a given area. To some extent, surveys with sonar avoid such catchability problems, but suffer from other problems, chiefly that it is often impossible to determine which fish species cause a given sonar sig- nal. Another alternative is to attempt to reconstruct past fish stocks, on the basis of records of what fish get landed commercially, an approach known as ‘virtual popula- tion analysis’, but this suffers from the problem that it tells you quite accurately what the stock was several years ago, but is rather imprecise about its current or recent state.
+Egg production methods are a very different means of assessing stocks. The basic idea is to try and assess the number of eggs produced by a stock, or the rate at which a stock is producing eggs, and then to work out the number (or more often mass) of adult fish required to produce this number or production rate. This works because egg production rates per kg of adult fish can be assessed from adults caught in trawls, while eggs can be sampled in an unbiased manner. Egg data are obtained, over the area occupied by a stock, by sending out scientific cruise ships to sample eggs, at each station of some predefined sampling grid. Eggs are usually sampled by hauling a fine meshed net up from the sea bed to the sea surface (or at least from well below the depth at which eggs are expected to the surface). The number of eggs, of the target species, in the sample is then counted, and, of course, the volume of water sampled is known.
+5.4.1 Model development
+To get the most out of the egg data, it is helpful to model the egg distribution, and here GAMs can be useful. The example considered in this section concerns data from a 1992 mackerel egg survey. The data were first modelled using GAMs by Borchers et al. (1997), and first entered the public domain as data sets mack and smacker in the sm library of Bowman and Azzalini (1997). Here they have been combined into one data set mack. The left hand panel of figure 5.16 shows the location at which samples were taken, and the egg densities found there. As well as longitude and latitude, a number of other possible predictors of egg abundance are available: salinity; surface temperature of the ocean, temp.surf; water temperature at a depth of 20m, temp.20m; depth of the ocean, b.depth; and finally, distance from the 200m seabed contour, c.dist. The latter predictor reflects the biologists’ belief that the fish like to spawn near the edge of the continental shelf, conventionally considered to end at a seabed depth of 200m. At each sampling location, a net was hauled vertically through the water column from well below the depth at which eggs are found, to the surface: the mackerel eggs caught in the net were counted, to give the response variable, egg.count.
+The Poisson distribution might be a reasonable model for the egg counts, with a mean
+    
+ MACKEREL EGG SURVEY EXAMPLE
+251
+Sample Quantiles residuals
+lat
+44 46 48 50 52 54 56 58
+−5 0 5 10 −5 0 5 10
+−14 −12 −10 −8 −6 −4 −2
+lon
+−3 −2
+fitted values
+Normal QQ plot of residuals
+−1 0 1 2 3
+Theoretical Quantiles
+Figure 5.16 The left hand plot shows the density of stage I mackerel eggs per square metre of sea surface as assessed by net samples in the 1992 Mackerel egg survey. Circle areas are proportional to egg density and are centered on the location at which the egg samples were obtained. The right hand plots show residual plots for the gm GAM fitted to these data.
+given by
+E[egg.counti] = gi × [net area]i
+where gi is the density of eggs, per square metre of sea surface, at the ith sampling
+location. Taking logs of this equation we get,
+log(E[egg.counti]) = fi + log([net area]i)
+where fi = log(gi) will be modelled as a function of predictor variables, using an additive structure, and log([net area]i) will be treated as a model ‘offset’: that is, as a column of the model matrix with associated parameter fixed at 1.
+For the purposes of this exercise, a simple additive structure will be assumed, with the first model being fitted as follows:
+mack$log.net.area <- log(mack$net.area)
+gm <- gam(egg.count ̃s(lon,lat,bs="ts")+s(I(b.depthˆ.5),bs="ts")
+    +s(c.dist,bs="ts")+s(salinity,bs="ts")+s(temp.surf,bs="ts")
+    +s(temp.20m,bs="ts")+offset(log.net.area),
+    data=mack,family=poisson,scale=-1,gamma=1.4)
+Here, shrinkage smoothers have been used, which are constructed in such a way that smooth terms can be penalized away altogether, making no contribution to the
+0 10 20 30 40 50 60 70
+ 252
+GAMS IN PRACTICE: MGCV
+−1se s(lon,lat,10.32) +1se
+−14 −12 −10 −8 −6 −4 −2 lon
+34.5 35.0 35.5
+salinity
+10 20 30 40 50
+I(b.depth^0.5)
+14 16 18
+temp.surf
+60
+0.0
+0.5 1.0 1.5 2.0 2.5
+c.dist
+12 14 16 18 20
+temp.20m
+s(salinity,0)
+lat
+44 46 48 50 52
+−4 −3 −2 −1 0 1 2
+s(temp.surf,0)
+s(I(b.depth^0.5),2.68)
+−4 −3 −2 −1 0 1 2
+−4 −3 −2 −1 0 1
+2
+s(temp.20m,4.2)
+s(c.dist,5)
+−4 −3 −2 −1 0 1 2
+−4 −3 −2 −1 0 1
+2
+Figure 5.17 Estimated model terms for the simple additive gm mackerel model.
+model (see section 4.1.6). The argument scale=-1 forces the scale parameter of the Poisson to be treated as unknown, and smoothing parameters to be estimated by GCV, rather than UBRE, which is the Poisson default: hence the model is employing an ‘overdispersed Poisson’ structure. The argument gamma=1.4, forces each model effective degree of freedom to count as 1.4 degrees of freedom in the GCV score, which forces models to be a little smoother than they might otherwise be, and is an ad hoc way of avoiding overfitting (Kim and Gu, 2004). Sea bed depth has been square root transformed, to achieve an even spread of covariate values, without a few high depths having undue leverage. The right hand panels of figure 5.16 show residual plots for this model, which are not too bad, considering the high proportion of zeroes in these data.
+Figure 5.17 shows the estimated smooth terms for model gm. The surface tempera- ture and salinity effects have been shrunk to zero. Refitting without salinity enables the full data set to be used for estimation, so surface temperature should be left in for the moment (some experimentation is needed to find a reasonable k for the smooth of lon and lat).
+gm1<-gam(egg.count  ̃ s(lon,lat,bs="ts",k=100)+ s(I(b.depthˆ.5),bs="ts") + s(c.dist,bs="ts") + s(temp.surf,bs="ts") + s(temp.20m,bs="ts") + offset(log.net.area), data=mack,family=poisson,scale=-1,gamma=1.4)
+>
++
++
++
++
+> gm1
+ MACKEREL EGG SURVEY EXAMPLE 253
+0
+34.5
+20
+abc
+40 60 80 44 46 48 50 52 54 56 58 −14 −12 −10 −8 −6 −4 −2
+fitted values mack$lat mack$lon
+def
+35.0 35.5 −3 −2 −1 0 1 2 3 0 20 40 60 80 100
+mack$salinity Theoretical Quantiles fitted values
+residuals(gm1a)
+residuals(gm1a)
+−6 −4 −2 0 2 4 6
+−6 −4 −2 0 2 4 6
+Sample Quantiles
+residuals(gm1a)
+−6 −4 −2 0 2 4 6
+−6 −4 −2 0 2 4 6
+residuals(gm2)
+residuals(gm1a)
+−2 −1 0 1 2 3
+−6 −4 −2 0 2 4 6
+Figure 5.18 a-e are residual plots for model gm1a. Only d appears problematic, but in fact the pattern is simply the result of both data and model predicting zeroes (or near zeroes) in the areas of low salinity. f is a residual plot for a negative binomial model and is clearly not satisfactory.
+Family: poisson
+Link function: log
+Formula:
+egg.count ̃s(lon,lat,bs="ts",k=100)+s(I(b.depthˆ0.5),
+    bs="ts")+s(c.dist,bs="ts")+s(temp.surf,bs="ts")+
+    s(temp.20m,bs="ts")+offset(log.net.area)
+Estimated degrees of freedom:
+77.3188 1.6469 1.49499e-15 4.0150e-09 6.24424 total = 86.2099
+GCV score:  5.834046
+Clearly their effective degrees of freedom are so small that the smooths of c.dist and temp.surf have effectively been eliminated from the model, so we may as well refit without them.
+gm1a<-gam(egg.count ̃s(lon,lat,bs="ts",k=100)+ s(I(b.depthˆ.5),bs="ts") + s(temp.20m,bs="ts")+ offset(log.net.area),data=mack,family=poisson, scale=-1,gamma=1.4)
+ 254
+GAMS IN PRACTICE: MGCV
+10 20 30 40 50 60
+I(b.depth^0.5)
+10 12 14 16 18 20
+temp.20m
+−1se s(lon,lat,77.32) +1se
+lat
+44 46 48 50 52 54 56 58
+s(temp.20m,6.25) s(I(b.depth^0.5),1.65)
+−4 −2 0 2 −4 −2 0 2
+−14 −12 −10 −8 −6 −4 −2 lon
+Figure 5.19 Estimated smooth terms for the mackerel model gm1a. The left panel shows the smooth of location. The upper right panel shows the smooth of seabed depth and the lower right panel shows the smooth of temperature at 20 metres depth.
+As expected the estimates of the smooths included in gm1a are almost identical to the estimates of the equivalent smooths from gm1. Residual plots for gm1a are shown in figure 5.18, and suggest no problems with the model. In some respects the high degrees of freedom estimated for the spatial smooth is disappointing: biologically it would be more satisfactory for the model to be based on predictors to which spawn- ing fish might be responding directly. Spatial location can really only be a proxy for something else, or the result of a process in which much of the pattern is driven by spatial correlation.
+The fitted model produces a scale parameter estimate of 4.8, indicating a fair degree of over-dispersion, relative to Poisson data. Rather than adopting the quasi-likelihood over dispersed Poisson approach, of the models used so far, it might be worth trying the negative binomial distribution. gam can use the negative binomial family from the MASS library, although, at time of writing, only with performance iteration esti- mation of smoothing parameters.
+> gm2<-gam(egg.count  ̃ s(lon,lat,bs="ts",k=40) +
++
++
++
++
++
+> gm2
+s(I(b.depthˆ.5),bs="ts") + s(c.dist,bs="ts") + s(temp.surf,bs="ts") + s(temp.20m,bs="ts") + offset(log.net.area), data=mack,family=negative.binomial(1), control=gam.control(maxit=100),gamma=1.4)
+    MACKEREL EGG SURVEY EXAMPLE 255
+Family: Negative Binomial(0.6226)
+Link function: log
+Formula:
+egg.count  ̃ s(lon,lat,bs="ts",k=40)+s(I(b.depthˆ0.5),
+    bs="ts")+s(c.dist,bs="ts")+s(temp.surf,bs="ts")+
+    s(temp.20m,bs="ts")+offset(log.net.area)
+Estimated degrees of freedom:
+17.230 2.2881 0.93996 6.6139e-10 5.1026 total = 26.562
+GCV score:  1.126673
+The model ascribes considerably more variability to random variation than do the Poisson based models, but far fewer degrees of freedom to the spatial smooth (even if k is increased substantially). However the residual plot, figure 5.18f, shows a clear pattern, with residual variability declining sharply with increasing mean: the model appears to overstate the variance of data corresponding to high mean densi- ties. Hence, from the models considered here, gm1a appears to me least inappropri- ate, and its component smooths are shown in figure 5.19. The rather gentle nature of the depth effect might suggest that it is not really significant, however
+> anova(gm1a)
+[edited]
+Approximate significance of smooth terms:
+s(lon,lat)        77.313
+s(I(b.depthˆ0.5))  1.656
+s(temp.20m)        6.250
+99.000
+ 9.000
+ 9.000
+edf Est.rank
+    F  p-value
+6.583  < 2e-16
+2.302   0.0152
+6.572 6.24e-09
+implies otherwise. Note however that the p-value probably overstates the significance of sea bed depth, although it is highly unlikely that an exact p-value would be greater than 0.05 (what simulation evidence there is suggests it is probably < 0.03).
+5.4.2 Model predictions
+The purpose of this sort of modelling exercise is assessment of the total stock of eggs, which means that predictions are required from the model. In the first instance a sim- ple map of predicted densities is useful. The data frame mackp contains the model covariates on a regular grid, over the survey area, as well as an indexing column in- dicating which grid square the covariates belong to, in an appropriate 2D array. The following code produces the plot on the left hand side of figure 5.20
+mackp$log.net.area <- 0*mackp$lon # make offset column lon<-seq(-15,-1,1/4);lat<-seq(44,58,1/4) zz<-array(NA,57*57) zz[mackp$area.index]<-predict(gm1a,mackp)
+    
+ 256
+GAMS IN PRACTICE: MGCV
+Histogram of mean.eggs1
+lat
+44 46 48 50 52 54 56 58
+Frequency Frequency
+0 100 300 500 0 50 150 250
+−14 −12 −10 −8 −6 −4 −2
+lon
+100
+100
+110
+110
+120 130 140
+mean.eggs1
+Histogram of mean.eggs
+120 130 140
+mean.eggs
+Figure 5.20 The left hand panel shows predicted log densities of mackerel eggs over the 1992 survey area, according to the model gm1a. The upper right panel shows the posterior dis- tribution of mean egg densities per square metre sea surface, conditional on the estimated smoothing parameters. The lower left panel is the same, but unconditional.
+image(lon,lat,matrix(zz,57,57),col=gray(0:32/32),
+      cex.lab=1.5,cex.axis=1.4)
+contour(lon,lat,matrix(zz,57,57),add=TRUE)
+lines(coast$lon,coast$lat,col=1)
+Notice the substantial problem that the egg densities remain high at the western boundary of the survey area.
+Typically, uncertainty estimates are required for quantities derived from fitted model predictions, and as in the brain imaging example, these can be obtained by simulation from the posterior distribution of the model coefficients. For example, the following obtains a sample from the posterior distribution of mean density of mackerel eggs across the survey area, shown in the upper right panel of figure 5.20.
+library(MASS)
+br1 <- mvrnorm(n=1000,coef(gm1a),gm1a$Vp)
+Xp <- predict(gm1a,newdata=mackp,type="lpmatrix") mean.eggs1 <- colMeans(exp(Xp%*%t(br1))) hist(mean.eggs1)
+A disadvantage of such simulations, from the posterior distribution of the parameters,
+    PORTUGUESE LARKS 257
+β, is that they are conditional on the estimated smoothing parameters, λˆ. That is, we are simulating from the posterior f(β|λˆ), when we would really like to simulate from f(β). Following section 4.9.3, we could improve matters by approximating f(βˆ) by
+its bootstrap sampling distribution, and then using the fact that f(β) = f(β|λˆ)f(λˆ), to simulate from an approximate version of f(β). The following code does just that, and plots the results in the lower right panel of figure 5.20.
+f<-fitted(gm1a)
+form<-egg.count ̃offset(log.net.area)+s(lon,lat,bs="ts",k=100)+
+                s(I(b.depthˆ.5),bs="ts")+s(temp.20m,bs="ts")
+mack.bs <- mack
+n <- nrow(mack)
+br <- matrix(0,0,length(coef(gm1a))) for (i in 1:19)
+{ e <- rpois(rep(1,n),f) - f
+y <- round(f+e*gm2$sig2ˆ.5)
+y[y<0] <- 0
+mack.bs$egg.count <- y
+sp <- gam(form,data=mack.bs,family=poisson,scale=-1,gamma=1.4)$sp b <- gam(form,data=mack,family=poisson,sp=sp,scale=-1)
+  br <- rbind(br,mvrnorm(n=100,coef(b),b$Vp))
+}
+br <- rbind(br,mvrnorm(n=100,coef(gm1a),gm1a$Vp))
+mean.eggs <- colMeans(exp(Xp%*%t(br)))
+hist(mean.eggs)
+The unconditional distribution is a little wider than the conditional one, but in this case the differences are not large.
+5.5 Portuguese larks
+Figure 5.21 shows data on the presence or absence of Crested Lark in each of a set of sampled 2km × 2km squares, gathered as part of the compilation of the Portuguese Atlas of Breeding Birds. The whole of Portugal was divided into 10km × 10km squares, each square was further subdivided into 25, 2km × 2km ‘tetrads’, and a number of tetrads (usually 6) were selected from each square. Each selected tetrad† was then surveyed, to establish which bird species were breeding within it: Crested Lark is one of the species surveyed (although it should be noted that there are some problems distinguishing Crested Lark from Thekla Lark).
+The compilers of the Atlas would like to summarize the information in figure 5.21, as a map, showing how the probability that a tetrad contains breeding Crested Larks varies over Portugal. An obvious approach is to model the presence absence data, ci, as
+logit(μi) = f(xi, yi)
+† Actually at time of writing the field work was not quite finished, so a few tetrads had yet to be surveyed.
+    
+ 258 GAMS IN PRACTICE: MGCV
+km west
+300 350 400 450 500 550
+4100 4200 4300 4400 4500 4600 km north
+Figure 5.21 Presence (black) and absence (white) of Crested Lark in sampled 2km by 2km squares in Portugal.
+where logit(μi) = μi/(1 − μi), f is a smooth function of location variables x and y, and ci ∼ binomial(1,μi). The geographic nature of the data, suggests using an isotropic smoother to represent f. Given the rather large number of data, it speeds things up to base the TPRS on rather fewer spatial locations than those contained in the entire data set: this can be done by making use of the knots argument of gam. In the following, 2000 randomly chosen tetrad locations are used as initial knots from which to produce a TPRS basis.
+ind <- sample(1:25100,2000,replace=FALSE)
+m2 <- gam(crestlark  ̃ s(x,y,k=100),data=bird,family=binomial,
+          knots=bird[ind,],gamma=1.4)
+The model is fitted with γ = 1.4, since for this application slight over-smoothing is much preferable to under-smoothing. By default UBRE/AIC is used for smoothing parameter estimation in the binomial case, and in this example a relatively complex model is selected.
+> m2
+Family: binomial
+Link function: logit
+Formula:
+crestlark  ̃ s(x, y, k = 100)
+Estimated degrees of freedom: 82.58799 total = 83.58799
+UBRE score:  -0.2416895
+Model checking with binary data is somewhat awkward,(see exercise 2 in Chapter
+    PORTUGUESE LARKS 259
+2) especially for spatial data, but for this application we can simplify matters con- siderably by choosing to model the data at the 10km by 10km square level, in order to obtain a binomial response, with easier to interpret residuals. It turns out that, in terms of predicted probabilities, the estimated models are almost indistinguishable, whether we model raw data, or the aggregated data. The bird data frame contains a column QUADRICULA identifying which 10 km square each tetrad belongs to, so aggregation is easy.
+bird$n <- bird$y*0+1 # when summed, gives binomial denominator bird$n[is.na(bird$crestlark)] <- NA
+ba <- aggregate(data.matrix(bird),by=list(bird$QUADRICULA),
+FUN=sum,na.rm=TRUE)
+ba$x <- ba$x / 25 # don’t want locations summed!
+ba$y <- ba$y / 25
+The model can now be fitted.
+> m10 <- gam(cbind(crestlark,n-crestlark) ̃s(x,y,k=100),
+             data=ba,family=binomial,gamma=1.4)
+> m10
+Family: binomial
+Link function: logit
+Formula:
+cbind(crestlark, n -
+Estimated degrees of
+ 75.22112   total =
+crestlark)  ̃ s(x, y, k = 100)
+freedom:
+76.22112
+UBRE score:  0.5183815
+As usual, the (deviance) residuals should be plotted against fitted values to check model assumptions, but conventional residual plots are unlikely to pick up one po- tential problem with spatial data: namely spatial auto-correlation in the residuals, and consequent violation of the independence assumption. To check this, it is useful to examine the variogram of the residuals, and the geoR package has convenient functions for doing this.
+library(geoR)
+coords<-matrix(0,1004,2);coords[,1]<-ba$x;coords[,2]<-ba$y
+gb<-list(data=residuals(m10,type="d"),coords=coords)
+plot(variog(gb,max.dist=1e5))
+plot(fitted(m10),residuals(m10))
+The plotted variogram is shown at the top left of figure 5.22. Uncorrelated residuals should give a more or less flat variogram, while un-modelled spatial auto-correlation usually results in a variogram which increases sharply before eventually plateau-ing. In the current case, the the variogram suggests no autocorrelation, or even slight negative autocorrelation which might suggest very slight overfitting (although see exercise 4).
+    
+ 260
+GAMS IN PRACTICE: MGCV
+0 20000
+60000
+distance
+0.4 0.6 0.8
+fitted(m10)
+residuals(m10)
+semivariance
+−2 0 2 4
+0.0 0.4 0.8 1.2
+4100 4200 4300
+4400 4500 4600
+km north
+0.0 0.2
+450 500
+550 600 650 700
+km east
+Figure 5.22 Plots related to model m10 for Crested Lark in Portugal. Top left: variogram of the deviance residuals: there is no evidence that the model is missing auto-correlation in these data. Lower left: residuals against fitted values, showing no problems, except for minor over- dispersion. Right: model predicted probability that Crested Lark is breeding in a 2km square at any location in Portugal.
+The residual plot against fitted values shown at the lower left of figure 5.22 is very good, for binomial data, although there is a suggestion of overdispersion (i.e. the data seem slightly more variable than truly binomial data).
+The end product of this modelling exercise should be a map of breeding probabilities. In this case the bird data frame actually contains the locations for all 2km tetrads in Portugal, so it is a fairly simply matter to produce such a map. The only fiddly part is embedding the predictions, for each tetrad in Portugal, in a larger square array of tetrads, where any tetrad not in Portugal is assigned the value NA: this is necessary to facilitate plotting. The following code suffices.
+mx <- sort(unique(bird$x));my<-sort(unique(bird$y))
+nx<-length(mx);ny<-length(my)
+ixm <- 1:nx;names(ixm)<-mx
+ix <- ixm[as.character(bird$x)]
+iym <- 1:ny;names(iym)<-my
+iy <- iym[as.character(bird$y)]
+    OTHER PACKAGES 261
+um <- matrix(NA,nx,ny)
+fv10 <- predict(m10,bird,type="response")
+my<-my/1000;mx <- mx/1000
+um[ix+(iy-1)*nx] <- fv10 image(mx,my,matrix(um,nx,ny),xlab="km east",ylab="km north") contour(mx,my,matrix(um,nx,ny),add=TRUE)
+The results are shown on the right hand side of figure 5.22. Note that the probabilities plotted are interpretable as follows: if you pick a 10km square in Portugal, then the plotted probability for that square, is the probability that a randomly selected 2km tetrad within the square will contain breeding Crested Larks.
+5.6 Other packages
+There are a number of other packages implementing GAMs, and related models for R, and this section offers a very brief introduction to two of them: Trevor Hastie’s gam package, which is a port to R of the original gam in S-PLUS, and Chong Gu’s gss package, which is a rather complete package for general smoothing spline models. In both cases, a model from the Chicago air pollution example will be re- estimated.
+Two packages not covered here are the assist package, which implements the approach of e.g. Wang (1998b) and Wang (1998a), and the gamlss package which offers the generalization of GAMs presented in Rigby and Stasinopoulos (2004).
+5.6.1 Packagegam
+Package gam is an implementation of the GAM framework of Hastie and Tibshirani (1990). The mgcv package was an attempt to provide GAMs for R, before the gam package was available, and its functions are based closely on the S equivalents de- signed by Hastie (1993). For this reason, basic use of gam is rather similar to basic use of mgcv. The main differences are: (i) s() terms in a gam::gam formula de- note cubic smoothing spline smooths of one variable; (ii) smooths of any number of variables are provided by lo terms, and are loess smooths; (iii) gam::gam does not estimate the degree of smoothness automatically.
+In the following, a version of the final Chicago air pollution model is fitted, using package gam. The flexibility of the smooths (controlled by the df and span ar- guments) has been selected to give a fit with terms of similar complexity to those estimated using mgcv::gam.
+> library(gam)
+> bfm <- gam(death ̃s(time,df=140)+lo(o3,tmp,span=.1),
+             family=poisson,control=gam.control(bf.maxit=150))
+The control argument has to be modified a little, in this case, to achieve convergence of the back fitting iterations. Here is a default summary of the fit.
+    
+ 262 GAMS IN PRACTICE: MGCV
+−2000 −1000 0 1000 2000
+lo(o3, tmp, span = 0.1)
+tmp
+residuals
+0 5 10
+s(time, df = 140)
+−0.1 0.0 0.1 0.2
+o3
+Figure 5.23 A GAM fitted to the Chicago air pollution data, using gam from package gam. The upper panel is the estimated smooth of time while the lower left panel is a perspective plot of the estimated ozone, temperature interaction. The lower right plot is a residual plot.
+> summary(bfm)
+Call: gam(formula=death ̃s(time,df=140)+lo(o3,tmp,span=0.1),
+  family=poisson,control=gam.control(maxit=100,bf.maxit=150))
+Deviance Residuals:
+Min 1Q Median 3Q Max
+-4.05604 -0.72077 -0.02738 0.67355 13.43195 (Dispersion Parameter for poisson family taken to be 1)
+Null Deviance: 9860.715 on 5110 degrees of freedom Residual Deviance: 5823.157 on 4929.065 degrees of freedom AIC: 39815.83
+Number of Local Scoring Iterations: 20
+DF for Terms and Chi-squares for Nonparametric Effects
+Df Npar Df Npar Chisq P(Chi) (Intercept) 1.0
+s(time, df = 140)
+lo(o3, tmp, span = 0.1)
+1.0 139.0 1336.27 0.00 2.0 38.9 645.51 0.00
+time
+4.6 4.7 4.8 4.9 5.0 5.1 5.2 5.3
+linear predictor
+    OTHER PACKAGES 263 Plotting of model terms is easily.
+plot(bfm,se=T,rug=F,phi=30,theta=-30)
+produces the upper and lower left panels in figure 5.23. The residual plot, at lower right of the figure, shows that this model still misses the really high deaths by a little way. This may be because of the way the relative scaling of ozone and temperature has been handled: these variables are scaled into the unit square, and then smoothed with a locally weighted regression. The scaling step is somewhat arbitrary, and im- poses an implicit assumption about how smoothly death rate varies with temperature as opposed to ozone: this assumption maybe behind the slightly worse fit, relative to the previous version of this model.
+5.6.2 Packagegss
+The gss package is a comprehensive implementation of the general smoothing spline approach to modelling described in the monographs by Wahba (1990) and Gu (2002). The modelling approach is somewhat different to the gam functions met so far, be- ing based strongly on the notion of ANOVA decompositions of functions (see section 4.10.2). Again the Air pollution model provides a useful example:
+library(gss)
+ssm <- gssanova1(death ̃time+o3*tmp,family="poisson",nbasis=200)
+The gssanova1 function is a computationally efficient reduced rank version of the function gssanova, which fits generalized smoothing spline ANOVA models based on the methods reported in Kim and Gu (2004). The model formula specifies a linear predictor, with the following structure:
+f1(time) + f2(o3) + f3(tmp) + f4(o3,tmp).
+i.e. smooth main effect functions of the three covariates, plus a smooth interac- tion of ozone and temperature. Notice that the size of approximating basis used by gssanova1 has been adjusted here, using the nbasis argument: the default basis size performs rather poorly in this example. Here is a summary of the fitted model.
+> summary(ssm)
+Call:
+gssanova1(formula=death ̃time+o3*tmp,family="poisson",
+nbasis=200)
+(Dispersion parameter for poisson family taken to be 1)
+Working residuals (weighted):
+Min 1Q Median 3Q Max
+-0.34584431 -0.06654956 -0.00357026 0.06297024 0.48446762 Residual sum of squares: 5699.994
+    
+ 264 GAMS IN PRACTICE: MGCV
+−2000 −1000 0 1000 2000
+o3*tmp
+tmp
+o3
+residuals
+−4 −2 0 2 4 6
+time effect
+−0.15 −0.05 0.05 0.15
+Figure 5.24 A GAM fitted to the Chicago air pollution data, using ssanova1 from package gss. The upper panel is the estimated smooth of time while the lower left panel is a perspective plot of the estimated ozone, temperature interaction. The lower right plot is a residual plot.
+Deviance residuals:
+Min 1Q Median 3Q Max
+-4.5208983 -0.7249406 -0.0373412 0.6706598 5.5970047 Deviance: 5695.739
+Null deviance: 9860.715
+Penalty associated with the fit: 81.43146
+gss does not provide a default plot function for such models, but it does provide a predict method function, so that it is easy to create the required plots. The following creates the upper panel in figure 5.24.
+tp <- seq(min(time),max(time),length=500)
+fvt <- predict(ssm,newdata=data.frame(time=tp,
+               o3=rep(mean(o3),500),tmp=rep(mean(tmp),500)),
+include=list("time")) plot(tp,fvt,type="l",xlab="time",ylab="time effect")
+Notice the include argument to predict.ssanova1: only model terms on this list are included in the predictions: so only the smooth function of time has been evaluated and returned here‡.
+‡ predict.ssanova1 allows the calculation of standard errors for predictions, but for this particular model this failed (a very unusual occurance ).
+time
+4.6 4.8 5.0 5.2 5.4 5.6 5.8
+linear predictor
+    EXERCISES 265
+The code for producing the perspective plot, at the lower left of figure 5.24, showing the dependence on ozone and temperature, is as follows.
+m <- 40
+o3m <- seq(min(o3),max(o3),length=m)
+tmpm <- seq(min(tmp),max(tmp),length=m)
+tmpp <- rep(tmpm,rep(m,m))
+o3p <- rep(o3m,m)
+pd <- data.frame(time=rep(0,m*m),o3=o3p,tmp=tmpp)
+fv <- predict(ssm,newdata=pd,include=list("o3","tmp","o3:tmp"))
+library(mgcv)
+ind <- exclude.too.far(o3p,tmpp,o3,tmp,dist=0.04)
+fv[ind] <- 0
+persp(o3m,tmpm,matrix(fv,m,m),phi=30,theta=-30,zlab="o3*tmp",
+      xlab="o3",ylab="tmp")
+Notice the modified include argument to predict: we have to specify the smooth main effects of ozone and temperature and the smooth interaction of the two, in order to obtain the complete dependence on these two variables. The exclude.too.far function, from package mgcv, is used to remove parts of the perspective plot that are too distant from supporting data.
+The residual plot for this model is shown in the lower right panel of figure 5.24 and is rather encouraging.
+5.7 Exercises
+1. This question re-examines the hubble data from Chapter 1.
+(a) Usegamtofitthemodel:
+Vi =f(Di)+εi
+tothehubbledata,wheref isasmoothfunctionandtheεi arei.i.d.N(0,σ2). Does a straight line model appear to be most appropriate? How would you interpret the best fit model?
+(b) Examine appropriate residual plots and refit the model with more appropriate distributional assumptions. How are your conclusions from part (a) modified?
+2. This question is about using gam for univariate smoothing, the advantages of pe- nalized regression and weighting a smooth model fit. The mcycle data in the MASS package are a classic dataset in univariate smoothing, introduced in Silver- man (1985). The data measure the acceleration of the rider’s head, against time, in a simulated motorcycle crash.
+(a) Plot the acceleration against time, and use gam to fit a univariate smooth to the data, selecting the smoothing parameter by GCV (k of 30 to 40 is plenty for this example). Plot the resulting smooth, with partial residuals, but without standard errors.
+(b) Use lm and poly to fit a polynomial to the data, with approximately the same degrees of freedom as was estimated by gam. Use termplot to plot
+    
+    266 GAMS IN PRACTICE: MGCV
+the estimated polynomial and partial residuals. Note the substantially worse fit
+achieved by the polynomial, relative to the penalized regression spline fit.
+(c) It’s possible to overstate the importance of penalization in explaining the im- provement of the penalized regression spline, relative to the the polynomial. Use gam to refit an un-penalized thin plate regression spline to the data, with basis dimension the same as that used for the polynomial, and again produce a
+plot for comparison with the previous two results.
+(d) Redo part (c) using an un- penalized cubic regression spline. You should find
+a fairly clear ordering of the acceptability of the results for the 4 models tried
+— what is it?
+(e) Now plot the model residuals against time, and comment.
+(f) To try and address the problems evident from the residual plot, try giving the first 20 observations the same higher weight, α, while leaving the remaining observations with weight one. Adjust α so that the variance of the first 20 residuals matches that of the remaining residuals. Recheck the residuals plots.
+(g) Experiment with the order of penalty used in the smooth. Does increasing it affect the model fit?
+3. Thisquestionusesthemcycledataagain,inordertoexploretheinfluencematrix of a smoother, more fully.
+(a) Consider a model for response data, y, which has the influence matrix, A, mapping the response data to the fitted values, given a smoothing parameter, λ. i.e. μˆ = Ay. Show that if we fit the same model, with the same λ to the re- sponse data Ij (the jth column of the identity matrix) then the resulting model fitted values are the jth column of A.
+(b) Using the result from part (a) evaluate the influence matrix, A, for the model fitted in question 2(a).
+(c) What value do all the rows of A sum to? Why?
+(d) Any smoothing model that can be represented as μˆ = Ay, simply replaces
+each value yj by a weighted sum of neighbouring yi values. e.g. μˆj =  i Ajiyi, where the Aji are the weights in the summation. It is instructive to examine the weights in the summation, so plot the weights used to form μˆ65 against mcycle$time. What you have plotted is the ‘equivalent kernel’ of the fitted spline (at the 65th datum).
+(e) Plot all the equivalent kernels, on the same plot. Why do their peak heights vary?
+(f) NowvarythesmoothingparameteraroundtheGCVselectedvalue.Whathap- pens to the equivalent kernel for the 65th datum?
+4. Thisquestionfollowsonfromquestions2and3,andexaminestheauto-correlation of residuals that results from smoothing.
+(a) Based on the best model from question 2, produce a plot of the residual auto- correlation at lag 1 (average correlation between each residual and the previous residual, see ?acf) against the model effective degrees of freedom. Vary the degrees of freedom between 2 and 40 by varying the sp argument to gam.
+    
+    EXERCISES 267
+(b) WhydoyouseepositiveautocorrelationatverylowEDF,andwhatcausesthis to reduce as the EDF increases?
+(c) Theexplanationofwhyautocorrelationbecomesnegativeisnotquitesostraight- forward. Given the insight from question 3, that smoothers operate by forming weighted averages of neighbouring data, the cause of the negative autocorrela- tion can be understood by examining the simplest weighted average smoother: the k-point running mean. The fitted values from such a smoother are a sim- ple average of the k nearest neighbours of the point in question (including the point itself). k is an odd integer.
+i. Write out the form of a typical row, j, of the influence matrix, A, of the simple running mean smoother. Assume that row j is not near the beginning or end of A, and is therefore unaffected by edge-effects.
+ii. Itiseasytoshowthattheresidualsaregivenbyεˆ=(I−A)yandhencethat their covariance matrix is Vεˆ = (I−A)(I−A)σ2. Find expressions for the elements of Vεˆ on its leading diagonal and on the sub- and super- diagonal, in terms of k. Again, only consider rows/columns that are unaffected by being near the edge of the data.
+iii. What do your expressions suggest about residual auto-correlation as the amount of smoothing is reduced?
+5. This question is about modelling data with seasonality, and the need to be very careful if trying to extrapolate with GAMs (or any statistical model). The data frame co2s contains monthly measurements of CO2 at the south pole from Jan- uary 1957 onwards. The columns are co2, the month of the year, month, and the cumulative number of months since January 1957, c.month. There are missing co2 observations in some months.
+(a) Plot the CO2 observations against cumulative months.
+(b) Fitthemodel,co2i =f(c.monthi)+εi wherefisasmoothfunctionandthe εi are i.i.d. with constant variance, using the gam function. Use the cr basis, and a basis dimension of 300.
+(c) Obtain the predicted CO2 for each month of the data plus 36 months after the end of the data as well as associated standard errors. Produce a plot of the predictions with twice standard error bands. Are the predictions in the last 36 months credible?
+(d) Fit the model co2i = f1(c.monthi) + f2(monthi) + εi where f1 and f2 are smooth functions, but f2 is cyclic (you will need to use the knots argument of gam to ensure that f2 wraps appropriately: it’s important to make sure that January is the same as January, not that December and January are the same!).
+(e) Repeat the prediction and plotting in part (c) for the new model. Are the pre- dictions more credible now? Explain the differences between the new results and those from part (c).
+6. The data frame ipo contains data from Lowry and Schwert (2002) on the num- ber of ‘Intitial Public Offerings’ (IPOs) per month in the US financial markets between 1960 and 2002. IPOs are the process by which companies go public:
+    
+    268 GAMS IN PRACTICE: MGCV
+ownership of the company is sold, in the form of shares, as a means of raising capital. Interest focuses on exploring the effect that several variables may have on numbers of IPOs per month, n.ipo. Of particular interest are the variables:
+ir the average initial return from investing in an IPO. This is measured as per- centage difference between the offer price of shares, and the share price after the first day of trading in the shares: this is basically a reflection of by how much the offer price undervalues the company. One might expect companies to pay careful attention to this when deciding on IPO timing.
+dp is the average percentage difference between the middle of the share price range proposed when the IPO is first filed, and the final offer price. This might be expected to carry information about direction of changes in market sentiment.
+reg.t the average time (in days) it takes from filing to offer. Obviously fluctua- tions in the length of time it takes to register has a direct impact on the number of companies making it through to offering in any given month.
+Find a suitable possible model for explaining the number of IPOs in terms of these variables (as well as time, and time of year). Note that it is probably appropriate to look at lagged versions of ir and dp, since the length of the registration process precludes the number of IPOs in a month being driven by the initial returns in that same month. In the interests of interpretability it is probably worth following the advice of Kim and Gu (2004) and setting gamma=1.4 in the gam call. Look at appropriate model checking plots, and interpret the results of your model fitting.
+7. The data frame wine contains data on prices and growing characteristics of 25 high quality Bordeaux wines from 1952 to 1998 as reported in: http://schwert.ssb.rochester.edu/a425/a425.htm.
+price gives the average price as a percentage of 1961; s.temp is the average temperature (Celsius) over the summer preceding harvest, while h.temp is the average temperature at harvest; w.rain is the mm of rain in the preceding winter, while h.rain give the mm of rain in the harvest month; year is obvious. Create a GAM to model price in terms of the given predictors. Interpret the effects and use the model to predict the missing prices.
+8. The mgcv package allows users to add their own smoother classes for use with gam. Two functions must be written in order to do this. The first is a smooth con- structor function with the name smooth.construct.xy.smooth.spec, where xy is the two letter code which will be used to identify the smoother class when referring to it in a gam formula: something like s(...,bs="xy") would be used to invoke this class. This function has access to the model covariates, any supplied knots and the information on setting up the smooth supplied to s(). It must return an object containing model and penalty matrices, and some other supplementary information. It must also assign that object a class: in the follow- ing the class is assumed to be called xy.smooth, but you are free to choose. The second function is called Predict.matrix.xy.smooth, and is used to evaluate a ‘prediction matrix’ which will map the coefficients of the smooth to evaluations of the smooth at a new set of data — this function is used for predic- tion and plotting.
+    
+    EXERCISES 269
+Full specification for the two functions can be found in the help file ?p.spline, which also includes example functions implementing P-spline smoothers for gam. Further examples can be found in the functions for handling smooth types cr, cc, tp, while the functions for smooths cs and ts show how slight variations on ex- isting smoothers can be implemented. Once you have defined a (single penalty) smoother it can automatically be used for tensor product smoothing (the con- structor smooth.construct.tensor.smooth.spec sets up tensor prod- uct smooths, and is somewhat from other constructors).
+Ruppert et al. (2003) discuss the use of penalized regression splines based on simple ridge penalties applied to the coefficients of a spline represented using the ‘truncated power basis’ for splines. For a spline of order m with k−m−1 ‘knots’, x∗i , a spline f is represented as:
+m k−m−1 f(x)= xiβi+1+   βi+m+1|x−x∗i|m+
+i=0 i=1
+where the βi are unknown parameters and |z|+ = z if z is positive and zero otherwise. (Note that a cubic spline has m = 3, in this question.) The suggested penalty on the spline is simply
+k
+λ   βi2.
+i=m+2
+Using the P-spline functions as templates, implement this class of smoothers for
+use with gam. Try it out on the first example given in the help file ?gam.
+9. Sometimes rather unusual models can be expressed as GAMs. For example the data frame blowfly contains counts (not samples!) of adults in a laboratory population of blowflies, as reported in the classic ecological papers of Nicholson (1954a,b). One possible model for these data (basically Ellner et al., 1997) is that they are governed by the equation,
+∆nt+1 = fb(nt−k)nt−k − fd(nt)nt + εt,
+where nt is the population at time t, ∆nt+1 = nt+1 − nt, fb and fd are smooth functions and the εt are i.i.d. errors with constant variance. The idea is that the change in population is given by the difference between the birth and death rates plus a random term. per capita birth rates and death rates are smooth functions of populations, and the delayed effect of births on the adult population is because it takes around 12 days to go from egg to adult.
+(a) Plot the blowfly data against time.
+(b) Fit the proposed model, using gam. You will need to use by variables to do this. Comment on the estimates of fb and fd. It is worth making fb and fd depend on log populations, rather than the populations themselves, to avoid leverage problems.
+(c) Using the beginning of the real data as a starting sequence, iterate your esti- mated model forward in time, to the end of the data, and plot it. First do this
+    
+    270
+(d)
+GAMS IN PRACTICE: MGCV
+with the noise terms set to zero, and then try again with an error standard devi- ation of up to 500 (much larger and the population tends to explode). Comment on the results. You will need to artificially restrict the population to the range seen in the real data, to avoid problems caused by extrapolating the model.
+Why is the approach used for these data unlikely to be widely applicable?
+10. This question is about creating models for calibration of satellite remote sensed data. The data frame chl contains direct ship based measurements of chlorophyll concentrations in the top 5 metres of ocean water, chl, as well as the corre- sponding satellite estimate chl.sw (actually a multi-year average measurement for the location and time of year), along with ocean depth, bath, day of year, jul.day and location lon, lat. The data are from the world ocean database (see http://seawifs.gsfc.nasa.gov/SEAWIFS/ for information on SeaWifs). chl and chl.sw do not correlate all that well with each other, proba- bly because the reflective characteristics of water tend to change with time of year and whether the water is near the coast (and hence full of particulate matter) or open ocean. One way of improving the predictive power of the satellite observa- tions might be to model the relationship between directly measured chlorophyll and remote sensed chlorophyll, viewing the relationship as a smooth one that is modified by other factors. Using ocean depth as an indicator for water type (near shore vs. open) a model something like:
+E(chli) = f1(chl.swi)f2(bathi)f3(jul.dayi) might be a reasonable starting point.
+(a) Plot the response data and predictors against each other using pairs. Notice that some of predictors have very skewed distributions. It is worth trying some simple power transformations in order to get a more even spread of predictors, and reduce the chance of a few points being over influential: find appropriate transformations.
+(b) Usinggam,trymodellingthedatausingamodelofthesortsuggested(butwith predictors transformed as in part (a)). Make sure that you use an appropriate family. It will probably help to increase the default basis dimensions used for smoothing, somewhat (especially for jul.day). Use the "cr" basis to avoid excessive computational cost.
+(c) In this sort of modelling the aim is to improve on simply using the satellite measurements as predictions of the direct measurements. Given the large num- ber of data, it is easy to end up using rather complex models after quite alot of examination of the data. It is therefore important to check that the model are not overfitting. A sensible way of doing this is to randomly select, say, 90% of the data to be fitted by the model, and then to see how well the model predicts the other 10% of data. Do this, using proportion deviance explained as the measure of fit/prediction. Note that the family you used will contain a function dev.resids, which you can use to find the deviance of and set of predictions.
+    
+    EXERCISES 271
+11. Investigate the performance of the p-values reported by summary.gam and de- scribed in section 4.8.5, by a simulation study based on the first example in the help file ?gam.
+(a) If a term should not be in the model, then its associated p-values should fol- low a uniform distribution on (0,1). Check this by simulation. Compare the performance of the p-values when smoothing parameters are estimated, and when the term is left un-penalized (using s(...,fx=TRUE)). What can you conclude?
+(b) From the results of part (a) it is tempting to do all hypothesis testing without penalization. Investigate whether this reduces the power of the tests (i.e. the ability to detect terms that are significant.)

@@ -1,0 +1,598 @@
+---
+title: "CHAPTER 6: Mixed models"
+author: "Robert A. Stevens"
+date: "5/1/2018"
+output: html_document
+---
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(comment=NA)
+```
+
+## 6.1 Mixed models for balanced data
+
+### 6.1.1 A motivating example
+
+**Figure 6.1** Schematic diagram of the CO2 experiment.
+
+*The wrong approach: a fixed effects linear model*
+
+```{r}
+m1 <- lm(area ~ CO2 + tree, stomata) 
+m0 <- lm(area ~ CO2, stomata)
+anova(m0, m1)
+```
+
+```{r}
+m2 <- lm(area ~ tree, stomata) 
+anova(m2, m1)
+```
+
+*The right approach: a mixed effects model*
+
+```{r}
+st <- aggregate(data.matrix(stomata), by = list(tree = stomata$tree), mean)
+st$CO2 <- as.factor(st$CO2)
+st
+```
+
+```{r}
+m3 <- lm(area ~ CO2 ,st)
+anova(m3)
+```
+
+```{r}
+summary(m3)$sigmaˆ2 - summary(m1)$sigmaˆ2/4 
+```
+
+### 6.1.2 General principles
+
+### 6.1.3 A single random factor
+
+**Figure 6.2** Schematic illustration of the balanced one-way experimental layout discussed in section 6.1.3. Rectangles are experimental units and dots indicate measurements.
+
+```{r}
+library(nlme) # load nlme ‘library’, which contains data
+data(Rail) # load data
+Rail
+```
+
+```{r}
+m1 <- lm(travel ~ Rail, Rail) 
+anova(m1)
+```
+
+```{r}
+# average over Rail effect
+rt <- aggregate(data.matrix(Rail), by = list(Rail$Rail), mean) 
+rt
+```
+
+```{r}
+# fit model to aggregated data 
+m0 <- lm(travel  ̃ 1, rt) 
+sigb <- (summary(m0)$sigma^2 - summary(m1)$sigma^2/3)^0.5 
+
+# sigb^2 is variance component for rail
+sig <- summary(m1)$sigma # sig^2 is resid. var. component 
+sigb
+sig
+```
+
+```{r}
+summary(m0)
+```
+
+### 6.1.4 A model with two factors
+
+**Figure 6.3** A schematic diagram of a two factor design of the sort discussed in section 6.1.4, with 3 levels of one factor, 4 levels of another and 5 observations for each combination of factor levels. Note that this diagram is not intended to represent the actual physical layout of any experiment.
+
+```{r}
+library(nlme) # only needed in R, not S-PLUS 
+data(Machines) # only needed in R, not S-PLUS 
+names(Machines)
+attach(Machines) # make data available without ‘Machines$’ 
+par(mfrow = c(1, 2)) # split graphics window into two
+plot(Machine, score)
+plot(Worker, score)
+```
+
+**Figure 6.4** Plots of the Machines data discussed in section 6.1.4.
+
+```{r}
+m1 <- lm(score ~ Worker*Machine, Machines) 
+m0 <- lm(score ~ Worker + Machine, Machines) 
+anova(m0, m1)
+```
+
+```{r}
+summary(m1)$sigmaˆ2
+```
+
+```{r}
+Mach <- aggregate(data.matrix(Machines), by = list(Machines$Worker, Machines$Machine), mean)
+Mach$Worker <- as.factor(Mach$Worker) 
+Mach$Machine <- as.factor(Mach$Machine)
+```
+
+```{r}
+m0 <- lm(score ~ Worker + Machine, Mach)
+anova(m0)
+```
+
+```{r}
+summary(m0)$sigmaˆ2 - summary(m1)$sigmaˆ2/3
+```
+
+```{r}
+M <- aggregate(data.matrix(Mach), by = list(Mach$Worker), mean) 
+m00 <- lm(score ~ 1, M)
+summary(m00)$sigma^2 - (summary(m0)$sigma^2)/3
+```
+
+### 6.1.5 Discussion
+
+## 6.2 Linear mixed models in general
+
+### 6.2.1 Estimation of linear mixed models
+
+### 6.2.2 Directly maximizing a mixed model likelihood in R
+
+```{r}
+ll <- function(gamma, X, Z, y) { 
+  sigma.b <- exp(gamma[1])
+  sigma <- exp(gamma[2])
+  n <- nrow(Z)
+  
+  # evaluate covariance matrix for y
+  V <- Z%*%t(Z)*sigma.b^2 + diag(n)*sigma^2
+  L <- chol(V) # L’L=V
+  
+  # transform dependent linear model to indep.
+  y <- backsolve(L, y, transpose = TRUE)
+  X <- backsolve(L, X, transpose = TRUE)
+  b <- coef(lm(y ~ X - 1)) # estimate fixed effects
+  
+  # evaluate log likelihood
+  logLik <- -n/2*log(2*pi) - sum(log(diag(L))) - sum((y - X %*% b)^2)/2
+  attr(logLik, "fixed") <- b # allow retrieval of beta logLik
+}
+```
+
+```{r}
+options(contrasts = c("contr.treatment", "contr.treatment"))
+Z <- model.matrix(~ Rail$Rail - 1)
+X <- matrix(1, 18, 1)
+rail.mod <- optim(c(0, 0), ll, control = list(fnscale = -1), X = X, Z = Z, y = Rail$travel)
+exp(rail.mod$par) # variance components
+attr(ll(rail.mod$par, X, Z, Rail$travel), "fixed") # fixed effect estimate
+```
+
+### 6.2.3 Inference with linear mixed models
+
+*Fixed effects*
+
+*Inference about the random effects*
+
+### 6.2.4 Predicting the random effects
+
+### 6.2.5 REML
+
+*The explicit form of the REML criterion*
+
+### 6.2.6 A link with penalized regression
+
+## 6.3 Linear mixed models in R
+
+```
+lme(y ~ x + z, dat, ~ x|g)
+```
+
+```
+lme(y  ~ x + z, dat, list(g = ~ x))
+```
+
+```{r}
+library(nlme)
+lme(travel ~ 1, Rail, list(Rail = ~1)) 
+```
+
+### 6.3.1 Tree Growth: an example using lme
+
+```{r}
+m0 <- lme(
+  height  ~ age + I(age^2) + I(age^3), 
+  Loblolly, 
+  random = list(Seed = ~ age + I(age^2) + I(age^3)), 
+  correlation = corCAR1(form = ~ age|Seed)
+)
+```
+
+```{r}
+plot(m0)
+```
+
+**Figure 6.5** Default residual plots for models m0, m1 and m2 (left to right). There is a clear trend in the mean of the residuals for the first two models, which model m2 eliminates.
+
+```{r}
+m1 <- lme(
+  height ~ age + I(age^2) + I(age^3) + I(age^4),
+  Loblolly, 
+  list(Seed = ~ age + I(age^2) + I(age^3)),
+  cor = corCAR1(form = ~age|Seed)
+) 
+
+plot(m1) 
+m2 <- lme(
+  height ~ age + I(age^2) + I(age^3) + I(age^4) + I(age^5),
+  Loblolly,
+  list(Seed = ~ age + I(age^2) + I(age^3)),
+  cor = corCAR1(form = ~age|Seed)
+) 
+
+plot(m2)
+```
+
+```{r}
+plot(m2, Seed ~ resid(.))
+qqnorm(m2, ~ resid(.))
+qqnorm(m2, ~ ranef(.))
+```
+
+**Figure 6.6** Further residual plots for model m2. The left panel shows boxplots of the residuals for each tree, while the right plot is a normal QQ plot for the residuals.
+
+**Figure 6.7** Normal QQ plots for the predicted random effects from model m2. The plots should look like random scatters around straight lines, if the normality assumptions for the random effects are reasonable: only ˆb1 shows any suggestion of any problem, but it is not enough to cause serious concern.
+
+```{r}
+m3 <- lme(
+  height ~ age + I(age^2) + I(age^3) + I(age^4) + I(age^5),
+  Loblolly,
+  list(Seed = ~ age + I(age^2) + I(age^3))
+)
+
+anova(m3, m2)
+```
+
+```{r}
+m4 <- lme(
+  height ~ age + I(age^2) + I(age^3) + I(age^4) + I(age^5),
+  Loblolly,
+  list(Seed = ~ age + I(age^2)),
+  correlation = corCAR1(form = ~ age|Seed)
+)
+
+anova(m4, m2)
+```
+
+```{r}
+m6 <- lme(
+  height ~ age + I(age^2) + I(age^3) + I(age^4) + I(age^5),
+  Loblolly,
+  list(Seed = pdDiag(~ age + I(age^2))),
+  correlation = corCAR1(form = ~ age|Seed)
+)
+
+anova(m6, m4)
+```
+
+```{r}
+plot(augPred(m4))
+```
+
+**Figure 6.8** Model predictions from m4 at the individual tree level, overlaid on individual Loblolly pine growth data. The panel titles are the value of the Seed individual tree identifier.
+
+### 6.3.2 Several levels of nesting
+
+```{r}
+lme(score ~ Machine, Machines, list(Worker = ~ 1, Machine = ~ 1))
+```
+
+## 6.4 Generalized linear mixed models
+
+## 6.5 GLMMs with R
+
+```{r}
+rf <- residuals(b4, type = "d") # extract deviance residuals
+
+# create an identifier for each sampling station
+solr$station <- factor(with(solr, paste(-la, -lo, -t, sep = "")))
+
+# is there evidence of a station effect in the residuals?
+solr$rf <- rf
+rm  <- lme(rf ~ 1, solr, random = ~ 1|station)
+rm0 <- lm(rf ~ 1, solr)
+anova(rm, rm0)
+```
+
+```{r}
+b <- glmmPQL(
+  eggs ~ offset(off) + lo + la + t + I(lo*la) + I(lo^2) + I(la^2) + I(t^2) + I(lo*t) + I(la*t) + I(lo^3) + I(la^3) + I(t^3) + I(lo*la*t) + I(lo^2*la) + I(lo*la^2) + I(lo^2*t) + I(la^*t) + I(la*t^2) + I(lo*t^2) + a + I(a*t) + I(t^2*a),
+  random = list(station = ~ 1), 
+  family = quasi(link = log, variance = "mu"),
+  data = solr
+)
+
+summary(b)
+```
+
+```{r}
+fv <- exp(fitted(b) + solr$off) # note need to add offset
+resid <- solr$egg - fv # raw residuals
+plot(fv^0.5, solr$eggs^0.5)
+abline(0, 1, lwd = 2)
+plot(fv^0.5, resid/fv^0.5)
+plot(fv^0.5, resid)
+fl <- sort(fv^0.5)
+
+# add 1 s.d. and 2 s.d. reference lines 
+lines(fl,  fl)
+lines(fl, -fl)
+lines(fl,  2*fl, lty = 2) 
+lines(fl, -2*fl, lty = 2)
+```
+
+**Figure 6.9** Model checking plots for the GLMM of the Bristol Channel Sole data. The left panel shows the relationship between raw data and fitted values. The middle panel plots Pearson residuals against fitted values: there are a handful of rather high residuals at low predicted densities. The right panel shows raw residuals against fitted values, with reference lines illustrating where 1 residual standard deviation and 2 residual standard deviations from the residual mean should lie, for each fitted value.
+
+```{r}
+intervals(b4, which = "var-cov") 
+```
+
+**Figure 6.10** Predicted spawning distributions of Bristol Channel Sole according to the GLMM of section 6.5. Notice how the spawning distributions are less peaked than those shown in figure 2.16.
+
+## 6.6 Generalized Additive Mixed Models
+
+### 6.6.1 Smooths as mixed model components
+
+### 6.6.2 Inference with GAMMs
+
+## 6.7 GAMMs with R
+
+### 6.7.1 A GAMM for sole eggs
+
+```{r}
+bam <- gamm(
+  eggs ~ te(lo, la, t, bs = c("tp", "tp"), k = c(25, 5), d = c(2, 1)) + a + s(t, k = 5, by = a) + offset(off),
+  family = quasi(link = log, variance = "mu"),
+  data = solr, random = list(station = ~1))
+```
+
+```{r}
+bam$gam
+```
+
+**Figure 6.11** Model checking plots for the GAMM of the Bristol Channel Sole data. The left panel shows the relationship between raw data and fitted values. The middle panel plots Pearson residuals against fitted values: there are a handful of rather high residuals at low predicted densities. The right panel shows raw residuals against fitted values, with reference lines illustrating where 1 residual standard deviation and 2 residual standard deviations from the residual mean should lie, for each fitted value. Note how plots are very similar to those from figure 6.9, although the residuals at low densities are less extreme in the current plots.
+
+**Figure 6.12** Predicted spawning rates at various times, using the GAMM of Bristol Channel sole eggs, presented in section 6.7. Note how plots are peakier and of rather different shape to those from figure 6.10.
+
+### 6.7.2 The Temperature in Cairo
+
+**Figure 6.13** Daily air temperature in Cairo, Egypt from January 1st 1995.
+
+```{r}
+ctamm <- gamm(
+  temp ~ s(day.of.year, bs = "cc", k = 20) + s(time, bs = "cr"),
+  data = cairo,
+  correlation = corAR1(form = ~ 1|year)
+)
+```
+
+```{r}
+> summary(ctamm$gam)
+```
+
+```{r}
+intervals(ctamm$lme, which = "var-cov")
+```
+
+```{r}
+sqrt(ctamm$gam$sig2/ctamm$gam$sp)
+```
+
+```{r}
+ctamm0 <- gamm(
+  temp ~ s(day.of.year, bs = "cc", k = 20),
+  data = cairo,
+  correlation = corAR1(form = ~ 1|year)
+)
+
+ctamm0$gam
+```
+
+```{r}
+anova(ctamm0$lme, ctamm$lme)
+```
+
+```{r}
+plot(ctamm$gam)
+```
+
+**Figure 6.14** GAMM terms for daily air temperature in Cairo, Egypt from January 1st 1995. The left panel is the estimated annual cycle: note that it has a fatter peak and thinner trough than a sinusoid. The right pattern is the estimated long term trend: there appears to have been a rise of around 1.5 F over the period of the data.
+
+## 6.8 Exercises
+
+1. A pig breeding company was interested in investigating litter to litter variability in piglet weight (after a fixed growth period). 6 sows were selected randomly from the companies breeding stock, impregnated and 5 (randomly selected) piglets from each resulting litter were then weighed at the end of a growth period. The data were entered into an R data frame, pig, with weights recorded in column w and a column, sow, containing a factor variable indicating which litter the piglet came from. The following R session is part of the analysis of these data using a simple mixed model for piglet weight.
+
+```
+> pig$w
+[1]   9.6 10.1 11.2 11.1 10.5  9.5  9.6  9.4  9.5  9.5 11.5 
+[12] 10.9 10.8 10.7 11.7 10.7 11.2 11.2 10.9 10.5 12.3 12.1 
+[23] 11.2 12.3 11.7 11.2 10.3 9.9 11.1 10.5
+> pig$sow
+[1]  1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 
+[28] 6 6 6
+Levels: 1 2 3 4 5 6
+> m1 <- lm(w ~ sow, data = pig) 
+> anova(m1)
+Analysis of Variance Table
+
+Response: w
+          Df  Sum Sq Mean Sq F value Pr(>F) 
+sow        5 15.8777 3.1755  14.897  1.086e-06 ***
+Residuals 24  5.1160 0.2132
+
+> piggy <- aggregate(data.matrix(pig), by = list(sow = pig$sow), mean)
+> m0 <- lm(w ~ 1, data = piggy)
+> summary(m1)$sigma^2
+[1] 0.2131667
+> summary(m0)$sigma^2
+[1] 0.6351067
+```
+
+(a) The full mixed model being used in the R session has a random effect for litter/sow and a fixed mean. Write down a full mathematical specification of the model.
+
+(b) Specify the hypothesis being tested by the anova function, both in terms of the parameters of the mixed model, and in words.
+
+(c) What conclusion would you draw from the printed ANOVA table. Again state your conclusions both in terms of the model parameters and in terms of what this tells you about pigs.
+
+(d) Using the given output, obtain an (unbiased) estimate of the between litter variance in weight, in the wider population of pigs.
+
+2. Consider a model with 2 random effects of the form:
+
+y[i, j] = α + b[i] + c[j] + ε[i, j]
+
+where i = 1, ..., I, j = 1, ..., J, b[i] ∼ N(0, σb^2), c[j] ∼ N(0, σc^2) and ε[i, j] ∼ N(0, σ^2) and all these random variables are mutually independent. If the model is fitted by least squares then
+
+σˆ2 = RSS/(IJ − I − J + 1)
+
+is an unbiased estimator of σ^2, where RSS is the residual sum of squares from the model fit.
+
+(a) Show that, if the above model is correct, the averages yi· =  j yij/J are governed by the model:
+
+y ̄ i · = a + e i
+
+where the ei are i.i.d. N(0, σb^2 + σ^2/J) and a is a random intercept term. Hence
+suggest how to estimate σb^2.
+
+(b) Show that the averages y ̄·j =  i yij /I are governed by the model:
+
+y ̄·j = a′ + e′j
+
+where the e′j are i.i.d. N(0, σc^2 + σ^2/I) and a′ is a random intercept parameter.
+
+Suggest an estimator for σc^2.
+
+3. Data were collected on blood cholesterol levels and blood pressure for a group of patients regularly attending an outpatient clinic for a non heart disease related condition. Measurements were taken each time the patient attended the clinic. A possible model for the resulting data is,
+
+yij =μ+ai +βxij +εij, ai ∼N(0,σa2) and εij ∼N(0,σ2),
+
+where yij is the jth blood pressure measurement for the ith patient and xij is the corresponding cholesterol measurement. β is a fixed parameter relating blood pressure to cholesterol concentration and ai is a random coefficient for the ith patient. Assume (somewhat improbably) that the same number of measurements are available for each patient.
+
+(a) Explain how you would test H0: σa^2 = 0 vs H1: σa^2 > 0 and test H0: β = 0 vs H1: β != 0, using standard software for ordinary linear modeling.
+
+(b) Explain how β and σa2 could be estimated. You should write down the models involved, but should assume that these would be fitted using standard linear modeling software.
+
+4. Write out the following 3 models in the general form,
+
+y=Xβ+Zb+ε, b∼N(0,ψ) and ε∼N(0,Iσ2),
+
+where Z is a matrix containing known coefficients which determine how the response, y, depends on the random effects b (i.e. it is a ‘model matrix’ for the random effects). ψ is the covariance matrix of the random effects b. You should ensure that X is specified so that the fixed effects are identifiable (you don’t need to do this for Z) and don’t forget to specify ψ.
+
+(a) The model from question 3, assuming 4 patients and 2 measurements per patient.
+
+(b) The mixed effects model from section 6.1.1, assuming only two measurements per tree.
+
+(c) Model (6.6) from section 6.1.4, assuming that I = 2, J = 3 and K = 3.
+
+5.
+
+(a) Show that if X and Z are independent random vectors, both of the same dimension, and with covariance matrices Σx and Σz , then the covariance matrix ofX+ZisΣx +Σz.
+
+(b) Consider a study examining patients blood insulin levels 30 minutes after eating, y, in relation to sugar content, x, of the meal eaten. Suppose that each of 3 patients had their insulin levels measured for each of 3 sugar levels, and that an appropriate linear mixed model for the jth measurement on the ith patient is,
+
+yij =α+βxij +bi +εij, bi ∼N(0,σ2), and εij ∼N(0,σ2), 
+
+where all the random effects and residuals are mutually independent.
+
+i. Write this model out in matrix vector form.
+
+ii. Find the covariance matrix for the response vector y.
+
+6. The R data frame Oxide from the nlme library contains data from a quality control exercise in the semiconductor industry. The object of the exercise was to investigate sources of variability in the thickness of oxide layers in silicon wafers. The dataframe contains the following columns:
+
+Thickness is the thickness of the oxide layer (in nanometres, as far as I can tell).
+
+Source is a two level factor indicating which of two possible suppliers the sample came from.
+
+Site is a 3 level factor, indicating which of three sites on the silicon wafer the thickness was measured.
+
+Lot is a factor variable with levels indicating which particular batch of Silicon wafers this measurement comes from.
+
+Wafer is a factor variable with levels labelling the individual wafers examined.
+
+The investigators are interested in finding out if there are systematic differences between the two sources, and expect that thickness may vary systematically across the three sites; they are only interested in the lots and wafers in as much as they are representative of a wider population of lots and wafers.
+
+(a) Identify which factors you would treat as random and which as fixed, in a linear mixed model analysis of these data.
+
+(b) Write down a model that might form a suitable basis for beginning to analyze the Oxide data.
+
+(c) Perform a complete analysis of the data, including model checking. Your aim should be to identify the sources of thickness variability in the data and any fixed effects causing thickness variability.
+
+7. Starting from model (6.6) in section 6.1.4, reanalyze the Machines data using lme. Try to find the most appropriate model, taking care to examine appropriate model checking plots. Make sure that you test whether the interaction in (6.6) is appropriate. Similarly test whether a more complex random effects structure would be appropriate: specifically one in which the machine-worker interaction is correlated within worker. If any data appear particularly problematic in the checking plots, repeat the analysis, and see if the conclusions change.
+
+8. This question follows on from question 7. Follow up multiple comparisons are a desirable part of some analyses. This question is about how to do this in practice. In the analysis of the Machines data the ANOVA table for the fixed effects indicates that there are significant differences between machine types, so an obvious follow up analysis would attempt to assess exactly where these differences lie. Obtaining Bonferroni corrected intervals for each of the 3 machine to machine differences would be one way to proceed, and this is easy to do.
+
+First note that provided you have set up the default contrasts using
+
+options(contrasts = c("contr.treatment", "contr.treatment"))
+
+(before calling lme, of course) then lme will set your model up in such away that the coefficients associated with the Machine effect correspond to the difference
+between the second and first machines, and between the third and first machines. Hence the intervals function can produce two of the required comparisons automatically. However, by default the intervals function uses the 95% confidence level, which needs to be modified if you wish to Bonferroni correct for the fact that 3 comparisons are being made. If your model object is m1 then
+
+```{r}
+intervals(m1, level = 1 - 0.05/3, which = "fixed")
+```
+
+will produce 2 of the required intervals. Note the Bonferroni correction ‘3’. The option which="fixed" indicates that only fixed effect intervals are required. The third comparison, between machines B and C can easily be obtained by changing the way that the factor variable Machine is treated, so that machine type B or C count as the ‘first machine’ when setting up the model. The MASS library provides a function, relevel, for doing this.
+
+```{r}
+library(MASS) # load MASS library 
+levels(Machines$Machine) # check the level names 
+# reset levels so that ‘first level’ is "B" ... 
+Machines$Machine <- relevel(Machines$Machine,"B")
+```
+
+Now refit the model and re-run the intervals function for the new fit. This will yield the interval for the remaining comparison (plus one of the intervals you already have, of course). What are the Bonferroni corrected 95% intervals for the 3 possible comparisons? How would you interpret them?
+
+9. The data frame Gun (library nlme) is from a trial examining methods for firing naval guns. Two firing methods were compared, with each of a number of teams of 3 gunners; the gunners in each team were matched to have similar physique (Slight, Average or Heavy). The response variable rounds is rounds fired per minute, and there are 3 explanatory factor variables, Physique (levels Slight, Medium and Heavy); Method (levels M1 and M2) and Team with 9 levels. The main interest is in determining which method and or physique results in the highest firing rate, and in quantifying team-to-team variability in firing rate.
+
+(a) Identify which factors should be treated as random and which as fixed, in the analysis of these data.
+
+(b) Write out a suitable mixed model as a starting point for the analysis of these data.
+
+(c) Analyze the data using lme in order to answer the main questions of interest. Include any necessary follow up multiple comparisons (as in the previous question) and report your conclusions.
+
+10. In an experiment comparing two varieties of Soybeans, plants were grown on 48 plots and measurements of leaf weight were taken at regular intervals as the plants grew. The nlme data frame Soybean contains the resulting data and has the following columns:
+
+Plot is a factor variable with levels for each of the 48 plots.
+
+weight is the leaf weight in grammes.
+
+Time is the time in days since planting.
+
+Variety is either F or P indicating the variety of Soybean.
+
+There is one observation for each variety in each plot at each time. Interest focuses on modeling the growth of Soybeans over time and on establishing whether or not this differs between the varieties.
+
+(a) A possible model for the weights is
+
+wijk =αi +βitk +γit2k +δit3k +aj +bjtk +εijk
+
+where wijk is the weight measurement for the ith variety in the jth plot at the kth time; [aj, bj]T ∼ N(0,ψ) where ψ is a covariance matrix, and εijk ∼ N(0, σ2). The random effects are independent of the residuals and independent of random effects with different j. The residuals are i.i.d.
+
+Fit this model using lme and confirm that the residual variance appears to increase with the (random effect conditional) mean.
+
+(b) To deal with the mean variance relationship, it might be appropriate to model the weights as being Gamma distributed, so that the model becomes a GLMM. e.g.
+
+log(μijk) = αi + βitk + γit2k + δit3k + aj + bjtk
+
+where μijk ≡ E(wijk) and wijk ∼ Gamma. Fit this GLMM, using glmmPQL from the MASS package, and confirm the improvement in residual plots that results.
+
+(c) Explore the whether further improvements to the model could be made by modifications of the random or fixed effects model structures.
+
+11. This question follows on from question 10, on Soybean modeling.
+
+(a) Using gamm, replace the cubic function of time in the GLMM of question 10, with a smooth function of time. You should allow for the possibility that the varieties depend differently on time, and examine appropriate model checking plots.
+
+(b) Evaluate whether a model with or without a variety effect is more appropriate, and what kind of variety effect is most appropriate.
+
+(c) Explain why a model with separate smooths for the two different varieties is different to a model with a smooth for one variety and a smooth correction for the other variety.
